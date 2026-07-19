@@ -11,9 +11,16 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-function getNestedValue(obj: Record<string, any>, path: string): string | undefined {
-  const result = path.split('.').reduce((acc: any, part: string) => acc?.[part], obj);
-  return typeof result === 'string' ? result : undefined;
+function resolveTranslation(key: string, lang: Language): string {
+  const parts = key.split('.');
+  let node: any = translations;
+  for (const part of parts) {
+    node = node?.[part];
+    if (node === undefined) return key;
+  }
+  if (typeof node === 'string') return node;
+  if (node && typeof node === 'object' && node[lang]) return node[lang];
+  return key;
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
@@ -39,12 +46,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback((key: string): string => {
-    const value = getNestedValue(translations as Record<string, any>, key);
-    if (value === undefined) {
-      console.warn(`Missing translation: ${key}`);
-      return key;
-    }
-    return value;
+    return resolveTranslation(key, language);
   }, [language]);
 
   return (

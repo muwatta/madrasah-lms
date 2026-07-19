@@ -1,26 +1,59 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { quizAPI, attemptAPI } from '../../api';
-import type { Quiz, QuizAttempt } from '../../types';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { quizAPI, attemptAPI, enrollmentAPI } from '../../api';
+import type { Quiz, QuizAttempt, Enrollment } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import StatCard from '../../components/StatCard';
+
+interface SubjectJourney {
+  subjectId: number;
+  subjectName: string;
+  enrolled: boolean;
+  quizzes: Quiz[];
+  attempts: QuizAttempt[];
+  avgScore: number;
+  completedCount: number;
+  lastActivity: string | null;
+}
+
+function getGradeColor(score: number): string {
+  if (score >= 80) return 'text-emerald-600';
+  if (score >= 60) return 'text-amber-600';
+  return 'text-red-500';
+}
+
+function getProgressColor(score: number): string {
+  if (score >= 80) return 'bg-emerald-500';
+  if (score >= 60) return 'bg-amber-500';
+  return 'bg-red-400';
+}
+
+function getGradeBg(score: number): string {
+  if (score >= 80) return 'bg-emerald-100';
+  if (score >= 60) return 'bg-amber-100';
+  return 'bg-red-100';
+}
 
 export default function StudentDashboard() {
   const { t } = useLanguage();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [quizzesRes, attemptsRes] = await Promise.all([
+        const [quizzesRes, attemptsRes, enrollmentsRes] = await Promise.all([
           quizAPI.list(),
           attemptAPI.myAttempts(),
+          enrollmentAPI.myEnrollments(),
         ]);
         setQuizzes(quizzesRes.data.results || quizzesRes.data || []);
         setAttempts(attemptsRes.data.results || attemptsRes.data || []);
+        setEnrollments(enrollmentsRes.data.results || enrollmentsRes.data || []);
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadDashboardFailed'));
       } finally {
@@ -29,6 +62,122 @@ export default function StudentDashboard() {
     };
     fetchData();
   }, []);
+
+  const completedAttempts = useMemo(() => attempts.filter((a) => a.score !== null), [attempts]);
+  const sortedAttempts = useMemo(() =>
+    [...completedAttempts].sort((a, b) =>
+      new Date(a.submitted_at || a.started_at).getTime() - new Date(b.submitted_at || b.started_at).getTime()
+    ), [completedAttempts]);
+
+  const subjectJourneys = useMemo(() => {
+    const subjectMap = new Map<number, SubjectJourney>();
+
+    enrollments.forEach((e) => {
+      subjectMap.set(e.subject, {
+        subjectId: e.subject,
+        subjectName: e.subject_name,
+        enrolled: true,
+        quizzes: [],
+        attempts: [],
+        avgScore: 0,
+        completedCount: 0,
+        lastActivity: null,
+      });
+    });
+
+    quizzes.forEach((q) => {
+      const journey = subjectMap.get(q.subject);
+      if (journey) {
+        journey.quizzes.push(q);
+      } else if (!subjectMap.has(q.subject)) {
+        subjectMap.set(q.subject, {
+          subjectId: q.subject,
+          subjectName: q.subject_name,
+          enrolled: false,
+          quizzes: [q],
+          attempts: [],
+          avgScore: 0,
+          completedCount: 0,
+          lastActivity: null,
+        });
+      }
+    });
+
+    completedAttempts.forEach((a) => {
+      const quiz = quizzes.find((q) => q.id === a.quiz);
+      if (quiz) {
+        const journey = subjectMap.get(quiz.subject);
+        if (journey) {
+          journey.attempts.push(a);
+        }
+      }
+    });
+
+    subjectMap.forEach((journey) => {
+      if (journey.attempts.length > 0) {
+        journey.avgScore = Math.round(
+          journey.attempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / journey.attempts.length
+        );
+        journey.completedCount = journey.attempts.length;
+        const lastAttempt = journey.attempts[journey.attempts.length - 1];
+        journey.lastActivity = lastAttempt.submitted_at || lastAttempt.started_at;
+      }
+    });
+
+    return Array.from(subjectMap.values()).sort((a, b) => {
+      if (a.enrolled !== b.enrolled) return a.enrolled ? -1 : 1;
+      return b.avgScore - a.avgScore;
+    });
+  }, [enrollments, quizzes, completedAttempts]);
+
+  const overallAvg = useMemo(() => {
+    if (completedAttempts.length === 0) return 0;
+    return Math.round(
+      completedAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / completedAttempts.length
+    );
+  }, [completedAttempts]);
+
+  const studyStreak = useMemo(() => {
+    if (completedAttempts.length === 0) return 0;
+    const dates = new Set(
+      completedAttempts.map((a) => {
+        const d = new Date(a.submitted_at || a.started_at);
+        return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      })
+    );
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - i);
+      const key = `${checkDate.getFullYear()}-${checkDate.getMonth()}-${checkDate.getDate()}`;
+      if (dates.has(key)) {
+        streak++;
+      } else if (i > 0) {
+        break;
+      }
+    }
+    return streak;
+  }, [completedAttempts]);
+
+  const chartData = useMemo(() =>
+    sortedAttempts.slice(-12).map((a, i) => ({
+      name: a.quiz_title.length > 20 ? a.quiz_title.slice(0, 20) + '...' : a.quiz_title,
+      score: a.percentage || 0,
+      idx: i + 1,
+    })), [sortedAttempts]);
+
+  const recentAttempts = useMemo(() =>
+    [...completedAttempts]
+      .sort((a, b) => new Date(b.submitted_at || b.started_at).getTime() - new Date(a.submitted_at || a.started_at).getTime())
+      .slice(0, 5),
+    [completedAttempts]);
+
+  const topSubject = useMemo(() => {
+    const enrolled = subjectJourneys.filter((j) => j.enrolled && j.completedCount > 0);
+    if (enrolled.length === 0) return null;
+    return enrolled.reduce((best, j) => (j.avgScore > best.avgScore ? j : best), enrolled[0]);
+  }, [subjectJourneys]);
 
   if (loading) {
     return (
@@ -46,97 +195,192 @@ export default function StudentDashboard() {
     );
   }
 
-  const totalQuizzes = quizzes.length;
-  const completedAttempts = attempts.filter((a) => a.score !== null);
-  const averageScore =
-    completedAttempts.length > 0
-      ? Math.round(completedAttempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / completedAttempts.length)
-      : 0;
-
-  const chartData = completedAttempts.length > 0
-    ? completedAttempts.slice(0, 8).map((a) => ({
-        name: a.quiz_title.length > 15 ? a.quiz_title.slice(0, 15) + '...' : a.quiz_title,
-        score: a.percentage || 0,
-      }))
-    : [];
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t('student.myDashboard')}</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow p-6 border border-emerald-100">
-          <div className="text-sm text-gray-500">{t('student.availableQuizzes')}</div>
-          <div className="text-3xl font-bold text-emerald-600 mt-1">{totalQuizzes}</div>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 border border-emerald-100">
-          <div className="text-sm text-gray-500">{t('student.completedQuizzes')}</div>
-          <div className="text-3xl font-bold text-emerald-600 mt-1">{completedAttempts.length}</div>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 border border-emerald-100">
-          <div className="text-sm text-gray-500">{t('student.averageScore')}</div>
-          <div className="text-3xl font-bold text-emerald-600 mt-1">{averageScore}%</div>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-800">{t('student.myJourney')}</h1>
+        <p className="text-gray-500 mt-1">{t('student.journeySubtitle')}</p>
       </div>
 
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          title={t('student.enrolledSubjects')}
+          value={subjectJourneys.filter((j) => j.enrolled).length}
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>}
+        />
+        <StatCard
+          title={t('student.quizzesCompleted')}
+          value={completedAttempts.length}
+          color="bg-blue-600"
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+        />
+        <StatCard
+          title={t('student.averageScore')}
+          value={`${overallAvg}%`}
+          color="bg-emerald-600"
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>}
+        />
+        <StatCard
+          title={t('student.studyStreak')}
+          value={`${studyStreak} ${t('student.days')}`}
+          color="bg-amber-600"
+          icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" /></svg>}
+        />
+      </div>
+
+      {subjectJourneys.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">{t('student.enrolledSubjects')}</h2>
+            <Link to="/student/quizzes" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              {t('student.browseQuizzes')}
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {subjectJourneys.filter((j) => j.enrolled).map((journey) => (
+              <div key={journey.subjectId} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-gray-800 truncate">{journey.subjectName}</h3>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {journey.quizzes.length} {t('student.quizzesAvailable')}
+                    </p>
+                  </div>
+                  {journey.completedCount > 0 && (
+                    <span className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${getGradeBg(journey.avgScore)} ${getGradeColor(journey.avgScore)}`}>
+                      {journey.avgScore}%
+                    </span>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                    <span>{journey.completedCount} / {journey.quizzes.length} {t('student.quizzesCompleted')}</span>
+                    {journey.lastActivity && (
+                      <span>{new Date(journey.lastActivity).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${journey.completedCount > 0 ? getProgressColor(journey.avgScore) : 'bg-gray-300'}`}
+                      style={{ width: `${journey.quizzes.length > 0 ? Math.min((journey.completedCount / journey.quizzes.length) * 100, 100) : 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">
+                    {journey.completedCount > 0 ? t('student.started') : t('student.notStarted')}
+                  </span>
+                  <Link
+                    to={`/student/quizzes?subject=${journey.subjectId}`}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+                  >
+                    {journey.completedCount > 0 ? t('student.continueLabel') : t('student.startQuiz')}
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {chartData.length > 0 && (
-        <div className="bg-white rounded-xl shadow p-6 border border-emerald-100 mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('student.recentPerformance')}</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis domain={[0, 100]} />
-              <Tooltip />
-              <Bar dataKey="score" fill="#059669" radius={[4, 4, 0, 0]} />
-            </BarChart>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('student.performanceTrend')}</h2>
+          <ResponsiveContainer width="100%" height={280}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="idx" tick={{ fontSize: 12 }} stroke="#9ca3af" />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="#9ca3af" />
+              <Tooltip
+                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                formatter={(value) => [`${value}%`, t('fields.score')]}
+                labelFormatter={(label) => `${t('student.quiz')} #${label}`}
+              />
+              <Line type="monotone" dataKey="score" stroke="#059669" strokeWidth={2.5} dot={{ r: 4, fill: '#059669' }} activeDot={{ r: 6 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow p-6 border border-emerald-100">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-800">{t('student.recentAttempts')}</h2>
-          <Link to="/student/quizzes" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
-            {t('student.browseQuizzes')}
-          </Link>
-        </div>
-        {completedAttempts.length === 0 ? (
-          <p className="text-gray-500">{t('student.noQuizzesYet')}</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('student.quiz')}</th>
-                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('fields.score')}</th>
-                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('fields.status')}</th>
-                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('fields.date')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {completedAttempts.slice(0, 5).map((attempt) => (
-                  <tr key={attempt.id} className="border-b border-gray-100 last:border-0">
-                    <td className="py-3 px-2">{attempt.quiz_title}</td>
-                    <td className="py-3 px-2 font-medium">{attempt.percentage !== null ? `${attempt.percentage}%` : '-'}</td>
-                    <td className="py-3 px-2">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        (attempt.percentage || 0) >= 50
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {(attempt.percentage || 0) >= 50 ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 text-gray-500">
-                      {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleDateString() : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">{t('student.recentActivity')}</h2>
+            <Link to="/student/results" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              {t('student.quizResults')}
+            </Link>
           </div>
-        )}
+          {recentAttempts.length === 0 ? (
+            <p className="text-gray-500 text-sm">{t('student.noActivity')}</p>
+          ) : (
+            <div className="space-y-3">
+              {recentAttempts.map((attempt) => (
+                <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGradeBg(attempt.percentage || 0)}`}>
+                    <span className={`text-sm font-bold ${getGradeColor(attempt.percentage || 0)}`}>
+                      {attempt.percentage}%
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-800 truncate">{attempt.quiz_title}</p>
+                    <p className="text-xs text-gray-400">
+                      {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleDateString() : '-'}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                    (attempt.percentage || 0) >= 50
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {(attempt.percentage || 0) >= 50 ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">{t('student.examResults')}</h2>
+            <Link to="/student/exams" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              {t('student.examResults')}
+            </Link>
+          </div>
+          {topSubject ? (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100">
+                <p className="text-xs text-emerald-600 font-medium mb-1">{t('student.topSubject')}</p>
+                <p className="text-lg font-bold text-emerald-800">{topSubject.subjectName}</p>
+                <p className="text-sm text-emerald-600">{topSubject.avgScore}% {t('student.averageScore')}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-gray-50 text-center">
+                  <p className="text-2xl font-bold text-gray-800">{subjectJourneys.filter((j) => j.enrolled).length}</p>
+                  <p className="text-xs text-gray-500">{t('student.enrolledSubjects')}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-gray-50 text-center">
+                  <p className="text-2xl font-bold text-gray-800">{completedAttempts.length}</p>
+                  <p className="text-xs text-gray-500">{t('student.quizzesTaken')}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
+                </svg>
+              </div>
+              <p className="text-gray-500 text-sm">{t('student.noActivity')}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
