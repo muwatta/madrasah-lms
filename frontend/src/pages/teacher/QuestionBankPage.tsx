@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { questionAPI, subjectAPI } from '../../api';
-import { Question, Subject, Topic } from '../../types';
+import type { Question, Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 type QuestionForm = {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { enrollmentAPI, userAPI, subjectAPI } from '../../api';
-import { Enrollment, User, Subject } from '../../types';
+import type { Enrollment, User, Subject } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function EnrollmentManagementPage() {

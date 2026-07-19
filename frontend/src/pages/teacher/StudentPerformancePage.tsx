@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { enrollmentAPI, dashboardAPI } from '../../api';
-import { Enrollment } from '../../types';
+import type { Enrollment } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface StudentPerformance {
@@ -153,7 +153,7 @@ export default function StudentPerformancePage() {
                       <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 100]} />
                       <Tooltip
-                        formatter={(value: number) => [`${value}%`, 'Score']}
+                        formatter={(value) => [`${value}%`, 'Score']}
                         labelFormatter={(label) => `Quiz: ${label}`}
                       />
                       <Legend />

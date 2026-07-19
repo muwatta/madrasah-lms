@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { subjectAPI } from '../../api';
-import { Subject, Topic } from '../../types';
+import type { Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function SubjectManagementPage() {

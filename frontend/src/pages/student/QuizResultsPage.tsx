@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { attemptAPI } from '../../api';
-import { QuizAttempt } from '../../types';
+import type { QuizAttempt } from '../../types';
 
 export default function QuizResultsPage() {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);

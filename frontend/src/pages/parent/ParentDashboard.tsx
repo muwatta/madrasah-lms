@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardAPI } from '../../api';
-import { ParentDashboard as ParentDashboardType } from '../../types';
+import type { ParentDashboard as ParentDashboardType } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function ParentDashboard() {

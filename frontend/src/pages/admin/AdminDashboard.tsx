@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardAPI } from '../../api';
-import { AdminDashboard as AdminDashboardType } from '../../types';
+import type { AdminDashboard as AdminDashboardType } from '../../types';
 import StatCard from '../../components/StatCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
 

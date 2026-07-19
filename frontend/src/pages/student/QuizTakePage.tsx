@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, attemptAPI } from '../../api';
-import { Question, Quiz, GradingResult } from '../../types';
+import type { Question, Quiz, GradingResult } from '../../types';
 
 interface Answers {
   [questionId: string]: string;
@@ -21,6 +21,30 @@ export default function QuizTakePage() {
   const [result, setResult] = useState<GradingResult | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const setAnswer = useCallback((questionId: number, value: string) => {
+    setAnswers((prev) => ({ ...prev, [String(questionId)]: value }));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
+    if (!attemptId || submitting) return;
+    setSubmitting(true);
+    if (timerRef.current) clearInterval(timerRef.current);
+    try {
+      const res = await attemptAPI.submit(attemptId, answers);
+      setResult(res.data.grading);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to submit quiz');
+    } finally {
+      setSubmitting(false);
+    }
+  }, [attemptId, submitting, answers]);
 
   useEffect(() => {
     const init = async () => {
@@ -60,31 +84,7 @@ export default function QuizTakePage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [timeLeft, result]);
-
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
-
-  const setAnswer = useCallback((questionId: number, value: string) => {
-    setAnswers((prev) => ({ ...prev, [String(questionId)]: value }));
-  }, []);
-
-  const handleSubmit = async () => {
-    if (!attemptId || submitting) return;
-    setSubmitting(true);
-    if (timerRef.current) clearInterval(timerRef.current);
-    try {
-      const res = await attemptAPI.submit(attemptId, answers);
-      setResult(res.data.grading);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to submit quiz');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  }, [timeLeft, result, handleSubmit]);
 
   if (loading) {
     return (
@@ -153,7 +153,6 @@ export default function QuizTakePage() {
   if (questions.length === 0) return null;
 
   const question = questions[currentIndex];
-  const qResult = result?.results[String(question.id)];
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

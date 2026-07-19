@@ -20,8 +20,14 @@ class Madrasah(models.Model):
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('Email is required')
+            raise ValueError("Email is required")
+
         email = self.normalize_email(email)
+
+        madrasah = extra_fields.get("madrasah")
+        if isinstance(madrasah, int) or (isinstance(madrasah, str) and madrasah.isdigit()):
+            extra_fields["madrasah"] = Madrasah.objects.get(pk=madrasah)
+
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)

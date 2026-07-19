@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import export_views
 
 urlpatterns = [
     path('exams/', views.ExamListView.as_view(), name='exam-list'),
@@ -7,4 +8,7 @@ urlpatterns = [
     path('exams/<int:exam_pk>/results/', views.ExamResultListView.as_view(), name='exam-results'),
     path('exams/<int:exam_pk>/results/bulk/', views.ExamResultsBulkUploadView.as_view(), name='exam-results-bulk'),
     path('student/exams/', views.StudentExamResultsView.as_view(), name='student-exam-results'),
+    path('export/students/', export_views.ExportStudentPerformanceView.as_view(), name='export-students'),
+    path('export/quiz/<int:quiz_id>/', export_views.ExportQuizResultsView.as_view(), name='export-quiz-results'),
+    path('export/exam/<int:exam_id>/', export_views.ExportExamResultsView.as_view(), name='export-exam-results'),
 ]

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { quizAPI, questionAPI, subjectAPI } from '../../api';
-import { Quiz, Subject, Topic, Question } from '../../types';
+import type { Quiz, Subject, Topic, Question } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 type QuizForm = {

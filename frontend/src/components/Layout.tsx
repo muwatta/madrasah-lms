@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User } from '../types';
+import type { User } from '../types';
 
 interface NavLink {
   label: string;
@@ -39,6 +39,14 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
   ],
 };
 
+const rolePrefixMap: Record<User['role'], string> = {
+  student: '/student',
+  ustaadh: '/teacher',
+  parent: '/parent',
+  mudeer: '/admin',
+  idaarah: '/board',
+};
+
 const roleLabels: Record<User['role'], string> = {
   student: 'Student',
   ustaadh: 'Ustaadh',
@@ -47,13 +55,16 @@ const roleLabels: Record<User['role'], string> = {
   idaarah: 'Idaarah',
 };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const links = user ? roleNavLinks[user.role] : [];
+  const links = user ? roleNavLinks[user.role].map(l => ({
+    ...l,
+    path: `${rolePrefixMap[user.role]}${l.path}`,
+  })) : [];
 
   const handleLogout = () => {
     logout();
@@ -151,7 +162,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6"><Outlet /></main>
       </div>
     </div>
   );

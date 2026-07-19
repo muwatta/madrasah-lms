@@ -1,13 +1,15 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User } from '../types';
+import type { User } from '../types';
 import LoadingSpinner from './LoadingSpinner';
+import type { ReactNode } from 'react';
 
 interface ProtectedRouteProps {
   allowedRoles?: User['role'][];
+  children?: ReactNode;
 }
 
-export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+export default function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
   const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
@@ -26,5 +28,5 @@ export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return children || <Outlet />;
 }

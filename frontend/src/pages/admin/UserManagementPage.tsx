@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { userAPI } from '../../api';
-import { User } from '../../types';
+import type { User } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const ROLES: { value: string; label: string }[] = [

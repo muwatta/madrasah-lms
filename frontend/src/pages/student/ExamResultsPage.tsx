@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { examAPI } from '../../api';
-import { ExamResult } from '../../types';
+import type { ExamResult } from '../../types';
 
 export default function ExamResultsPage() {
   const [results, setResults] = useState<ExamResult[]>([]);
