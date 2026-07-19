@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { quizAPI, questionAPI, subjectAPI } from '../../api';
+import { unwrapPaginated } from '../../api/client';
 import type { Quiz, Subject, Topic, Question } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -39,7 +40,7 @@ export default function QuizManagementPage() {
   const loadQuizzes = useCallback(() => {
     setLoading(true);
     quizAPI.list()
-      .then((res) => setQuizzes(res.data))
+      .then((res) => setQuizzes(unwrapPaginated(res.data)))
       .catch(() => setError('Failed to load quizzes'))
       .finally(() => setLoading(false));
   }, []);
@@ -47,13 +48,13 @@ export default function QuizManagementPage() {
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
 
   useEffect(() => {
-    subjectAPI.list().then((res) => setSubjects(res.data)).catch(() => {});
+    subjectAPI.list().then((res) => setSubjects(unwrapPaginated(res.data))).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (form.subject) {
       subjectAPI.getTopics(form.subject as number)
-        .then((res) => setTopics(res.data))
+        .then((res) => setTopics(unwrapPaginated(res.data)))
         .catch(() => setTopics([]));
     } else {
       setTopics([]);
@@ -67,7 +68,7 @@ export default function QuizManagementPage() {
     if (questionFilter.difficulty) params.difficulty = questionFilter.difficulty;
     if (questionFilter.search) params.search = questionFilter.search;
     questionAPI.list(params)
-      .then((res) => setQuestions(res.data))
+      .then((res) => setQuestions(unwrapPaginated(res.data)))
       .catch(() => {});
   }, [questionFilter]);
 

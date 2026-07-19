@@ -48,3 +48,9 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export function unwrapPaginated<T>(data: any): T[] {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.results)) return data.results;
+  return [];
+}

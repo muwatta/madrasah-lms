@@ -12,7 +12,7 @@ const ROLE_ROUTES: Record<string, string> = {
 };
 
 export default function LoginPage() {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,8 +23,9 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    let userData;
     try {
-      await login(email, password);
+      userData = await login(email, password);
     } catch (err: any) {
       setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid email or password');
       setLoading(false);
@@ -32,7 +33,7 @@ export default function LoginPage() {
     }
 
     setLoading(false);
-    const role = user?.role || 'student';
+    const role = userData?.role || 'student';
     navigate(ROLE_ROUTES[role] || '/student/dashboard');
   };
 

@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { questionAPI, subjectAPI } from '../../api';
+import { unwrapPaginated } from '../../api/client';
 import type { Question, Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
@@ -44,7 +45,7 @@ export default function QuestionBankPage() {
     if (filters.difficulty) params.difficulty = filters.difficulty;
     if (filters.search) params.search = filters.search;
     questionAPI.list(params)
-      .then((res) => setQuestions(res.data))
+      .then((res) => setQuestions(unwrapPaginated(res.data)))
       .catch(() => setError('Failed to load questions'))
       .finally(() => setLoading(false));
   }, [filters]);
@@ -52,13 +53,13 @@ export default function QuestionBankPage() {
   useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
   useEffect(() => {
-    subjectAPI.list().then((res) => setSubjects(res.data)).catch(() => {});
+    subjectAPI.list().then((res) => setSubjects(unwrapPaginated(res.data))).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (selectedSubject) {
       subjectAPI.getTopics(selectedSubject as number)
-        .then((res) => setTopics(res.data))
+        .then((res) => setTopics(unwrapPaginated(res.data)))
         .catch(() => setTopics([]));
     } else {
       setTopics([]);

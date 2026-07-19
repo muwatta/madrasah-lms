@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { enrollmentAPI, dashboardAPI } from '../../api';
+import { unwrapPaginated } from '../../api/client';
 import type { Enrollment } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface StudentPerformance {
   student: {
     id: number;
-    first_name: string;
-    last_name: string;
-    full_name: string;
+    name: string;
     email: string;
   };
   overall_average: number | null;
@@ -38,7 +37,7 @@ export default function StudentPerformancePage() {
 
   useEffect(() => {
     enrollmentAPI.teacherStudents()
-      .then((res) => setStudents(res.data))
+      .then((res) => setStudents(unwrapPaginated(res.data)))
       .catch(() => setError('Failed to load students'))
       .finally(() => setLoading(false));
   }, []);
@@ -120,7 +119,7 @@ export default function StudentPerformancePage() {
             <div className="space-y-6">
               <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <h3 className="mb-4 text-lg font-semibold text-gray-900">
-                  {performance.student.full_name}
+                  {performance.student.name}
                 </h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div className="rounded-lg bg-primary-50 p-4 text-center">

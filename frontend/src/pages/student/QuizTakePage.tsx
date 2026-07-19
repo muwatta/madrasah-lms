@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { quizAPI, attemptAPI } from '../../api';
+import { quizAPI, attemptAPI, questionAPI } from '../../api';
 import type { Question, Quiz, GradingResult } from '../../types';
 
 interface Answers {
@@ -53,7 +53,7 @@ export default function QuizTakePage() {
         const q = quizRes.data;
         setQuiz(q);
 
-        const qRes = await quizAPI.list({ ids: q.question_ids?.join(',') });
+        const qRes = await questionAPI.list({ ids: q.question_ids?.join(',') });
         const fetchedQuestions = qRes.data.results || qRes.data || [];
         setQuestions(fetchedQuestions);
 

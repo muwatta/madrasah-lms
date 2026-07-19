@@ -70,7 +70,7 @@ export default function QuizListPage() {
                 </div>
               </div>
               <Link
-                to={`/student/quiz/${quiz.id}`}
+                to={`/student/quizzes/${quiz.id}/take`}
                 className="mt-4 block text-center py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition"
               >
                 Start Quiz

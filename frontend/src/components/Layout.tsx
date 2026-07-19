@@ -24,13 +24,11 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
   ],
   parent: [
     { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'My Children', path: '/children', icon: '👨‍👩‍👧' },
   ],
   mudeer: [
     { label: 'Dashboard', path: '/dashboard', icon: '📊' },
     { label: 'Users', path: '/users', icon: '👤' },
     { label: 'Subjects', path: '/subjects', icon: '📚' },
-    { label: 'Quizzes', path: '/quizzes', icon: '📝' },
     { label: 'Exams', path: '/exams', icon: '📋' },
     { label: 'Enrollments', path: '/enrollments', icon: '🎓' },
   ],
