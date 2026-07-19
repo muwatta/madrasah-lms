@@ -31,7 +31,8 @@ class TopicListView(generics.ListCreateAPIView):
         return Topic.objects.filter(subject_id=subject_id)
 
     def perform_create(self, serializer):
-        serializer.save()
+        subject_id = self.kwargs.get('subject_pk')
+        serializer.save(subject_id=subject_id)
 
 
 class TopicDetailView(generics.RetrieveUpdateDestroyAPIView):

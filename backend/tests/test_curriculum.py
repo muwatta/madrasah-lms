@@ -13,7 +13,7 @@ class TestSubjects:
             'name': 'Fiqh',
             'description': 'Islamic jurisprudence',
             'level': 'intermediate',
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_get_subject_detail(self, auth_client, subject):
@@ -31,5 +31,5 @@ class TestTopics:
         response = auth_client.post(f'/api/subjects/{subject.id}/topics/', {
             'name': 'Surah Al-Baqarah',
             'description': 'Second Surah',
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_201_CREATED

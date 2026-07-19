@@ -13,7 +13,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             'options', 'correct_answer', 'explanation', 'difficulty',
             'created_by', 'created_by_name', 'created_at'
         ]
-        read_only_fields = ['id', 'created_by', 'created_at']
+        read_only_fields = ['id', 'madrasah', 'created_by', 'created_at']
 
 
 class QuestionListSerializer(serializers.ModelSerializer):
@@ -38,7 +38,7 @@ class QuizSerializer(serializers.ModelSerializer):
             'question_count', 'attempt_count', 'average_score',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'madrasah', 'created_by', 'created_at', 'updated_at']
 
 
 class QuizListSerializer(serializers.ModelSerializer):

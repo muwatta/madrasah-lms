@@ -16,7 +16,7 @@ class TestQuestions:
             'correct_answer': 'Monotheism',
             'explanation': 'The oneness of Allah',
             'difficulty': 'medium',
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_question_search(self, auth_client, question):
@@ -38,7 +38,7 @@ class TestQuizzes:
             'question_ids': [question.id],
             'quiz_type': 'practice',
             'passing_score': 60,
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_201_CREATED
 
     def test_publish_quiz(self, teacher_client, quiz):
@@ -57,7 +57,7 @@ class TestQuizAttempts:
         attempt_id = start.data['id']
         response = student_client.put(f'/api/quiz-attempts/{attempt_id}/submit/', {
             'answers': {str(quiz.question_ids[0]): 'Al-Fatiha'}
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert 'grading' in response.data
         assert response.data['grading']['percentage'] == 100.0
@@ -67,6 +67,6 @@ class TestQuizAttempts:
         attempt_id = start.data['id']
         response = student_client.put(f'/api/quiz-attempts/{attempt_id}/submit/', {
             'answers': {str(quiz.question_ids[0]): 'Al-Baqarah'}
-        })
+        }, format='json')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['grading']['percentage'] == 0.0

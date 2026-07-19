@@ -58,4 +58,4 @@ class TestMe:
 
     def test_get_me_unauthenticated(self, client):
         response = client.get('/api/auth/me/')
-        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        assert response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)

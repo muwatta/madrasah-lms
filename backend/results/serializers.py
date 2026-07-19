@@ -13,6 +13,7 @@ class ExamSerializer(serializers.ModelSerializer):
             'id', 'madrasah', 'subject', 'subject_name', 'created_by', 'created_by_name',
             'title', 'exam_date', 'description', 'total_marks', 'result_count', 'created_at'
         ]
+        read_only_fields = ['madrasah', 'created_by']
 
     def get_result_count(self, obj):
         return obj.results.count()
