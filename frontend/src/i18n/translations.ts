@@ -219,6 +219,7 @@ export const translations = {
     noActivity: { ar: 'لم تبدأ رحلتك بعد. ابدأ اختباراً!', en: 'Your journey hasn\'t started yet. Take a quiz!' },
     topSubject: { ar: 'أفضل مادة', en: 'Top Subject' },
     quizzesTaken: { ar: 'اختبارات مأخوذة', en: 'Quizzes Taken' },
+    viewAll: { ar: 'عرض الكل', en: 'View All' },
   },
   // Quiz taking
   quizTake: {

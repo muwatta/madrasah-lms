@@ -19,14 +19,17 @@ export default function ExamManagementPage() {
   const [selectedExam, setSelectedExam] = useState<number | null>(null);
   const [results, setResults] = useState<ExamResult[]>([]);
   const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsError, setResultsError] = useState<string | null>(null);
 
   const [showRecordResult, setShowRecordResult] = useState(false);
   const [resultForm, setResultForm] = useState({ student: '', score: '', grade: 'C', remarks: '' });
   const [resultSaving, setResultSaving] = useState(false);
+  const [resultError, setResultError] = useState<string | null>(null);
 
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [bulkText, setBulkText] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkError, setBulkError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadExams = () => {
@@ -64,11 +67,12 @@ export default function ExamManagementPage() {
   const loadResults = async (examId: number) => {
     setSelectedExam(examId);
     setResultsLoading(true);
+    setResultsError(null);
     try {
       const res = await examAPI.getResults(examId);
       setResults(res.data.results ?? res.data);
     } catch {
-      alert(t('examManagement.resultsLoadFailed'));
+      setResultsError(t('examManagement.resultsLoadFailed'));
     } finally {
       setResultsLoading(false);
     }
@@ -78,6 +82,7 @@ export default function ExamManagementPage() {
     e.preventDefault();
     if (!selectedExam) return;
     setResultSaving(true);
+    setResultError(null);
     try {
       await examAPI.recordResult(selectedExam, {
         student: Number(resultForm.student),
@@ -88,7 +93,7 @@ export default function ExamManagementPage() {
       setShowRecordResult(false);
       loadResults(selectedExam);
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('examManagement.recordFailed'));
+      setResultError(Object.values(err.response?.data || {}).flat().join(', ') || t('examManagement.recordFailed'));
     } finally {
       setResultSaving(false);
     }
@@ -97,6 +102,7 @@ export default function ExamManagementPage() {
   const handleBulkUpload = async () => {
     if (!selectedExam || !bulkText.trim()) return;
     setBulkSaving(true);
+    setBulkError(null);
     try {
       const lines = bulkText.trim().split('\n').filter(Boolean);
       const parsed = lines.map((line) => {
@@ -108,7 +114,7 @@ export default function ExamManagementPage() {
       setBulkText('');
       loadResults(selectedExam);
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('examManagement.bulkFailed'));
+      setBulkError(Object.values(err.response?.data || {}).flat().join(', ') || t('examManagement.bulkFailed'));
     } finally {
       setBulkSaving(false);
     }
@@ -187,6 +193,12 @@ export default function ExamManagementPage() {
       {showRecordResult && selectedExam && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
           <h3 className="mb-3 font-semibold text-gray-900">{t('examManagement.recordResultFor')} {activeExam?.title}</h3>
+          {resultError && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {resultError}
+              <button onClick={() => setResultError(null)} className="me-2 underline">{t('common.dismiss')}</button>
+            </div>
+          )}
           <form onSubmit={handleRecordResult} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.student')}</label>
@@ -224,6 +236,12 @@ export default function ExamManagementPage() {
           <p className="mb-2 text-sm text-gray-600">
             {t('examManagement.csvFormat')} <code className="rounded bg-gray-100 px-1">student_id, score, grade, remarks</code> ({t('examManagement.onePerLine')})
           </p>
+          {bulkError && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {bulkError}
+              <button onClick={() => setBulkError(null)} className="me-2 underline">{t('common.dismiss')}</button>
+            </div>
+          )}
           <textarea
             rows={6}
             value={bulkText}
@@ -319,6 +337,9 @@ export default function ExamManagementPage() {
               </button>
             </div>
           </div>
+          {resultsError && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{resultsError}</div>
+          )}
           {resultsLoading ? (
             <div className="flex h-24 items-center justify-center"><LoadingSpinner size="sm" /></div>
           ) : results.length ? (

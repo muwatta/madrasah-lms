@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { quizAPI, attemptAPI, enrollmentAPI } from '../../api';
-import type { Quiz, QuizAttempt, Enrollment } from '../../types';
+import { dashboardAPI } from '../../api';
+import type { Quiz, QuizAttempt, Enrollment, ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import StatCard from '../../components/StatCard';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface SubjectJourney {
   subjectId: number;
@@ -40,20 +41,19 @@ export default function StudentDashboard() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [examResults, setExamResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [quizzesRes, attemptsRes, enrollmentsRes] = await Promise.all([
-          quizAPI.list(),
-          attemptAPI.myAttempts(),
-          enrollmentAPI.myEnrollments(),
-        ]);
-        setQuizzes(quizzesRes.data.results || quizzesRes.data || []);
-        setAttempts(attemptsRes.data.results || attemptsRes.data || []);
-        setEnrollments(enrollmentsRes.data.results || enrollmentsRes.data || []);
+        const res = await dashboardAPI.student();
+        const data = res.data;
+        setEnrollments(data.enrollments || []);
+        setQuizzes(data.quizzes || []);
+        setAttempts(data.attempts || []);
+        setExamResults(data.exam_results || []);
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadDashboardFailed'));
       } finally {
@@ -173,16 +173,10 @@ export default function StudentDashboard() {
       .slice(0, 5),
     [completedAttempts]);
 
-  const topSubject = useMemo(() => {
-    const enrolled = subjectJourneys.filter((j) => j.enrolled && j.completedCount > 0);
-    if (enrolled.length === 0) return null;
-    return enrolled.reduce((best, j) => (j.avgScore > best.avgScore ? j : best), enrolled[0]);
-  }, [subjectJourneys]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-emerald-600 text-lg">{t('common.loading')}</div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -319,28 +313,32 @@ export default function StudentDashboard() {
             <p className="text-gray-500 text-sm">{t('student.noActivity')}</p>
           ) : (
             <div className="space-y-3">
-              {recentAttempts.map((attempt) => (
-                <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGradeBg(attempt.percentage || 0)}`}>
-                    <span className={`text-sm font-bold ${getGradeColor(attempt.percentage || 0)}`}>
-                      {attempt.percentage}%
+              {recentAttempts.map((attempt) => {
+                const quiz = quizzes.find((q) => q.id === attempt.quiz);
+                const passingScore = quiz?.passing_score ?? 50;
+                return (
+                  <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGradeBg(attempt.percentage || 0)}`}>
+                      <span className={`text-sm font-bold ${getGradeColor(attempt.percentage || 0)}`}>
+                        {attempt.percentage}%
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-800 truncate">{attempt.quiz_title}</p>
+                      <p className="text-xs text-gray-400">
+                        {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleDateString() : '-'}
+                      </p>
+                    </div>
+                    <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                      (attempt.percentage || 0) >= passingScore
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {(attempt.percentage || 0) >= passingScore ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
                     </span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-800 truncate">{attempt.quiz_title}</p>
-                    <p className="text-xs text-gray-400">
-                      {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleDateString() : '-'}
-                    </p>
-                  </div>
-                  <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                    (attempt.percentage || 0) >= 50
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}>
-                    {(attempt.percentage || 0) >= 50 ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -349,35 +347,35 @@ export default function StudentDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">{t('student.examResults')}</h2>
             <Link to="/student/exams" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
-              {t('student.examResults')}
+              {t('student.viewAll')}
             </Link>
           </div>
-          {topSubject ? (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100">
-                <p className="text-xs text-emerald-600 font-medium mb-1">{t('student.topSubject')}</p>
-                <p className="text-lg font-bold text-emerald-800">{topSubject.subjectName}</p>
-                <p className="text-sm text-emerald-600">{topSubject.avgScore}% {t('student.averageScore')}</p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-lg bg-gray-50 text-center">
-                  <p className="text-2xl font-bold text-gray-800">{subjectJourneys.filter((j) => j.enrolled).length}</p>
-                  <p className="text-xs text-gray-500">{t('student.enrolledSubjects')}</p>
+          {examResults.length > 0 ? (
+            <div className="space-y-3">
+              {examResults.slice(0, 5).map((result) => (
+                <div key={result.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                    result.grade === 'A' || result.grade === 'B' ? 'bg-emerald-100' :
+                    result.grade === 'C' ? 'bg-amber-100' : 'bg-red-100'
+                  }`}>
+                    <span className={`text-sm font-bold ${
+                      result.grade === 'A' || result.grade === 'B' ? 'text-emerald-600' :
+                      result.grade === 'C' ? 'text-amber-600' : 'text-red-500'
+                    }`}>{result.grade}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-gray-800 truncate">{result.exam_title}</p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(result.recorded_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-sm font-semibold text-gray-700">{result.score}</span>
                 </div>
-                <div className="p-3 rounded-lg bg-gray-50 text-center">
-                  <p className="text-2xl font-bold text-gray-800">{completedAttempts.length}</p>
-                  <p className="text-xs text-gray-500">{t('student.quizzesTaken')}</p>
-                </div>
-              </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
-                </svg>
-              </div>
-              <p className="text-gray-500 text-sm">{t('student.noActivity')}</p>
+              <p className="text-gray-500 text-sm">{t('student.noExamResults')}</p>
             </div>
           )}
         </div>

@@ -82,6 +82,7 @@ export const enrollmentAPI = {
 };
 
 export const dashboardAPI = {
+  student: () => api.get('/student/dashboard/'),
   teacher: () => api.get('/teacher/dashboard/'),
   teacherStudentPerformance: (studentId: number) =>
     api.get(`/teacher/student/${studentId}/performance/`),

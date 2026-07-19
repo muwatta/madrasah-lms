@@ -89,13 +89,16 @@ export default function UserManagementPage() {
     }
   };
 
+  const [deactivateError, setDeactivateError] = useState<string | null>(null);
+
   const handleDeactivate = async (id: number) => {
     if (!confirm(t('userManagement.deactivateConfirm'))) return;
+    setDeactivateError(null);
     try {
       await userAPI.update(id, { is_active: false });
       loadUsers();
     } catch {
-      alert(t('userManagement.deactivateFailed'));
+      setDeactivateError(t('userManagement.deactivateFailed'));
     }
   };
 
@@ -179,6 +182,13 @@ export default function UserManagementPage() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {deactivateError && (
+        <div className="rounded-lg bg-red-50 p-4 text-red-700">
+          {deactivateError}
+          <button onClick={() => setDeactivateError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 

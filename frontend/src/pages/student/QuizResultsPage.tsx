@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { attemptAPI } from '../../api';
 import type { QuizAttempt } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function QuizResultsPage() {
   const { t } = useLanguage();
@@ -27,7 +28,7 @@ export default function QuizResultsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-emerald-600 text-lg">{t('student.loadingResults')}</div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

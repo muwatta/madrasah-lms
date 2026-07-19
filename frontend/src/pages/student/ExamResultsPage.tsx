@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { examAPI } from '../../api';
 import type { ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function ExamResultsPage() {
   const { t } = useLanguage();
@@ -26,7 +27,7 @@ export default function ExamResultsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-emerald-600 text-lg">{t('student.loadingResults')}</div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

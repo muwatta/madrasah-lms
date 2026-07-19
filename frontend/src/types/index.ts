@@ -9,6 +9,7 @@ export interface User {
   madrasah_name: string;
   is_active: boolean;
   date_joined: string;
+  student_ids?: number[];
 }
 
 export interface Madrasah {
@@ -202,6 +203,13 @@ export interface AdminDashboard {
     student_count: number;
     quiz_count: number;
   }[];
+}
+
+export interface StudentDashboard {
+  enrollments: Enrollment[];
+  quizzes: Quiz[];
+  attempts: QuizAttempt[];
+  exam_results: ExamResult[];
 }
 
 export interface BoardDashboard {

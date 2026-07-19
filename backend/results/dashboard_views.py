@@ -209,6 +209,28 @@ class AdminDashboardView(APIView):
         })
 
 
+class StudentDashboardView(APIView):
+    def get(self, request):
+        user = request.user
+        madrasah = user.madrasah
+
+        from curriculum.enrollment_serializers import EnrollmentSerializer
+        from assessments.serializers import QuizListSerializer, QuizAttemptSerializer
+        from results.serializers import ExamResultSerializer
+
+        enrollments = Enrollment.objects.filter(student=user)
+        quizzes = Quiz.objects.filter(madrasah=madrasah, is_published=True)
+        attempts = QuizAttempt.objects.filter(student=user)
+        exam_results = ExamResult.objects.filter(student=user).select_related('exam')
+
+        return Response({
+            'enrollments': EnrollmentSerializer(enrollments, many=True).data,
+            'quizzes': QuizListSerializer(quizzes, many=True).data,
+            'attempts': QuizAttemptSerializer(attempts, many=True).data,
+            'exam_results': ExamResultSerializer(exam_results, many=True).data,
+        })
+
+
 class BoardDashboardView(APIView):
     def get(self, request):
         user = request.user

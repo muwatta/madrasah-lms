@@ -14,15 +14,18 @@ export default function SubjectManagementPage() {
   const [editingSubjectId, setEditingSubjectId] = useState<number | null>(null);
   const [subjectForm, setSubjectForm] = useState({ name_ar: '', name_en: '', code: '', description: '' });
   const [subjectSaving, setSubjectSaving] = useState(false);
+  const [subjectError, setSubjectError] = useState<string | null>(null);
 
   const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
   const [topics, setTopics] = useState<Record<number, Topic[]>>({});
   const [topicsLoading, setTopicsLoading] = useState<number | null>(null);
+  const [topicsError, setTopicsError] = useState<string | null>(null);
 
   const [showTopicForm, setShowTopicForm] = useState(false);
   const [topicSubjectId, setTopicSubjectId] = useState<number | null>(null);
   const [topicForm, setTopicForm] = useState({ name: '', description: '', surah_number: '' });
   const [topicSaving, setTopicSaving] = useState(false);
+  const [topicError, setTopicError] = useState<string | null>(null);
 
   const loadSubjects = () => {
     setLoading(true);
@@ -37,6 +40,7 @@ export default function SubjectManagementPage() {
   const handleSubjectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubjectSaving(true);
+    setSubjectError(null);
     try {
       if (editingSubjectId) {
         await subjectAPI.update(editingSubjectId, subjectForm);
@@ -46,7 +50,7 @@ export default function SubjectManagementPage() {
       setShowSubjectForm(false);
       loadSubjects();
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('userManagement.operationFailed'));
+      setSubjectError(Object.values(err.response?.data || {}).flat().join(', ') || t('userManagement.operationFailed'));
     } finally {
       setSubjectSaving(false);
     }
@@ -64,7 +68,7 @@ export default function SubjectManagementPage() {
       await subjectAPI.delete(id);
       loadSubjects();
     } catch {
-      alert(t('subjectManagement.deleteFailed'));
+      setError(t('subjectManagement.deleteFailed'));
     }
   };
 
@@ -76,11 +80,12 @@ export default function SubjectManagementPage() {
     setExpandedSubject(subjectId);
     if (!topics[subjectId]) {
       setTopicsLoading(subjectId);
+      setTopicsError(null);
       try {
         const res = await subjectAPI.getTopics(subjectId);
         setTopics((prev) => ({ ...prev, [subjectId]: res.data.results ?? res.data }));
       } catch {
-        alert(t('subjectManagement.topicsLoadFailed'));
+        setTopicsError(t('subjectManagement.topicsLoadFailed'));
       } finally {
         setTopicsLoading(null);
       }
@@ -97,6 +102,7 @@ export default function SubjectManagementPage() {
     e.preventDefault();
     if (!topicSubjectId) return;
     setTopicSaving(true);
+    setTopicError(null);
     try {
       const payload = {
         ...topicForm,
@@ -108,7 +114,7 @@ export default function SubjectManagementPage() {
       setTopics((prev) => ({ ...prev, [topicSubjectId]: res.data.results ?? res.data }));
       loadSubjects();
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('subjectManagement.topicCreateFailed'));
+      setTopicError(Object.values(err.response?.data || {}).flat().join(', ') || t('subjectManagement.topicCreateFailed'));
     } finally {
       setTopicSaving(false);
     }
@@ -126,6 +132,12 @@ export default function SubjectManagementPage() {
       {showSubjectForm && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">{editingSubjectId ? t('common.edit') + ' ' + t('fields.subject') : t('common.create') + ' ' + t('fields.subject')}</h2>
+          {subjectError && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {subjectError}
+              <button onClick={() => setSubjectError(null)} className="me-2 underline">{t('common.dismiss')}</button>
+            </div>
+          )}
           <form onSubmit={handleSubjectSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.nameAr')}</label>
@@ -156,6 +168,12 @@ export default function SubjectManagementPage() {
       {showTopicForm && topicSubjectId && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
           <h3 className="mb-3 text-md font-semibold text-gray-900">{t('subjectManagement.addTopic')} - {subjects.find((s) => s.id === topicSubjectId)?.name_ar}</h3>
+          {topicError && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              {topicError}
+              <button onClick={() => setTopicError(null)} className="me-2 underline">{t('common.dismiss')}</button>
+            </div>
+          )}
           <form onSubmit={handleTopicSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.name')}</label>
@@ -209,6 +227,8 @@ export default function SubjectManagementPage() {
                 <div className="border-t border-gray-100 px-6 py-4">
                   {topicsLoading === subject.id ? (
                     <div className="flex justify-center py-4"><LoadingSpinner size="sm" /></div>
+                  ) : topicsError ? (
+                    <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{topicsError}</div>
                   ) : topics[subject.id]?.length ? (
                     <ul className="space-y-2">
                       {topics[subject.id].map((topic) => (

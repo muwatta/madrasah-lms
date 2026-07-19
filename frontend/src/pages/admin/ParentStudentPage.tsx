@@ -64,13 +64,16 @@ export default function ParentStudentPage() {
     }
   };
 
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const handleDelete = async (id: number) => {
     if (!confirm(t('parentStudent.removeConfirm'))) return;
+    setDeleteError(null);
     try {
       await api.delete(`/auth/student-parents/${id}/`);
       loadData();
     } catch {
-      alert(t('parentStudent.deleteFailed'));
+      setDeleteError(t('parentStudent.deleteFailed'));
     }
   };
 
@@ -124,6 +127,13 @@ export default function ParentStudentPage() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {deleteError && (
+        <div className="rounded-lg bg-red-50 p-4 text-red-700">
+          {deleteError}
+          <button onClick={() => setDeleteError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 

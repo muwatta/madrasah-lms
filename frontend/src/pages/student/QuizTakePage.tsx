@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, attemptAPI, questionAPI } from '../../api';
 import type { Question, Quiz, GradingResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface Answers {
   [questionId: string]: string;
@@ -91,7 +92,7 @@ export default function QuizTakePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-emerald-600 text-lg">{t('quizTake.loadingQuiz')}</div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
