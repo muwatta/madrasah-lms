@@ -15,7 +15,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     dashboardAPI.admin()
       .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.detail || 'فشل تحميل لوحة التحكم'))
+      .catch((err) => setError(err.response?.data?.detail || t('adminDashboard.loadFailed')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -62,17 +62,17 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-right text-xs font-medium uppercase text-gray-500">
-                  <th className="pb-3 pl-4">{t('fields.subject')}</th>
-                  <th className="pb-3 pl-4">{t('adminDashboard.totalStudents')}</th>
+                <tr className="border-b border-gray-200 text-end text-xs font-medium uppercase text-gray-500">
+                  <th className="pb-3 pe-4">{t('fields.subject')}</th>
+                  <th className="pb-3 pe-4">{t('adminDashboard.totalStudents')}</th>
                   <th className="pb-3">{t('adminDashboard.totalQuizzes')}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.subject_stats.map((subject) => (
                   <tr key={subject.id} className="border-b border-gray-50">
-                    <td className="py-3 pl-4 font-medium text-gray-900">{subject.name_ar}</td>
-                    <td className="py-3 pl-4 text-gray-600">{subject.student_count}</td>
+                    <td className="py-3 pe-4 font-medium text-gray-900">{subject.name_ar}</td>
+                    <td className="py-3 pe-4 text-gray-600">{subject.student_count}</td>
                     <td className="py-3 text-gray-600">{subject.quiz_count}</td>
                   </tr>
                 ))}

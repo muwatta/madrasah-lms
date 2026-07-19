@@ -95,7 +95,7 @@ export default function TeacherDashboard() {
                       </p>
                       <p className="text-xs text-gray-500">{activity.subject}</p>
                     </div>
-                    <div className="text-left text-xs text-gray-500">
+                    <div className="text-start text-xs text-gray-500">
                       <span className="font-medium text-primary-700">{activity.attempt_count} {t('teacher.attempts')}</span>
                       <br />
                       {t('teacher.average')} {activity.average_score.toFixed(1)}%

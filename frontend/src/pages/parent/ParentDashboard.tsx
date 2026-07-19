@@ -14,7 +14,7 @@ export default function ParentDashboard() {
   useEffect(() => {
     dashboardAPI.parent()
       .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.detail || 'فشل تحميل لوحة التحكم'))
+      .catch((err) => setError(err.response?.data?.detail || t('parentDashboard.loadFailed')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -32,7 +32,7 @@ export default function ParentDashboard() {
               <h2 className="text-lg font-semibold text-gray-900">{child.name}</h2>
               <p className="text-sm text-gray-500">{child.email}</p>
             </div>
-            <div className="text-left">
+            <div className="text-start">
               <p className="text-sm text-gray-500">{t('parentDashboard.overallAverage')}</p>
               <p className="text-2xl font-bold text-primary-600">
                 {child.overall_average != null ? `${child.overall_average.toFixed(1)}%` : t('teacher.notAvailable')}
@@ -57,7 +57,7 @@ export default function ParentDashboard() {
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-right text-xs font-medium uppercase text-gray-500">
+                    <tr className="border-b border-gray-100 text-end text-xs font-medium uppercase text-gray-500">
                       <th className="pb-2 pl-4">{t('fields.name')}</th>
                       <th className="pb-2 pl-4">{t('fields.score')}</th>
                       <th className="pb-2">{t('fields.date')}</th>
@@ -89,7 +89,7 @@ export default function ParentDashboard() {
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-right text-xs font-medium uppercase text-gray-500">
+                    <tr className="border-b border-gray-100 text-end text-xs font-medium uppercase text-gray-500">
                       <th className="pb-2 pl-4">{t('teacher.exam')}</th>
                       <th className="pb-2 pl-4">{t('fields.score')}</th>
                       <th className="pb-2 pl-4">{t('fields.grade')}</th>

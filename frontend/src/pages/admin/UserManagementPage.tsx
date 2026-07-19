@@ -190,7 +190,7 @@ export default function UserManagementPage() {
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-right text-xs font-medium uppercase text-gray-500">
+              <tr className="border-b border-gray-200 bg-gray-50 text-end text-xs font-medium uppercase text-gray-500">
                 <th className="px-4 py-3">{t('fields.name')}</th>
                 <th className="px-4 py-3">{t('fields.email')}</th>
                 <th className="px-4 py-3">{t('fields.role')}</th>

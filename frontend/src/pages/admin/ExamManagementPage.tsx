@@ -228,7 +228,7 @@ export default function ExamManagementPage() {
             rows={6}
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            placeholder={'1, 85, A, ممتاز\n2, 72, B, جيد'}
+            placeholder={'1, 85, A, Excellent\n2, 72, B, Good'}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
           <div className="mt-3 flex gap-3">
@@ -238,7 +238,7 @@ export default function ExamManagementPage() {
             <button onClick={() => { setShowBulkUpload(false); setBulkText(''); }} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
               {t('common.cancel')}
             </button>
-            <label className="mr-auto cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <label className="me-auto cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
               {t('common.importCsv')}
               <input
                 ref={fileInputRef}
@@ -266,7 +266,7 @@ export default function ExamManagementPage() {
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-right text-xs font-medium uppercase text-gray-500">
+              <tr className="border-b border-gray-200 bg-gray-50 text-end text-xs font-medium uppercase text-gray-500">
                 <th className="px-4 py-3">{t('fields.title')}</th>
                 <th className="px-4 py-3">{t('fields.subject')}</th>
                 <th className="px-4 py-3">{t('fields.date')}</th>
@@ -325,19 +325,19 @@ export default function ExamManagementPage() {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 text-right text-xs font-medium uppercase text-gray-500">
-                    <th className="pb-2 pl-4">{t('fields.student')}</th>
-                    <th className="pb-2 pl-4">{t('fields.score')}</th>
-                    <th className="pb-2 pl-4">{t('fields.grade')}</th>
+                  <tr className="border-b border-gray-200 text-end text-xs font-medium uppercase text-gray-500">
+                    <th className="pb-2 pe-4">{t('fields.student')}</th>
+                    <th className="pb-2 pe-4">{t('fields.score')}</th>
+                    <th className="pb-2 pe-4">{t('fields.grade')}</th>
                     <th className="pb-2">{t('fields.remarks')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((r) => (
                     <tr key={r.id} className="border-b border-gray-50">
-                      <td className="py-2 pl-4 font-medium text-gray-900">{r.student_name}</td>
-                      <td className="py-2 pl-4 text-gray-600">{r.score} / {activeExam?.total_marks}</td>
-                      <td className="py-2 pl-4">{gradeBadge(r.grade)}</td>
+                      <td className="py-2 pe-4 font-medium text-gray-900">{r.student_name}</td>
+                      <td className="py-2 pe-4 text-gray-600">{r.score} / {activeExam?.total_marks}</td>
+                      <td className="py-2 pe-4">{gradeBadge(r.grade)}</td>
                       <td className="py-2 text-gray-500">{r.remarks || '—'}</td>
                     </tr>
                   ))}

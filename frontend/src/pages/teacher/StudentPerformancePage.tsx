@@ -80,7 +80,7 @@ export default function StudentPerformancePage() {
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="mr-2 underline">{t('common.close')}</button>
+          <button onClick={() => setError(null)} className="me-2 underline">{t('common.close')}</button>
         </div>
       )}
 
@@ -97,8 +97,8 @@ export default function StudentPerformancePage() {
                 <li key={s.student}>
                   <button
                     onClick={() => setSelectedStudentId(s.student)}
-                    className={`w-full px-4 py-3 text-right text-sm hover:bg-gray-50 ${
-                      selectedStudentId === s.student ? 'bg-primary-50 border-r-2 border-primary-600' : ''
+                    className={`w-full px-4 py-3 text-end text-sm hover:bg-gray-50 ${
+                      selectedStudentId === s.student ? 'bg-primary-50 border-s-2 border-primary-600' : ''
                     }`}
                   >
                     <div className="font-medium text-gray-900">{s.student_name}</div>
@@ -180,9 +180,9 @@ export default function StudentPerformancePage() {
                     <table className="min-w-full divide-y divide-gray-100">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.quiz')}</th>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.score')}</th>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.enrollmentDate')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.quiz')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.score')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.enrollmentDate')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -212,10 +212,10 @@ export default function StudentPerformancePage() {
                     <table className="min-w-full divide-y divide-gray-100">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.exam')}</th>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.score')}</th>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.grade')}</th>
-                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.date')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.exam')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.score')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.grade')}</th>
+                           <th className="px-6 py-2 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.date')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">

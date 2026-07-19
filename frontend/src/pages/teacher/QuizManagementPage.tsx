@@ -162,7 +162,7 @@ export default function QuizManagementPage() {
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="mr-2 underline">{t('common.dismiss')}</button>
+          <button onClick={() => setError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 
@@ -338,13 +338,13 @@ export default function QuizManagementPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.quiz')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.type')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.questions')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.attempts')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.averageScore')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.status')}</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{t('common.actions')}</th>
+                <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.quiz')}</th>
+                <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.type')}</th>
+                <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.questions')}</th>
+                <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.attempts')}</th>
+                <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('quizManagement.averageScore')}</th>
+                <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.status')}</th>
+                <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -372,7 +372,7 @@ export default function QuizManagementPage() {
                       {quiz.is_published ? t('fields.published') : t('fields.draft')}
                     </button>
                   </td>
-                  <td className="px-6 py-4 text-left">
+                  <td className="px-6 py-4 text-start">
                     <div className="flex justify-start gap-2">
                       <button
                         onClick={() => openEdit(quiz)}

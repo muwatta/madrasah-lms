@@ -15,7 +15,7 @@ export default function BoardDashboard() {
   useEffect(() => {
     dashboardAPI.board()
       .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.detail || 'فشل تحميل لوحة التحكم'))
+      .catch((err) => setError(err.response?.data?.detail || t('boardDashboard.loadFailed')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -48,7 +48,7 @@ export default function BoardDashboard() {
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-right text-xs font-medium uppercase text-gray-500">
+                <tr className="border-b border-gray-200 text-end text-xs font-medium uppercase text-gray-500">
                   <th className="pb-3 pl-4">#</th>
                   <th className="pb-3 pl-4">{t('fields.teacher')}</th>
                   <th className="pb-3 pl-4">{t('boardDashboard.quizzesCreated')}</th>

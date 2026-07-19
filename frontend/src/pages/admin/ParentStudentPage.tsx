@@ -135,7 +135,7 @@ export default function ParentStudentPage() {
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-medium uppercase text-gray-500">
+              <tr className="border-b border-gray-200 bg-gray-50 text-start text-xs font-medium uppercase text-gray-500">
                 <th className="px-4 py-3">{t('fields.student')}</th>
                 <th className="px-4 py-3">{t('parentStudent.selectParent')}</th>
                 <th className="px-4 py-3">{t('parentStudent.relationship')}</th>

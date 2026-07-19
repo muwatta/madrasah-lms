@@ -162,7 +162,7 @@ export default function QuestionBankPage() {
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="mr-2 underline">{t('common.dismiss')}</button>
+          <button onClick={() => setError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 

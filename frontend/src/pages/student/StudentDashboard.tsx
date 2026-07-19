@@ -108,10 +108,10 @@ export default function StudentDashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-right py-3 px-2 font-medium text-gray-600">{t('student.quiz')}</th>
-                  <th className="text-right py-3 px-2 font-medium text-gray-600">{t('fields.score')}</th>
-                  <th className="text-right py-3 px-2 font-medium text-gray-600">{t('fields.status')}</th>
-                  <th className="text-right py-3 px-2 font-medium text-gray-600">{t('fields.date')}</th>
+                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('student.quiz')}</th>
+                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('fields.score')}</th>
+                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('fields.status')}</th>
+                  <th className="text-end py-3 px-2 font-medium text-gray-600">{t('fields.date')}</th>
                 </tr>
               </thead>
               <tbody>

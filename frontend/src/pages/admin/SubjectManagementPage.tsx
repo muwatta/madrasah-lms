@@ -215,7 +215,7 @@ export default function SubjectManagementPage() {
                         <li key={topic.id} className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-2">
                           <span className="text-sm font-medium text-gray-900">{topic.name}</span>
                           {topic.surah_number && <span className="text-xs text-gray-500">{t('subjectManagement.surah')} {topic.surah_number}</span>}
-                          {topic.description && <span className="text-xs text-gray-400 mr-auto">{topic.description}</span>}
+                          {topic.description && <span className="text-xs text-gray-400 me-auto">{topic.description}</span>}
                         </li>
                       ))}
                     </ul>

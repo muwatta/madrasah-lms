@@ -118,7 +118,7 @@ export default function Layout() {
             className="fixed inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="fixed inset-y-0 right-0 z-50 w-64">
+          <aside className="fixed inset-y-0 end-0 z-50 w-64">
             {sidebarContent}
           </aside>
         </div>
@@ -132,7 +132,7 @@ export default function Layout() {
             <button
               onClick={() => setSidebarOpen(true)}
               className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
-              aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
+              aria-label={t('common.openMenu')}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -148,7 +148,7 @@ export default function Layout() {
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-              title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+              title={t('common.toggleLanguage')}
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -157,7 +157,7 @@ export default function Layout() {
             </button>
 
             {user && (
-              <div className="hidden text-right sm:block">
+              <div className="hidden text-end sm:block">
                 <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
                 <p className="text-xs text-gray-500">{t(roleLabelKeys[user.role])}</p>
               </div>

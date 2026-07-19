@@ -53,6 +53,8 @@ export const translations = {
     uploading: { ar: 'جارٍ الرفع...', en: 'Uploading...' },
     noData: { ar: 'لا توجد بيانات', en: 'No data' },
     all: { ar: 'الكل', en: 'All' },
+    openMenu: { ar: 'فتح القائمة', en: 'Open menu' },
+    toggleLanguage: { ar: 'التبديل إلى الإنجليزية', en: 'Switch to Arabic' },
   },
   // Fields
   fields: {
@@ -373,6 +375,7 @@ export const translations = {
     manageSubjects: { ar: 'إدارة المواد', en: 'Manage Subjects' },
     manageEnrollments: { ar: 'إدارة التسجيلات', en: 'Manage Enrollments' },
     manageExams: { ar: 'إدارة الامتحانات', en: 'Manage Exams' },
+    loadFailed: { ar: 'فشل تحميل لوحة التحكم', en: 'Failed to load dashboard' },
   },
   // Parent dashboard
   parentDashboard: {
@@ -382,6 +385,7 @@ export const translations = {
     subjects: { ar: 'المواد', en: 'Subjects' },
     recentQuizAttempts: { ar: 'آخر محاولات الاختبار', en: 'Recent Quiz Attempts' },
     performanceTrend: { ar: 'اتجاه الأداء', en: 'Performance Trend' },
+    loadFailed: { ar: 'فشل تحميل لوحة التحكم', en: 'Failed to load dashboard' },
   },
   // Board dashboard
   boardDashboard: {
@@ -392,6 +396,7 @@ export const translations = {
     avgStudentScore: { ar: 'متوسط درجات الطلاب', en: 'Avg Student Score' },
     topSubjects: { ar: 'أفضل المواد', en: 'Top Subjects' },
     performanceByTeacher: { ar: 'الأداء حسب المعلم', en: 'Performance by Teacher' },
+    loadFailed: { ar: 'فشل تحميل لوحة التحكم', en: 'Failed to load dashboard' },
   },
   // Parent-Student page
   parentStudent: {
