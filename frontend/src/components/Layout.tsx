@@ -1,39 +1,39 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import type { User } from '../types';
 
 interface NavLink {
-  label: string;
+  labelKey: string;
   path: string;
-  icon: string;
 }
 
 const roleNavLinks: Record<User['role'], NavLink[]> = {
   student: [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'Available Quizzes', path: '/quizzes', icon: '📝' },
-    { label: 'My Results', path: '/results', icon: '📈' },
-    { label: 'Exams', path: '/exams', icon: '📋' },
+    { labelKey: 'nav.dashboard', path: '/dashboard' },
+    { labelKey: 'nav.availableQuizzes', path: '/quizzes' },
+    { labelKey: 'nav.myResults', path: '/results' },
+    { labelKey: 'nav.exams', path: '/exams' },
   ],
   ustaadh: [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'My Quizzes', path: '/quizzes', icon: '📝' },
-    { label: 'Questions Bank', path: '/questions', icon: '❓' },
-    { label: 'Students', path: '/students', icon: '👥' },
+    { labelKey: 'nav.dashboard', path: '/dashboard' },
+    { labelKey: 'nav.myQuizzes', path: '/quizzes' },
+    { labelKey: 'nav.questionBank', path: '/questions' },
+    { labelKey: 'nav.students', path: '/students' },
   ],
   parent: [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
+    { labelKey: 'nav.dashboard', path: '/dashboard' },
   ],
   mudeer: [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { label: 'Users', path: '/users', icon: '👤' },
-    { label: 'Subjects', path: '/subjects', icon: '📚' },
-    { label: 'Exams', path: '/exams', icon: '📋' },
-    { label: 'Enrollments', path: '/enrollments', icon: '🎓' },
+    { labelKey: 'nav.dashboard', path: '/dashboard' },
+    { labelKey: 'nav.users', path: '/users' },
+    { labelKey: 'nav.subjects', path: '/subjects' },
+    { labelKey: 'nav.exams', path: '/exams' },
+    { labelKey: 'nav.enrollments', path: '/enrollments' },
   ],
   idaarah: [
-    { label: 'Dashboard', path: '/dashboard', icon: '📊' },
+    { labelKey: 'nav.dashboard', path: '/dashboard' },
   ],
 };
 
@@ -45,22 +45,24 @@ const rolePrefixMap: Record<User['role'], string> = {
   idaarah: '/board',
 };
 
-const roleLabels: Record<User['role'], string> = {
-  student: 'Student',
-  ustaadh: 'Ustaadh',
-  parent: 'Parent',
-  mudeer: 'Mudeer',
-  idaarah: 'Idaarah',
+const roleLabelKeys: Record<User['role'], string> = {
+  student: 'roles.student',
+  ustaadh: 'roles.ustaadh',
+  parent: 'roles.parent',
+  mudeer: 'roles.mudeer',
+  idaarah: 'roles.idaarah',
 };
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const { t, language, toggleLanguage } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const links = user ? roleNavLinks[user.role].map(l => ({
     ...l,
+    label: t(l.labelKey),
     path: `${rolePrefixMap[user.role]}${l.path}`,
   })) : [];
 
@@ -72,8 +74,7 @@ export default function Layout() {
   const sidebarContent = (
     <div className="flex h-full flex-col bg-islamic-dark text-white">
       <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
-        <span className="text-lg font-bold text-islamic-gold">🕌</span>
-        <span className="text-lg font-semibold">Madrasah LMS</span>
+        <span className="text-lg font-semibold">{t('nav.schoolLms')}</span>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
@@ -90,7 +91,6 @@ export default function Layout() {
                   : 'text-gray-300 hover:bg-white/10 hover:text-white'
               }`}
             >
-              <span className="text-base">{link.icon}</span>
               {link.label}
             </Link>
           );
@@ -99,7 +99,7 @@ export default function Layout() {
 
       {user && (
         <div className="border-t border-white/10 p-4">
-          <p className="text-xs text-gray-400">{roleLabels[user.role]}</p>
+          <p className="text-xs text-gray-400">{t(roleLabelKeys[user.role])}</p>
           <p className="truncate text-sm font-medium">{user.full_name}</p>
         </div>
       )}
@@ -118,7 +118,7 @@ export default function Layout() {
             className="fixed inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="fixed inset-y-0 left-0 z-50 w-64">
+          <aside className="fixed inset-y-0 right-0 z-50 w-64">
             {sidebarContent}
           </aside>
         </div>
@@ -132,29 +132,41 @@ export default function Layout() {
             <button
               onClick={() => setSidebarOpen(true)}
               className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
-              aria-label="Open sidebar"
+              aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <h1 className="text-lg font-semibold text-islamic-dark">
-              {user?.madrasah_name || 'Madrasah LMS'}
+              {user?.madrasah_name || t('nav.schoolLms')}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Language toggle */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+              {language === 'ar' ? 'EN' : 'عربي'}
+            </button>
+
             {user && (
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
-                <p className="text-xs text-gray-500">{roleLabels[user.role]}</p>
+                <p className="text-xs text-gray-500">{t(roleLabelKeys[user.role])}</p>
               </div>
             )}
             <button
               onClick={handleLogout}
               className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
             >
-              Logout
+              {t('nav.logout')}
             </button>
           </div>
         </header>

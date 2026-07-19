@@ -4,6 +4,7 @@ import { enrollmentAPI, dashboardAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { Enrollment } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface StudentPerformance {
   student: {
@@ -28,6 +29,7 @@ interface StudentPerformance {
 }
 
 export default function StudentPerformancePage() {
+  const { t } = useLanguage();
   const [students, setStudents] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,9 +40,9 @@ export default function StudentPerformancePage() {
   useEffect(() => {
     enrollmentAPI.teacherStudents()
       .then((res) => setStudents(unwrapPaginated(res.data)))
-      .catch(() => setError('Failed to load students'))
+      .catch(() => setError(t('teacher.loadStudentsFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (selectedStudentId === null) {
@@ -50,9 +52,9 @@ export default function StudentPerformancePage() {
     setPerfLoading(true);
     dashboardAPI.teacherStudentPerformance(selectedStudentId)
       .then((res) => setPerformance(res.data))
-      .catch(() => setError('Failed to load student performance'))
+      .catch(() => setError(t('teacher.loadPerformanceFailed')))
       .finally(() => setPerfLoading(false));
-  }, [selectedStudentId]);
+  }, [selectedStudentId, t]);
 
   const chartData = performance
     ? performance.quiz_attempts
@@ -73,30 +75,30 @@ export default function StudentPerformancePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Student Performance</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">{t('teacher.studentPerformance')}</h1>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">dismiss</button>
+          <button onClick={() => setError(null)} className="mr-2 underline">{t('common.close')}</button>
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm lg:col-span-1">
           <div className="border-b border-gray-200 px-4 py-3">
-            <h2 className="text-sm font-semibold text-gray-900">Students</h2>
+            <h2 className="text-sm font-semibold text-gray-900">{t('teacher.students')}</h2>
           </div>
           <ul className="max-h-[600px] divide-y divide-gray-100 overflow-y-auto">
             {uniqueStudents.length === 0 ? (
-              <li className="p-4 text-sm text-gray-500">No students found.</li>
+              <li className="p-4 text-sm text-gray-500">{t('teacher.noStudents')}</li>
             ) : (
               uniqueStudents.map((s) => (
                 <li key={s.student}>
                   <button
                     onClick={() => setSelectedStudentId(s.student)}
-                    className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 ${
-                      selectedStudentId === s.student ? 'bg-primary-50 border-l-2 border-primary-600' : ''
+                    className={`w-full px-4 py-3 text-right text-sm hover:bg-gray-50 ${
+                      selectedStudentId === s.student ? 'bg-primary-50 border-r-2 border-primary-600' : ''
                     }`}
                   >
                     <div className="font-medium text-gray-900">{s.student_name}</div>
@@ -111,7 +113,7 @@ export default function StudentPerformancePage() {
         <div className="lg:col-span-2">
           {selectedStudentId === null ? (
             <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
-              <p className="text-gray-500">Select a student to view their performance.</p>
+              <p className="text-gray-500">{t('teacher.selectStudent')}</p>
             </div>
           ) : perfLoading ? (
             <LoadingSpinner size="lg" className="mt-12" />
@@ -123,19 +125,19 @@ export default function StudentPerformancePage() {
                 </h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div className="rounded-lg bg-primary-50 p-4 text-center">
-                    <p className="text-sm text-primary-700">Overall Average</p>
+                    <p className="text-sm text-primary-700">{t('teacher.overallAverage')}</p>
                     <p className="mt-1 text-2xl font-bold text-primary-800">
-                      {performance.overall_average !== null ? `${performance.overall_average.toFixed(1)}%` : 'N/A'}
+                      {performance.overall_average !== null ? `${performance.overall_average.toFixed(1)}%` : t('teacher.notAvailable')}
                     </p>
                   </div>
                   <div className="rounded-lg bg-blue-50 p-4 text-center">
-                    <p className="text-sm text-blue-700">Quiz Attempts</p>
+                    <p className="text-sm text-blue-700">{t('teacher.quizAttempts')}</p>
                     <p className="mt-1 text-2xl font-bold text-blue-800">
                       {performance.quiz_attempts.length}
                     </p>
                   </div>
                   <div className="rounded-lg bg-purple-50 p-4 text-center">
-                    <p className="text-sm text-purple-700">Exam Results</p>
+                    <p className="text-sm text-purple-700">{t('teacher.examResults')}</p>
                     <p className="mt-1 text-2xl font-bold text-purple-800">
                       {performance.exam_results.length}
                     </p>
@@ -145,15 +147,15 @@ export default function StudentPerformancePage() {
 
               {chartData.length > 0 && (
                 <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                  <h4 className="mb-4 text-sm font-semibold text-gray-900">Quiz Score Trend</h4>
+                  <h4 className="mb-4 text-sm font-semibold text-gray-900">{t('teacher.scoreTrend')}</h4>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 100]} />
                       <Tooltip
-                        formatter={(value) => [`${value}%`, 'Score']}
-                        labelFormatter={(label) => `Quiz: ${label}`}
+                        formatter={(value) => [`${value}%`, t('fields.score')]}
+                        labelFormatter={(label) => `${t('teacher.quiz')}: ${label}`}
                       />
                       <Legend />
                       <Line
@@ -162,7 +164,7 @@ export default function StudentPerformancePage() {
                         stroke="#16a34a"
                         strokeWidth={2}
                         dot={{ r: 4 }}
-                        name="Score %"
+                        name={t('teacher.scorePercent')}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -172,15 +174,15 @@ export default function StudentPerformancePage() {
               {performance.quiz_attempts.length > 0 && (
                 <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
                   <div className="border-b border-gray-200 px-6 py-3">
-                    <h4 className="text-sm font-semibold text-gray-900">Quiz Attempts</h4>
+                    <h4 className="text-sm font-semibold text-gray-900">{t('teacher.quizAttempts')}</h4>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-100">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Quiz</th>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Score</th>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Submitted</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.quiz')}</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.score')}</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.enrollmentDate')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -188,7 +190,7 @@ export default function StudentPerformancePage() {
                           <tr key={a.id} className="hover:bg-gray-50">
                             <td className="px-6 py-3 text-sm font-medium text-gray-900">{a.quiz_title}</td>
                             <td className="px-6 py-3 text-sm text-gray-700">
-                              {a.percentage !== null ? `${a.percentage.toFixed(1)}%` : 'Pending'}
+                              {a.percentage !== null ? `${a.percentage.toFixed(1)}%` : t('enrollmentStatus.pending')}
                             </td>
                             <td className="px-6 py-3 text-sm text-gray-500">
                               {a.submitted_at ? new Date(a.submitted_at).toLocaleDateString() : '-'}
@@ -204,16 +206,16 @@ export default function StudentPerformancePage() {
               {performance.exam_results.length > 0 && (
                 <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
                   <div className="border-b border-gray-200 px-6 py-3">
-                    <h4 className="text-sm font-semibold text-gray-900">Exam Results</h4>
+                    <h4 className="text-sm font-semibold text-gray-900">{t('teacher.examResults')}</h4>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-100">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Exam</th>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Score</th>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Grade</th>
-                          <th className="px-6 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('teacher.exam')}</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.score')}</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.grade')}</th>
+                          <th className="px-6 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.date')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
@@ -242,7 +244,7 @@ export default function StudentPerformancePage() {
             </div>
           ) : (
             <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
-              <p className="text-gray-500">No performance data available.</p>
+              <p className="text-gray-500">{t('teacher.noPerformanceData')}</p>
             </div>
           )}
         </div>

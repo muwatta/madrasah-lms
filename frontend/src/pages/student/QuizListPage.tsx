@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { quizAPI, subjectAPI } from '../../api';
 import type { Quiz, Subject } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function QuizListPage() {
+  const { t } = useLanguage();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filterSubject, setFilterSubject] = useState<number | ''>('');
@@ -19,7 +21,7 @@ export default function QuizListPage() {
         const res = await quizAPI.list(params);
         setQuizzes(res.data.results || res.data || []);
       } catch (err: any) {
-        setError(err.response?.data?.detail || 'Failed to load quizzes');
+        setError(err.response?.data?.detail || t('student.loadQuizzesFailed'));
       } finally {
         setLoading(false);
       }
@@ -34,25 +36,25 @@ export default function QuizListPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quizzes</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{t('student.quizzes')}</h1>
         <select
           value={filterSubject}
           onChange={(e) => setFilterSubject(e.target.value ? Number(e.target.value) : '')}
           className="px-4 py-2 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-emerald-500 outline-none"
         >
-          <option value="">All Subjects</option>
+          <option value="">{t('filters.allSubjects')}</option>
           {subjects.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
+            <option key={s.id} value={s.id}>{s.name_ar}</option>
           ))}
         </select>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-emerald-600">Loading quizzes...</div>
+        <div className="text-center py-12 text-emerald-600">{t('student.loadingQuizzes')}</div>
       ) : error ? (
         <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">{error}</div>
       ) : quizzes.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">No quizzes available.</div>
+        <div className="text-center py-12 text-gray-500">{t('student.noQuizzesAvailable')}</div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {quizzes.map((quiz) => (
@@ -62,10 +64,12 @@ export default function QuizListPage() {
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2">{quiz.description}</p>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <span className="px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">{quiz.subject_name}</span>
-                  <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 capitalize">{quiz.quiz_type}</span>
-                  <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">{quiz.question_count} Qs</span>
+                  <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                    {quiz.quiz_type === 'practice' ? t('quizTypes.practice') : quiz.quiz_type === 'assignment' ? t('quizTypes.assignment') : t('quizTypes.test')}
+                  </span>
+                  <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">{quiz.question_count} {t('student.questions')}</span>
                   {quiz.time_limit_minutes && (
-                    <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700">{quiz.time_limit_minutes} min</span>
+                    <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700">{quiz.time_limit_minutes} {t('student.minutes')}</span>
                   )}
                 </div>
               </div>
@@ -73,7 +77,7 @@ export default function QuizListPage() {
                 to={`/student/quizzes/${quiz.id}/take`}
                 className="mt-4 block text-center py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition"
               >
-                Start Quiz
+                {t('student.startQuiz')}
               </Link>
             </div>
           ))}

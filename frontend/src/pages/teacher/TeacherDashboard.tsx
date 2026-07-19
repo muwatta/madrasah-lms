@@ -5,8 +5,10 @@ import { dashboardAPI } from '../../api';
 import type { TeacherDashboard as TeacherDashboardType } from '../../types';
 import StatCard from '../../components/StatCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function TeacherDashboard() {
+  const { t } = useLanguage();
   const [data, setData] = useState<TeacherDashboardType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,9 +16,9 @@ export default function TeacherDashboard() {
   useEffect(() => {
     dashboardAPI.teacher()
       .then((res) => setData(res.data))
-      .catch(() => setError('Failed to load dashboard'))
+      .catch(() => setError(t('teacher.loadDashboardFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   if (loading) return <LoadingSpinner size="lg" className="mt-20" />;
   if (error) return <div className="text-center text-red-600 mt-20">{error}</div>;
@@ -24,11 +26,11 @@ export default function TeacherDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-8 text-2xl font-bold text-gray-900">Teacher Dashboard</h1>
+      <h1 className="mb-8 text-2xl font-bold text-gray-900">{t('teacher.dashboard')}</h1>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
-          title="Total Students"
+          title={t('teacher.totalStudents')}
           value={data.total_students}
           color="bg-primary-600"
           icon={
@@ -38,7 +40,7 @@ export default function TeacherDashboard() {
           }
         />
         <StatCard
-          title="Total Quizzes"
+          title={t('teacher.totalQuizzes')}
           value={data.total_quizzes}
           color="bg-primary-700"
           icon={
@@ -48,7 +50,7 @@ export default function TeacherDashboard() {
           }
         />
         <StatCard
-          title="Total Attempts"
+          title={t('teacher.totalAttempts')}
           value={data.total_attempts}
           color="bg-primary-800"
           icon={
@@ -62,9 +64,9 @@ export default function TeacherDashboard() {
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Subject Performance</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('teacher.subjectPerformance')}</h2>
           {data.subject_performance.length === 0 ? (
-            <p className="text-sm text-gray-500">No subject data yet.</p>
+            <p className="text-sm text-gray-500">{t('teacher.noSubjectData')}</p>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={data.subject_performance}>
@@ -79,9 +81,9 @@ export default function TeacherDashboard() {
         </div>
 
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">Recent Quiz Activity</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('teacher.recentActivity')}</h2>
           {data.recent_activity.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent activity.</p>
+            <p className="text-sm text-gray-500">{t('teacher.noRecentActivity')}</p>
           ) : (
             <ul className="divide-y divide-gray-100">
               {data.recent_activity.map((activity) => (
@@ -93,10 +95,10 @@ export default function TeacherDashboard() {
                       </p>
                       <p className="text-xs text-gray-500">{activity.subject}</p>
                     </div>
-                    <div className="text-right text-xs text-gray-500">
-                      <span className="font-medium text-primary-700">{activity.attempt_count} attempts</span>
+                    <div className="text-left text-xs text-gray-500">
+                      <span className="font-medium text-primary-700">{activity.attempt_count} {t('teacher.attempts')}</span>
                       <br />
-                      Avg: {activity.average_score.toFixed(1)}%
+                      {t('teacher.average')} {activity.average_score.toFixed(1)}%
                     </div>
                   </div>
                 </li>
@@ -111,13 +113,13 @@ export default function TeacherDashboard() {
           to="/teacher/quizzes"
           className="inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
         >
-          Create Quiz
+          {t('teacher.createQuiz')}
         </Link>
         <Link
           to="/teacher/students"
           className="inline-flex items-center rounded-lg border border-primary-600 px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50"
         >
-          View Students
+          {t('teacher.viewStudents')}
         </Link>
       </div>
     </div>

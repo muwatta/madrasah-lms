@@ -3,6 +3,7 @@ import { questionAPI, subjectAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { Question, Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useLanguage } from '../../context/LanguageContext';
 
 type QuestionForm = {
   topic: number | '';
@@ -25,6 +26,7 @@ const emptyForm: QuestionForm = {
 };
 
 export default function QuestionBankPage() {
+  const { t } = useLanguage();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,9 +48,9 @@ export default function QuestionBankPage() {
     if (filters.search) params.search = filters.search;
     questionAPI.list(params)
       .then((res) => setQuestions(unwrapPaginated(res.data)))
-      .catch(() => setError('Failed to load questions'))
+      .catch(() => setError(t('questionBank.loadFailed')))
       .finally(() => setLoading(false));
-  }, [filters]);
+  }, [filters, t]);
 
   useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
@@ -103,19 +105,19 @@ export default function QuestionBankPage() {
       setShowForm(false);
       loadQuestions();
     } catch {
-      setError('Failed to save question');
+      setError(t('questionBank.saveFailed'));
     } finally {
       setSaving(false);
     }
   };
 
   const deleteQuestion = async (id: number) => {
-    if (!confirm('Delete this question?')) return;
+    if (!confirm(t('questionBank.deleteConfirm'))) return;
     try {
       await questionAPI.delete(id);
       loadQuestions();
     } catch {
-      setError('Failed to delete question');
+      setError(t('questionBank.deleteFailed'));
     }
   };
 
@@ -128,9 +130,14 @@ export default function QuestionBankPage() {
   const addOption = () => setForm({ ...form, options: [...form.options, ''] });
   const removeOption = (index: number) => setForm({ ...form, options: form.options.filter((_, i) => i !== index) });
 
-  const typeLabel = (t: string) => {
-    const map: Record<string, string> = { mcq: 'MCQ', fill_blank: 'Fill Blank', short_answer: 'Short Answer', essay: 'Essay' };
-    return map[t] ?? t;
+  const typeLabel = (type: string) => {
+    const map: Record<string, string> = { mcq: t('questionTypes.mcq'), fill_blank: t('questionTypes.fillBlank'), short_answer: t('questionTypes.shortAnswer'), essay: t('questionTypes.essay') };
+    return map[type] ?? type;
+  };
+
+  const difficultyLabel = (d: string) => {
+    const map: Record<string, string> = { easy: t('difficulty.easy'), medium: t('difficulty.medium'), hard: t('difficulty.hard') };
+    return map[d] ?? d;
   };
 
   const difficultyColor = (d: string) => {
@@ -143,26 +150,26 @@ export default function QuestionBankPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Question Bank</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('questionBank.title')}</h1>
         <button
           onClick={openCreate}
           className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
         >
-          + New Question
+          {'+ ' + t('questionBank.newQuestion')}
         </button>
       </div>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">dismiss</button>
+          <button onClick={() => setError(null)} className="mr-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 
       <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-5">
         <input
           type="text"
-          placeholder="Search questions..."
+          placeholder={t('filters.searchQuestions')}
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
@@ -176,9 +183,9 @@ export default function QuestionBankPage() {
           }}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
-          <option value="">All subjects</option>
+          <option value="">{t('filters.allSubjects')}</option>
           {subjects.map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
+            <option key={s.id} value={s.id}>{s.name_ar}</option>
           ))}
         </select>
         <select
@@ -186,9 +193,9 @@ export default function QuestionBankPage() {
           onChange={(e) => setFilters({ ...filters, topic: e.target.value })}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
-          <option value="">All topics</option>
-          {topics.map((t) => (
-            <option key={t.id} value={t.id}>{t.name}</option>
+          <option value="">{t('filters.allTopics')}</option>
+          {topics.map((topic) => (
+            <option key={topic.id} value={topic.id}>{topic.name}</option>
           ))}
         </select>
         <select
@@ -196,32 +203,32 @@ export default function QuestionBankPage() {
           onChange={(e) => setFilters({ ...filters, type: e.target.value })}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
-          <option value="">All types</option>
-          <option value="mcq">MCQ</option>
-          <option value="fill_blank">Fill Blank</option>
-          <option value="short_answer">Short Answer</option>
-          <option value="essay">Essay</option>
+          <option value="">{t('filters.allTypes')}</option>
+          <option value="mcq">{t('questionTypes.mcq')}</option>
+          <option value="fill_blank">{t('questionTypes.fillBlank')}</option>
+          <option value="short_answer">{t('questionTypes.shortAnswer')}</option>
+          <option value="essay">{t('questionTypes.essay')}</option>
         </select>
         <select
           value={filters.difficulty}
           onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
-          <option value="">All difficulties</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
+          <option value="">{t('filters.allLevels')}</option>
+          <option value="easy">{t('difficulty.easy')}</option>
+          <option value="medium">{t('difficulty.medium')}</option>
+          <option value="hard">{t('difficulty.hard')}</option>
         </select>
       </div>
 
       {showForm && (
         <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
-            {editingId ? 'Edit Question' : 'Create Question'}
+            {editingId ? t('questionBank.editQuestion') : t('questionBank.createQuestion')}
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Subject</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.subject')}</label>
               <select
                 value={selectedSubject}
                 onChange={(e) => {
@@ -231,52 +238,52 @@ export default function QuestionBankPage() {
                 }}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
-                <option value="">Select subject</option>
+                <option value="">{t('filters.chooseSubject')}</option>
                 {subjects.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
+                  <option key={s.id} value={s.id}>{s.name_ar}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Topic</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.topic')}</label>
               <select
                 value={form.topic}
                 onChange={(e) => setForm({ ...form, topic: e.target.value ? Number(e.target.value) : '' })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
-                <option value="">Select topic</option>
-                {topics.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
+                <option value="">{t('filters.chooseTopic')}</option>
+                {topics.map((topic) => (
+                  <option key={topic.id} value={topic.id}>{topic.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Question Type</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.questionType')}</label>
               <select
                 value={form.question_type}
                 onChange={(e) => setForm({ ...form, question_type: e.target.value as QuestionForm['question_type'] })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
-                <option value="mcq">Multiple Choice</option>
-                <option value="fill_blank">Fill in the Blank</option>
-                <option value="short_answer">Short Answer</option>
-                <option value="essay">Essay</option>
+                <option value="mcq">{t('questionTypes.mcq')}</option>
+                <option value="fill_blank">{t('questionTypes.fillBlank')}</option>
+                <option value="short_answer">{t('questionTypes.shortAnswer')}</option>
+                <option value="essay">{t('questionTypes.essay')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Difficulty</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.difficulty')}</label>
               <select
                 value={form.difficulty}
                 onChange={(e) => setForm({ ...form, difficulty: e.target.value as QuestionForm['difficulty'] })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
+                <option value="easy">{t('difficulty.easy')}</option>
+                <option value="medium">{t('difficulty.medium')}</option>
+                <option value="hard">{t('difficulty.hard')}</option>
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Question Text</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.questionText')}</label>
               <textarea
                 rows={3}
                 value={form.question_text}
@@ -288,7 +295,7 @@ export default function QuestionBankPage() {
 
           {form.question_type === 'mcq' && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">Options</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.options')}</label>
               <div className="mt-1 space-y-2">
                 {form.options.map((opt, i) => (
                   <div key={i} className="flex items-center gap-2">
@@ -296,7 +303,7 @@ export default function QuestionBankPage() {
                       type="text"
                       value={opt}
                       onChange={(e) => updateOption(i, e.target.value)}
-                      placeholder={`Option ${i + 1}`}
+                      placeholder={t('questionBank.option') + ' ' + (i + 1)}
                       className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                     {form.options.length > 2 && (
@@ -305,7 +312,7 @@ export default function QuestionBankPage() {
                         onClick={() => removeOption(i)}
                         className="text-sm text-red-600 hover:text-red-800"
                       >
-                        Remove
+                        {t('common.remove')}
                       </button>
                     )}
                   </div>
@@ -315,7 +322,7 @@ export default function QuestionBankPage() {
                   onClick={addOption}
                   className="text-sm text-primary-600 hover:text-primary-800"
                 >
-                  + Add Option
+                  {t('questionBank.addOption')}
                 </button>
               </div>
             </div>
@@ -324,7 +331,7 @@ export default function QuestionBankPage() {
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                {form.question_type === 'mcq' ? 'Correct Answer (select from options)' : 'Correct Answer'}
+                {form.question_type === 'mcq' ? t('teacher.correctAnswerHint') : t('fields.correctAnswer')}
               </label>
               {form.question_type === 'mcq' ? (
                 <select
@@ -332,7 +339,7 @@ export default function QuestionBankPage() {
                   onChange={(e) => setForm({ ...form, correct_answer: e.target.value })}
                   className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 >
-                  <option value="">Select correct answer</option>
+                  <option value="">{t('questionBank.chooseCorrectAnswer')}</option>
                   {form.options.filter((o) => o.trim()).map((opt, i) => (
                     <option key={i} value={opt}>{opt}</option>
                   ))}
@@ -347,7 +354,7 @@ export default function QuestionBankPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Explanation</label>
+              <label className="block text-sm font-medium text-gray-700">{t('fields.explanation')}</label>
               <input
                 type="text"
                 value={form.explanation}
@@ -363,20 +370,20 @@ export default function QuestionBankPage() {
               disabled={saving || !form.question_text || !form.topic}
               className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
             >
-              {saving ? 'Saving...' : editingId ? 'Update Question' : 'Create Question'}
+              {saving ? t('common.saving') : editingId ? t('questionBank.updateQuestion') : t('questionBank.createQuestion')}
             </button>
             <button
               onClick={() => setShowForm(false)}
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>
       )}
 
       {questions.length === 0 ? (
-        <p className="text-center text-gray-500">No questions found.</p>
+        <p className="text-center text-gray-500">{t('questionBank.noQuestions')}</p>
       ) : (
         <div className="space-y-3">
           {questions.map((q) => (
@@ -389,24 +396,24 @@ export default function QuestionBankPage() {
                       {typeLabel(q.question_type)}
                     </span>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyColor(q.difficulty)}`}>
-                      {q.difficulty}
+                      {difficultyLabel(q.difficulty)}
                     </span>
                     <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
                       {q.topic_name}
                     </span>
                   </div>
                   {q.question_type === 'mcq' && q.options && (
-                    <ul className="mt-2 list-inside list-disc text-xs text-gray-600">
+                    <ul className="mt-2 list-disc list-inside text-xs text-gray-600">
                       {q.options.map((opt, i) => (
                         <li key={i} className={opt === q.correct_answer ? 'font-semibold text-primary-700' : ''}>
-                          {opt} {opt === q.correct_answer && '(correct)'}
+                          {opt} {opt === q.correct_answer && '(' + t('questionBank.correct') + ')'}
                         </li>
                       ))}
                     </ul>
                   )}
                   {q.question_type !== 'mcq' && q.correct_answer && (
                     <p className="mt-1 text-xs text-gray-500">
-                      Answer: <span className="font-medium text-primary-700">{q.correct_answer}</span>
+                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700">{q.correct_answer}</span>
                     </p>
                   )}
                 </div>
@@ -415,13 +422,13 @@ export default function QuestionBankPage() {
                     onClick={() => openEdit(q)}
                     className="text-sm text-primary-600 hover:text-primary-800"
                   >
-                    Edit
+                    {t('common.edit')}
                   </button>
                   <button
                     onClick={() => deleteQuestion(q.id)}
                     className="text-sm text-red-600 hover:text-red-800"
                   >
-                    Delete
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>

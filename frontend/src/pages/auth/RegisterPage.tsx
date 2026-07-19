@@ -2,14 +2,10 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../../api';
-
-const ROLES = [
-  { value: 'student', label: 'Student' },
-  { value: 'ustaadh', label: 'Ustaadh (Teacher)' },
-  { value: 'parent', label: 'Parent' },
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function RegisterPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -23,6 +19,12 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const ROLES = [
+    { value: 'student', label: t('roles.student') },
+    { value: 'ustaadh', label: t('roles.ustaadh') },
+    { value: 'parent', label: t('roles.parent') },
+  ];
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -32,7 +34,7 @@ export default function RegisterPage() {
     setError('');
 
     if (formData.password !== formData.password_confirm) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsMismatch'));
       return;
     }
 
@@ -52,9 +54,9 @@ export default function RegisterPage() {
       const data = err.response?.data;
       if (typeof data === 'object' && data !== null) {
         const messages = Object.values(data).flat().join('. ');
-        setError(messages || 'Registration failed');
+        setError(messages || t('auth.registrationFailed'));
       } else {
-        setError('Registration failed');
+        setError(t('auth.registrationFailed'));
       }
     } finally {
       setLoading(false);
@@ -71,8 +73,8 @@ export default function RegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
-            <p className="text-gray-500 mt-1">Join Madrasah LMS</p>
+            <h1 className="text-2xl font-bold text-gray-800">{t('auth.createAccount')}</h1>
+            <p className="text-gray-500 mt-1">{t('auth.registerSubtitle')}</p>
           </div>
 
           {error && (
@@ -84,7 +86,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.firstName')}</label>
                 <input
                   name="first_name"
                   type="text"
@@ -95,7 +97,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.lastName')}</label>
                 <input
                   name="last_name"
                   type="text"
@@ -108,7 +110,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.email')}</label>
               <input
                 name="email"
                 type="email"
@@ -121,7 +123,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.role')}</label>
               <select
                 name="role"
                 value={formData.role}
@@ -135,7 +137,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Madrasah ID</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.schoolId')}</label>
               <input
                 name="madrasah"
                 type="number"
@@ -148,7 +150,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('fields.password')}</label>
               <input
                 name="password"
                 type="password"
@@ -160,7 +162,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.confirmPass')}</label>
               <input
                 name="password_confirm"
                 type="password"
@@ -176,14 +178,14 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold rounded-lg transition focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
             >
-              {loading ? 'Creating Account...' : 'Register'}
+              {loading ? t('auth.creatingAccount') : t('auth.registerLink')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Already have an account?{' '}
+            {t('auth.hasAccount')}{' '}
             <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-medium">
-              Sign In
+              {t('auth.loginLink')}
             </Link>
           </p>
         </div>

@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import Subject, Topic
+from .models import Subject, Topic, SchoolClass
+
+
+class SchoolClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SchoolClass
+        fields = ['id', 'madrasah', 'name_ar', 'name_en', 'order']
+        read_only_fields = ['madrasah']
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -15,7 +22,7 @@ class SubjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ['id', 'madrasah', 'name', 'description', 'level', 'topics', 'topic_count', 'created_at']
+        fields = ['id', 'madrasah', 'name_ar', 'name_en', 'code', 'description', 'topics', 'topic_count', 'created_at']
         read_only_fields = ['madrasah']
 
     def get_topic_count(self, obj):
@@ -27,7 +34,7 @@ class SubjectListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subject
-        fields = ['id', 'madrasah', 'name', 'description', 'level', 'topic_count', 'created_at']
+        fields = ['id', 'madrasah', 'name_ar', 'name_en', 'code', 'description', 'topic_count', 'created_at']
         read_only_fields = ['madrasah']
 
     def get_topic_count(self, obj):

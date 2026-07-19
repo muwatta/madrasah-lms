@@ -2,8 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import { examAPI, subjectAPI } from '../../api';
 import type { Exam, ExamResult, Subject } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ExamManagementPage() {
+  const { t } = useLanguage();
   const [exams, setExams] = useState<Exam[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ export default function ExamManagementPage() {
       examAPI.list().then((r) => setExams(r.data.results ?? r.data)),
       subjectAPI.list().then((r) => setSubjects(r.data.results ?? r.data)),
     ])
-      .catch((err) => setError(err.response?.data?.detail || 'Failed to load data'))
+      .catch((err) => setError(err.response?.data?.detail || t('examManagement.loadFailed')))
       .finally(() => setLoading(false));
   };
 
@@ -53,7 +55,7 @@ export default function ExamManagementPage() {
       loadExams();
     } catch (err: any) {
       const msg = err.response?.data;
-      setFormError(typeof msg === 'string' ? msg : Object.values(msg || {}).flat().join(', ') || 'Failed to create exam');
+      setFormError(typeof msg === 'string' ? msg : Object.values(msg || {}).flat().join(', ') || t('examManagement.createFailed'));
     } finally {
       setSaving(false);
     }
@@ -66,7 +68,7 @@ export default function ExamManagementPage() {
       const res = await examAPI.getResults(examId);
       setResults(res.data.results ?? res.data);
     } catch {
-      alert('Failed to load results');
+      alert(t('examManagement.resultsLoadFailed'));
     } finally {
       setResultsLoading(false);
     }
@@ -86,7 +88,7 @@ export default function ExamManagementPage() {
       setShowRecordResult(false);
       loadResults(selectedExam);
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || 'Failed to record result');
+      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('examManagement.recordFailed'));
     } finally {
       setResultSaving(false);
     }
@@ -106,7 +108,7 @@ export default function ExamManagementPage() {
       setBulkText('');
       loadResults(selectedExam);
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || 'Bulk upload failed');
+      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('examManagement.bulkFailed'));
     } finally {
       setBulkSaving(false);
     }
@@ -133,49 +135,49 @@ export default function ExamManagementPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Exam Management</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('examManagement.title')}</h1>
         <button
           onClick={() => { setForm({ title: '', subject: '', exam_date: '', total_marks: '', description: '' }); setFormError(null); setShowForm(true); }}
           className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
         >
-          Create Exam
+          {t('examManagement.createExam')}
         </button>
       </div>
 
       {showForm && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">New Exam</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('examManagement.newExam')}</h2>
           {formError && <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{formError}</div>}
           <form onSubmit={handleCreateExam} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700">Title</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.title')}</label>
               <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Subject</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.subject')}</label>
               <select required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inputClass}>
-                <option value="">Select subject</option>
-                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                <option value="">{t('filters.chooseSubject')}</option>
+                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name_ar}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Exam Date</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.examDate')}</label>
               <input required type="date" value={form.exam_date} onChange={(e) => setForm({ ...form, exam_date: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Total Marks</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.totalMarks')}</label>
               <input required type="number" min="1" value={form.total_marks} onChange={(e) => setForm({ ...form, total_marks: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.description')}</label>
               <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputClass} />
             </div>
             <div className="sm:col-span-2 flex gap-3">
               <button type="submit" disabled={saving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
-                {saving ? 'Creating...' : 'Create Exam'}
+                {saving ? t('common.creating') : t('examManagement.createExam')}
               </button>
               <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -184,32 +186,32 @@ export default function ExamManagementPage() {
 
       {showRecordResult && selectedExam && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
-          <h3 className="mb-3 font-semibold text-gray-900">Record Result for {activeExam?.title}</h3>
+          <h3 className="mb-3 font-semibold text-gray-900">{t('examManagement.recordResultFor')} {activeExam?.title}</h3>
           <form onSubmit={handleRecordResult} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Student ID</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.student')}</label>
               <input required type="number" value={resultForm.student} onChange={(e) => setResultForm({ ...resultForm, student: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Score</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.score')}</label>
               <input required type="number" min="0" value={resultForm.score} onChange={(e) => setResultForm({ ...resultForm, score: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Grade</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.grade')}</label>
               <select value={resultForm.grade} onChange={(e) => setResultForm({ ...resultForm, grade: e.target.value })} className={inputClass}>
                 {['A', 'B', 'C', 'D', 'F'].map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Remarks</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.remarks')}</label>
               <input value={resultForm.remarks} onChange={(e) => setResultForm({ ...resultForm, remarks: e.target.value })} className={inputClass} />
             </div>
             <div className="sm:col-span-4 flex gap-3">
               <button type="submit" disabled={resultSaving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
-                {resultSaving ? 'Saving...' : 'Record'}
+                {resultSaving ? t('common.saving') : t('common.save')}
               </button>
               <button type="button" onClick={() => setShowRecordResult(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </form>
@@ -218,26 +220,26 @@ export default function ExamManagementPage() {
 
       {showBulkUpload && selectedExam && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
-          <h3 className="mb-3 font-semibold text-gray-900">Bulk Upload Results for {activeExam?.title}</h3>
+          <h3 className="mb-3 font-semibold text-gray-900">{t('common.bulkUpload')} - {activeExam?.title}</h3>
           <p className="mb-2 text-sm text-gray-600">
-            CSV format: <code className="rounded bg-gray-100 px-1">student_id, score, grade, remarks</code> (one per line)
+            {t('examManagement.csvFormat')} <code className="rounded bg-gray-100 px-1">student_id, score, grade, remarks</code> ({t('examManagement.onePerLine')})
           </p>
           <textarea
             rows={6}
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            placeholder={'1, 85, A, Excellent\n2, 72, B, Good'}
+            placeholder={'1, 85, A, ممتاز\n2, 72, B, جيد'}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
           <div className="mt-3 flex gap-3">
             <button onClick={handleBulkUpload} disabled={bulkSaving || !bulkText.trim()} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
-              {bulkSaving ? 'Uploading...' : 'Upload'}
+              {bulkSaving ? t('common.uploading') : t('common.upload')}
             </button>
             <button onClick={() => { setShowBulkUpload(false); setBulkText(''); }} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Cancel
+              {t('common.cancel')}
             </button>
-            <label className="ml-auto cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-              Import CSV
+            <label className="mr-auto cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              {t('common.importCsv')}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -264,13 +266,13 @@ export default function ExamManagementPage() {
         <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-medium uppercase text-gray-500">
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Subject</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Marks</th>
-                <th className="px-4 py-3">Results</th>
-                <th className="px-4 py-3">Actions</th>
+              <tr className="border-b border-gray-200 bg-gray-50 text-right text-xs font-medium uppercase text-gray-500">
+                <th className="px-4 py-3">{t('fields.title')}</th>
+                <th className="px-4 py-3">{t('fields.subject')}</th>
+                <th className="px-4 py-3">{t('fields.date')}</th>
+                <th className="px-4 py-3">{t('fields.marks')}</th>
+                <th className="px-4 py-3">{t('fields.results')}</th>
+                <th className="px-4 py-3">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -278,26 +280,26 @@ export default function ExamManagementPage() {
                 <tr key={exam.id} className={`border-b border-gray-50 hover:bg-gray-50 ${selectedExam === exam.id ? 'bg-primary-50' : ''}`}>
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{exam.title}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-gray-600">{exam.subject_name}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{new Date(exam.exam_date).toLocaleDateString()}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{new Date(exam.exam_date).toLocaleDateString('ar')}</td>
                   <td className="px-4 py-3 text-gray-600">{exam.total_marks}</td>
                   <td className="px-4 py-3 text-gray-600">{exam.result_count}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => loadResults(exam.id)} className="text-sm font-medium text-primary-600 hover:underline">
-                        View Results
+                        {t('examManagement.viewResults')}
                       </button>
                       <button onClick={() => { setResultForm({ student: '', score: '', grade: 'C', remarks: '' }); setSelectedExam(exam.id); setShowRecordResult(true); }} className="text-sm font-medium text-blue-600 hover:underline">
-                        + Result
+                        {t('examManagement.recordResult')}
                       </button>
                       <button onClick={() => { setSelectedExam(exam.id); setShowBulkUpload(true); }} className="text-sm font-medium text-purple-600 hover:underline">
-                        Bulk Upload
+                        {t('common.bulkUpload')}
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
               {!exams.length && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">No exams found.</td></tr>
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('examManagement.noExams')}</td></tr>
               )}
             </tbody>
           </table>
@@ -307,13 +309,13 @@ export default function ExamManagementPage() {
       {selectedExam && !showRecordResult && !showBulkUpload && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Results: {activeExam?.title}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('examManagement.resultsFor')} {activeExam?.title}</h2>
             <div className="flex gap-2">
               <button onClick={() => { setResultForm({ student: '', score: '', grade: 'C', remarks: '' }); setShowRecordResult(true); }} className="rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-700">
-                + Record Result
+                {t('examManagement.recordResult')}
               </button>
               <button onClick={() => setShowBulkUpload(true)} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                Bulk Upload
+                {t('common.bulkUpload')}
               </button>
             </div>
           </div>
@@ -323,19 +325,19 @@ export default function ExamManagementPage() {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 text-left text-xs font-medium uppercase text-gray-500">
-                    <th className="pb-2 pr-4">Student</th>
-                    <th className="pb-2 pr-4">Score</th>
-                    <th className="pb-2 pr-4">Grade</th>
-                    <th className="pb-2">Remarks</th>
+                  <tr className="border-b border-gray-200 text-right text-xs font-medium uppercase text-gray-500">
+                    <th className="pb-2 pl-4">{t('fields.student')}</th>
+                    <th className="pb-2 pl-4">{t('fields.score')}</th>
+                    <th className="pb-2 pl-4">{t('fields.grade')}</th>
+                    <th className="pb-2">{t('fields.remarks')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {results.map((r) => (
                     <tr key={r.id} className="border-b border-gray-50">
-                      <td className="py-2 pr-4 font-medium text-gray-900">{r.student_name}</td>
-                      <td className="py-2 pr-4 text-gray-600">{r.score} / {activeExam?.total_marks}</td>
-                      <td className="py-2 pr-4">{gradeBadge(r.grade)}</td>
+                      <td className="py-2 pl-4 font-medium text-gray-900">{r.student_name}</td>
+                      <td className="py-2 pl-4 text-gray-600">{r.score} / {activeExam?.total_marks}</td>
+                      <td className="py-2 pl-4">{gradeBadge(r.grade)}</td>
                       <td className="py-2 text-gray-500">{r.remarks || '—'}</td>
                     </tr>
                   ))}
@@ -343,7 +345,7 @@ export default function ExamManagementPage() {
               </table>
             </div>
           ) : (
-            <p className="py-4 text-center text-sm text-gray-500">No results recorded yet.</p>
+            <p className="py-4 text-center text-sm text-gray-500">{t('examManagement.noResults')}</p>
           )}
         </div>
       )}

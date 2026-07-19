@@ -2,12 +2,14 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, attemptAPI, questionAPI } from '../../api';
 import type { Question, Quiz, GradingResult } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface Answers {
   [questionId: string]: string;
 }
 
 export default function QuizTakePage() {
+  const { t } = useLanguage();
   const { quizId } = useParams<{ quizId: string }>();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -40,7 +42,7 @@ export default function QuizTakePage() {
       const res = await attemptAPI.submit(attemptId, answers);
       setResult(res.data.grading);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to submit quiz');
+      setError(err.response?.data?.detail || t('quizTake.submitFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -64,7 +66,7 @@ export default function QuizTakePage() {
           setTimeLeft(q.time_limit_minutes * 60);
         }
       } catch (err: any) {
-        setError(err.response?.data?.detail || 'Failed to start quiz');
+        setError(err.response?.data?.detail || t('quizTake.startFailed'));
       } finally {
         setLoading(false);
       }
@@ -89,7 +91,7 @@ export default function QuizTakePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-emerald-600 text-lg">Loading quiz...</div>
+        <div className="text-emerald-600 text-lg">{t('quizTake.loadingQuiz')}</div>
       </div>
     );
   }
@@ -107,29 +109,29 @@ export default function QuizTakePage() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className={`rounded-2xl p-8 text-center mb-8 ${passed ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-          <h2 className="text-3xl font-bold mb-2">{passed ? 'MashaAllah!' : 'Keep Trying!'}</h2>
+          <h2 className="text-3xl font-bold mb-2">{passed ? t('quizTake.wellDone') : t('quizTake.tryAgain')}</h2>
           <p className="text-5xl font-bold my-4">{result.percentage}%</p>
-          <p className="text-lg">{result.score}/{result.total} correct</p>
+          <p className="text-lg">{result.score}/{result.total} {t('quizTake.correct')}</p>
           <p className={`mt-2 font-medium ${passed ? 'text-green-700' : 'text-red-700'}`}>
-            {passed ? 'You passed' : 'You did not pass'}
+            {passed ? t('quizTake.youPassed') : t('quizTake.youDidNotPass')}
           </p>
         </div>
 
-        <h3 className="text-xl font-semibold mb-4">Review Answers</h3>
+        <h3 className="text-xl font-semibold mb-4">{t('quizTake.reviewAnswers')}</h3>
         {questions.map((q, i) => {
           const r = result.results[String(q.id)];
           if (!r) return null;
           return (
             <div key={q.id} className={`rounded-xl p-5 mb-4 border ${r.is_correct ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
               <div className="flex items-start gap-3">
-                <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${r.is_correct ? 'bg-green-500' : 'bg-red-500'}`}>
+                <span className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${r.is_correct ? 'bg-green-500' : 'bg-red-500'}`}>
                   {i + 1}
                 </span>
                 <div className="flex-1">
                   <p className="font-medium text-gray-800 mb-2">{q.question_text}</p>
-                  <p className="text-sm text-gray-600">Your answer: <span className="font-medium">{r.user_answer || '(empty)'}</span></p>
+                  <p className="text-sm text-gray-600">{t('quizTake.yourAnswer')} <span className="font-medium">{r.user_answer || t('quizTake.empty')}</span></p>
                   {!r.is_correct && (
-                    <p className="text-sm text-gray-600">Correct answer: <span className="font-medium text-green-700">{r.correct_answer}</span></p>
+                    <p className="text-sm text-gray-600">{t('quizTake.correctAnswer')} <span className="font-medium text-green-700">{r.correct_answer}</span></p>
                   )}
                   {q.explanation && (
                     <p className="text-sm text-gray-500 mt-2 italic">{q.explanation}</p>
@@ -144,7 +146,7 @@ export default function QuizTakePage() {
           onClick={() => navigate('/student/quizzes')}
           className="mt-4 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition"
         >
-          Back to Quizzes
+          {t('quizTake.returnToQuizzes')}
         </button>
       </div>
     );
@@ -166,8 +168,8 @@ export default function QuizTakePage() {
       </div>
 
       <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
-        <span>Question {currentIndex + 1} of {questions.length}</span>
-        <span>{Object.keys(answers).length} answered</span>
+        <span>{t('quizTake.questionCounter')} {currentIndex + 1} {t('quizTake.of')} {questions.length}</span>
+        <span>{Object.keys(answers).length} {t('quizTake.answered')}</span>
       </div>
 
       <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
@@ -180,9 +182,9 @@ export default function QuizTakePage() {
             question.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
             question.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
             'bg-red-100 text-red-700'
-          }`}>{question.difficulty}</span>
-          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 capitalize">
-            {question.question_type.replace('_', ' ')}
+          }`}>{question.difficulty === 'easy' ? t('difficulty.easy') : question.difficulty === 'medium' ? t('difficulty.medium') : t('difficulty.hard')}</span>
+          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+            {question.question_type === 'mcq' ? t('questionTypes.mcq') : question.question_type === 'fill_blank' ? t('questionTypes.fillBlank') : question.question_type === 'short_answer' ? t('questionTypes.shortAnswer') : t('questionTypes.essay')}
           </span>
         </div>
 
@@ -218,7 +220,7 @@ export default function QuizTakePage() {
             type="text"
             value={answers[String(question.id)] || ''}
             onChange={(e) => setAnswer(question.id, e.target.value)}
-            placeholder="Type your answer..."
+            placeholder={t('quizTake.typeAnswer')}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
           />
         )}
@@ -227,7 +229,7 @@ export default function QuizTakePage() {
           <textarea
             value={answers[String(question.id)] || ''}
             onChange={(e) => setAnswer(question.id, e.target.value)}
-            placeholder="Write your answer..."
+            placeholder={t('quizTake.typeAnswer')}
             rows={4}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition resize-y"
           />
@@ -240,25 +242,25 @@ export default function QuizTakePage() {
           disabled={currentIndex === 0}
           className="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          Previous
+          {t('common.previous')}
         </button>
 
         {currentIndex === questions.length - 1 ? (
           <button
             onClick={() => {
-              if (window.confirm('Are you sure you want to submit?')) handleSubmit();
+              if (window.confirm(t('quizTake.confirmSubmit'))) handleSubmit();
             }}
             disabled={submitting}
             className="px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold transition"
           >
-            {submitting ? 'Submitting...' : 'Submit Quiz'}
+            {submitting ? t('common.submitting') : t('quizTake.submitQuiz')}
           </button>
         ) : (
           <button
             onClick={() => setCurrentIndex((i) => Math.min(questions.length - 1, i + 1))}
             className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition"
           >
-            Next
+            {t('common.next')}
           </button>
         )}
       </div>

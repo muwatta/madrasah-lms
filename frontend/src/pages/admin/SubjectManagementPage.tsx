@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react';
 import { subjectAPI } from '../../api';
 import type { Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SubjectManagementPage() {
+  const { t } = useLanguage();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [showSubjectForm, setShowSubjectForm] = useState(false);
   const [editingSubjectId, setEditingSubjectId] = useState<number | null>(null);
-  const [subjectForm, setSubjectForm] = useState({ name: '', description: '', level: 'beginner' as Subject['level'] });
+  const [subjectForm, setSubjectForm] = useState({ name_ar: '', name_en: '', code: '', description: '' });
   const [subjectSaving, setSubjectSaving] = useState(false);
 
   const [expandedSubject, setExpandedSubject] = useState<number | null>(null);
@@ -26,7 +28,7 @@ export default function SubjectManagementPage() {
     setLoading(true);
     subjectAPI.list()
       .then((res) => setSubjects(res.data.results ?? res.data))
-      .catch((err) => setError(err.response?.data?.detail || 'Failed to load subjects'))
+      .catch((err) => setError(err.response?.data?.detail || t('subjectManagement.deleteFailed')))
       .finally(() => setLoading(false));
   };
 
@@ -44,25 +46,25 @@ export default function SubjectManagementPage() {
       setShowSubjectForm(false);
       loadSubjects();
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || 'Operation failed');
+      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('userManagement.operationFailed'));
     } finally {
       setSubjectSaving(false);
     }
   };
 
   const openEditSubject = (subject: Subject) => {
-    setSubjectForm({ name: subject.name, description: subject.description, level: subject.level });
+    setSubjectForm({ name_ar: subject.name_ar, name_en: subject.name_en, code: subject.code, description: subject.description });
     setEditingSubjectId(subject.id);
     setShowSubjectForm(true);
   };
 
   const handleDeleteSubject = async (id: number) => {
-    if (!confirm('Delete this subject and all its topics?')) return;
+    if (!confirm(t('subjectManagement.deleteSubjectConfirm'))) return;
     try {
       await subjectAPI.delete(id);
       loadSubjects();
     } catch {
-      alert('Failed to delete subject');
+      alert(t('subjectManagement.deleteFailed'));
     }
   };
 
@@ -78,7 +80,7 @@ export default function SubjectManagementPage() {
         const res = await subjectAPI.getTopics(subjectId);
         setTopics((prev) => ({ ...prev, [subjectId]: res.data.results ?? res.data }));
       } catch {
-        alert('Failed to load topics');
+        alert(t('subjectManagement.topicsLoadFailed'));
       } finally {
         setTopicsLoading(null);
       }
@@ -106,51 +108,46 @@ export default function SubjectManagementPage() {
       setTopics((prev) => ({ ...prev, [topicSubjectId]: res.data.results ?? res.data }));
       loadSubjects();
     } catch (err: any) {
-      alert(Object.values(err.response?.data || {}).flat().join(', ') || 'Failed to create topic');
+      alert(Object.values(err.response?.data || {}).flat().join(', ') || t('subjectManagement.topicCreateFailed'));
     } finally {
       setTopicSaving(false);
     }
   };
 
-  const levelBadge = (level: string) => {
-    const colors: Record<string, string> = { beginner: 'bg-green-100 text-green-700', intermediate: 'bg-yellow-100 text-yellow-700', advanced: 'bg-red-100 text-red-700' };
-    return <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${colors[level] || ''}`}>{level}</span>;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Subject Management</h1>
-        <button onClick={() => { setSubjectForm({ name: '', description: '', level: 'beginner' }); setEditingSubjectId(null); setShowSubjectForm(true); }} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
-          Add Subject
+        <h1 className="text-2xl font-bold text-gray-900">{t('subjectManagement.title')}</h1>
+        <button onClick={() => { setSubjectForm({ name_ar: '', name_en: '', code: '', description: '' }); setEditingSubjectId(null); setShowSubjectForm(true); }} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
+          {t('subjectManagement.addSubject')}
         </button>
       </div>
 
       {showSubjectForm && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">{editingSubjectId ? 'Edit Subject' : 'Create Subject'}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">{editingSubjectId ? t('common.edit') + ' ' + t('fields.subject') : t('common.create') + ' ' + t('fields.subject')}</h2>
           <form onSubmit={handleSubjectSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
-              <input required value={subjectForm.name} onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
-              <textarea value={subjectForm.description} onChange={(e) => setSubjectForm({ ...subjectForm, description: e.target.value })} rows={2} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.nameAr')}</label>
+              <input required value={subjectForm.name_ar} onChange={(e) => setSubjectForm({ ...subjectForm, name_ar: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Level</label>
-              <select value={subjectForm.level} onChange={(e) => setSubjectForm({ ...subjectForm, level: e.target.value as Subject['level'] })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.nameEn')}</label>
+              <input required value={subjectForm.name_en} onChange={(e) => setSubjectForm({ ...subjectForm, name_en: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
             </div>
-            <div className="flex items-end gap-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.code')}</label>
+              <input value={subjectForm.code} onChange={(e) => setSubjectForm({ ...subjectForm, code: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.description')}</label>
+              <textarea value={subjectForm.description} onChange={(e) => setSubjectForm({ ...subjectForm, description: e.target.value })} rows={2} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+            </div>
+            <div className="sm:col-span-2 flex items-end gap-3">
               <button type="submit" disabled={subjectSaving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
-                {subjectSaving ? 'Saving...' : editingSubjectId ? 'Update' : 'Create'}
+                {subjectSaving ? t('common.saving') : editingSubjectId ? t('common.update') : t('common.create')}
               </button>
-              <button type="button" onClick={() => setShowSubjectForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button type="button" onClick={() => setShowSubjectForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{t('common.cancel')}</button>
             </div>
           </form>
         </div>
@@ -158,25 +155,25 @@ export default function SubjectManagementPage() {
 
       {showTopicForm && topicSubjectId && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
-          <h3 className="mb-3 text-md font-semibold text-gray-900">Add Topic to {subjects.find((s) => s.id === topicSubjectId)?.name}</h3>
+          <h3 className="mb-3 text-md font-semibold text-gray-900">{t('subjectManagement.addTopic')} - {subjects.find((s) => s.id === topicSubjectId)?.name_ar}</h3>
           <form onSubmit={handleTopicSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Name</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.name')}</label>
               <input required value={topicForm.name} onChange={(e) => setTopicForm({ ...topicForm, name: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.description')}</label>
               <input value={topicForm.description} onChange={(e) => setTopicForm({ ...topicForm, description: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Surah Number</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.surahNumber')}</label>
               <input type="number" value={topicForm.surah_number} onChange={(e) => setTopicForm({ ...topicForm, surah_number: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
             </div>
             <div className="sm:col-span-3 flex gap-3">
               <button type="submit" disabled={topicSaving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
-                {topicSaving ? 'Saving...' : 'Add Topic'}
+                {topicSaving ? t('common.saving') : t('subjectManagement.addTopic')}
               </button>
-              <button type="button" onClick={() => setShowTopicForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+              <button type="button" onClick={() => setShowTopicForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">{t('common.cancel')}</button>
             </div>
           </form>
         </div>
@@ -198,15 +195,14 @@ export default function SubjectManagementPage() {
                     </svg>
                   </button>
                   <div>
-                    <h3 className="font-medium text-gray-900">{subject.name}</h3>
-                    <p className="text-sm text-gray-500">{subject.topic_count ?? 0} topics</p>
+                    <h3 className="font-medium text-gray-900">{subject.name_ar}</h3>
+                    <p className="text-sm text-gray-500">{subject.name_en} &middot; {subject.topic_count ?? 0} {t('subjectManagement.topicsCount')}</p>
                   </div>
-                  {levelBadge(subject.level)}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => openEditSubject(subject)} className="text-sm font-medium text-primary-600 hover:underline">Edit</button>
-                  <button onClick={() => openCreateTopic(subject.id)} className="text-sm font-medium text-blue-600 hover:underline">+ Topic</button>
-                  <button onClick={() => handleDeleteSubject(subject.id)} className="text-sm font-medium text-red-600 hover:underline">Delete</button>
+                  <button onClick={() => openEditSubject(subject)} className="text-sm font-medium text-primary-600 hover:underline">{t('common.edit')}</button>
+                  <button onClick={() => openCreateTopic(subject.id)} className="text-sm font-medium text-blue-600 hover:underline">{t('subjectManagement.newTopic')}</button>
+                  <button onClick={() => handleDeleteSubject(subject.id)} className="text-sm font-medium text-red-600 hover:underline">{t('common.delete')}</button>
                 </div>
               </div>
               {expandedSubject === subject.id && (
@@ -218,19 +214,19 @@ export default function SubjectManagementPage() {
                       {topics[subject.id].map((topic) => (
                         <li key={topic.id} className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-2">
                           <span className="text-sm font-medium text-gray-900">{topic.name}</span>
-                          {topic.surah_number && <span className="text-xs text-gray-500">Surah {topic.surah_number}</span>}
-                          {topic.description && <span className="text-xs text-gray-400 ml-auto">{topic.description}</span>}
+                          {topic.surah_number && <span className="text-xs text-gray-500">{t('subjectManagement.surah')} {topic.surah_number}</span>}
+                          {topic.description && <span className="text-xs text-gray-400 mr-auto">{topic.description}</span>}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="py-4 text-center text-sm text-gray-500">No topics yet. Click "+ Topic" to add one.</p>
+                    <p className="py-4 text-center text-sm text-gray-500">{t('subjectManagement.noTopics')}</p>
                   )}
                 </div>
               )}
             </div>
           ))}
-          {!subjects.length && <p className="py-8 text-center text-gray-500">No subjects found.</p>}
+          {!subjects.length && <p className="py-8 text-center text-gray-500">{t('subjectManagement.noSubjects')}</p>}
         </div>
       )}
     </div>

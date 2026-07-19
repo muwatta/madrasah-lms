@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { examAPI } from '../../api';
 import type { ExamResult } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function ExamResultsPage() {
+  const { t } = useLanguage();
   const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -13,7 +15,7 @@ export default function ExamResultsPage() {
         const res = await examAPI.myResults();
         setResults(res.data.results || res.data || []);
       } catch (err: any) {
-        setError(err.response?.data?.detail || 'Failed to load exam results');
+        setError(err.response?.data?.detail || t('student.loadExamResultsFailed'));
       } finally {
         setLoading(false);
       }
@@ -24,7 +26,7 @@ export default function ExamResultsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-emerald-600 text-lg">Loading results...</div>
+        <div className="text-emerald-600 text-lg">{t('student.loadingResults')}</div>
       </div>
     );
   }
@@ -39,10 +41,10 @@ export default function ExamResultsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Exam Results</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t('student.examResults')}</h1>
 
       {results.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">No exam results available.</div>
+        <div className="text-center py-12 text-gray-500">{t('student.noExamResults')}</div>
       ) : (
         <div className="grid gap-4">
           {results.map((result) => (
@@ -51,13 +53,13 @@ export default function ExamResultsPage() {
                 <div>
                   <h2 className="text-lg font-semibold text-gray-800">{result.exam_title}</h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    Recorded: {new Date(result.recorded_at).toLocaleDateString()}
+                    {t('student.recordedOn')} {new Date(result.recorded_at).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-emerald-600">{result.score}</div>
-                    <div className="text-xs text-gray-500">Score</div>
+                    <div className="text-xs text-gray-500">{t('fields.score')}</div>
                   </div>
                   <div className="text-center">
                     <div className={`text-2xl font-bold ${
@@ -65,7 +67,7 @@ export default function ExamResultsPage() {
                       result.grade === 'C' ? 'text-yellow-600' :
                       'text-red-600'
                     }`}>{result.grade}</div>
-                    <div className="text-xs text-gray-500">Grade</div>
+                    <div className="text-xs text-gray-500">{t('fields.grade')}</div>
                   </div>
                 </div>
               </div>

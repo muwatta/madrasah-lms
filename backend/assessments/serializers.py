@@ -24,7 +24,7 @@ class QuestionListSerializer(serializers.ModelSerializer):
 
 class QuizSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    subject_name = serializers.CharField(source='subject.name', read_only=True)
+    subject_name = serializers.CharField(source='subject.name_ar', read_only=True)
     question_count = serializers.IntegerField(read_only=True)
     attempt_count = serializers.IntegerField(read_only=True)
     average_score = serializers.FloatField(read_only=True)

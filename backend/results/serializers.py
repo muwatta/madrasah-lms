@@ -4,7 +4,7 @@ from .models import Exam, ExamResult
 
 class ExamSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    subject_name = serializers.CharField(source='subject.name', read_only=True)
+    subject_name = serializers.CharField(source='subject.name_ar', read_only=True)
     result_count = serializers.SerializerMethodField()
 
     class Meta:

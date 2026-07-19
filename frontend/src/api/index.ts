@@ -31,6 +31,10 @@ export const subjectAPI = {
     api.post(`/subjects/${subjectId}/topics/`, data),
 };
 
+export const schoolClassAPI = {
+  list: () => api.get('/subjects/classes/'),
+};
+
 export const questionAPI = {
   list: (params?: any) => api.get('/questions/', { params }),
   get: (id: number) => api.get(`/questions/${id}/`),

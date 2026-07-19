@@ -31,7 +31,7 @@ class TeacherDashboardView(APIView):
 
             subject_performance.append({
                 'subject_id': subject.id,
-                'subject_name': subject.name,
+                'subject_name': subject.name_ar,
                 'student_count': subject_enrollments.count(),
                 'average_score': round(avg_score, 1) if avg_score else 0,
             })
@@ -44,7 +44,7 @@ class TeacherDashboardView(APIView):
             recent_activity.append({
                 'quiz_id': quiz.id,
                 'quiz_title': quiz.title,
-                'subject': quiz.subject.name,
+                'subject': quiz.subject.name_ar,
                 'attempt_count': attempts.count(),
                 'average_score': round(avg, 1) if avg else 0,
                 'created_at': quiz.created_at.isoformat(),
@@ -85,7 +85,7 @@ class TeacherStudentPerformanceView(APIView):
         for attempt in attempts:
             performance_data.append({
                 'quiz_title': attempt.quiz.title,
-                'subject': attempt.quiz.subject.name,
+                'subject': attempt.quiz.subject.name_ar,
                 'score': float(attempt.score) if attempt.score is not None else None,
                 'percentage': float(attempt.percentage) if attempt.percentage is not None else None,
                 'submitted_at': attempt.submitted_at.isoformat() if attempt.submitted_at else None,
@@ -100,7 +100,7 @@ class TeacherStudentPerformanceView(APIView):
         for result in exam_results:
             exam_data.append({
                 'exam_title': result.exam.title,
-                'subject': result.exam.subject.name,
+                'subject': result.exam.subject.name_ar,
                 'score': float(result.score),
                 'grade': result.grade,
                 'exam_date': result.exam.exam_date.isoformat(),
@@ -154,7 +154,7 @@ class ParentDashboardView(APIView):
 
             subjects = Subject.objects.filter(
                 enrollments__student=child
-            ).values_list('name', flat=True)
+            ).values_list('name_ar', flat=True)
 
             children_data.append({
                 'id': child.id,
@@ -194,7 +194,7 @@ class AdminDashboardView(APIView):
         subject_stats = Subject.objects.filter(madrasah=madrasah).annotate(
             student_count=Count('enrollments', distinct=True),
             quiz_count=Count('quizzes', distinct=True),
-        ).values('id', 'name', 'student_count', 'quiz_count')
+        ).values('id', 'name_ar', 'student_count', 'quiz_count')
 
         return Response({
             'total_users': total_users,
@@ -242,7 +242,7 @@ class BoardDashboardView(APIView):
 
         top_subjects = Subject.objects.filter(madrasah=madrasah).annotate(
             avg_score=Avg('quizzes__attempts__percentage')
-        ).order_by('-avg_score')[:5].values('name', 'avg_score')
+        ).order_by('-avg_score')[:5].values('name_ar', 'avg_score')
 
         return Response({
             'total_students': total_students,
@@ -251,7 +251,7 @@ class BoardDashboardView(APIView):
             'average_performance': round(avg_performance, 1) if avg_performance else 0,
             'teacher_effectiveness': teacher_effectiveness,
             'top_subjects': [
-                {'name': s['name'], 'avg_score': round(s['avg_score'], 1) if s['avg_score'] else 0}
+                {'name': s['name_ar'], 'avg_score': round(s['avg_score'], 1) if s['avg_score'] else 0}
                 for s in top_subjects
             ],
         })

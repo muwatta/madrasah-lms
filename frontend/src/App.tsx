@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/auth/LoginPage';
@@ -20,13 +20,12 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import SubjectManagementPage from './pages/admin/SubjectManagementPage';
 import EnrollmentManagementPage from './pages/admin/EnrollmentManagementPage';
 import ExamManagementPage from './pages/admin/ExamManagementPage';
+import ParentStudentPage from './pages/admin/ParentStudentPage';
 import BoardDashboard from './pages/board/BoardDashboard';
-
-const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
       <AuthProvider>
         <Router>
           <Routes>
@@ -90,6 +89,7 @@ function App() {
               <Route path="subjects" element={<SubjectManagementPage />} />
               <Route path="enrollments" element={<EnrollmentManagementPage />} />
               <Route path="exams" element={<ExamManagementPage />} />
+              <Route path="parent-students" element={<ParentStudentPage />} />
             </Route>
 
             <Route
@@ -109,7 +109,7 @@ function App() {
           </Routes>
         </Router>
       </AuthProvider>
-    </QueryClientProvider>
+      </LanguageProvider>
   );
 }
 

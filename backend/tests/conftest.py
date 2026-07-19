@@ -63,7 +63,7 @@ def parent_user(madrasah, student):
 
 @pytest.fixture
 def subject(madrasah):
-    return Subject.objects.create(madrasah=madrasah, name='Quran', level='beginner')
+    return Subject.objects.create(madrasah=madrasah, name_ar='القرآن الكريم', name_en='Holy Quran', code='QUR')
 
 
 @pytest.fixture

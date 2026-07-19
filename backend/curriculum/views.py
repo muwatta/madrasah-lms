@@ -1,6 +1,16 @@
 from rest_framework import generics
-from .models import Subject, Topic
-from .serializers import SubjectSerializer, SubjectListSerializer, TopicSerializer
+from .models import Subject, Topic, SchoolClass
+from .serializers import SubjectSerializer, SubjectListSerializer, TopicSerializer, SchoolClassSerializer
+
+
+class SchoolClassListView(generics.ListCreateAPIView):
+    serializer_class = SchoolClassSerializer
+
+    def get_queryset(self):
+        return SchoolClass.objects.filter(madrasah=self.request.user.madrasah)
+
+    def perform_create(self, serializer):
+        serializer.save(madrasah=self.request.user.madrasah)
 
 
 class SubjectListView(generics.ListCreateAPIView):

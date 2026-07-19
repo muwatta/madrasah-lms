@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const ROLE_ROUTES: Record<string, string> = {
   student: '/student/dashboard',
@@ -13,6 +14,7 @@ const ROLE_ROUTES: Record<string, string> = {
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +29,7 @@ export default function LoginPage() {
     try {
       userData = await login(email, password);
     } catch (err: any) {
-      setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid email or password');
+      setError(err.response?.data?.detail || err.response?.data?.error || t('auth.invalidCredentials'));
       setLoading(false);
       return;
     }
@@ -47,8 +49,8 @@ export default function LoginPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Madrasah LMS</h1>
-            <p className="text-gray-500 mt-1">Sign in to your account</p>
+            <h1 className="text-2xl font-bold text-gray-800">إدارة المدرسة</h1>
+            <p className="text-gray-500 mt-1">{t('auth.loginSubtitle')}</p>
           </div>
 
           {error && (
@@ -60,7 +62,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                {t('fields.email')}
               </label>
               <input
                 id="email"
@@ -75,7 +77,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+                {t('fields.password')}
               </label>
               <input
                 id="password"
@@ -93,14 +95,14 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold rounded-lg transition focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-500">
-            Don't have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to="/register" className="text-emerald-600 hover:text-emerald-700 font-medium">
-              Register
+              {t('auth.registerLink')}
             </Link>
           </p>
         </div>

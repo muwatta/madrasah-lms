@@ -10,9 +10,10 @@ class TestSubjects:
 
     def test_create_subject(self, auth_client, madrasah):
         response = auth_client.post('/api/subjects/', {
-            'name': 'Fiqh',
+            'name_ar': 'الفقه',
+            'name_en': 'Fiqh',
             'description': 'Islamic jurisprudence',
-            'level': 'intermediate',
+            'code': 'FIQ',
         }, format='json')
         assert response.status_code == status.HTTP_201_CREATED
 

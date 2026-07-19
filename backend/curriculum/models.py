@@ -2,39 +2,34 @@ from django.db import models
 from users.models import User, Madrasah
 
 
-class Enrollment(models.Model):
-    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='enrollments')
-    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
-    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, related_name='enrollments')
-    ustaadh = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='teaching_enrollments')
-    enrolled_at = models.DateTimeField(auto_now_add=True)
+class SchoolClass(models.Model):
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='school_classes')
+    name_ar = models.CharField(max_length=100)
+    name_en = models.CharField(max_length=100)
+    order = models.PositiveSmallIntegerField()
 
     class Meta:
-        unique_together = ['student', 'subject']
+        ordering = ['order']
+        unique_together = ['madrasah', 'name_ar']
 
     def __str__(self):
-        return f"{self.student.get_full_name()} - {self.subject.name}"
+        return self.name_ar
 
 
 class Subject(models.Model):
-    LEVEL_CHOICES = [
-        ('beginner', 'Beginner'),
-        ('intermediate', 'Intermediate'),
-        ('advanced', 'Advanced'),
-    ]
-
     madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='subjects')
-    name = models.CharField(max_length=100)
+    name_ar = models.CharField(max_length=100)
+    name_en = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, blank=True)
     description = models.TextField(blank=True)
-    level = models.CharField(max_length=50, choices=LEVEL_CHOICES, default='beginner')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} ({self.get_level_display()})"
+        return self.name_ar
 
     class Meta:
-        ordering = ['name']
-        unique_together = ['madrasah', 'name']
+        ordering = ['name_ar']
+        unique_together = ['madrasah', 'name_ar']
 
 
 class Topic(models.Model):
@@ -49,3 +44,18 @@ class Topic(models.Model):
 
     class Meta:
         ordering = ['name']
+
+
+class Enrollment(models.Model):
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='enrollments')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='enrollments')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='enrollments')
+    school_class = models.ForeignKey(SchoolClass, on_delete=models.SET_NULL, null=True, blank=True, related_name='enrollments')
+    ustaadh = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='teaching_enrollments')
+    enrolled_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['student', 'subject']
+
+    def __str__(self):
+        return f"{self.student.get_full_name()} - {self.subject.name_ar}"

@@ -24,9 +24,10 @@ export interface Madrasah {
 export interface Subject {
   id: number;
   madrasah: number;
-  name: string;
+  name_ar: string;
+  name_en: string;
+  code: string;
   description: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
   topics: Topic[];
   topic_count: number;
   created_at: string;
@@ -197,7 +198,7 @@ export interface AdminDashboard {
   average_performance: number;
   subject_stats: {
     id: number;
-    name: string;
+    name_ar: string;
     student_count: number;
     quiz_count: number;
   }[];
