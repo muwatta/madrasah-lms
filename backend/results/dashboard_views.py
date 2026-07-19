@@ -68,8 +68,11 @@ class TeacherDashboardView(APIView):
 
 class TeacherStudentPerformanceView(APIView):
     def get(self, request, student_id):
+        if request.user.role != 'ustaadh':
+            return Response({'error': 'Access denied'}, status=403)
+
         try:
-            student = User.objects.get(id=student_id, role='student')
+            student = User.objects.get(id=student_id, role='student', madrasah=request.user.madrasah)
         except User.DoesNotExist:
             return Response({'error': 'Student not found'}, status=404)
 

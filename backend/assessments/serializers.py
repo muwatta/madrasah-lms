@@ -64,24 +64,17 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
             'answers', 'score', 'percentage', 'attempt_number',
             'started_at', 'submitted_at'
         ]
-        read_only_fields = ['id', 'score', 'percentage', 'started_at']
+        read_only_fields = ['id', 'student', 'score', 'percentage', 'started_at']
 
 
 class QuizAttemptDetailSerializer(serializers.ModelSerializer):
     quiz_title = serializers.CharField(source='quiz.title', read_only=True)
     student_name = serializers.CharField(source='student.get_full_name', read_only=True)
-    results = serializers.SerializerMethodField()
 
     class Meta:
         model = QuizAttempt
         fields = [
             'id', 'quiz', 'quiz_title', 'student', 'student_name',
             'answers', 'score', 'percentage', 'attempt_number',
-            'started_at', 'submitted_at', 'results'
+            'started_at', 'submitted_at'
         ]
-
-    def get_results(self, obj):
-        from assessments.grading import grade_quiz
-        if obj.percentage is not None:
-            return None
-        return None

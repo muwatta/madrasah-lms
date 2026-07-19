@@ -21,11 +21,15 @@ class QuestionListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = Question.objects.filter(madrasah=self.request.user.madrasah)
+        ids = self.request.query_params.get('ids')
         topic_id = self.request.query_params.get('topic')
         q_type = self.request.query_params.get('type')
         difficulty = self.request.query_params.get('difficulty')
         search = self.request.query_params.get('search')
 
+        if ids:
+            id_list = [int(i) for i in ids.split(',') if i.strip().isdigit()]
+            qs = qs.filter(id__in=id_list)
         if topic_id:
             qs = qs.filter(topic_id=topic_id)
         if q_type:
@@ -140,7 +144,7 @@ class QuizAttemptSubmitView(APIView):
 class QuizAttemptDetailView(APIView):
     def get(self, request, pk):
         try:
-            attempt = QuizAttempt.objects.get(pk=pk)
+            attempt = QuizAttempt.objects.get(pk=pk, quiz__madrasah=request.user.madrasah)
         except QuizAttempt.DoesNotExist:
             return Response({'error': 'Attempt not found'}, status=status.HTTP_404_NOT_FOUND)
 

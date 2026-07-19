@@ -29,3 +29,4 @@ class ExamResultSerializer(serializers.ModelSerializer):
             'id', 'exam', 'exam_title', 'student', 'student_name',
             'score', 'grade', 'remarks', 'recorded_at'
         ]
+        read_only_fields = ['exam', 'student']

@@ -28,7 +28,7 @@ class TopicListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         subject_id = self.kwargs.get('subject_pk')
-        return Topic.objects.filter(subject_id=subject_id)
+        return Topic.objects.filter(subject_id=subject_id, subject__madrasah=self.request.user.madrasah)
 
     def perform_create(self, serializer):
         subject_id = self.kwargs.get('subject_pk')

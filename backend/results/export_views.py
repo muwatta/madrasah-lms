@@ -33,13 +33,10 @@ class ExportStudentPerformanceView(APIView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="student_performance.csv"'
 
-        writer = csv.DictWriter(response.fieldnames, fieldnames=[
-            'student_id', 'name', 'email', 'total_quizzes', 'average_score'
-        ])
-        # Fix: use the data's fieldnames
-        writer = csv.DictWriter(response, fieldnames=data[0].keys() if data else [])
-        writer.writeheader()
-        writer.writerows(data)
+        if data:
+            writer = csv.DictWriter(response, fieldnames=data[0].keys())
+            writer.writeheader()
+            writer.writerows(data)
         return response
 
 

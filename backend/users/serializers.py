@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'email', 'first_name', 'last_name', 'full_name',
             'role', 'madrasah', 'madrasah_name', 'is_active', 'date_joined'
         ]
-        read_only_fields = ['id', 'date_joined']
+        read_only_fields = ['id', 'date_joined', 'madrasah']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
