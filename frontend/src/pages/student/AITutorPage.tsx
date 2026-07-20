@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { guidanceAPI, subjectAPI } from '../../api';
 import { SkeletonCard } from '../../components/Skeleton';
 
@@ -180,8 +182,8 @@ export default function AITutorPage() {
                         </svg>
                       </div>
                       <div className="flex-1 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 rounded-lg p-4">
-                        <div className="text-sm text-[var(--color-text-secondary)] dark:text-gray-300 whitespace-pre-line leading-relaxed">
-                          {session.response}
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text-secondary)] dark:text-gray-300 leading-relaxed [&_strong]:text-[var(--color-text-primary)] [&_strong]:dark:text-gray-100 [&_h3]:text-[var(--color-text-primary)] [&_h3]:dark:text-gray-100 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_code]:bg-gray-100 [&_code]:dark:bg-gray-700 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_p]:mb-2 [&_p:last-child]:mb-0">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{session.response}</ReactMarkdown>
                         </div>
                       </div>
                     </div>
