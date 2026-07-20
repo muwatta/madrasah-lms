@@ -166,3 +166,171 @@ export const notificationAPI = {
   markRead: (id: number) => api.post(`/school/notifications/mark-read/${id}/`),
   markAllRead: () => api.post('/school/notifications/mark-all-read/'),
 };
+
+export const academicAPI = {
+  sessions: {
+    list: (params?: any) => api.get('/academic/sessions/', { params }),
+    create: (data: any) => api.post('/academic/sessions/', data),
+    update: (id: number, data: any) => api.put(`/academic/sessions/${id}/`, data),
+    delete: (id: number) => api.delete(`/academic/sessions/${id}/`),
+  },
+  terms: {
+    list: (params?: any) => api.get('/academic/terms/', { params }),
+    create: (data: any) => api.post('/academic/terms/', data),
+    update: (id: number, data: any) => api.put(`/academic/terms/${id}/`, data),
+    delete: (id: number) => api.delete(`/academic/terms/${id}/`),
+  },
+  calendarEvents: {
+    list: (params?: any) => api.get('/academic/calendar-events/', { params }),
+    create: (data: any) => api.post('/academic/calendar-events/', data),
+    update: (id: number, data: any) => api.put(`/academic/calendar-events/${id}/`, data),
+    delete: (id: number) => api.delete(`/academic/calendar-events/${id}/`),
+  },
+  classArms: {
+    list: (params?: any) => api.get('/academic/class-arms/', { params }),
+    create: (data: any) => api.post('/academic/class-arms/', data),
+  },
+  timetables: {
+    list: (params?: any) => api.get('/academic/timetables/', { params }),
+    get: (id: number) => api.get(`/academic/timetables/${id}/`),
+    create: (data: any) => api.post('/academic/timetables/', data),
+    update: (id: number, data: any) => api.put(`/academic/timetables/${id}/`, data),
+    delete: (id: number) => api.delete(`/academic/timetables/${id}/`),
+    generate: (id: number) => api.post(`/academic/timetables/${id}/generate/`),
+    slots: (id: number) => api.get(`/academic/timetables/${id}/slots/`),
+    bulkSlots: (id: number, data: any) => api.put(`/academic/timetables/${id}/bulk/`, data),
+    detectConflicts: (id: number) => api.get(`/academic/timetables/${id}/detect_conflicts/`),
+  },
+  timetableSlots: {
+    list: (params?: any) => api.get('/academic/timetable-slots/', { params }),
+    create: (data: any) => api.post('/academic/timetable-slots/', data),
+    update: (id: number, data: any) => api.put(`/academic/timetable-slots/${id}/`, data),
+    delete: (id: number) => api.delete(`/academic/timetable-slots/${id}/`),
+  },
+};
+
+export const admissionsAPI = {
+  list: (params?: any) => api.get('/admissions/applications/', { params }),
+  get: (id: number) => api.get(`/admissions/applications/${id}/`),
+  create: (data: any) => api.post('/admissions/applications/', data),
+  update: (id: number, data: any) => api.put(`/admissions/applications/${id}/`, data),
+  accept: (id: number) => api.post(`/admissions/applications/${id}/accept/`),
+  reject: (id: number, data: any) => api.post(`/admissions/applications/${id}/reject/`, data),
+  enroll: (id: number) => api.post(`/admissions/applications/${id}/enroll/`),
+  documents: (id: number) => api.get(`/admissions/applications/${id}/documents/`),
+  uploadDocument: (id: number, data: FormData) => api.post(`/admissions/applications/${id}/documents/`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  deleteDocument: (id: number, docId: number) => api.delete(`/admissions/applications/${id}/documents/${docId}/`),
+};
+
+export const lessonAPI = {
+  lessonPlans: {
+    list: (params?: any) => api.get('/lessons/lesson-plans/', { params }),
+    get: (id: number) => api.get(`/lessons/lesson-plans/${id}/`),
+    create: (data: any) => api.post('/lessons/lesson-plans/', data),
+    update: (id: number, data: any) => api.put(`/lessons/lesson-plans/${id}/`, data),
+    delete: (id: number) => api.delete(`/lessons/lesson-plans/${id}/`),
+    approve: (id: number, data: any) => api.patch(`/lessons/lesson-plans/${id}/approve/`, data),
+  },
+  homework: {
+    list: (params?: any) => api.get('/lessons/homework/', { params }),
+    get: (id: number) => api.get(`/lessons/homework/${id}/`),
+    create: (data: any) => api.post('/lessons/homework/', data),
+    update: (id: number, data: any) => api.put(`/lessons/homework/${id}/`, data),
+    delete: (id: number) => api.delete(`/lessons/homework/${id}/`),
+    submissions: (id: number) => api.get(`/lessons/homework/${id}/submissions/`),
+    submit: (id: number, data: any) => api.post(`/lessons/homework/${id}/submissions/`, data),
+    pendingGrading: () => api.get('/lessons/homework/submissions/pending/'),
+    grade: (submissionId: number, data: any) => api.patch(`/lessons/homework/submissions/${submissionId}/grade/`, data),
+  },
+};
+
+export const quranAPI = {
+  memorization: {
+    list: (params?: any) => api.get('/quran/memorization/', { params }),
+    create: (data: any) => api.post('/quran/memorization/', data),
+    update: (id: number, data: any) => api.put(`/quran/memorization/${id}/`, data),
+    delete: (id: number) => api.delete(`/quran/memorization/${id}/`),
+  },
+  revision: {
+    list: (params?: any) => api.get('/quran/revision/', { params }),
+    create: (data: any) => api.post('/quran/revision/', data),
+    markComplete: (id: number) => api.patch(`/quran/revision/mark-complete/${id}/`),
+  },
+  tajwid: {
+    list: (params?: any) => api.get('/quran/tajwid/', { params }),
+    create: (data: any) => api.post('/quran/tajwid/', data),
+  },
+  prayerTimes: {
+    list: (params?: any) => api.get('/quran/prayer-times/', { params }),
+    create: (data: any) => api.post('/quran/prayer-times/', data),
+    today: () => api.get('/quran/prayer-times/today/'),
+  },
+  studentProgress: (studentId: number) => api.get(`/quran/student-progress/${studentId}/`),
+};
+
+export const analyticsAPI = {
+  atRisk: {
+    list: (params?: any) => api.get('/analytics/at-risk/', { params }),
+    get: (id: number) => api.get(`/analytics/at-risk/${id}/`),
+    generate: () => api.post('/analytics/at-risk/generate/'),
+  },
+  skills: {
+    list: (params?: any) => api.get('/analytics/skills/', { params }),
+    create: (data: any) => api.post('/analytics/skills/', data),
+    update: (id: number, data: any) => api.put(`/analytics/skills/${id}/`, data),
+    delete: (id: number) => api.delete(`/analytics/skills/${id}/`),
+  },
+  portfolio: {
+    list: (params?: any) => api.get('/analytics/portfolio/', { params }),
+    create: (data: any) => api.post('/analytics/portfolio/', data),
+    update: (id: number, data: any) => api.put(`/analytics/portfolio/${id}/`, data),
+    delete: (id: number) => api.delete(`/analytics/portfolio/${id}/`),
+  },
+  teacherWorkload: {
+    all: () => api.get('/analytics/teacher-workload/'),
+    me: () => api.get('/analytics/teacher-workload/me/'),
+  },
+  adminDashboard: () => api.get('/analytics/dashboard/admin/'),
+};
+
+export const questionGeneratorAPI = {
+  generate: (data: any) => api.post('/assessments/generate-questions/', data),
+};
+
+export const learningAPI = {
+  paths: {
+    list: (params?: any) => api.get('/learning/paths/', { params }),
+    get: (id: number) => api.get(`/learning/paths/${id}/`),
+    generate: (data: any) => api.post('/learning/paths/generate/', data),
+    completeItem: (pathId: number, itemId: number, data?: any) =>
+      api.patch(`/learning/paths/${pathId}/items/${itemId}/complete/`, data),
+  },
+  decks: {
+    list: (params?: any) => api.get('/learning/decks/', { params }),
+    create: (data: any) => api.post('/learning/decks/', data),
+    update: (id: number, data: any) => api.put(`/learning/decks/${id}/`, data),
+    delete: (id: number) => api.delete(`/learning/decks/${id}/`),
+    cards: (deckId: number) => api.get(`/learning/decks/${deckId}/cards/`),
+    addCard: (deckId: number, data: any) => api.post(`/learning/decks/${deckId}/cards/`, data),
+    updateCard: (deckId: number, cardId: number, data: any) =>
+      api.put(`/learning/decks/${deckId}/cards/${cardId}/`, data),
+    deleteCard: (deckId: number, cardId: number) =>
+      api.delete(`/learning/decks/${deckId}/cards/${cardId}/`),
+    reviewCard: (deckId: number, cardId: number, data: any) =>
+      api.post(`/learning/decks/${deckId}/cards/review/${cardId}/`, data),
+    dueCards: (deckId: number) => api.get(`/learning/decks/${deckId}/cards/due/`),
+  },
+};
+
+export const guidanceAPI = {
+  career: {
+    generate: (studentId: number) => api.post('/guidance/career/generate/', { student_id: studentId }),
+    list: (params?: any) => api.get('/guidance/career/', { params }),
+  },
+  tutor: {
+    ask: (data: { question: string; subject_id?: number }) => api.post('/guidance/tutor/ask/', data),
+    history: () => api.get('/guidance/tutor/history/'),
+  },
+};

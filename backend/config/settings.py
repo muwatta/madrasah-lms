@@ -26,6 +26,9 @@ INSTALLED_APPS = [
     'lessons',
     'admissions',
     'quran',
+    'analytics',
+    'guidance',
+    'learning',
 ]
 
 MIDDLEWARE = [

@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 
+const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
@@ -36,6 +37,20 @@ const AnnouncementsPage = lazy(() => import('./pages/shared/AnnouncementsPage'))
 const AttendancePage = lazy(() => import('./pages/teacher/AttendancePage'));
 const StudentAttendancePage = lazy(() => import('./pages/student/StudentAttendancePage'));
 const FeeStatusPage = lazy(() => import('./pages/parent/FeeStatusPage'));
+const AcademicPage = lazy(() => import('./pages/admin/AcademicPage'));
+const AdmissionsPage = lazy(() => import('./pages/admin/AdmissionsPage'));
+const LessonPlannerPage = lazy(() => import('./pages/teacher/LessonPlannerPage'));
+const HomeworkPage = lazy(() => import('./pages/teacher/HomeworkPage'));
+const QuranPage = lazy(() => import('./pages/teacher/QuranPage'));
+const StudentHomeworkPage = lazy(() => import('./pages/student/StudentHomeworkPage'));
+const PortfolioPage = lazy(() => import('./pages/student/PortfolioPage'));
+const PrayerTimesPage = lazy(() => import('./pages/shared/PrayerTimesPage'));
+const AtRiskPage = lazy(() => import('./pages/admin/AtRiskPage'));
+const TeacherWorkloadPage = lazy(() => import('./pages/admin/TeacherWorkloadPage'));
+const LearningPathPage = lazy(() => import('./pages/student/LearningPathPage'));
+const FlashCardPage = lazy(() => import('./pages/student/FlashCardPage'));
+const CareerGuidancePage = lazy(() => import('./pages/student/CareerGuidancePage'));
+const AITutorPage = lazy(() => import('./pages/student/AITutorPage'));
 
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -68,6 +83,13 @@ function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="attendance" element={<StudentAttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="homework" element={<StudentHomeworkPage />} />
+              <Route path="portfolio" element={<PortfolioPage />} />
+              <Route path="prayer-times" element={<PrayerTimesPage />} />
+              <Route path="career" element={<CareerGuidancePage />} />
+              <Route path="tutor" element={<AITutorPage />} />
+              <Route path="path" element={<LearningPathPage />} />
+              <Route path="flashcards" element={<FlashCardPage />} />
             </Route>
 
             <Route
@@ -87,6 +109,10 @@ function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="attendance" element={<AttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="lesson-planner" element={<LessonPlannerPage />} />
+              <Route path="homework" element={<HomeworkPage />} />
+              <Route path="quran" element={<QuranPage />} />
+              <Route path="prayer-times" element={<PrayerTimesPage />} />
             </Route>
 
             <Route
@@ -103,6 +129,7 @@ function App() {
               <Route path="fees" element={<FeeStatusPage />} />
               <Route path="attendance" element={<StudentAttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="prayer-times" element={<PrayerTimesPage />} />
             </Route>
 
             <Route
@@ -127,6 +154,11 @@ function App() {
               <Route path="attendance" element={<AttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="reports" element={<StudentReportPage />} />
+              <Route path="academic" element={<AcademicPage />} />
+              <Route path="admissions" element={<AdmissionsPage />} />
+              <Route path="at-risk" element={<AtRiskPage />} />
+              <Route path="teacher-workload" element={<TeacherWorkloadPage />} />
+              <Route path="prayer-times" element={<PrayerTimesPage />} />
             </Route>
 
             <Route
@@ -142,11 +174,13 @@ function App() {
               <Route path="finance" element={<FinancePage />} />
               <Route path="attendance" element={<AttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
-              <Route path="reports" element={<StudentReportPage />} />
-              <Route path="engagement" element={<AdminEngagementPage />} />
+              <Route path="messages" element={<MessagesPage />} />
+              <Route path="lesson-planner" element={<LessonPlannerPage />} />
+              <Route path="homework" element={<HomeworkPage />} />
+              <Route path="prayer-times" element={<PrayerTimesPage />} />
             </Route>
 
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
           </Suspense>
