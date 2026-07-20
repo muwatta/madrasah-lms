@@ -129,6 +129,7 @@ export interface Enrollment {
   student_name: string;
   subject: number;
   subject_name: string;
+  subject_name_en: string;
   ustaadh: number | null;
   ustaadh_name: string | null;
   enrolled_at: string;

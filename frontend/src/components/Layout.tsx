@@ -15,15 +15,19 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.availableQuizzes', path: '/quizzes' },
     { labelKey: 'nav.myResults', path: '/results' },
     { labelKey: 'nav.exams', path: '/exams' },
+    { labelKey: 'nav.progress', path: '/progress' },
+    { labelKey: 'nav.messages', path: '/messages' },
   ],
   ustaadh: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
     { labelKey: 'nav.myQuizzes', path: '/quizzes' },
     { labelKey: 'nav.questionBank', path: '/questions' },
     { labelKey: 'nav.students', path: '/students' },
+    { labelKey: 'nav.messages', path: '/messages' },
   ],
   parent: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
+    { labelKey: 'nav.messages', path: '/messages' },
   ],
   mudeer: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
@@ -31,6 +35,9 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.subjects', path: '/subjects' },
     { labelKey: 'nav.exams', path: '/exams' },
     { labelKey: 'nav.enrollments', path: '/enrollments' },
+    { labelKey: 'nav.interventions', path: '/interventions' },
+    { labelKey: 'nav.engagement', path: '/engagement' },
+    { labelKey: 'nav.messages', path: '/messages' },
   ],
   idaarah: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
@@ -185,7 +192,7 @@ export default function Layout() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
@@ -202,14 +209,14 @@ export default function Layout() {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                className="btn-press flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="btn-press flex items-center gap-2 rounded-lg border border-gray-200 py-1.5 ps-1.5 pe-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 {user && (
-                  <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white ${roleColors[user.role]}`}>
+                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white ${roleColors[user.role]}`}>
                     {user.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                   </span>
                 )}
-                <svg className={`h-4 w-4 transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`h-3.5 w-3.5 transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -219,7 +226,15 @@ export default function Layout() {
                   {/* Current account */}
                   {user && (
                     <div className="border-b border-gray-100 px-4 py-3">
-                      <p className="text-[11px] font-medium uppercase text-gray-400 mb-1">{t('common.currentAccount')}</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[11px] font-medium uppercase text-gray-400">{t('common.currentAccount')}</p>
+                        <button
+                          onClick={handleLogout}
+                          className="text-[11px] font-medium text-red-500 hover:text-red-600 transition-colors"
+                        >
+                          {t('nav.logout')}
+                        </button>
+                      </div>
                       <div className="flex items-center gap-2.5">
                         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${roleColors[user.role]}`}>
                           {user.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
@@ -272,19 +287,6 @@ export default function Layout() {
                 </div>
               )}
             </div>
-
-            {user && (
-              <div className="hidden text-end sm:block">
-                <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
-                <p className="text-xs text-gray-500">{t(roleLabelKeys[user.role])}</p>
-              </div>
-            )}
-            <button
-              onClick={handleLogout}
-              className="btn-press rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-            >
-              {t('nav.logout')}
-            </button>
           </div>
         </header>
 

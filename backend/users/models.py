@@ -95,3 +95,19 @@ class StudentParent(models.Model):
 
     def __str__(self):
         return f"{self.parent.get_full_name()} - {self.student.get_full_name()} ({self.relationship})"
+
+
+class Message(models.Model):
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.sender.get_full_name()} → {self.recipient.get_full_name()}: {self.subject}"

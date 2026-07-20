@@ -4,6 +4,7 @@ import type { User } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
+import BulkUserImport from './BulkUserImport';
 
 interface UserFormData {
   email: string;
@@ -26,6 +27,7 @@ export default function UserManagementPage() {
   const [form, setForm] = useState<UserFormData>({ email: '', password: '', first_name: '', last_name: '', role: 'student', madrasah: '' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showBulkImport, setShowBulkImport] = useState(false);
 
   const ROLES: { value: string; label: string }[] = [
     { value: '', label: t('filters.allRoles') },
@@ -127,11 +129,22 @@ export default function UserManagementPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <h1 className="text-2xl font-bold text-gray-900">{t('userManagement.title')}</h1>
-        <button onClick={openCreate} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
-          {t('userManagement.addUser')}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowBulkImport(!showBulkImport)} className="rounded-lg border border-primary-200 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50">
+            {t('bulkImport.title')}
+          </button>
+          <button onClick={openCreate} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
+            {t('userManagement.addUser')}
+          </button>
+        </div>
       </div>
       <p className="text-sm text-gray-500 mb-6">{t('guides.userManagement')}</p>
+
+      {showBulkImport && (
+        <div className="mb-6">
+          <BulkUserImport onComplete={() => { loadUsers(); setShowBulkImport(false); }} />
+        </div>
+      )}
 
       <div className="flex flex-wrap items-end gap-4">
         <div>

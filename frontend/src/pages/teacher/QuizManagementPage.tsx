@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { quizAPI, questionAPI, subjectAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { Quiz, Subject, Topic, Question } from '../../types';
@@ -383,6 +384,14 @@ export default function QuizManagementPage() {
                   </td>
                   <td className="px-6 py-4 text-start">
                     <div className="flex justify-start gap-2">
+                      {quiz.attempt_count > 0 && (
+                        <Link
+                          to={`/teacher/quizzes/${quiz.id}/analytics`}
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          {t('quizAnalytics.viewAnalytics')}
+                        </Link>
+                      )}
                       <button
                         onClick={() => openEdit(quiz)}
                         className="text-sm text-primary-600 hover:text-primary-800"

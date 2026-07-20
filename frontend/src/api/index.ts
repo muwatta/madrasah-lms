@@ -41,6 +41,13 @@ export const questionAPI = {
   create: (data: any) => api.post('/questions/', data),
   update: (id: number, data: any) => api.put(`/questions/${id}/`, data),
   delete: (id: number) => api.delete(`/questions/${id}/`),
+  bulkUpload: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/questions/bulk-upload/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 export const quizAPI = {
@@ -50,6 +57,7 @@ export const quizAPI = {
   update: (id: number, data: any) => api.put(`/quizzes/${id}/`, data),
   delete: (id: number) => api.delete(`/quizzes/${id}/`),
   publish: (id: number) => api.post(`/quizzes/${id}/publish/`),
+  analytics: (id: number) => api.get(`/quizzes/${id}/analytics/`),
 };
 
 export const attemptAPI = {
@@ -83,6 +91,7 @@ export const enrollmentAPI = {
 
 export const dashboardAPI = {
   student: () => api.get('/student/dashboard/'),
+  studentProgress: () => api.get('/student/progress/'),
   teacher: () => api.get('/teacher/dashboard/'),
   teacherStudentPerformance: (studentId: number) =>
     api.get(`/teacher/student/${studentId}/performance/`),
@@ -97,4 +106,25 @@ export const userAPI = {
   create: (data: any) => api.post('/auth/register/', data),
   update: (id: number, data: any) => api.put(`/auth/${id}/`, data),
   delete: (id: number) => api.delete(`/auth/${id}/`),
+  bulkImport: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/auth/bulk-import/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+};
+
+export const messageAPI = {
+  list: (params?: any) => api.get('/auth/messages/', { params }),
+  get: (id: number) => api.get(`/auth/messages/${id}/`),
+  create: (data: any) => api.post('/auth/messages/', data),
+  unreadCount: () => api.get('/auth/messages/unread-count/'),
+  parentStudents: () => api.get('/auth/parent-students/'),
+  teacherParents: () => api.get('/auth/teacher-parents/'),
+};
+
+export const interventionAPI = {
+  alerts: () => api.get('/auth/intervention-alerts/'),
+  engagement: () => api.get('/auth/admin-engagement/'),
 };

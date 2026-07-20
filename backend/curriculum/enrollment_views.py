@@ -14,11 +14,14 @@ class EnrollmentListView(generics.ListCreateAPIView):
 
         student_id = self.request.query_params.get('student')
         subject_id = self.request.query_params.get('subject')
+        teacher_id = self.request.query_params.get('ustaadh')
 
         if student_id:
             qs = qs.filter(student_id=student_id)
         if subject_id:
             qs = qs.filter(subject_id=subject_id)
+        if teacher_id:
+            qs = qs.filter(ustaadh_id=teacher_id)
 
         return qs
 

@@ -25,6 +25,11 @@ const EnrollmentManagementPage = lazy(() => import('./pages/admin/EnrollmentMana
 const ExamManagementPage = lazy(() => import('./pages/admin/ExamManagementPage'));
 const ParentStudentPage = lazy(() => import('./pages/admin/ParentStudentPage'));
 const BoardDashboard = lazy(() => import('./pages/board/BoardDashboard'));
+const QuizAnalyticsPage = lazy(() => import('./pages/teacher/QuizAnalyticsPage'));
+const StudentProgressPage = lazy(() => import('./pages/student/StudentProgressPage'));
+const MessagesPage = lazy(() => import('./pages/shared/MessagesPage'));
+const InterventionAlertsPage = lazy(() => import('./pages/admin/InterventionAlertsPage'));
+const AdminEngagementPage = lazy(() => import('./pages/admin/AdminEngagementPage'));
 
 function App() {
   return (
@@ -50,6 +55,8 @@ function App() {
               <Route path="quizzes/:quizId/take" element={<QuizTakePage />} />
               <Route path="results" element={<QuizResultsPage />} />
               <Route path="exams" element={<ExamResultsPage />} />
+              <Route path="progress" element={<StudentProgressPage />} />
+              <Route path="messages" element={<MessagesPage />} />
             </Route>
 
             <Route
@@ -63,8 +70,10 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboard />} />
               <Route path="quizzes" element={<QuizManagementPage />} />
+              <Route path="quizzes/:id/analytics" element={<QuizAnalyticsPage />} />
               <Route path="questions" element={<QuestionBankPage />} />
               <Route path="students" element={<StudentPerformancePage />} />
+              <Route path="messages" element={<MessagesPage />} />
             </Route>
 
             <Route
@@ -77,6 +86,7 @@ function App() {
             >
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<ParentDashboard />} />
+              <Route path="messages" element={<MessagesPage />} />
             </Route>
 
             <Route
@@ -94,6 +104,9 @@ function App() {
               <Route path="enrollments" element={<EnrollmentManagementPage />} />
               <Route path="exams" element={<ExamManagementPage />} />
               <Route path="parent-students" element={<ParentStudentPage />} />
+              <Route path="interventions" element={<InterventionAlertsPage />} />
+              <Route path="engagement" element={<AdminEngagementPage />} />
+              <Route path="messages" element={<MessagesPage />} />
             </Route>
 
             <Route

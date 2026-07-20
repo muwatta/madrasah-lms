@@ -5,6 +5,7 @@ import type { Question, Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
+import BulkUpload from './BulkUpload';
 
 type QuestionForm = {
   topic: number | '';
@@ -40,6 +41,7 @@ export default function QuestionBankPage() {
   const [filters, setFilters] = useState({ topic: '', type: '', difficulty: '', search: '' });
   const [saving, setSaving] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
 
   const loadQuestions = useCallback(() => {
     setLoading(true);
@@ -159,12 +161,20 @@ export default function QuestionBankPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">{t('questionBank.title')}</h1>
-        <button
-          onClick={openCreate}
-          className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
-        >
-          {'+ ' + t('questionBank.newQuestion')}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowBulkUpload(!showBulkUpload)}
+            className="rounded-lg border border-primary-200 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50"
+          >
+            {t('bulkUpload.title')}
+          </button>
+          <button
+            onClick={openCreate}
+            className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          >
+            {'+ ' + t('questionBank.newQuestion')}
+          </button>
+        </div>
       </div>
       <p className="text-sm text-gray-500 mb-6">{t('guides.questionBank')}</p>
 
@@ -172,6 +182,12 @@ export default function QuestionBankPage() {
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
           <button onClick={() => setError(null)} className="me-2 underline">{t('common.dismiss')}</button>
+        </div>
+      )}
+
+      {showBulkUpload && (
+        <div className="mb-6">
+          <BulkUpload onComplete={() => { loadQuestions(); setShowBulkUpload(false); }} />
         </div>
       )}
 

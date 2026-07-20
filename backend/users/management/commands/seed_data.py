@@ -105,18 +105,26 @@ class Command(BaseCommand):
         admin.set_password('admin123')
         admin.save()
 
-        # Create teacher
-        teacher, _ = User.objects.get_or_create(
-            email='teacher@madrasah.com',
-            defaults={
-                'first_name': 'Ustaadh',
-                'last_name': 'Ahmed',
-                'role': 'ustaadh',
-                'madrasah': madrasah,
-            }
-        )
-        teacher.set_password('teacher123')
-        teacher.save()
+        # Create teachers
+        teachers_data = [
+            ('teacher@madrasah.com', 'أحمد', 'محمد', 'Quran & Tajweed teacher'),
+            ('teacher2@madrasah.com', 'يوسف', 'صالح', 'Tafsir & Hadith teacher'),
+            ('teacher3@madrasah.com', 'خالد', 'عمر', 'Aqeedah & Fiqh teacher'),
+        ]
+        teachers = []
+        for email, fname, lname, _ in teachers_data:
+            t, _ = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    'first_name': fname,
+                    'last_name': lname,
+                    'role': 'ustaadh',
+                    'madrasah': madrasah,
+                }
+            )
+            t.set_password('teacher123')
+            t.save()
+            teachers.append(t)
 
         # Create students
         students = []
@@ -191,15 +199,16 @@ class Command(BaseCommand):
                 )
                 topics_map[subj.name_ar].append(topic)
 
-        # Enroll first 5 subjects for all students
+        # Enroll first 5 subjects for all students with different teachers per subject
+        teacher_assignments = [teachers[0], teachers[1], teachers[0], teachers[1], teachers[2]]
         for student in students:
-            for subj in subjects[:5]:
+            for i, subj in enumerate(subjects[:5]):
                 Enrollment.objects.get_or_create(
                     madrasah=madrasah,
                     student=student,
                     subject=subj,
                     defaults={
-                        'ustaadh': teacher,
+                        'ustaadh': teacher_assignments[i],
                         'school_class': classes[0],
                     }
                 )
@@ -235,7 +244,7 @@ class Command(BaseCommand):
                 q, _ = Question.objects.get_or_create(
                     madrasah=madrasah,
                     topic=topic,
-                    created_by=teacher,
+                    created_by=teachers[0],
                     question_text=q_data['question_text'],
                     defaults=q_data
                 )
@@ -246,7 +255,7 @@ class Command(BaseCommand):
             quiz1, _ = Quiz.objects.get_or_create(
                 madrasah=madrasah,
                 subject=first_subj,
-                created_by=teacher,
+                created_by=teachers[0],
                 title='اختبار أساسيات القرآن',
                 defaults={
                     'description': 'اختبار في أساسيات القرآن الكريم',
@@ -262,7 +271,7 @@ class Command(BaseCommand):
                 quiz2, _ = Quiz.objects.get_or_create(
                     madrasah=madrasah,
                     subject=subjects[2],
-                    created_by=teacher,
+                    created_by=teachers[0],
                     title='اختبار أحكام التجويد',
                     defaults={
                         'description': 'اختبار في قواعد التجويد',
@@ -279,7 +288,7 @@ class Command(BaseCommand):
             exam, _ = Exam.objects.get_or_create(
                 madrasah=madrasah,
                 subject=first_subj,
-                created_by=teacher,
+                created_by=teachers[0],
                 title='اختبار منتصف الفصل - القرآن',
                 defaults={
                     'exam_date': date(2026, 8, 15),
@@ -301,7 +310,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Database seeded successfully!'))
         self.stdout.write(f'  Madrasah: {madrasah.name}')
         self.stdout.write(f'  Admin: admin@madrasah.com / admin123')
-        self.stdout.write(f'  Teacher: teacher@madrasah.com / teacher123')
+        self.stdout.write(f'  Teachers: teacher@madrasah.com, teacher2@madrasah.com, teacher3@madrasah.com / teacher123')
         self.stdout.write(f'  Students: student1@madrasah.com / student123')
         self.stdout.write(f'  Parent: parent@madrasah.com / parent123')
         self.stdout.write(f'  Board: board@madrasah.com / board123')
