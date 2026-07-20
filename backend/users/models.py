@@ -78,6 +78,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ['-date_joined']
+        indexes = [
+            models.Index(fields=['madrasah', 'role', 'is_active'], name='idx_user_m_role_active'),
+        ]
 
 
 class StudentParent(models.Model):

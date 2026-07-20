@@ -1,9 +1,12 @@
+import logging
+
 from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from curriculum.models import Enrollment, SchoolClass, Subject
+from config.permissions import IsMudeer
+from curriculum.models import Enrollment, Subject
 from users.models import User
 
 from .models import Application, ApplicationDocument
@@ -12,6 +15,8 @@ from .serializers import (
     ApplicationDocumentSerializer,
     ApplicationListSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ApplicationListView(generics.ListCreateAPIView):
@@ -43,6 +48,8 @@ class ApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ApplicationAcceptView(APIView):
+    permission_classes = [IsMudeer]
+
     def post(self, request, pk):
         application = Application.objects.filter(
             pk=pk, madrasah=request.user.madrasah
@@ -57,10 +64,13 @@ class ApplicationAcceptView(APIView):
         application.status = 'accepted'
         application.accepted_at = timezone.now()
         application.save()
+        logger.info("Application %s accepted by %s", application.application_number, request.user.email)
         return Response(ApplicationSerializer(application).data)
 
 
 class ApplicationRejectView(APIView):
+    permission_classes = [IsMudeer]
+
     def post(self, request, pk):
         application = Application.objects.filter(
             pk=pk, madrasah=request.user.madrasah
@@ -71,10 +81,13 @@ class ApplicationRejectView(APIView):
         application.status = 'rejected'
         application.rejected_reason = reason
         application.save()
+        logger.info("Application %s rejected by %s: %s", application.application_number, request.user.email, reason)
         return Response(ApplicationSerializer(application).data)
 
 
 class ApplicationEnrollView(APIView):
+    permission_classes = [IsMudeer]
+
     def post(self, request, pk):
         application = Application.objects.filter(
             pk=pk, madrasah=request.user.madrasah
@@ -111,6 +124,8 @@ class ApplicationEnrollView(APIView):
         application.status = 'enrolled'
         application.enrolled_at = timezone.now()
         application.save()
+
+        logger.info("Application %s enrolled as user %s by %s", application.application_number, user.email, request.user.email)
 
         return Response(
             {

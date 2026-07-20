@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { messageAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { SkeletonCard, SkeletonTable } from '../../components/Skeleton';
+import { SkeletonCard } from '../../components/Skeleton';
 
 interface Message {
   id: number;

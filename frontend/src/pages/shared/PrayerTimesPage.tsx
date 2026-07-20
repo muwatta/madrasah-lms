@@ -3,7 +3,7 @@ import { quranAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { Skeleton, SkeletonCard, SkeletonTable } from '../../components/Skeleton';
+import { SkeletonCard, SkeletonTable } from '../../components/Skeleton';
 
 interface PrayerTime {
   id: number;

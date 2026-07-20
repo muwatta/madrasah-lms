@@ -33,18 +33,21 @@ def validate_file_size(max_size):
     return inner
 
 
-validate_image = lambda value: (
-    validate_file_extension(ALLOWED_IMAGE_EXTENSIONS)(value) or validate_file_size(MAX_IMAGE_SIZE)(value)
-)
+def validate_image(value):
+    validate_file_extension(ALLOWED_IMAGE_EXTENSIONS)(value)
+    validate_file_size(MAX_IMAGE_SIZE)(value)
 
-validate_document = lambda value: (
-    validate_file_extension(ALLOWED_DOCUMENT_EXTENSIONS)(value) or validate_file_size(MAX_FILE_SIZE)(value)
-)
 
-validate_audio = lambda value: (
-    validate_file_extension(ALLOWED_AUDIO_EXTENSIONS)(value) or validate_file_size(MAX_AUDIO_SIZE)(value)
-)
+def validate_document(value):
+    validate_file_extension(ALLOWED_DOCUMENT_EXTENSIONS)(value)
+    validate_file_size(MAX_FILE_SIZE)(value)
 
-validate_generic_file = lambda value: (
-    validate_file_extension(ALLOWED_GENERIC_EXTENSIONS)(value) or validate_file_size(MAX_FILE_SIZE)(value)
-)
+
+def validate_audio(value):
+    validate_file_extension(ALLOWED_AUDIO_EXTENSIONS)(value)
+    validate_file_size(MAX_AUDIO_SIZE)(value)
+
+
+def validate_generic_file(value):
+    validate_file_extension(ALLOWED_GENERIC_EXTENSIONS)(value)
+    validate_file_size(MAX_FILE_SIZE)(value)

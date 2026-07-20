@@ -48,6 +48,9 @@ class Application(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['madrasah', 'status'], name='idx_app_m_status'),
+        ]
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

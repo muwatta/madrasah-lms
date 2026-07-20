@@ -3,7 +3,7 @@ import { academicAPI, schoolClassAPI } from '../../api';
 import StatCard from '../../components/StatCard';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
-import { Skeleton, SkeletonTable, SkeletonStatsGrid } from '../../components/Skeleton';
+import { SkeletonTable, SkeletonStatsGrid } from '../../components/Skeleton';
 
 interface Session {
   id: number;

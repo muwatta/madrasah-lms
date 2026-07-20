@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { lessonAPI, subjectAPI, schoolClassAPI } from '../../api';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
-import { Skeleton, SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
+import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 
 interface Homework {
   id: number;

@@ -19,6 +19,9 @@ class LearningPath(models.Model):
     class Meta:
         unique_together = ['student', 'subject']
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['student', 'is_active'], name='idx_lp_student_active'),
+        ]
 
     def __str__(self):
         return f"{self.student} - {self.subject}"

@@ -462,19 +462,36 @@ class StudentReportView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        if request.user.role == 'parent':
+            is_child = StudentParent.objects.filter(parent=request.user, student=student).exists()
+            if not is_child:
+                return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
         from assessments.models import QuizAttempt
         attempts = QuizAttempt.objects.filter(student=student, submitted_at__isnull=False)
         avg = attempts.aggregate(avg=Avg('percentage'))['avg']
 
         enrollments = Enrollment.objects.filter(student=student, madrasah=request.user.madrasah).select_related('subject')
+        subject_averages = attempts.values('quiz__subject').annotate(
+            avg_score=Avg('percentage'),
+            attempt_count=Count('id'),
+        )
+        subject_avg_map = {
+            row['quiz__subject']: {
+                'average': round(float(row['avg_score']), 1) if row['avg_score'] else 0,
+                'attempts': row['attempt_count'],
+            }
+            for row in subject_averages
+        }
+
         subject_perf = []
         for enrollment in enrollments:
-            s_avg = attempts.filter(quiz__subject=enrollment.subject).aggregate(avg=Avg('percentage'))['avg']
+            stats = subject_avg_map.get(enrollment.subject_id, {'average': 0, 'attempts': 0})
             subject_perf.append({
                 'subject': enrollment.subject.name_ar,
                 'subject_en': enrollment.subject.name_en,
-                'average': round(s_avg, 1) if s_avg else 0,
-                'attempts': attempts.filter(quiz__subject=enrollment.subject).count(),
+                'average': stats['average'],
+                'attempts': stats['attempts'],
             })
 
         recent_attendance_qs = Attendance.objects.filter(student=student, madrasah=request.user.madrasah)

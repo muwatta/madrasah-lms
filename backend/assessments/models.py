@@ -94,3 +94,6 @@ class QuizAttempt(models.Model):
     class Meta:
         ordering = ['-started_at']
         unique_together = ['quiz', 'student', 'attempt_number']
+        indexes = [
+            models.Index(fields=['student', 'submitted_at'], name='idx_qa_student_submitted'),
+        ]

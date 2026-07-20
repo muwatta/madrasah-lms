@@ -56,6 +56,9 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = ['student', 'subject']
+        indexes = [
+            models.Index(fields=['madrasah', 'student'], name='idx_enr_m_student'),
+        ]
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.subject.name_ar}"

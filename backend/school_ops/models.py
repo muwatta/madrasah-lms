@@ -40,6 +40,10 @@ class Fee(models.Model):
 
     class Meta:
         ordering = ['-due_date']
+        indexes = [
+            models.Index(fields=['madrasah', 'status'], name='idx_fee_m_status'),
+            models.Index(fields=['madrasah', 'student'], name='idx_fee_m_student'),
+        ]
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.amount}"
@@ -71,6 +75,9 @@ class FeePayment(models.Model):
 
     class Meta:
         ordering = ['-payment_date']
+        indexes = [
+            models.Index(fields=['fee', 'payment_date'], name='idx_fpay_fee_date'),
+        ]
 
     def __str__(self):
         return f"Payment {self.amount_paid} for {self.fee}"
@@ -95,6 +102,9 @@ class Attendance(models.Model):
     class Meta:
         ordering = ['-date']
         unique_together = ['student', 'date', 'madrasah']
+        indexes = [
+            models.Index(fields=['madrasah', 'date', 'status'], name='idx_att_m_date_status'),
+        ]
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.date} - {self.status}"
@@ -142,6 +152,9 @@ class Announcement(models.Model):
 
     class Meta:
         ordering = ['-is_pinned', '-created_at']
+        indexes = [
+            models.Index(fields=['madrasah', 'audience'], name='idx_annc_m_audience'),
+        ]
 
     def __str__(self):
         return self.title
@@ -169,6 +182,9 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read'], name='idx_notif_rec_read'),
+        ]
 
     def __str__(self):
         return f"{self.title} -> {self.recipient}"

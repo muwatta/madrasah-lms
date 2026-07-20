@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { examAPI, subjectAPI } from '../../api';
 import type { Exam, ExamResult, Subject } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
-import { Skeleton, SkeletonTable } from '../../components/Skeleton';
+import { SkeletonTable } from '../../components/Skeleton';
 
 export default function ExamManagementPage() {
   const { t } = useLanguage();

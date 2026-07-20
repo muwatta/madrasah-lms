@@ -63,35 +63,36 @@ def process_pending_messages():
 def send_overdue_fee_reminders():
     """Send fee reminders for overdue fees to opted-in parents."""
     from school_ops.models import Fee
-    from users.models import StudentParent, User
+    from users.models import Madrasah, StudentParent
     from .models import WhatsAppRecipient
     from .services import WhatsAppService
 
     today = date.today()
-    overdue_fees = Fee.objects.filter(
-        status='overdue',
-        due_date__lte=today,
-    ).select_related('madrasah', 'student')
-
     service = WhatsAppService()
     sent = 0
-    for fee in overdue_fees:
-        parent_links = StudentParent.objects.filter(student=fee.student).select_related('parent')
-        for link in parent_links:
-            parent = link.parent
-            try:
-                recipient = WhatsAppRecipient.objects.get(
-                    madrasah=fee.madrasah, parent=parent, is_opted_in=True,
-                )
-            except WhatsAppRecipient.DoesNotExist:
-                continue
 
-            msg = service.send_fee_reminder(
-                fee.madrasah, parent, fee.student,
-                fee.balance, fee.due_date,
-            )
-            if msg:
-                sent += 1
+    for madrasah in Madrasah.objects.all():
+        overdue_fees = Fee.objects.filter(
+            madrasah=madrasah, status='overdue', due_date__lte=today,
+        ).select_related('student')
+
+        for fee in overdue_fees:
+            parent_links = StudentParent.objects.filter(student=fee.student).select_related('parent')
+            for link in parent_links:
+                parent = link.parent
+                try:
+                    recipient = WhatsAppRecipient.objects.get(
+                        madrasah=madrasah, parent=parent, is_opted_in=True,
+                    )
+                except WhatsAppRecipient.DoesNotExist:
+                    continue
+
+                msg = service.send_fee_reminder(
+                    madrasah, parent, fee.student,
+                    fee.balance, fee.due_date,
+                )
+                if msg:
+                    sent += 1
 
     logger.info("[TASK] Sent %d fee reminders", sent)
     return sent
@@ -101,34 +102,36 @@ def send_overdue_fee_reminders():
 def send_daily_attendance_summary():
     """Send daily attendance summary to parents of absent/late students."""
     from school_ops.models import Attendance
-    from users.models import StudentParent
+    from users.models import Madrasah, StudentParent
     from .models import WhatsAppRecipient
     from .services import WhatsAppService
 
     today = date.today()
-    absent_attendances = Attendance.objects.filter(
-        date=today, status__in=['absent', 'late'],
-    ).select_related('madrasah', 'student')
-
     service = WhatsAppService()
     sent = 0
-    for att in absent_attendances:
-        parent_links = StudentParent.objects.filter(student=att.student).select_related('parent')
-        for link in parent_links:
-            parent = link.parent
-            try:
-                recipient = WhatsAppRecipient.objects.get(
-                    madrasah=att.madrasah, parent=parent, is_opted_in=True,
-                )
-            except WhatsAppRecipient.DoesNotExist:
-                continue
 
-            msg = service.send_attendance_alert(
-                att.madrasah, parent, att.student,
-                today, att.status,
-            )
-            if msg:
-                sent += 1
+    for madrasah in Madrasah.objects.all():
+        absent_attendances = Attendance.objects.filter(
+            madrasah=madrasah, date=today, status__in=['absent', 'late'],
+        ).select_related('student')
+
+        for att in absent_attendances:
+            parent_links = StudentParent.objects.filter(student=att.student).select_related('parent')
+            for link in parent_links:
+                parent = link.parent
+                try:
+                    recipient = WhatsAppRecipient.objects.get(
+                        madrasah=madrasah, parent=parent, is_opted_in=True,
+                    )
+                except WhatsAppRecipient.DoesNotExist:
+                    continue
+
+                msg = service.send_attendance_alert(
+                    madrasah, parent, att.student,
+                    today, att.status,
+                )
+                if msg:
+                    sent += 1
 
     logger.info("[TASK] Sent %d attendance alerts", sent)
     return sent

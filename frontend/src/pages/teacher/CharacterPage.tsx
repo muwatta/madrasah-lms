@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
 import { characterAPI, enrollmentAPI } from '../../api';
-import { useLanguage } from '../../context/LanguageContext';
-import { Skeleton, SkeletonCard, SkeletonTable } from '../../components/Skeleton';
+import { Skeleton, SkeletonCard } from '../../components/Skeleton';
 
 interface Trait { id: number; name: string; name_ar: string; category: string; is_active: boolean; }
 interface Student { id: number; full_name: string; }
-interface Score { trait: number; score: number; notes: string; }
 
 const SCORE_LABELS = ['', 'Poor', 'Needs Improvement', 'Satisfactory', 'Good', 'Excellent'];
 const CATEGORIES = ['moral', 'social', 'spiritual', 'academic', 'personal'];
 
 export default function CharacterPage() {
-  const { t } = useLanguage();
   const [tab, setTab] = useState<'evaluate'|'traits'|'summary'>('evaluate');
   const [traits, setTraits] = useState<Trait[]>([]);
   const [students, setStudents] = useState<Student[]>([]);

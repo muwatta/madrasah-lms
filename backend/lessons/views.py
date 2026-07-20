@@ -1,10 +1,14 @@
+import logging
 from django.utils import timezone
 from django.db.models import Count, Q
+
+logger = logging.getLogger(__name__)
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from config.permissions import IsMudeer
 from .models import LessonPlan, Homework, HomeworkSubmission
 from .serializers import (
     LessonPlanSerializer,
@@ -66,13 +70,10 @@ class LessonPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class LessonPlanApprovalView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsMudeer]
 
     def patch(self, request, pk):
         user = request.user
-        if user.role not in ('mudeer', 'idaarah'):
-            return Response({'error': 'Only mudeer or idaarah can approve lesson plans.'},
-                            status=status.HTTP_403_FORBIDDEN)
 
         try:
             lesson_plan = LessonPlan.objects.get(pk=pk, madrasah=user.madrasah)
@@ -89,6 +90,7 @@ class LessonPlanApprovalView(APIView):
         lesson_plan.approval_notes = request.data.get('approval_notes', '')
         lesson_plan.save()
 
+        logger.info("LessonPlan %s %s by %s (madrasah %s)", pk, new_status, user.id, user.madrasah_id)
         return Response(LessonPlanSerializer(lesson_plan).data)
 
 

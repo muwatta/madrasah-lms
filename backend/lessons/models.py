@@ -68,6 +68,10 @@ class Homework(models.Model):
 
     class Meta:
         ordering = ['-due_date']
+        indexes = [
+            models.Index(fields=['madrasah', 'teacher'], name='idx_hw_m_teacher'),
+            models.Index(fields=['madrasah', 'is_published'], name='idx_hw_m_published'),
+        ]
 
     def __str__(self):
         return self.title
@@ -103,6 +107,9 @@ class HomeworkSubmission(models.Model):
     class Meta:
         unique_together = ['homework', 'student']
         ordering = ['-submitted_at']
+        indexes = [
+            models.Index(fields=['madrasah', 'status'], name='idx_sub_m_status'),
+        ]
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.homework}"

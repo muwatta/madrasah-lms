@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { lessonAPI, subjectAPI, schoolClassAPI } from '../../api';
-import { Skeleton, SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
+import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
 

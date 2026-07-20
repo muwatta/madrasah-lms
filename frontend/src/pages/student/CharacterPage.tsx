@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { characterAPI } from '../../api';
-import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
 export default function StudentCharacterPage() {
-  const { t } = useLanguage();
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { whatsappAPI, userAPI } from '../../api';
-import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonTable } from '../../components/Skeleton';
 
@@ -19,7 +18,6 @@ interface Message {
 
 export default function WhatsAppPage() {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const [tab, setTab] = useState<'templates'|'recipients'|'messages'|'send'>('templates');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [recipients, setRecipients] = useState<Recipient[]>([]);

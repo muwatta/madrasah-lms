@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardAPI } from '../../api';
 import type { ParentDashboard as ParentDashboardType } from '../../types';
-import { Skeleton, SkeletonStatsGrid, SkeletonCard, SkeletonTable, SkeletonChart } from '../../components/Skeleton';
+import { SkeletonStatsGrid, SkeletonCard, SkeletonTable, SkeletonChart } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
 
 function getInitials(name: string) {

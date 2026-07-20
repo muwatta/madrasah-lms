@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { whatsappAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
 export default function WhatsAppOptInPage() {
-  const { t, language } = useLanguage();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

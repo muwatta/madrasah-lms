@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { academicAPI, lessonAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonTable } from '../../components/Skeleton';
 
@@ -60,7 +60,7 @@ export default function CalendarPage() {
       academicAPI.studentCalendarEvents(),
       lessonAPI.homework.list({ published: true }),
     ])
-      .then(([ttRes, calRes, hwRes]) => {
+      .then(([ttRes, calRes]) => {
         setSlots(ttRes.data);
         const calData = calRes.data;
         setEvents(calData.events || []);
