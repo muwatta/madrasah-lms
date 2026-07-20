@@ -31,6 +31,16 @@ export const translations = {
     flashcards: { ar: 'البطاقات التعليمية', en: 'Flashcards' },
     whatsapp: { ar: 'واتساب', en: 'WhatsApp' },
     character: { ar: 'تقييم الشخصية', en: 'Character' },
+    prayerTimes: { ar: 'أوقات الصلاة', en: 'Prayer Times' },
+    homework: { ar: 'الواجبات', en: 'Homework' },
+    portfolio: { ar: 'المحفظة', en: 'Portfolio' },
+    lessonPlanner: { ar: 'مخطط الدروس', en: 'Lesson Planner' },
+    quran: { ar: 'القرآن', en: 'Quran' },
+    academic: { ar: 'أكاديمي', en: 'Academic' },
+    admissions: { ar: 'القبول', en: 'Admissions' },
+    atRisk: { ar: 'في خطر', en: 'At Risk' },
+    teacherWorkload: { ar: 'عبء المعلم', en: 'Teacher Workload' },
+    alerts: { ar: 'تنبيهات', en: 'Alerts' },
   },
   // Roles
   roles: {
