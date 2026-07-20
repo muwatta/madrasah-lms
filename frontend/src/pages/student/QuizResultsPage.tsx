@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { attemptAPI } from '../../api';
 import type { QuizAttempt } from '../../types';
@@ -25,6 +25,21 @@ export default function QuizResultsPage() {
     fetchAttempts();
   }, []);
 
+  const stats = useMemo(() => {
+    const graded = attempts.filter((a) => a.score !== null);
+    if (graded.length === 0) return null;
+    const scores = graded.map((a) => a.percentage || 0);
+    const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+    const best = Math.max(...scores);
+    const passCount = graded.filter((a) => (a.percentage || 0) >= 50).length;
+    return {
+      total: attempts.length,
+      passRate: Math.round((passCount / graded.length) * 100),
+      average: Math.round(avg),
+      best: Math.round(best),
+    };
+  }, [attempts]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -41,10 +56,36 @@ export default function QuizResultsPage() {
         <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-4">{error}</div>
       )}
 
+      {stats && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+            <div className="text-xs text-gray-500 mt-1">{t('student.totalAttempts')}</div>
+          </div>
+          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-emerald-600">{stats.average}%</div>
+            <div className="text-xs text-gray-500 mt-1">{t('student.averageScore')}</div>
+          </div>
+          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{stats.best}%</div>
+            <div className="text-xs text-gray-500 mt-1">{t('student.bestScore')}</div>
+          </div>
+          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600">{stats.passRate}%</div>
+            <div className="text-xs text-gray-500 mt-1">{t('student.passRate')}</div>
+          </div>
+        </div>
+      )}
+
       {attempts.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          <p>{t('student.noAttemptsYet')}</p>
-          <Link to="/student/quizzes" className="mt-2 inline-block text-emerald-600 hover:text-emerald-700 font-medium">
+        <div className="text-center py-16">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="text-gray-500 mb-3">{t('student.noAttemptsYet')}</p>
+          <Link to="/student/quizzes" className="inline-block px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition">
             {t('student.takeAQuiz')}
           </Link>
         </div>
@@ -64,40 +105,51 @@ export default function QuizResultsPage() {
             <tbody>
               {attempts.map((attempt) => {
                 const hasResult = attempt.score !== null;
+                const pct = attempt.percentage || 0;
                 return (
-                  <tr key={attempt.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                  <tr key={attempt.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                     <td className="py-3 px-4 font-medium text-gray-800">{attempt.quiz_title}</td>
-                    <td className="py-3 px-4">{hasResult ? attempt.score : '-'}</td>
+                    <td className="py-3 px-4">
+                      {hasResult ? (
+                        <span className="font-semibold text-gray-900">{attempt.score}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
                     <td className="py-3 px-4">
                       {hasResult ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                          <div className="w-20 bg-gray-200 rounded-full h-2">
                             <div
-                              className={`h-2 rounded-full ${(attempt.percentage || 0) >= 50 ? 'bg-green-500' : 'bg-red-500'}`}
-                              style={{ width: `${Math.min(attempt.percentage || 0, 100)}%` }}
+                              className={`h-2 rounded-full ${pct >= 70 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                              style={{ width: `${Math.min(pct, 100)}%` }}
                             />
                           </div>
-                          <span>{attempt.percentage}%</span>
+                          <span className="text-xs font-medium text-gray-600">{pct}%</span>
                         </div>
-                      ) : '-'}
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-gray-500">#{attempt.attempt_number}</td>
                     <td className="py-3 px-4">
                       {hasResult ? (
-                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                          (attempt.percentage || 0) >= 50
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          pct >= 70
                             ? 'bg-green-100 text-green-800'
+                            : pct >= 50
+                            ? 'bg-amber-100 text-amber-800'
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {(attempt.percentage || 0) >= 50 ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
+                          {pct >= 50 ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
                         </span>
                       ) : (
-                        <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                           {t('enrollmentStatus.inProgress')}
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-gray-500">
+                    <td className="py-3 px-4 text-gray-500 text-xs">
                       {attempt.submitted_at
                         ? new Date(attempt.submitted_at).toLocaleDateString()
                         : new Date(attempt.started_at).toLocaleDateString()}

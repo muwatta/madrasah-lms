@@ -23,6 +23,7 @@ export default function QuizTakePage() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<GradingResult | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const formatTime = (seconds: number) => {
@@ -38,6 +39,7 @@ export default function QuizTakePage() {
   const handleSubmit = useCallback(async () => {
     if (!attemptId || submitting) return;
     setSubmitting(true);
+    setShowConfirmModal(false);
     if (timerRef.current) clearInterval(timerRef.current);
     try {
       const res = await attemptAPI.submit(attemptId, answers);
@@ -156,13 +158,64 @@ export default function QuizTakePage() {
   if (questions.length === 0) return null;
 
   const question = questions[currentIndex];
+  const answeredCount = Object.keys(answers).length;
+  const unansweredCount = questions.length - answeredCount;
+  const isLastQuestion = currentIndex === questions.length - 1;
+  const isTimeLow = timeLeft !== null && timeLeft <= 30;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
+      {/* Confirm Submit Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+            <h2 className="text-xl font-bold text-gray-900">{t('quizTake.confirmSubmit')}</h2>
+            <p className="text-gray-600">{t('quizTake.confirmSubmitDesc')}</p>
+            {unansweredCount > 0 && (
+              <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-amber-700 text-sm font-medium">
+                <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                {t('quizTake.unansweredWarning')} ({unansweredCount} {t('quizTake.unanswered')})
+              </div>
+            )}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold transition"
+              >
+                {submitting ? t('common.submitting') : t('quizTake.submitQuiz')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Timer warning banner */}
+      {isTimeLow && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700 text-sm font-medium animate-pulse">
+          <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {t('quizTake.timeWarning')} {t('quizTake.autoSubmit')} {formatTime(timeLeft!)}
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-800">{quiz?.title}</h1>
         {timeLeft !== null && (
-          <div className={`px-4 py-2 rounded-lg font-mono text-lg font-bold ${timeLeft < 60 ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+          <div className={`px-4 py-2 rounded-lg font-mono text-lg font-bold transition-colors ${
+            timeLeft <= 30 ? 'bg-red-100 text-red-700 animate-pulse' :
+            timeLeft <= 60 ? 'bg-amber-100 text-amber-700' :
+            'bg-emerald-100 text-emerald-700'
+          }`}>
             {formatTime(timeLeft)}
           </div>
         )}
@@ -170,7 +223,9 @@ export default function QuizTakePage() {
 
       <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
         <span>{t('quizTake.questionCounter')} {currentIndex + 1} {t('quizTake.of')} {questions.length}</span>
-        <span>{Object.keys(answers).length} {t('quizTake.answered')}</span>
+        <span className={unansweredCount > 0 ? 'text-amber-600 font-medium' : ''}>
+          {answeredCount}/{questions.length} {t('quizTake.answered')}
+        </span>
       </div>
 
       <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
@@ -187,6 +242,11 @@ export default function QuizTakePage() {
           <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
             {question.question_type === 'mcq' ? t('questionTypes.mcq') : question.question_type === 'fill_blank' ? t('questionTypes.fillBlank') : question.question_type === 'short_answer' ? t('questionTypes.shortAnswer') : t('questionTypes.essay')}
           </span>
+          {answers[String(question.id)] && (
+            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
+              ✓
+            </span>
+          )}
         </div>
 
         <p className="text-lg font-medium text-gray-800 mb-6">{question.question_text}</p>
@@ -246,11 +306,9 @@ export default function QuizTakePage() {
           {t('common.previous')}
         </button>
 
-        {currentIndex === questions.length - 1 ? (
+        {isLastQuestion ? (
           <button
-            onClick={() => {
-              if (window.confirm(t('quizTake.confirmSubmit'))) handleSubmit();
-            }}
+            onClick={() => setShowConfirmModal(true)}
             disabled={submitting}
             className="px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold transition"
           >
