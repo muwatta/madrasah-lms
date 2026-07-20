@@ -41,13 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadUser = useCallback(async () => {
-    const activeEmail = localStorage.getItem(ACTIVE_EMAIL_KEY);
+    const activeEmail = sessionStorage.getItem(ACTIVE_EMAIL_KEY);
     const sessions = getStoredSessions();
 
     if (activeEmail && sessions[activeEmail]) {
       const session = sessions[activeEmail];
-      localStorage.setItem('access_token', session.tokens.access);
-      localStorage.setItem('refresh_token', session.tokens.refresh);
+      sessionStorage.setItem('access_token', session.tokens.access);
+      sessionStorage.setItem('refresh_token', session.tokens.refresh);
       try {
         const response = await authAPI.getMe();
         setUser(response.data);
@@ -56,13 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         delete sessions[activeEmail];
         saveStoredSessions(sessions);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem(ACTIVE_EMAIL_KEY);
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('refresh_token');
+        sessionStorage.removeItem(ACTIVE_EMAIL_KEY);
       }
     } else {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('access_token');
+      sessionStorage.removeItem('refresh_token');
     }
     setLoading(false);
   }, []);
@@ -75,9 +75,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const response = await authAPI.login(email, password);
     const { user: userData, tokens } = response.data;
 
-    localStorage.setItem('access_token', tokens.access);
-    localStorage.setItem('refresh_token', tokens.refresh);
-    localStorage.setItem(ACTIVE_EMAIL_KEY, email);
+    sessionStorage.setItem('access_token', tokens.access);
+    sessionStorage.setItem('refresh_token', tokens.refresh);
+    sessionStorage.setItem(ACTIVE_EMAIL_KEY, email);
 
     const sessions = getStoredSessions();
     sessions[email] = { user: userData, tokens };
@@ -88,15 +88,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    const activeEmail = localStorage.getItem(ACTIVE_EMAIL_KEY);
+    const activeEmail = sessionStorage.getItem(ACTIVE_EMAIL_KEY);
     if (activeEmail) {
       const sessions = getStoredSessions();
       delete sessions[activeEmail];
       saveStoredSessions(sessions);
     }
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem(ACTIVE_EMAIL_KEY);
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
+    sessionStorage.removeItem(ACTIVE_EMAIL_KEY);
     setUser(null);
   };
 
@@ -105,9 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!sessions[email]) return false;
 
     const session = sessions[email];
-    localStorage.setItem('access_token', session.tokens.access);
-    localStorage.setItem('refresh_token', session.tokens.refresh);
-    localStorage.setItem(ACTIVE_EMAIL_KEY, email);
+    sessionStorage.setItem('access_token', session.tokens.access);
+    sessionStorage.setItem('refresh_token', session.tokens.refresh);
+    sessionStorage.setItem(ACTIVE_EMAIL_KEY, email);
     setUser(session.user);
     return true;
   };
@@ -119,12 +119,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const removeStoredSession = (email: string) => {
     const sessions = getStoredSessions();
-    const activeEmail = localStorage.getItem(ACTIVE_EMAIL_KEY);
+    const activeEmail = sessionStorage.getItem(ACTIVE_EMAIL_KEY);
 
     if (email === activeEmail) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      localStorage.removeItem(ACTIVE_EMAIL_KEY);
+      sessionStorage.removeItem('access_token');
+      sessionStorage.removeItem('refresh_token');
+      sessionStorage.removeItem(ACTIVE_EMAIL_KEY);
       setUser(null);
     }
 
