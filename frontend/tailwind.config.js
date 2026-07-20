@@ -25,6 +25,45 @@ export default {
           dark: '#1a1a2e',
         }
       },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-out forwards',
+        'slide-up': 'slideUp 0.35s ease-out forwards',
+        'slide-down': 'slideDown 0.35s ease-out forwards',
+        'slide-in-right': 'slideInRight 0.25s ease-out forwards',
+        'slide-in-left': 'slideInLeft 0.35s ease-out forwards',
+        'scale-in': 'scaleIn 0.2s ease-out forwards',
+        'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
+        },
+        slideUp: {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideDown: {
+          from: { opacity: '0', transform: 'translateY(-12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideInRight: {
+          from: { opacity: '0', transform: 'translateX(20px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        slideInLeft: {
+          from: { opacity: '0', transform: 'translateX(-20px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        scaleIn: {
+          from: { opacity: '0', transform: 'scale(0.95)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+      },
+      transitionDuration: {
+        '200': '200ms',
+        '300': '300ms',
+      },
     },
   },
   plugins: [],

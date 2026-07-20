@@ -21,7 +21,7 @@ export default function TeacherDashboard() {
   }, [t]);
 
   if (loading) return <LoadingSpinner size="lg" className="mt-20" />;
-  if (error) return <div className="text-center text-red-600 mt-20">{error}</div>;
+  if (error) return <div className="max-w-7xl mx-auto px-4 py-8"><div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-700">{error}</div></div>;
   if (!data) return null;
 
   return (

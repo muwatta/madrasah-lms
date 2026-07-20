@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import Layout from './components/Layout';
+import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -30,7 +31,7 @@ function App() {
       <LanguageProvider>
       <AuthProvider>
         <Router>
-          <Suspense fallback={<div className="flex h-64 items-center justify-center"><div className="text-emerald-600 text-lg">Loading...</div></div>}>
+          <Suspense fallback={<div className="flex h-64 items-center justify-center animate-fade-in"><LoadingSpinner size="lg" /></div>}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />

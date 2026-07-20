@@ -3,6 +3,7 @@ import { quizAPI, questionAPI, subjectAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { Quiz, Subject, Topic, Question } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
 
 type QuizForm = {
@@ -38,6 +39,7 @@ export default function QuizManagementPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [questionFilter, setQuestionFilter] = useState({ topic: '', type: '', difficulty: '', search: '' });
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const loadQuizzes = useCallback(() => {
     setLoading(true);
@@ -126,13 +128,19 @@ export default function QuizManagementPage() {
     }
   };
 
-  const deleteQuiz = async (id: number) => {
-    if (!confirm(t('quizManagement.deleteConfirm'))) return;
+  const deleteQuiz = (id: number) => {
+    setConfirmDeleteId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDeleteId === null) return;
     try {
-      await quizAPI.delete(id);
+      await quizAPI.delete(confirmDeleteId);
       loadQuizzes();
     } catch {
       setError(t('quizManagement.deleteFailed'));
+    } finally {
+      setConfirmDeleteId(null);
     }
   };
 
@@ -393,6 +401,16 @@ export default function QuizManagementPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {confirmDeleteId !== null && (
+        <ConfirmModal
+          title={t('quizManagement.deleteConfirm')}
+          message={t('quizManagement.deleteConfirm')}
+          variant="danger"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
       )}
     </div>
   );

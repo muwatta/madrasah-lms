@@ -6,7 +6,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 export default function QuizListPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
@@ -78,7 +78,7 @@ export default function QuizListPage() {
         >
           <option value="">{t('filters.allSubjects')}</option>
           {subjects.map((s) => (
-            <option key={s.id} value={s.id}>{s.name_ar}</option>
+            <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>
           ))}
         </select>
       </div>
@@ -94,7 +94,7 @@ export default function QuizListPage() {
           {groupedQuizzes.map((group) => (
             <div key={group.subject.id}>
               <div className="flex items-center gap-3 mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">{group.subject.name_ar}</h2>
+                <h2 className="text-lg font-semibold text-gray-800">{language === 'ar' ? group.subject.name_ar : group.subject.name_en}</h2>
                 <span className="text-sm text-gray-400">({group.quizzes.length})</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -55,6 +55,7 @@ export const translations = {
     all: { ar: 'الكل', en: 'All' },
     openMenu: { ar: 'فتح القائمة', en: 'Open menu' },
     toggleLanguage: { ar: 'التبديل إلى الإنجليزية', en: 'Switch to Arabic' },
+    confirm: { ar: 'تأكيد', en: 'Confirm' },
   },
   // Fields
   fields: {

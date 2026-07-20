@@ -3,6 +3,7 @@ import { questionAPI, subjectAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { Question, Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
 
 type QuestionForm = {
@@ -38,6 +39,7 @@ export default function QuestionBankPage() {
   const [selectedSubject, setSelectedSubject] = useState<number | ''>('');
   const [filters, setFilters] = useState({ topic: '', type: '', difficulty: '', search: '' });
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const loadQuestions = useCallback(() => {
     setLoading(true);
@@ -111,13 +113,19 @@ export default function QuestionBankPage() {
     }
   };
 
-  const deleteQuestion = async (id: number) => {
-    if (!confirm(t('questionBank.deleteConfirm'))) return;
+  const deleteQuestion = (id: number) => {
+    setConfirmDeleteId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (confirmDeleteId === null) return;
     try {
-      await questionAPI.delete(id);
+      await questionAPI.delete(confirmDeleteId);
       loadQuestions();
     } catch {
       setError(t('questionBank.deleteFailed'));
+    } finally {
+      setConfirmDeleteId(null);
     }
   };
 
@@ -435,6 +443,16 @@ export default function QuestionBankPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {confirmDeleteId !== null && (
+        <ConfirmModal
+          title={t('questionBank.deleteConfirm')}
+          message={t('questionBank.deleteConfirm')}
+          variant="danger"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
       )}
     </div>
   );

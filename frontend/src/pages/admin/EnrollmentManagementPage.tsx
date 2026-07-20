@@ -146,7 +146,7 @@ export default function EnrollmentManagementPage() {
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{e.student_name}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-gray-600">{e.subject_name}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-gray-600">{e.ustaadh_name || '—'}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-500">{new Date(e.enrolled_at).toLocaleDateString('ar')}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-gray-500">{new Date(e.enrolled_at).toLocaleDateString()}</td>
                 </tr>
               ))}
               {!enrollments.length && (

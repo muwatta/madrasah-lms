@@ -78,18 +78,19 @@ export default function Layout() {
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {links.map((link) => {
+        {links.map((link, i) => {
           const isActive = location.pathname === link.path;
           return (
             <Link
               key={link.path}
               to={link.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`nav-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium opacity-0 animate-slide-up ${
                 isActive
-                  ? 'bg-primary-600 text-white'
+                  ? 'bg-primary-600 text-white shadow-sm shadow-primary-600/30'
                   : 'text-gray-300 hover:bg-white/10 hover:text-white'
               }`}
+              style={{ animationDelay: `${i * 40}ms` }}
             >
               {link.label}
             </Link>
@@ -113,12 +114,12 @@ export default function Layout() {
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 lg:hidden animate-fade-in">
           <div
-            className="fixed inset-0 bg-black/50"
+            className="fixed inset-0 bg-black/50 transition-opacity"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="fixed inset-y-0 end-0 z-50 w-64">
+          <aside className="fixed inset-y-0 end-0 z-50 w-64 sidebar-slide-enter">
             {sidebarContent}
           </aside>
         </div>
@@ -131,7 +132,7 @@ export default function Layout() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+              className="btn-press rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
               aria-label={t('common.openMenu')}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +148,7 @@ export default function Layout() {
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="btn-press flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               title={t('common.toggleLanguage')}
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +165,7 @@ export default function Layout() {
             )}
             <button
               onClick={handleLogout}
-              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="btn-press rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
             >
               {t('nav.logout')}
             </button>
@@ -172,7 +173,7 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6"><Outlet /></main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6"><div className="page-enter"><Outlet /></div></main>
       </div>
     </div>
   );

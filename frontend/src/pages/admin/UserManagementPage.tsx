@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { userAPI } from '../../api';
 import type { User } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface UserFormData {
@@ -90,12 +91,14 @@ export default function UserManagementPage() {
   };
 
   const [deactivateError, setDeactivateError] = useState<string | null>(null);
+  const [confirmDeactivateId, setConfirmDeactivateId] = useState<number | null>(null);
 
-  const handleDeactivate = async (id: number) => {
-    if (!confirm(t('userManagement.deactivateConfirm'))) return;
+  const handleDeactivate = async () => {
+    if (confirmDeactivateId === null) return;
     setDeactivateError(null);
     try {
-      await userAPI.update(id, { is_active: false });
+      await userAPI.update(confirmDeactivateId, { is_active: false });
+      setConfirmDeactivateId(null);
       loadUsers();
     } catch {
       setDeactivateError(t('userManagement.deactivateFailed'));
@@ -225,7 +228,7 @@ export default function UserManagementPage() {
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(user)} className="text-primary-600 hover:underline text-sm font-medium">{t('common.edit')}</button>
                       {user.is_active && (
-                        <button onClick={() => handleDeactivate(user.id)} className="text-red-600 hover:underline text-sm font-medium">{t('userManagement.deactivate')}</button>
+                        <button onClick={() => setConfirmDeactivateId(user.id)} className="text-red-600 hover:underline text-sm font-medium">{t('userManagement.deactivate')}</button>
                       )}
                     </div>
                   </td>
@@ -237,6 +240,15 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
+      )}
+      {confirmDeactivateId !== null && (
+        <ConfirmModal
+          title={t('userManagement.deactivate')}
+          message={t('userManagement.deactivateConfirm')}
+          onConfirm={handleDeactivate}
+          onCancel={() => setConfirmDeactivateId(null)}
+          variant="danger"
+        />
       )}
     </div>
   );

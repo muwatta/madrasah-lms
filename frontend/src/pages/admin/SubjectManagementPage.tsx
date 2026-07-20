@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { subjectAPI } from '../../api';
 import type { Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
 
 export default function SubjectManagementPage() {
@@ -62,10 +63,13 @@ export default function SubjectManagementPage() {
     setShowSubjectForm(true);
   };
 
-  const handleDeleteSubject = async (id: number) => {
-    if (!confirm(t('subjectManagement.deleteSubjectConfirm'))) return;
+  const [confirmDeleteSubjectId, setConfirmDeleteSubjectId] = useState<number | null>(null);
+
+  const handleDeleteSubject = async () => {
+    if (confirmDeleteSubjectId === null) return;
     try {
-      await subjectAPI.delete(id);
+      await subjectAPI.delete(confirmDeleteSubjectId);
+      setConfirmDeleteSubjectId(null);
       loadSubjects();
     } catch {
       setError(t('subjectManagement.deleteFailed'));
@@ -220,7 +224,7 @@ export default function SubjectManagementPage() {
                 <div className="flex gap-2">
                   <button onClick={() => openEditSubject(subject)} className="text-sm font-medium text-primary-600 hover:underline">{t('common.edit')}</button>
                   <button onClick={() => openCreateTopic(subject.id)} className="text-sm font-medium text-blue-600 hover:underline">{t('subjectManagement.newTopic')}</button>
-                  <button onClick={() => handleDeleteSubject(subject.id)} className="text-sm font-medium text-red-600 hover:underline">{t('common.delete')}</button>
+                  <button onClick={() => setConfirmDeleteSubjectId(subject.id)} className="text-sm font-medium text-red-600 hover:underline">{t('common.delete')}</button>
                 </div>
               </div>
               {expandedSubject === subject.id && (
@@ -248,6 +252,15 @@ export default function SubjectManagementPage() {
           ))}
           {!subjects.length && <p className="py-8 text-center text-gray-500">{t('subjectManagement.noSubjects')}</p>}
         </div>
+      )}
+      {confirmDeleteSubjectId !== null && (
+        <ConfirmModal
+          title={t('common.delete')}
+          message={t('subjectManagement.deleteSubjectConfirm')}
+          onConfirm={handleDeleteSubject}
+          onCancel={() => setConfirmDeleteSubjectId(null)}
+          variant="danger"
+        />
       )}
     </div>
   );

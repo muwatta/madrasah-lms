@@ -4,6 +4,7 @@ import { userAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { User } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface StudentParentLink {
@@ -65,12 +66,14 @@ export default function ParentStudentPage() {
   };
 
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [confirmDeleteLinkId, setConfirmDeleteLinkId] = useState<number | null>(null);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm(t('parentStudent.removeConfirm'))) return;
+  const handleDelete = async () => {
+    if (confirmDeleteLinkId === null) return;
     setDeleteError(null);
     try {
-      await api.delete(`/auth/student-parents/${id}/`);
+      await api.delete(`/auth/student-parents/${confirmDeleteLinkId}/`);
+      setConfirmDeleteLinkId(null);
       loadData();
     } catch {
       setDeleteError(t('parentStudent.deleteFailed'));
@@ -104,7 +107,7 @@ export default function ParentStudentPage() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('parentStudent.relationship')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">{t('parentStudent.selectParent')}</label>
               <select required value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })} className={inputClass}>
                 <option value="">{t('parentStudent.selectParent')}</option>
                 {parents.map((p) => <option key={p.id} value={p.id}>{p.full_name} ({p.email})</option>)}
@@ -160,7 +163,7 @@ export default function ParentStudentPage() {
                   <td className="px-4 py-3 text-gray-600 capitalize">{link.relationship === 'father' ? t('relationship.father') : link.relationship === 'mother' ? t('relationship.mother') : t('relationship.guardian')}</td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => handleDelete(link.id)}
+                      onClick={() => setConfirmDeleteLinkId(link.id)}
                       className="text-sm font-medium text-red-600 hover:underline"
                     >
                       {t('parentStudent.remove')}
@@ -174,6 +177,15 @@ export default function ParentStudentPage() {
             </tbody>
           </table>
         </div>
+      )}
+      {confirmDeleteLinkId !== null && (
+        <ConfirmModal
+          title={t('parentStudent.remove')}
+          message={t('parentStudent.removeConfirm')}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmDeleteLinkId(null)}
+          variant="danger"
+        />
       )}
     </div>
   );

@@ -298,7 +298,7 @@ export default function ExamManagementPage() {
                 <tr key={exam.id} className={`border-b border-gray-50 hover:bg-gray-50 ${selectedExam === exam.id ? 'bg-primary-50' : ''}`}>
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{exam.title}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-gray-600">{exam.subject_name}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{new Date(exam.exam_date).toLocaleDateString('ar')}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{new Date(exam.exam_date).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-gray-600">{exam.total_marks}</td>
                   <td className="px-4 py-3 text-gray-600">{exam.result_count}</td>
                   <td className="px-4 py-3">
