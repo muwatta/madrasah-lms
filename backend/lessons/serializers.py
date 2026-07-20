@@ -34,7 +34,7 @@ class HomeworkSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'madrasah', 'lesson_plan', 'teacher', 'teacher_name',
             'subject', 'subject_name', 'school_class', 'school_class_name',
-            'title', 'description', 'due_date', 'total_marks', 'attachments',
+            'title', 'description', 'due_date', 'total_marks', 'attachments', 'file',
             'is_published', 'late_submission_allowed',
             'submission_count', 'created_at', 'updated_at',
         ]
@@ -50,7 +50,7 @@ class HomeworkSubmissionSerializer(serializers.ModelSerializer):
         model = HomeworkSubmission
         fields = [
             'id', 'madrasah', 'homework', 'homework_title',
-            'student', 'student_name', 'submitted_at', 'content', 'attachments',
+            'student', 'student_name', 'submitted_at', 'content', 'file', 'attachments',
             'is_late', 'score', 'feedback', 'graded_by', 'graded_by_name',
             'graded_at', 'status',
         ]

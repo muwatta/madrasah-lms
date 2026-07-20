@@ -8,7 +8,7 @@ def grade_quiz(attempt):
     question_map = {q.id: q for q in questions}
 
     score = 0
-    total_questions = len(quiz.question_ids)
+    auto_graded_count = 0
     results = {}
 
     for q_id_str, user_answer in attempt.answers.items():
@@ -20,6 +20,7 @@ def grade_quiz(attempt):
         is_correct = False
 
         if question.question_type in ('mcq', 'fill_blank', 'short_answer'):
+            auto_graded_count += 1
             correct = question.correct_answer.strip().lower()
             given = str(user_answer).strip().lower()
 
@@ -44,7 +45,7 @@ def grade_quiz(attempt):
         if is_correct:
             score += 1
 
-    percentage = round((score / total_questions) * 100, 1) if total_questions > 0 else 0
+    percentage = round((score / auto_graded_count) * 100, 1) if auto_graded_count > 0 else 0
 
     attempt.score = score
     attempt.percentage = percentage
@@ -52,7 +53,7 @@ def grade_quiz(attempt):
 
     return {
         'score': score,
-        'total': total_questions,
+        'total': auto_graded_count,
         'percentage': percentage,
         'results': results,
     }

@@ -4,13 +4,14 @@ import { quizAPI, attemptAPI, questionAPI } from '../../api';
 import type { Question, Quiz, GradingResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import RichTextEditor from '../../components/RichTextEditor';
 
 interface Answers {
   [questionId: string]: string;
 }
 
 export default function QuizTakePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { quizId } = useParams<{ quizId: string }>();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -131,10 +132,16 @@ export default function QuizTakePage() {
                   {i + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-800 mb-2">{q.question_text}</p>
-                  <p className="text-sm text-gray-600">{t('quizTake.yourAnswer')} <span className="font-medium">{r.user_answer || t('quizTake.empty')}</span></p>
-                  {!r.is_correct && (
-                    <p className="text-sm text-gray-600">{t('quizTake.correctAnswer')} <span className="font-medium text-green-700">{r.correct_answer}</span></p>
+                  <div className="font-medium text-gray-800 mb-2 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: q.question_text }} />
+                  <div className="text-sm text-gray-600">
+                    {t('quizTake.yourAnswer')}
+                    <div className="font-medium prose prose-sm max-w-none mt-1" dangerouslySetInnerHTML={{ __html: r.user_answer || t('quizTake.empty') }} />
+                  </div>
+                  {!r.is_correct && r.correct_answer && (
+                    <div className="text-sm text-gray-600 mt-1">
+                      {t('quizTake.correctAnswer')}
+                      <div className="font-medium text-green-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: r.correct_answer }} />
+                    </div>
                   )}
                   {q.explanation && (
                     <p className="text-sm text-gray-500 mt-2 italic">{q.explanation}</p>
@@ -249,7 +256,7 @@ export default function QuizTakePage() {
           )}
         </div>
 
-        <p className="text-lg font-medium text-gray-800 mb-6">{question.question_text}</p>
+        <div className="text-lg font-medium text-gray-800 mb-6 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: question.question_text }} />
 
         {question.question_type === 'mcq' && question.options && (
           <div className="space-y-3">
@@ -293,6 +300,15 @@ export default function QuizTakePage() {
             placeholder={t('quizTake.typeAnswer')}
             rows={4}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition resize-y"
+          />
+        )}
+
+        {question.question_type === 'essay' && (
+          <RichTextEditor
+            value={answers[String(question.id)] || ''}
+            onChange={(val) => setAnswer(question.id, val)}
+            placeholder={language === 'ar' ? 'اكتب إجابتك هنا...' : 'Write your essay answer here...'}
+            minHeight="250px"
           />
         )}
       </div>

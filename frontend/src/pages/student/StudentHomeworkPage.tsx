@@ -20,7 +20,8 @@ interface Submission {
   homework_title?: string;
   student: number;
   answer: string;
-  file_url?: string;
+  content: string;
+  file: string | null;
   grade: number | null;
   feedback: string;
   submitted_at: string;
@@ -54,6 +55,7 @@ export default function StudentHomeworkPage() {
 
   const [selectedHomework, setSelectedHomework] = useState<Homework | null>(null);
   const [submitAnswer, setSubmitAnswer] = useState('');
+  const [submitFile, setSubmitFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -101,7 +103,14 @@ export default function StudentHomeworkPage() {
     if (!selectedHomework || !submitAnswer.trim()) return;
     setSubmitting(true);
     try {
-      await lessonAPI.homework.submit(selectedHomework.id, { answer: submitAnswer });
+      let payload: any = { answer: submitAnswer };
+      if (submitFile) {
+        const fd = new FormData();
+        fd.append('content', submitAnswer);
+        fd.append('file', submitFile);
+        payload = fd;
+      }
+      await lessonAPI.homework.submit(selectedHomework.id, payload);
       const subRes = await lessonAPI.homework.submissions(selectedHomework.id);
       const subs: Submission[] = unwrapPaginated(subRes.data) as Submission[];
       if (subs.length > 0) {
@@ -109,6 +118,7 @@ export default function StudentHomeworkPage() {
       }
       setSelectedHomework(null);
       setSubmitAnswer('');
+      setSubmitFile(null);
     } catch {
       setError(t('common.saveFailed'));
     } finally {
@@ -225,6 +235,12 @@ export default function StudentHomeworkPage() {
                     {status === 'submitted' && (
                       <div className="mt-3 rounded-lg bg-blue-50 p-3">
                         <p className="text-xs font-medium text-blue-600">{language === 'ar' ? 'في انتظار التقييم' : 'Awaiting grade'}</p>
+                        {getSubmission(hw.id)?.file && (
+                          <a href={getSubmission(hw.id)!.file!} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline">
+                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            {language === 'ar' ? 'عرض الملف المرفوع' : 'View uploaded file'}
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>
@@ -253,7 +269,7 @@ export default function StudentHomeworkPage() {
             {selectedHomework.description && (
               <p className="mb-4 text-sm text-gray-600 whitespace-pre-wrap">{selectedHomework.description}</p>
             )}
-            <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'إجابتك' : 'Your Answer'}</label>
                 <textarea
@@ -265,12 +281,17 @@ export default function StudentHomeworkPage() {
                   required
                 />
               </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'ملف مرفق (اختياري)' : 'Attachment (optional)'}</label>
+                <input type="file" onChange={(e) => setSubmitFile(e.target.files?.[0] || null)} className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm file:me-2 file:rounded file:border-0 file:bg-primary-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-700 hover:file:bg-primary-100" />
+                {submitFile && <p className="mt-1 text-xs text-gray-400">{submitFile.name}</p>}
+              </div>
               <div className="flex gap-3">
                 <button type="submit" disabled={submitting || !submitAnswer.trim()}
                   className="btn-press rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
                   {submitting ? t('common.saving') : (language === 'ar' ? 'تقديم' : 'Submit')}
                 </button>
-                <button type="button" onClick={() => { setSelectedHomework(null); setSubmitAnswer(''); }}
+                <button type="button" onClick={() => { setSelectedHomework(null); setSubmitAnswer(''); setSubmitFile(null); }}
                   className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50">
                   {t('common.cancel')}
                 </button>

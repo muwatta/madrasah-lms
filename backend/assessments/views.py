@@ -251,12 +251,12 @@ class QuestionGeneratorView(APIView):
         random.shuffle(type_pool)
 
         used_texts = set()
-        type_index = {t: 0 for t in ['mcq', 'theory', 'true_false', 'fill_blank']}
+        type_index = {t: 0 for t in ['mcq', 'essay', 'true_false', 'fill_blank']}
 
         for qtype in type_pool[:count]:
             generator = {
                 'mcq': self._make_mcq,
-                'theory': self._make_theory,
+                'essay': self._make_theory,
                 'true_false': self._make_true_false,
                 'fill_blank': self._make_fill_blank,
             }.get(qtype)
@@ -267,7 +267,7 @@ class QuestionGeneratorView(APIView):
             idx = type_index[qtype]
             template_list = {
                 'mcq': self.MCQ_TEMPLATES,
-                'theory': self.THEORY_TEMPLATES,
+                'essay': self.THEORY_TEMPLATES,
                 'true_false': self.TRUE_FALSE_TEMPLATES,
                 'fill_blank': self.FILL_BLANK_TEMPLATES,
             }[qtype]
@@ -343,7 +343,7 @@ class QuestionGeneratorView(APIView):
 
         return {
             'question_text': text,
-            'question_type': 'theory',
+            'question_type': 'essay',
             'options': None,
             'correct_answer': answer,
             'difficulty': difficulty,

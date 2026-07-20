@@ -4,6 +4,7 @@ import { unwrapPaginated } from '../../api/client';
 import type { Question, Subject, Topic } from '../../types';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ConfirmModal from '../../components/ConfirmModal';
+import RichTextEditor from '../../components/RichTextEditor';
 import { useLanguage } from '../../context/LanguageContext';
 import BulkUpload from './BulkUpload';
 
@@ -28,7 +29,7 @@ const emptyForm: QuestionForm = {
 };
 
 export default function QuestionBankPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -309,11 +310,11 @@ export default function QuestionBankPage() {
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700">{t('fields.questionText')}</label>
-              <textarea
-                rows={3}
+              <RichTextEditor
                 value={form.question_text}
-                onChange={(e) => setForm({ ...form, question_text: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                onChange={(val) => setForm({ ...form, question_text: val })}
+                placeholder={language === 'ar' ? 'اكتب السؤال هنا...' : 'Enter the question...'}
+                minHeight="100px"
               />
             </div>
           </div>
@@ -369,6 +370,13 @@ export default function QuestionBankPage() {
                     <option key={i} value={opt}>{opt}</option>
                   ))}
                 </select>
+              ) : form.question_type === 'essay' ? (
+                <RichTextEditor
+                  value={form.correct_answer}
+                  onChange={(val) => setForm({ ...form, correct_answer: val })}
+                  placeholder={language === 'ar' ? 'أضف إجابة نموذجية...' : 'Add a model answer...'}
+                  minHeight="150px"
+                />
               ) : (
                 <input
                   type="text"
@@ -415,7 +423,7 @@ export default function QuestionBankPage() {
             <div key={q.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">{q.question_text}</p>
+                  <div className="text-sm font-medium text-gray-900 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: q.question_text }} />
                   <div className="mt-1 flex flex-wrap gap-2">
                     <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
                       {typeLabel(q.question_type)}
@@ -437,8 +445,8 @@ export default function QuestionBankPage() {
                     </ul>
                   )}
                   {q.question_type !== 'mcq' && q.correct_answer && (
-                    <p className="mt-1 text-xs text-gray-500">
-                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700">{q.correct_answer}</span>
+                    <div className="mt-1 text-xs text-gray-500">
+                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700 prose prose-sm max-w-none inline-block" dangerouslySetInnerHTML={{ __html: q.correct_answer }} />
                     </p>
                   )}
                 </div>

@@ -60,6 +60,9 @@ const WhatsAppOptInPage = lazy(() => import('./pages/parent/WhatsAppOptInPage'))
 
 const CharacterPage = lazy(() => import('./pages/teacher/CharacterPage'));
 const WhatsAppPage = lazy(() => import('./pages/admin/WhatsAppPage'));
+const CertificatesPage = lazy(() => import('./pages/student/CertificatesPage'));
+const CalendarPage = lazy(() => import('./pages/student/CalendarPage'));
+const TeacherTimetablePage = lazy(() => import('./pages/teacher/TimetablePage'));
 
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -97,6 +100,8 @@ function App() {
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="homework" element={<StudentHomeworkPage />} />
               <Route path="portfolio" element={<PortfolioPage />} />
+              <Route path="certificates" element={<CertificatesPage />} />
+              <Route path="calendar" element={<CalendarPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="career" element={<CareerGuidancePage />} />
               <Route path="tutor" element={<AITutorPage />} />
@@ -128,6 +133,7 @@ function App() {
               <Route path="quran" element={<QuranPage />} />
               <Route path="character" element={<CharacterPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
+              <Route path="timetable" element={<TeacherTimetablePage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 

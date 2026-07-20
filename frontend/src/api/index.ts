@@ -227,6 +227,9 @@ export const academicAPI = {
     update: (id: number, data: any) => api.put(`/academic/timetable-slots/${id}/`, data),
     delete: (id: number) => api.delete(`/academic/timetable-slots/${id}/`),
   },
+  studentTimetable: () => api.get('/academic/student/timetable/'),
+  teacherTimetable: () => api.get('/academic/teacher/timetable/'),
+  studentCalendarEvents: () => api.get('/academic/student/calendar-events/'),
 };
 
 export const admissionsAPI = {
@@ -256,11 +259,26 @@ export const lessonAPI = {
   homework: {
     list: (params?: any) => api.get('/lessons/homework/', { params }),
     get: (id: number) => api.get(`/lessons/homework/${id}/`),
-    create: (data: any) => api.post('/lessons/homework/', data),
-    update: (id: number, data: any) => api.put(`/lessons/homework/${id}/`, data),
+    create: (data: any) => {
+      if (data instanceof FormData) {
+        return api.post('/lessons/homework/', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
+      return api.post('/lessons/homework/', data);
+    },
+    update: (id: number, data: any) => {
+      if (data instanceof FormData) {
+        return api.put(`/lessons/homework/${id}/`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
+      return api.put(`/lessons/homework/${id}/`, data);
+    },
     delete: (id: number) => api.delete(`/lessons/homework/${id}/`),
     submissions: (id: number) => api.get(`/lessons/homework/${id}/submissions/`),
-    submit: (id: number, data: any) => api.post(`/lessons/homework/${id}/submissions/`, data),
+    submit: (id: number, data: any) => {
+      if (data instanceof FormData) {
+        return api.post(`/lessons/homework/${id}/submissions/`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
+      return api.post(`/lessons/homework/${id}/submissions/`, data);
+    },
     pendingGrading: () => api.get('/lessons/homework/submissions/pending/'),
     grade: (submissionId: number, data: any) => api.patch(`/lessons/homework/submissions/${submissionId}/grade/`, data),
   },
@@ -390,4 +408,11 @@ export const whatsappAPI = {
     list: (params?: any) => api.get('/whatsapp/messages/', { params }),
   },
   send: (data: any) => api.post('/whatsapp/send/', data),
+};
+
+export const certificateAPI = {
+  list: (params?: any) => api.get('/certificates/', { params }),
+  get: (id: string) => api.get(`/certificates/${id}/`),
+  generate: (data: any) => api.post('/certificates/generate/', data),
+  download: (id: string) => api.get(`/certificates/${id}/download/`, { responseType: 'blob' }),
 };

@@ -12,4 +12,7 @@ router.register(r'timetable-slots', views.TimetableSlotViewSet, basename='timeta
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('student/timetable/', views.StudentTimetableView.as_view(), name='student-timetable'),
+    path('teacher/timetable/', views.TeacherTimetableView.as_view(), name='teacher-timetable'),
+    path('student/calendar-events/', views.StudentCalendarEventsView.as_view(), name='student-calendar-events'),
 ]

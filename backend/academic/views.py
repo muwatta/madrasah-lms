@@ -166,3 +166,74 @@ class TimetableSlotViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save()
+
+
+from rest_framework.views import APIView
+from curriculum.models import Enrollment
+from lessons.models import Homework
+
+
+class StudentTimetableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        enrollments = Enrollment.objects.filter(student=request.user, madrasah=request.user.madrasah)
+        school_classes = enrollments.values_list('school_class', flat=True).distinct()
+        timetables = Timetable.objects.filter(
+            school_class__in=school_classes,
+            madrasah=request.user.madrasah,
+            is_active=True,
+        )
+        slots = TimetableSlot.objects.filter(timetable__in=timetables).order_by('day_of_week', 'start_time')
+        serializer = TimetableSlotSerializer(slots, many=True)
+        return Response(serializer.data)
+
+
+class TeacherTimetableView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        slots = TimetableSlot.objects.filter(
+            teacher=request.user,
+            timetable__madrasah=request.user.madrasah,
+            timetable__is_active=True,
+        ).order_by('day_of_week', 'start_time')
+        serializer = TimetableSlotSerializer(slots, many=True)
+        return Response(serializer.data)
+
+
+class StudentCalendarEventsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        events = AcademicCalendar.objects.filter(
+            madrasah=request.user.madrasah,
+        ).order_by('start_date')
+
+        enrollments = Enrollment.objects.filter(student=request.user, madrasah=request.user.madrasah)
+        school_classes = enrollments.values_list('school_class', flat=True).distinct()
+
+        homework = Homework.objects.filter(
+            school_class__in=school_classes,
+            madrasah=request.user.madrasah,
+            is_published=True,
+        ).values('id', 'title', 'description', 'due_date', 'subject_name')
+
+        event_data = AcademicCalendarSerializer(events, many=True).data
+        homework_data = [
+            {
+                'id': h['id'],
+                'title': h['title'],
+                'description': h['description'],
+                'start_date': h['due_date'],
+                'end_date': h['due_date'],
+                'event_type': 'homework',
+                'subject_name': h['subject_name'],
+            }
+            for h in homework
+        ]
+
+        return Response({
+            'events': event_data,
+            'homework': homework_data,
+        })

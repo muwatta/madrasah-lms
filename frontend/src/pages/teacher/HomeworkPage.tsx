@@ -60,6 +60,7 @@ export default function HomeworkPage() {
     title: '', description: '', subject: '', class_obj: '',
     due_date: '', total_marks: '100',
   });
+  const [createFile, setCreateFile] = useState<File | null>(null);
   const [createSaving, setCreateSaving] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createFieldErrors, setCreateFieldErrors] = useState<Record<string, string>>({});
@@ -127,13 +128,22 @@ export default function HomeworkPage() {
     setCreateFieldErrors({});
     setCreateSaving(true);
     try {
-      await lessonAPI.homework.create({
+      const payload: any = {
         ...createForm,
         subject: Number(createForm.subject),
         class_obj: Number(createForm.class_obj),
         total_marks: Number(createForm.total_marks),
-      });
+      };
+      let data: any = payload;
+      if (createFile) {
+        const fd = new FormData();
+        Object.entries(payload).forEach(([k, v]) => fd.append(k, String(v)));
+        fd.append('file', createFile);
+        data = fd;
+      }
+      await lessonAPI.homework.create(data);
       setShowCreateModal(false);
+      setCreateFile(null);
       setCreateForm({ title: '', description: '', subject: '', class_obj: '', due_date: '', total_marks: '100' });
       showToast('success', 'Homework created');
       loadData();
@@ -230,7 +240,7 @@ export default function HomeworkPage() {
             <h1 className="text-2xl font-bold sm:text-3xl">{t('homework.title') || (language === 'ar' ? 'الواجبات' : 'Homework Management')}</h1>
             <p className="mt-1 text-sm text-amber-100">{t('homework.subtitle') || (language === 'ar' ? 'إنشاء وتقييم الواجبات' : 'Create and grade homework assignments')}</p>
           </div>
-          <button onClick={() => { setCreateForm({ title: '', description: '', subject: '', class_obj: '', due_date: '', total_marks: '100' }); setCreateError(null); setCreateFieldErrors({}); setShowCreateModal(true); }}
+          <button onClick={() => { setCreateForm({ title: '', description: '', subject: '', class_obj: '', due_date: '', total_marks: '100' }); setCreateFile(null); setCreateError(null); setCreateFieldErrors({}); setShowCreateModal(true); }}
             className="btn-press inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-50">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             {language === 'ar' ? 'واجب جديد' : 'New Homework'}
@@ -485,6 +495,11 @@ export default function HomeworkPage() {
                   <input required type="number" min="1" value={createForm.total_marks} onChange={(e) => setCreateForm({ ...createForm, total_marks: e.target.value })} className={inputCls} />
                 </div>
               </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'ملف مرفق (اختياري)' : 'Attachment (optional)'}</label>
+                <input type="file" onChange={(e) => setCreateFile(e.target.files?.[0] || null)} className={`${inputCls} file:me-2 file:rounded file:border-0 file:bg-primary-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-700 hover:file:bg-primary-100`} />
+                {createFile && <p className="mt-1 text-xs text-gray-400">{createFile.name}</p>}
+              </div>
               <div className="flex items-center gap-3 pt-2">
                 <button type="submit" disabled={createSaving} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
                   {createSaving ? (
@@ -526,6 +541,7 @@ export default function HomeworkPage() {
                   <tr className="border-b border-gray-100 text-end text-xs font-medium uppercase text-gray-500">
                     <th className="pb-2 ps-4">{language === 'ar' ? 'الطالب' : 'Student'}</th>
                     <th className="pb-2 ps-4">{language === 'ar' ? 'التاريخ' : 'Submitted'}</th>
+                    <th className="pb-2 ps-4">{language === 'ar' ? 'ملف' : 'File'}</th>
                     <th className="pb-2 ps-4">{language === 'ar' ? 'الدرجة' : 'Score'}</th>
                     <th className="pb-2 ps-4 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                   </tr>
@@ -535,6 +551,16 @@ export default function HomeworkPage() {
                     <tr key={sub.id} className="transition-colors hover:bg-gray-50/60">
                       <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{sub.student_name}</td>
                       <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(sub.submitted_at).toLocaleString()}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        {sub.file ? (
+                          <a href={sub.file} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:underline">
+                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            {language === 'ar' ? 'عرض' : 'View'}
+                          </a>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         {sub.is_graded ? (
                           <span className="font-semibold text-green-600">{sub.score}/{viewingHomework.total_marks}</span>
