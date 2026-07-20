@@ -52,6 +52,7 @@ const FlashCardPage = lazy(() => import('./pages/student/FlashCardPage'));
 const CareerGuidancePage = lazy(() => import('./pages/student/CareerGuidancePage'));
 const StudentCharacterPage = lazy(() => import('./pages/student/CharacterPage'));
 const AITutorPage = lazy(() => import('./pages/student/AITutorPage'));
+const WhatsAppOptInPage = lazy(() => import('./pages/parent/WhatsAppOptInPage'));
 
 const CharacterPage = lazy(() => import('./pages/teacher/CharacterPage'));
 const WhatsAppPage = lazy(() => import('./pages/admin/WhatsAppPage'));
@@ -136,6 +137,7 @@ function App() {
               <Route path="attendance" element={<StudentAttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
+              <Route path="whatsapp" element={<WhatsAppOptInPage />} />
             </Route>
 
             <Route

@@ -50,6 +50,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.feeStatus', path: '/fees' },
     { labelKey: 'nav.announcements', path: '/announcements' },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times' },
+    { labelKey: 'nav.whatsapp', path: '/whatsapp' },
   ],
   mudeer: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },

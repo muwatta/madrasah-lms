@@ -1,7 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { attendanceAPI, schoolClassAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
-import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface SchoolClass {
@@ -21,7 +20,6 @@ interface ScanRecord {
 }
 
 export default function QRScannerPage() {
-  const { user } = useAuth();
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
@@ -34,15 +32,18 @@ export default function QRScannerPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [manualInput, setManualInput] = useState('');
   const [manualLocation, setManualLocation] = useState('');
+  const [scannerActive, setScannerActive] = useState(false);
+  const [scanMode, setScanMode] = useState<'generate' | 'camera' | 'manual'>('generate');
+  const [libLoaded, setLibLoaded] = useState(false);
+  const scannerRef = useRef<any>(null);
+  const readerRef = useRef<HTMLDivElement>(null);
 
   const loadClasses = useCallback(async () => {
     try {
       const res = await schoolClassAPI.list();
       const list = unwrapPaginated<SchoolClass>(res.data);
       setClasses(list);
-    } catch {
-      // classes may not be available
-    } finally {
+    } catch {} finally {
       setLoading(false);
     }
   }, []);
@@ -52,9 +53,7 @@ export default function QRScannerPage() {
       const res = await attendanceAPI.scans();
       const list = unwrapPaginated<ScanRecord>(res.data);
       setScans(list);
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, []);
 
   useEffect(() => { loadClasses(); }, [loadClasses]);
@@ -65,13 +64,32 @@ export default function QRScannerPage() {
     const interval = setInterval(() => {
       const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
       setCountdown(remaining);
-      if (remaining <= 0) {
-        setQrImage(null);
-        clearInterval(interval);
-      }
+      if (remaining <= 0) { setQrImage(null); clearInterval(interval); }
     }, 1000);
     return () => clearInterval(interval);
   }, [expiresAt]);
+
+  // Dynamic script load
+  useEffect(() => {
+    if (typeof (window as any).Html5Qrcode !== 'undefined') {
+      setLibLoaded(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+    script.async = true;
+    script.onload = () => setLibLoaded(true);
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(() => {});
+      }
+    };
+  }, []);
 
   const generateQR = async () => {
     if (!selectedClass) return;
@@ -88,16 +106,65 @@ export default function QRScannerPage() {
     }
   };
 
+  const handleScanResult = async (decodedText: string) => {
+    if (scannerRef.current) {
+      await scannerRef.current.stop().catch(() => {});
+    }
+    setScannerActive(false);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const payload = { qr_data: decodedText, scanner_location: manualLocation.trim() || 'camera' };
+      const res = await attendanceAPI.scan(payload);
+      setSuccessMsg(`${res.data.student} - ${res.data.attendance_status}`);
+      loadScans();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Scan failed');
+    }
+  };
+
+  const startCamera = async () => {
+    if (!libLoaded) { setError('QR scanner library not loaded'); return; }
+    setError(null);
+    try {
+      if (scannerRef.current) {
+        await scannerRef.current.stop().catch(() => {});
+      }
+
+      const Html5QrcodeClass = (window as any).Html5Qrcode;
+      const html5QrCode = new Html5QrcodeClass('qr-reader');
+      scannerRef.current = html5QrCode;
+      setScannerActive(true);
+
+      await html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        handleScanResult,
+        () => {},
+      );
+    } catch (err: any) {
+      setScannerActive(false);
+      setError(err?.message || 'Camera access denied or not available');
+    }
+  };
+
+  const stopCamera = async () => {
+    if (scannerRef.current) {
+      await scannerRef.current.stop().catch(() => {});
+      scannerRef.current = null;
+    }
+    setScannerActive(false);
+  };
+
   const handleManualScan = async () => {
     if (!manualInput.trim()) return;
     setError(null);
     setSuccessMsg(null);
     try {
-      const payload = {
+      const res = await attendanceAPI.scan({
         qr_data: manualInput.trim(),
         scanner_location: manualLocation.trim() || undefined,
-      };
-      const res = await attendanceAPI.scan(payload);
+      });
       setSuccessMsg(`${res.data.student} - ${res.data.attendance_status}`);
       setManualInput('');
       loadScans();
@@ -106,9 +173,8 @@ export default function QRScannerPage() {
     }
   };
 
-  const formatTime = (iso: string) => {
-    return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const formatTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   if (loading) return <LoadingSpinner size="lg" className="mt-20" />;
 
@@ -117,107 +183,110 @@ export default function QRScannerPage() {
       <div className="mb-2">
         <h1 className="text-2xl font-bold text-gray-900">QR Attendance</h1>
       </div>
-      <p className="text-sm text-gray-500 mb-6">Generate QR codes for students to scan, or enter scan data manually.</p>
+      <p className="mb-6 text-sm text-gray-500">Generate, scan, or manually enter QR codes for attendance.</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="me-2 underline">Dismiss</button>
+          <button onClick={() => setError(null)} className="ms-2 underline">Dismiss</button>
         </div>
       )}
-
       {successMsg && (
         <div className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
           {successMsg}
-          <button onClick={() => setSuccessMsg(null)} className="me-2 underline">Dismiss</button>
+          <button onClick={() => setSuccessMsg(null)} className="ms-2 underline">Dismiss</button>
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Generate Class QR</h2>
+      <div className="mb-4 flex gap-2 border-b">
+        {(['generate', 'camera', 'manual'] as const).map(mode => (
+          <button key={mode} onClick={() => { setScanMode(mode); if (mode !== 'camera') stopCamera(); }}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              scanMode === mode ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}>
+            {mode === 'generate' ? 'Generate QR' : mode === 'camera' ? 'Camera Scan' : 'Manual Entry'}
+          </button>
+        ))}
+      </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-4">
-            <select
-              value={selectedClass || ''}
-              onChange={(e) => setSelectedClass(Number(e.target.value) || null)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            >
+      {scanMode === 'generate' && (
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <select value={selectedClass || ''} onChange={e => setSelectedClass(Number(e.target.value) || null)}
+              className="input-field">
               <option value="">Select class...</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>{c.name_ar} - {c.name_en}</option>
-              ))}
+              {classes.map(c => <option key={c.id} value={c.id}>{c.name_ar} - {c.name_en}</option>)}
             </select>
-            <button
-              onClick={generateQR}
-              disabled={!selectedClass || qrLoading}
-              className="btn-press rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
-            >
+            <button onClick={generateQR} disabled={!selectedClass || qrLoading}
+              className="btn-press rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
               {qrLoading ? 'Generating...' : 'Generate QR'}
             </button>
           </div>
-
           {qrImage && (
             <div className="flex flex-col items-center gap-3">
-              <img src={qrImage} alt="Attendance QR Code" className="w-64 h-64" />
+              <img src={qrImage} alt="Attendance QR Code" className="h-64 w-64" />
               <p className="text-xs text-gray-500">
                 Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
               </p>
-              <button
-                onClick={generateQR}
-                className="btn-press text-sm text-primary-600 hover:text-primary-700 underline"
-              >
-                Refresh QR
-              </button>
+              <button onClick={generateQR} className="text-sm text-primary-600 underline hover:text-primary-700">Refresh QR</button>
             </div>
           )}
         </div>
+      )}
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Manual Entry</h2>
+      {scanMode === 'camera' && (
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="mb-4">
+            <input type="text" value={manualLocation} onChange={e => setManualLocation(e.target.value)}
+              placeholder="Scanner location (optional)" className="input-field" />
+          </div>
+          <div id="qr-reader" ref={readerRef} className="mx-auto max-w-md overflow-hidden rounded-lg" />
+          <div className="mt-4 flex justify-center gap-3">
+            {!scannerActive ? (
+              <button onClick={startCamera}
+                className="rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white hover:bg-primary-700">
+                Start Camera
+              </button>
+            ) : (
+              <button onClick={stopCamera}
+                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700">
+                Stop Camera
+              </button>
+            )}
+          </div>
+          {scannerActive && <p className="mt-3 text-center text-xs text-gray-500">Point the camera at a QR code to scan</p>}
+          {!libLoaded && <p className="mt-2 text-center text-xs text-amber-600">Loading QR scanner library...</p>}
+        </div>
+      )}
 
+      {scanMode === 'manual' && (
+        <div className="rounded-lg border bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-3">
-            <textarea
-              value={manualInput}
-              onChange={(e) => setManualInput(e.target.value)}
-              placeholder='Paste QR JSON data here...'
-              rows={4}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 font-mono"
-            />
-            <input
-              type="text"
-              value={manualLocation}
-              onChange={(e) => setManualLocation(e.target.value)}
-              placeholder="Scanner location (optional)"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            />
-            <button
-              onClick={handleManualScan}
-              disabled={!manualInput.trim()}
-              className="btn-press rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-            >
+            <textarea value={manualInput} onChange={e => setManualInput(e.target.value)}
+              placeholder='Paste QR JSON data here...' rows={4} className="input-field font-mono" />
+            <input type="text" value={manualLocation} onChange={e => setManualLocation(e.target.value)}
+              placeholder="Scanner location (optional)" className="input-field" />
+            <button onClick={handleManualScan} disabled={!manualInput.trim()}
+              className="btn-press rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
               Submit Scan
             </button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="mt-8 rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
+      <div className="mt-8 overflow-hidden rounded-lg border bg-white shadow-sm">
+        <div className="border-b bg-gray-50 px-6 py-3">
           <h3 className="text-sm font-semibold text-gray-900">Today's Scans</h3>
         </div>
         {scans.length === 0 ? (
           <div className="p-8 text-center text-sm text-gray-500">No scans today</div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            <div className="hidden sm:grid sm:grid-cols-[1fr_auto_auto_auto] bg-gray-50 px-6 py-2 text-xs font-medium uppercase tracking-wider text-gray-500">
-              <span>Student</span>
-              <span>Time</span>
-              <span>Method</span>
-              <span>Status</span>
+          <div className="divide-y">
+            <div className="hidden grid-cols-[1fr_auto_auto_auto] bg-gray-50 px-6 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:grid">
+              <span>Student</span><span>Time</span><span>Method</span><span>Status</span>
             </div>
-            {scans.map((scan) => (
-              <div key={scan.id} className="flex flex-col gap-1 sm:grid sm:grid-cols-[1fr_auto_auto_auto] px-6 py-3 hover:bg-gray-50/50">
+            {scans.map(scan => (
+              <div key={scan.id} className="flex flex-col gap-1 px-6 py-3 hover:bg-gray-50/50 sm:grid sm:grid-cols-[1fr_auto_auto_auto]">
                 <span className="text-sm font-medium text-gray-900">{scan.student_name}</span>
                 <span className="text-sm text-gray-500">{formatTime(scan.scanned_at)}</span>
                 <span className="text-xs text-gray-400 uppercase">{scan.method}</span>

@@ -1,0 +1,53 @@
+import logging
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+logger = logging.getLogger(__name__)
+
+
+@receiver(post_save, sender='school_ops.Notification')
+def forward_notification_to_whatsapp(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    try:
+        from .models import WhatsAppRecipient
+        from .tasks import send_whatsapp_message
+
+        recipient_type_map = {
+            'attendance_absent': 'attendance',
+            'attendance_late': 'attendance',
+            'fee_overdue': 'fee_reminder',
+            'announcement': 'announcement',
+            'quiz_graded': 'result',
+            'exam_result': 'result',
+        }
+
+        message_type = recipient_type_map.get(instance.notification_type, 'general')
+        student = instance.recipient
+
+        parent_links = student.parent_links.select_related('parent')
+        for link in parent_links:
+            wa_recipient = WhatsAppRecipient.objects.filter(
+                madrasah=instance.madrasah,
+                parent=link.parent,
+                is_opted_in=True,
+            ).first()
+            if not wa_recipient:
+                continue
+
+            variables = {
+                'message': instance.title,
+                'details': instance.message or '',
+                'student_name': student.get_full_name(),
+            }
+
+            send_whatsapp_message.delay(
+                madrasah_id=instance.madrasah_id,
+                recipient_id=wa_recipient.id,
+                message_type=message_type,
+                variables=variables,
+            )
+
+    except Exception as e:
+        logger.error("[SIGNAL] Failed to forward notification %s: %s", instance.id, e)

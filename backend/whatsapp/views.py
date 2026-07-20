@@ -35,21 +35,29 @@ class WhatsAppRecipientViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def opt_in(self, request):
-        parent_id = request.data.get('parent_id')
         phone_number = request.data.get('phone_number')
         language = request.data.get('language', 'ar')
+        parent_id = request.data.get('parent_id')
 
-        if not parent_id or not phone_number:
+        if not phone_number:
             return Response(
-                {'error': 'parent_id and phone_number are required'},
+                {'error': 'phone_number is required'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         from users.models import User
-        try:
-            parent = User.objects.get(pk=parent_id, role='parent', madrasah=request.user.madrasah)
-        except User.DoesNotExist:
-            return Response({'error': 'Parent not found'}, status=status.HTTP_404_NOT_FOUND)
+        if parent_id:
+            try:
+                parent = User.objects.get(pk=parent_id, role='parent', madrasah=request.user.madrasah)
+            except User.DoesNotExist:
+                return Response({'error': 'Parent not found'}, status=status.HTTP_404_NOT_FOUND)
+        elif request.user.role == 'parent':
+            parent = request.user
+        else:
+            return Response(
+                {'error': 'parent_id is required for non-parent users'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         recipient, created = WhatsAppRecipient.objects.get_or_create(
             madrasah=request.user.madrasah,
