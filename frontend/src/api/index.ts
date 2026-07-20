@@ -152,6 +152,11 @@ export const attendanceAPI = {
   list: (params?: any) => api.get('/school/attendance/', { params }),
   bulk: (data: { date: string; records: any[] }) => api.post('/school/attendance/bulk/', data),
   analytics: () => api.get('/school/attendance/analytics/'),
+  qrClass: (classId: number) => api.get(`/school/attendance/qr/class/${classId}/`),
+  qrStudent: (studentId: number) => api.get(`/school/attendance/qr/student/${studentId}/`),
+  scan: (data: { qr_data?: string; student_identifier?: string; scanner_location?: string }) =>
+    api.post('/school/attendance/scan/', data),
+  scans: (params?: any) => api.get('/school/attendance/scans/', { params }),
 };
 
 export const announcementAPI = {
@@ -333,4 +338,41 @@ export const guidanceAPI = {
     ask: (data: { question: string; subject_id?: number }) => api.post('/guidance/tutor/ask/', data),
     history: () => api.get('/guidance/tutor/history/'),
   },
+};
+
+export const characterAPI = {
+  traits: {
+    list: (params?: any) => api.get('/character/traits/', { params }),
+    create: (data: any) => api.post('/character/traits/', data),
+    update: (id: number, data: any) => api.put(`/character/traits/${id}/`, data),
+    delete: (id: number) => api.delete(`/character/traits/${id}/`),
+  },
+  evaluations: {
+    list: (params?: any) => api.get('/character/evaluations/', { params }),
+    get: (id: number) => api.get(`/character/evaluations/${id}/`),
+    create: (data: any) => api.post('/character/evaluations/', data),
+    update: (id: number, data: any) => api.put(`/character/evaluations/${id}/`, data),
+    delete: (id: number) => api.delete(`/character/evaluations/${id}/`),
+    summary: (params?: any) => api.get('/character/evaluations/summary/', { params }),
+  },
+};
+
+export const whatsappAPI = {
+  recipients: {
+    list: (params?: any) => api.get('/whatsapp/recipients/', { params }),
+    optIn: (data: { parent_id: number; phone_number: string; language?: string }) =>
+      api.post('/whatsapp/recipients/opt_in/', data),
+    optOut: (recipientId: number) =>
+      api.post(`/whatsapp/recipients/${recipientId}/opt_out/`),
+  },
+  templates: {
+    list: (params?: any) => api.get('/whatsapp/templates/', { params }),
+    create: (data: any) => api.post('/whatsapp/templates/', data),
+    update: (id: number, data: any) => api.put(`/whatsapp/templates/${id}/`, data),
+    delete: (id: number) => api.delete(`/whatsapp/templates/${id}/`),
+  },
+  messages: {
+    list: (params?: any) => api.get('/whatsapp/messages/', { params }),
+  },
+  send: (data: any) => api.post('/whatsapp/send/', data),
 };

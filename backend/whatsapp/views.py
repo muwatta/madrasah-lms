@@ -1,10 +1,11 @@
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
-from rest_framework import viewsets, status, generics, permissions
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
 import json
 import logging
 
@@ -85,17 +86,17 @@ class WhatsAppTemplateViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.role not in ('mudeer', 'idaarah'):
-            raise permissions.PermissionDenied()
+            raise PermissionDenied()
         serializer.save(madrasah=self.request.user.madrasah)
 
     def perform_update(self, serializer):
         if self.request.user.role not in ('mudeer', 'idaarah'):
-            raise permissions.PermissionDenied()
+            raise PermissionDenied()
         serializer.save()
 
     def perform_destroy(self, instance):
         if self.request.user.role not in ('mudeer', 'idaarah'):
-            raise permissions.PermissionDenied()
+            raise PermissionDenied()
         instance.delete()
 
 

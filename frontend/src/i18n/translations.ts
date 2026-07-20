@@ -29,6 +29,8 @@ export const translations = {
     aiTutor: { ar: 'المدرس الذكي', en: 'AI Tutor' },
     learningPath: { ar: 'مسار التعلم', en: 'Learning Path' },
     flashcards: { ar: 'البطاقات التعليمية', en: 'Flashcards' },
+    whatsapp: { ar: 'واتساب', en: 'WhatsApp' },
+    character: { ar: 'تقييم الشخصية', en: 'Character' },
   },
   // Roles
   roles: {

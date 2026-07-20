@@ -50,7 +50,11 @@ const TeacherWorkloadPage = lazy(() => import('./pages/admin/TeacherWorkloadPage
 const LearningPathPage = lazy(() => import('./pages/student/LearningPathPage'));
 const FlashCardPage = lazy(() => import('./pages/student/FlashCardPage'));
 const CareerGuidancePage = lazy(() => import('./pages/student/CareerGuidancePage'));
+const StudentCharacterPage = lazy(() => import('./pages/student/CharacterPage'));
 const AITutorPage = lazy(() => import('./pages/student/AITutorPage'));
+
+const CharacterPage = lazy(() => import('./pages/teacher/CharacterPage'));
+const WhatsAppPage = lazy(() => import('./pages/admin/WhatsAppPage'));
 
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -90,6 +94,7 @@ function App() {
               <Route path="tutor" element={<AITutorPage />} />
               <Route path="path" element={<LearningPathPage />} />
               <Route path="flashcards" element={<FlashCardPage />} />
+              <Route path="character" element={<StudentCharacterPage />} />
             </Route>
 
             <Route
@@ -112,6 +117,7 @@ function App() {
               <Route path="lesson-planner" element={<LessonPlannerPage />} />
               <Route path="homework" element={<HomeworkPage />} />
               <Route path="quran" element={<QuranPage />} />
+              <Route path="character" element={<CharacterPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
             </Route>
 
@@ -158,6 +164,8 @@ function App() {
               <Route path="admissions" element={<AdmissionsPage />} />
               <Route path="at-risk" element={<AtRiskPage />} />
               <Route path="teacher-workload" element={<TeacherWorkloadPage />} />
+              <Route path="character" element={<CharacterPage />} />
+              <Route path="whatsapp" element={<WhatsAppPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
             </Route>
 

@@ -230,7 +230,7 @@ class WhatsAppAPITest(TestCase):
             'body_en': 'Fees for {{student_name}} - updated',
             'variables': ['student_name'],
             'is_active': False,
-        })
+        }, format='json')
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.data['is_active'])
 

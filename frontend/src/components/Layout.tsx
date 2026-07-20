@@ -27,6 +27,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.aiTutor', path: '/tutor' },
     { labelKey: 'nav.learningPath', path: '/path' },
     { labelKey: 'nav.flashcards', path: '/flashcards' },
+    { labelKey: 'nav.character', path: '/character' },
   ],
   ustaadh: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
@@ -36,6 +37,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.lessonPlanner', path: '/lesson-planner' },
     { labelKey: 'nav.homework', path: '/homework' },
     { labelKey: 'nav.quran', path: '/quran' },
+    { labelKey: 'nav.character', path: '/character' },
     { labelKey: 'nav.attendance', path: '/attendance' },
     { labelKey: 'nav.announcements', path: '/announcements' },
     { labelKey: 'nav.messages', path: '/messages' },
@@ -66,6 +68,8 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.admissions', path: '/admissions' },
     { labelKey: 'nav.atRisk', path: '/at-risk' },
     { labelKey: 'nav.teacherWorkload', path: '/teacher-workload' },
+    { labelKey: 'nav.character', path: '/character' },
+    { labelKey: 'nav.whatsapp', path: '/whatsapp' },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times' },
   ],
   idaarah: [
