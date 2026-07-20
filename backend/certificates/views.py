@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -8,6 +10,9 @@ from django.shortcuts import get_object_or_404
 from .models import Certificate
 from .serializers import CertificateSerializer, CertificateGenerateSerializer
 from .services import generate_certificate
+from users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class CertificateListCreateView(generics.ListCreateAPIView):
@@ -22,10 +27,15 @@ class CertificateListCreateView(generics.ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
+        student_id = self.request.data.get('student') or self.request.user.id
+        if not User.objects.filter(id=student_id, madrasah=self.request.user.madrasah, role='student').exists():
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'error': 'Student not found in this madrasah'})
         serializer.save(
             madrasah=self.request.user.madrasah,
-            student_id=self.request.data.get('student') or self.request.user.id,
+            student_id=student_id,
         )
+        logger.info("Certificate created for student %s by user %s", student_id, self.request.user.id)
 
 
 class CertificateDetailView(generics.RetrieveDestroyAPIView):
@@ -47,6 +57,8 @@ class CertificateGenerateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         student_id = request.data.get('student') or request.user.id
+        if not User.objects.filter(id=student_id, madrasah=request.user.madrasah, role='student').exists():
+            return Response({'error': 'Student not found in this madrasah'}, status=status.HTTP_400_BAD_REQUEST)
         cert = Certificate.objects.create(
             madrasah=request.user.madrasah,
             student_id=student_id,
@@ -63,6 +75,7 @@ class CertificateGenerateView(generics.CreateAPIView):
         except Exception as e:
             return Response({'error': f'PDF generation failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+        logger.info("Certificate %s generated for student %s by user %s", cert.id, student_id, request.user.id)
         out = CertificateSerializer(cert)
         return Response(out.data, status=status.HTTP_201_CREATED)
 

@@ -274,6 +274,7 @@ class CareerGuidanceView(APIView):
             recommended_courses=profile['courses'],
         )
 
+        logger.info("Career recommendation generated for student %s by user %s", student.id, request.user.id)
         return Response(
             CareerRecommendationSerializer(recommendation).data,
             status=status.HTTP_201_CREATED,
@@ -315,6 +316,7 @@ class AITutorSessionView(APIView):
             response=response_text,
         )
 
+        logger.info("AI tutor session created for user %s (subject=%s)", request.user.id, subject_name or "general")
         return Response(
             AITutorSessionSerializer(session).data,
             status=status.HTTP_201_CREATED,

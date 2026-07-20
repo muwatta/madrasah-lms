@@ -228,5 +228,6 @@ class HomeworkSubmissionGradeView(APIView):
                 graded_at=timezone.now(),
                 status='graded',
             )
+            logger.info("Homework submission %s graded by user %s (score: %s)", submission.id, user.id, submission.score)
             return Response(HomeworkSubmissionSerializer(submission).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

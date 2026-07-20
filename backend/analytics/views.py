@@ -9,7 +9,6 @@ from .serializers import (
 from config.permissions import IsMudeer, IsStaff
 
 
-# ── At-Risk Prediction ──
 
 class AtRiskPredictionListView(generics.ListAPIView):
     serializer_class = AtRiskPredictionSerializer
@@ -44,13 +43,17 @@ class GenerateAtRiskPredictionsView(APIView):
         }, status=status.HTTP_202_ACCEPTED)
 
 
-# ── Teacher Workload ──
 
 class TeacherWorkloadListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
     serializer_class = AtRiskPredictionSerializer  # placeholder, we override list
 
     def list(self, request, *args, **kwargs):
+        from datetime import date, timedelta
+        from django.db.models import Count
+        from users.models import User
+        from lessons.models import Homework, HomeworkSubmission
+
         madrasah = request.user.madrasah
         today = date.today()
         week_end = today + timedelta(days=(6 - today.weekday()))
@@ -58,19 +61,16 @@ class TeacherWorkloadListView(generics.ListAPIView):
         teachers = User.objects.filter(madrasah=madrasah, role='ustaadh', is_active=True)
         teacher_ids = list(teachers.values_list('id', flat=True))
 
-        # Bulk homework counts per teacher (covers both lesson_plans and homework_count)
         hw_counts = Homework.objects.filter(
             madrasah=madrasah, teacher_id__in=teacher_ids,
         ).values('teacher_id').annotate(count=Count('id'))
         hw_count_map = {h['teacher_id']: h['count'] for h in hw_counts}
 
-        # Bulk ungraded submission counts per teacher
         ungraded_counts = HomeworkSubmission.objects.filter(
             homework__teacher_id__in=teacher_ids, homework__madrasah=madrasah, status='submitted',
         ).values('homework__teacher_id').annotate(count=Count('id', distinct=True))
         ungraded_map = {u['homework__teacher_id']: u['count'] for u in ungraded_counts}
 
-        # Bulk upcoming homework counts per teacher
         upcoming_counts = Homework.objects.filter(
             madrasah=madrasah, teacher_id__in=teacher_ids,
             due_date__date__gte=today, due_date__date__lte=week_end,
@@ -98,6 +98,9 @@ class TeacherWorkloadMeView(APIView):
         user = request.user
         if user.role not in ('ustaadh', 'mudeer', 'idaarah'):
             return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        from datetime import date, timedelta
+        from lessons.models import Homework, HomeworkSubmission
 
         madrasah = user.madrasah
         today = date.today()
@@ -216,11 +219,21 @@ class AdminDashboardView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
 
     def get(self, request):
+        from datetime import date, timedelta
+        from django.utils import timezone
+        from django.db.models import Sum, F, Avg
+        from django.db.models.functions import Coalesce
+        from decimal import Decimal
+        from users.models import User
+        from school_ops.models import Attendance, Fee, FeePayment, Notification
+        from lessons.models import HomeworkSubmission
+        from assessments.models import QuizAttempt
+        from results.models import Exam
+
         madrasah = request.user.madrasah
         today = date.today()
         now = timezone.now()
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        week_end = today + timedelta(days=(6 - today.weekday()))
 
         total_students = User.objects.filter(madrasah=madrasah, role='student', is_active=True).count()
         total_teachers = User.objects.filter(madrasah=madrasah, role='ustaadh', is_active=True).count()
@@ -233,7 +246,6 @@ class AdminDashboardView(APIView):
         today_absentees = today_att.filter(status='absent').count()
 
         # Fees
-        from school_ops.models import Fee, FeePayment
         fees_this_month = FeePayment.objects.filter(
             fee__madrasah=madrasah, payment_date__gte=month_start.date(),
         ).aggregate(total=Coalesce(Sum('amount_paid'), Decimal('0')))['total']
@@ -244,7 +256,6 @@ class AdminDashboardView(APIView):
         )['total']
 
         # Upcoming exams
-        from results.models import Exam
         upcoming_exams = Exam.objects.filter(
             madrasah=madrasah, exam_date__gte=today, exam_date__lte=today + timedelta(days=7),
         ).count()
@@ -285,7 +296,6 @@ class AdminDashboardView(APIView):
             })
 
         # Recent notifications
-        from school_ops.models import Notification
         recent_notifications = Notification.objects.filter(
             madrasah=madrasah,
         ).select_related('recipient')[:5]

@@ -26,16 +26,13 @@ class SubjectSerializer(serializers.ModelSerializer):
         read_only_fields = ['madrasah']
 
     def get_topic_count(self, obj):
-        return obj.topics.count()
+        return getattr(obj, 'topic_count', None) or obj.topics.count()
 
 
 class SubjectListSerializer(serializers.ModelSerializer):
-    topic_count = serializers.SerializerMethodField()
+    topic_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Subject
         fields = ['id', 'madrasah', 'name_ar', 'name_en', 'code', 'description', 'topic_count', 'created_at']
         read_only_fields = ['madrasah']
-
-    def get_topic_count(self, obj):
-        return obj.topics.count()

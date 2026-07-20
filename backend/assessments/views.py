@@ -1,5 +1,7 @@
+import logging
 import random
 
+from django.db.models import Count
 from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
@@ -13,6 +15,8 @@ from .serializers import (
     QuizAttemptSerializer, QuizAttemptDetailSerializer
 )
 from .grading import grade_quiz
+
+logger = logging.getLogger(__name__)
 
 
 class QuestionListView(generics.ListCreateAPIView):
@@ -61,7 +65,7 @@ class QuizListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Quiz.objects.filter(madrasah=user.madrasah).select_related('created_by', 'subject')
+        qs = Quiz.objects.filter(madrasah=user.madrasah).select_related('created_by', 'subject').annotate(_attempt_count=Count('attempts', distinct=True))
 
         if user.role == 'student':
             qs = qs.filter(is_published=True)
@@ -92,6 +96,7 @@ class QuizPublishView(APIView):
 
         quiz.is_published = not quiz.is_published
         quiz.save()
+        logger.info("Quiz %s %s by user %s", quiz.id, "published" if quiz.is_published else "unpublished", request.user.id)
         return Response({
             'message': f'Quiz {"published" if quiz.is_published else "unpublished"}',
             'is_published': quiz.is_published
@@ -137,6 +142,8 @@ class QuizAttemptSubmitView(APIView):
 
         attempt.refresh_from_db()
 
+        logger.info("Quiz attempt %s submitted by user %s (score: %s)", attempt.id, request.user.id, attempt.score)
+
         return Response({
             'attempt': QuizAttemptSerializer(attempt).data,
             'grading': grading_result,
@@ -158,7 +165,7 @@ class QuizAttemptDetailView(APIView):
 
 class StudentQuizAttemptsView(APIView):
     def get(self, request):
-        attempts = QuizAttempt.objects.filter(student=request.user)
+        attempts = QuizAttempt.objects.filter(student=request.user).select_related('quiz', 'student')
         serializer = QuizAttemptSerializer(attempts, many=True)
         return Response(serializer.data)
 
@@ -237,6 +244,7 @@ class QuestionGeneratorView(APIView):
 
         questions = self._generate_questions(topic, subject_id, difficulty, question_types, count)
 
+        logger.info("Generated %s questions for topic '%s' by user %s", len(questions), topic, request.user.id)
         return Response({'questions': questions, 'count': len(questions)})
 
     def _generate_questions(self, topic, subject_id, difficulty, types, count):

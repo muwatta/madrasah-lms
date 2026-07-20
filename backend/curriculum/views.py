@@ -1,4 +1,6 @@
+from django.db.models import Count
 from rest_framework import generics
+from rest_framework.exceptions import NotFound
 from .models import Subject, Topic, SchoolClass
 from .serializers import SubjectSerializer, SubjectListSerializer, TopicSerializer, SchoolClassSerializer
 
@@ -20,7 +22,7 @@ class SubjectListView(generics.ListCreateAPIView):
         return SubjectListSerializer
 
     def get_queryset(self):
-        return Subject.objects.filter(madrasah=self.request.user.madrasah).prefetch_related('topics')
+        return Subject.objects.filter(madrasah=self.request.user.madrasah).annotate(topic_count=Count('topics'))
 
     def perform_create(self, serializer):
         serializer.save(madrasah=self.request.user.madrasah)
@@ -42,6 +44,8 @@ class TopicListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         subject_id = self.kwargs.get('subject_pk')
+        if not Subject.objects.filter(pk=subject_id, madrasah=self.request.user.madrasah).exists():
+            raise NotFound('Subject not found')
         serializer.save(subject_id=subject_id)
 
 

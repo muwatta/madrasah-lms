@@ -1,3 +1,4 @@
+from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import viewsets, generics, status
 from rest_framework.decorators import action
@@ -38,12 +39,16 @@ class LearningPathViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = LearningPath.objects.annotate(
+            _total_items=Count('items', distinct=True),
+            _completed_items=Count('items', filter=Q(items__is_completed=True), distinct=True),
+        )
         if user.role == 'student':
-            return LearningPath.objects.filter(
+            return base_qs.filter(
                 student=user, is_active=True
             ).select_related('subject', 'student').prefetch_related('items')
         elif user.role == 'ustaadh':
-            return LearningPath.objects.filter(
+            return base_qs.filter(
                 subject__madrasah=user.madrasah,
                 student__role='student'
             ).select_related('subject', 'student').prefetch_related('items')
@@ -55,7 +60,7 @@ class LearningPathViewSet(viewsets.ModelViewSet):
         return LearningPathSerializer
 
     def perform_create(self, serializer):
-        serializer.save()
+        serializer.save(madrasah=self.request.user.madrasah)
 
     @action(detail=False, methods=['post'])
     def generate(self, request):
@@ -135,15 +140,16 @@ class FlashCardDeckViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = FlashCardDeck.objects.annotate(card_count=Count('cards', distinct=True))
         if user.role == 'ustaadh':
-            return FlashCardDeck.objects.filter(
+            return base_qs.filter(
                 created_by=user
             ).select_related('created_by').prefetch_related('cards')
-        return FlashCardDeck.objects.filter(
+        return base_qs.filter(
             madrasah=user.madrasah
         ).filter(
             is_shared=True
-        ).select_related('created_by').prefetch_related('cards') | FlashCardDeck.objects.filter(
+        ).select_related('created_by').prefetch_related('cards') | base_qs.filter(
             created_by=user
         ).select_related('created_by').prefetch_related('cards')
 
@@ -158,6 +164,9 @@ class FlashCardDeckViewSet(viewsets.ModelViewSet):
             created_by=self.request.user
         )
 
+    def perform_update(self, serializer):
+        serializer.save(madrasah=self.request.user.madrasah)
+
 
 class FlashCardViewSet(viewsets.ModelViewSet):
     serializer_class = FlashCardSerializer
@@ -166,9 +175,7 @@ class FlashCardViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         deck_id = self.kwargs.get('deck_pk')
         user = self.request.user
-        qs = FlashCard.objects.filter(deck_id=deck_id).prefetch_related('reviews')
-        if user.role != 'ustaadh':
-            qs = qs.filter(deck__madrasah=user.madrasah)
+        qs = FlashCard.objects.filter(deck_id=deck_id, deck__madrasah=user.madrasah).prefetch_related('reviews')
         return qs
 
     def get_serializer_class(self):
@@ -183,7 +190,7 @@ class FlashCardViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def review(self, request, pk=None, deck_pk=None):
         try:
-            card = FlashCard.objects.get(pk=pk, deck_id=deck_pk)
+            card = FlashCard.objects.get(pk=pk, deck_id=deck_pk, deck__madrasah=request.user.madrasah)
         except FlashCard.DoesNotExist:
             return Response({'error': 'Card not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -219,14 +226,14 @@ class FlashCardViewSet(viewsets.ModelViewSet):
     def due(self, request, deck_pk=None):
         now = timezone.now()
         due_cards = FlashCard.objects.filter(
-            deck_id=deck_pk
+            deck_id=deck_pk, deck__madrasah=request.user.madrasah
         ).filter(
             reviews__student=request.user,
             reviews__next_review__lte=now
         ).distinct()
 
         cards_never_reviewed = FlashCard.objects.filter(
-            deck_id=deck_pk
+            deck_id=deck_pk, deck__madrasah=request.user.madrasah
         ).exclude(
             reviews__student=request.user
         )

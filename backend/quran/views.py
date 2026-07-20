@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 from django.utils import timezone
 from django.db.models import Count, Avg, Sum, Q
@@ -13,6 +14,8 @@ from .serializers import (
     TajwidAssessmentSerializer,
     PrayerTimetableSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class MemorizationTrackerListCreateView(generics.ListCreateAPIView):
@@ -86,6 +89,7 @@ def mark_revision_complete(request, pk):
     serializer = RevisionScheduleSerializer(revision, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save(completed=True, completed_at=timezone.now())
+        logger.info("Revision %s marked complete by user %s", pk, request.user.id)
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -159,7 +163,7 @@ def student_progress(request, student_id):
         return Response({'detail': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
 
     mem_qs = MemorizationTracker.objects.filter(madrasah=madrasah, student_id=student_id)
-    rev_qs = RevisionSchedule.objects.filter(madrasah=madrasah, student_id=student_id)
+    rev_qs = RevisionSchedule.objects.filter(madrasah=madrasah, student_id=student_id).select_related('student')
     taj_qs = TajwidAssessment.objects.filter(madrasah=madrasah, student_id=student_id)
 
     total_surahs = mem_qs.values('surah_number').distinct().count()

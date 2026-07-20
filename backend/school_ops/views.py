@@ -1,9 +1,11 @@
+import logging
+
 from rest_framework import generics, status, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Count, Q, Avg, F, FloatField
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, TruncMonth
 from django.utils import timezone
 from datetime import timedelta, date
 from decimal import Decimal
@@ -17,6 +19,8 @@ from .services import QRService
 from config.permissions import IsMudeer, IsStaff
 from curriculum.models import Enrollment, SchoolClass
 from users.models import User, StudentParent
+
+logger = logging.getLogger(__name__)
 
 
 class FeeStructureListView(generics.ListCreateAPIView):
@@ -121,6 +125,10 @@ class FeePaymentCreateView(APIView):
             fee.status = 'partial'
         fee.save(update_fields=['status'])
 
+        logger.info(
+            "Fee payment created: fee=%s amount=%s method=%s recorded_by=%s",
+            fee.id, amount, method, request.user.id,
+        )
         return Response(FeePaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
 
 
@@ -146,23 +154,32 @@ class FeeAnalyticsView(APIView):
         ).aggregate(total=Coalesce(Sum('amount_paid'), 0))['total']
 
         monthly_data = []
-        for m in range(5, -1, -1):
-            m_date = now.replace(day=1) - timedelta(days=m * 30)
-            m_start = m_date.replace(day=1)
-            if m_start.month == 12:
-                m_end = m_start.replace(year=m_start.year + 1, month=1)
-            else:
-                m_end = m_start.replace(month=m_start.month + 1)
-            m_collected = FeePayment.objects.filter(
-                fee__madrasah=madrasah,
-                payment_date__gte=m_start.date(),
-                payment_date__lt=m_end.date(),
-            ).aggregate(total=Coalesce(Sum('amount_paid'), 0))['total']
+        today = timezone.now().date()
+        six_months_ago = today - timedelta(days=180)
+        month_start = six_months_ago.replace(day=1)
+        monthly_aggregated = FeePayment.objects.filter(
+            fee__madrasah=madrasah,
+            payment_date__gte=month_start,
+        ).annotate(
+            month=TruncMonth('payment_date')
+        ).values('month').annotate(
+            total=Coalesce(Sum('amount_paid'), 0)
+        ).order_by('month')
+        month_map = {row['month']: row['total'] for row in monthly_aggregated}
+        cursor = month_start
+        while cursor <= today:
+            month_label = cursor.strftime('%b')
+            month_key = cursor.replace(day=1)
+            collected = month_map.get(month_key, 0)
             monthly_data.append({
-                'month': m_start.strftime('%b'),
-                'collected': float(m_collected),
+                'month': month_label,
+                'collected': float(collected),
                 'outstanding': float(outstanding / 6) if outstanding > 0 else 0,
             })
+            if cursor.month == 12:
+                cursor = cursor.replace(year=cursor.year + 1, month=1)
+            else:
+                cursor = cursor.replace(month=cursor.month + 1)
 
         recent_payments = FeePayment.objects.filter(
             fee__madrasah=madrasah
@@ -245,6 +262,7 @@ class BulkFeeCreateView(APIView):
 
         Fee.objects.bulk_create(fees_to_create, ignore_conflicts=True)
 
+        logger.info("Bulk fees created: count=%s by user %s", len(fees_to_create), request.user.id)
         return Response({'created': len(fees_to_create)}, status=status.HTTP_201_CREATED)
 
 
@@ -286,12 +304,22 @@ class BulkAttendanceView(APIView):
         if not records or not date_str:
             return Response({'error': 'records and date required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        student_ids = [rec.get('student') for rec in records if rec.get('student')]
+        valid_student_ids = set(
+            User.objects.filter(
+                id__in=student_ids, madrasah=request.user.madrasah, role='student',
+            ).values_list('id', flat=True)
+        )
+
         created = []
         skipped = 0
         for rec in records:
             student_id = rec.get('student')
             status_val = rec.get('status')
             if not student_id or not status_val:
+                skipped += 1
+                continue
+            if student_id not in valid_student_ids:
                 skipped += 1
                 continue
             obj, _ = Attendance.objects.update_or_create(
@@ -306,6 +334,10 @@ class BulkAttendanceView(APIView):
             )
             created.append(obj.id)
 
+        logger.info(
+            "Bulk attendance saved: date=%s created=%s skipped=%s by user %s",
+            date_str, len(created), skipped, request.user.id,
+        )
         return Response({
             'created': len(created),
             'skipped': skipped,
@@ -697,6 +729,7 @@ class AttendanceScanView(APIView):
         scan_record.attendance = attendance
         scan_record.save(update_fields=['attendance'])
 
+        logger.info("Attendance scan processed: student=%s method=%s status=%s", student.id, scan_method, attendance_status)
         return Response({
             'status': 'ok',
             'student': student.get_full_name(),

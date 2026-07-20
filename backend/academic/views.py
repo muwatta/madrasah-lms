@@ -167,6 +167,10 @@ class TimetableSlotViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
+        timetable_id = serializer.validated_data.get('timetable_id') or self.request.data.get('timetable')
+        if timetable_id and not Timetable.objects.filter(pk=timetable_id, madrasah=self.request.user.madrasah).exists():
+            from rest_framework.exceptions import NotFound
+            raise NotFound('Timetable not found')
         serializer.save()
 
 

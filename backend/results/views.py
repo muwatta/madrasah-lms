@@ -1,9 +1,14 @@
+import logging
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Avg, Count
 from .models import Exam, ExamResult
 from .serializers import ExamSerializer, ExamResultSerializer
+from users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class ExamListView(generics.ListCreateAPIView):
@@ -51,6 +56,9 @@ class ExamResultListView(APIView):
         if score is None or student_id is None:
             return Response({'error': 'student and score required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not User.objects.filter(id=student_id, madrasah=request.user.madrasah, role='student').exists():
+            return Response({'error': 'Student not found in this madrasah'}, status=status.HTTP_400_BAD_REQUEST)
+
         grade = ExamResult.calculate_grade(float(score), float(exam.total_marks))
 
         result, created = ExamResult.objects.update_or_create(
@@ -63,6 +71,7 @@ class ExamResultListView(APIView):
             }
         )
 
+        logger.info("Exam result %s for student %s on exam %s by user %s", "created" if created else "updated", student_id, exam.id, request.user.id)
         return Response(ExamResultSerializer(result).data, status=status.HTTP_201_CREATED)
 
 
@@ -84,10 +93,20 @@ class ExamResultsBulkUploadView(APIView):
         created_count = 0
         updated_count = 0
 
+        valid_student_ids = set(
+            User.objects.filter(
+                id__in=[item.get('student') for item in results_data if item.get('student')],
+                madrasah=request.user.madrasah,
+                role='student',
+            ).values_list('id', flat=True)
+        )
+
         for item in results_data:
             student_id = item.get('student')
             score = item.get('score')
             if student_id is None or score is None:
+                continue
+            if student_id not in valid_student_ids:
                 continue
 
             grade = ExamResult.calculate_grade(float(score), float(exam.total_marks))
@@ -105,6 +124,10 @@ class ExamResultsBulkUploadView(APIView):
             else:
                 updated_count += 1
 
+        logger.info(
+            "Bulk exam results uploaded for exam %s: created=%s updated=%s by user %s",
+            exam.id, created_count, updated_count, request.user.id,
+        )
         return Response({
             'created': created_count,
             'updated': updated_count,

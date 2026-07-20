@@ -34,10 +34,10 @@ class LearningPathSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'progress_percent', 'created_at', 'updated_at']
 
     def get_total_items(self, obj):
-        return obj.items.count()
+        return getattr(obj, '_total_items', None) or obj.items.count()
 
     def get_completed_items(self, obj):
-        return obj.items.filter(is_completed=True).count()
+        return getattr(obj, '_completed_items', None) or obj.items.filter(is_completed=True).count()
 
 
 class LearningPathListSerializer(serializers.ModelSerializer):
@@ -56,10 +56,10 @@ class LearningPathListSerializer(serializers.ModelSerializer):
         ]
 
     def get_total_items(self, obj):
-        return obj.items.count()
+        return getattr(obj, '_total_items', None) or obj.items.count()
 
     def get_completed_items(self, obj):
-        return obj.items.filter(is_completed=True).count()
+        return getattr(obj, '_completed_items', None) or obj.items.filter(is_completed=True).count()
 
 
 class FlashCardSerializer(serializers.ModelSerializer):
@@ -99,7 +99,7 @@ class FlashCardListSerializer(serializers.ModelSerializer):
 class FlashCardDeckSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
     subject_name = serializers.SerializerMethodField()
-    card_count = serializers.SerializerMethodField()
+    card_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = FlashCardDeck
@@ -108,20 +108,17 @@ class FlashCardDeckSerializer(serializers.ModelSerializer):
             'description', 'is_shared', 'created_by', 'created_by_name',
             'card_count', 'created_at'
         ]
-        read_only_fields = ['id', 'created_by', 'created_at']
+        read_only_fields = ['id', 'created_by', 'created_at', 'madrasah']
 
     def get_subject_name(self, obj):
         if obj.subject:
             return obj.subject.name_ar
         return None
 
-    def get_card_count(self, obj):
-        return obj.cards.count()
-
 
 class FlashCardDeckListSerializer(serializers.ModelSerializer):
     created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
-    card_count = serializers.SerializerMethodField()
+    card_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = FlashCardDeck
@@ -129,9 +126,6 @@ class FlashCardDeckListSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'is_shared',
             'created_by', 'created_by_name', 'card_count', 'created_at'
         ]
-
-    def get_card_count(self, obj):
-        return obj.cards.count()
 
 
 class FlashCardReviewSerializer(serializers.Serializer):

@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -10,6 +12,8 @@ from .serializers import (
 )
 from .authentication import generate_tokens
 
+logger = logging.getLogger(__name__)
+
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -19,6 +23,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             user = serializer.save()
             tokens = generate_tokens(user)
+            logger.info("New user registered: %s (role=%s)", user.id, user.role)
             return Response({
                 'user': UserSerializer(user).data,
                 'tokens': tokens,
@@ -38,10 +43,12 @@ class LoginView(APIView):
             )
             if user:
                 tokens = generate_tokens(user)
+                logger.info("User %s logged in successfully", user.id)
                 return Response({
                     'user': UserSerializer(user).data,
                     'tokens': tokens,
                 })
+            logger.warning("Failed login attempt for %s", serializer.validated_data.get('email', ''))
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -81,6 +88,7 @@ class ChangePasswordView(APIView):
         if serializer.is_valid():
             request.user.set_password(serializer.validated_data['new_password'])
             request.user.save()
+            logger.info("Password changed for user %s", request.user.id)
             return Response({'message': 'Password changed successfully'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

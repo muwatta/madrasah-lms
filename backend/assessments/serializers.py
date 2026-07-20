@@ -43,7 +43,7 @@ class QuizSerializer(serializers.ModelSerializer):
 
 class QuizListSerializer(serializers.ModelSerializer):
     question_count = serializers.IntegerField(read_only=True)
-    attempt_count = serializers.IntegerField(read_only=True)
+    attempt_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Quiz
@@ -51,6 +51,9 @@ class QuizListSerializer(serializers.ModelSerializer):
             'id', 'title', 'subject', 'quiz_type', 'question_count',
             'attempt_count', 'is_published', 'created_at'
         ]
+
+    def get_attempt_count(self, obj):
+        return getattr(obj, '_attempt_count', None) or obj.attempts.count()
 
 
 class QuizAttemptSerializer(serializers.ModelSerializer):

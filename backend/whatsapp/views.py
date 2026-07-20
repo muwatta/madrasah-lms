@@ -79,6 +79,7 @@ class WhatsAppRecipientViewSet(viewsets.ModelViewSet):
         recipient.language = language
         recipient.save()
 
+        logger.info("WhatsApp opt-in: parent=%s phone=%s", parent.id, phone_number)
         return Response(WhatsAppRecipientSerializer(recipient).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
@@ -87,6 +88,7 @@ class WhatsAppRecipientViewSet(viewsets.ModelViewSet):
         recipient.is_opted_in = False
         recipient.opted_out_at = timezone.now()
         recipient.save()
+        logger.info("WhatsApp opt-out: recipient=%s", recipient.id)
         return Response(WhatsAppRecipientSerializer(recipient).data)
 
 
@@ -174,6 +176,7 @@ class SendMessageView(APIView):
             media_url=request.data.get('media_url', ''),
         )
 
+        logger.info("WhatsApp message sent to parent %s by user %s (type=%s)", parent_id, request.user.id, message_type)
         return Response(WhatsAppMessageSerializer(msg).data, status=status.HTTP_201_CREATED)
 
 
