@@ -20,7 +20,7 @@ class SubjectListView(generics.ListCreateAPIView):
         return SubjectListSerializer
 
     def get_queryset(self):
-        return Subject.objects.filter(madrasah=self.request.user.madrasah)
+        return Subject.objects.filter(madrasah=self.request.user.madrasah).prefetch_related('topics')
 
     def perform_create(self, serializer):
         serializer.save(madrasah=self.request.user.madrasah)
@@ -30,7 +30,7 @@ class SubjectDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SubjectSerializer
 
     def get_queryset(self):
-        return Subject.objects.filter(madrasah=self.request.user.madrasah)
+        return Subject.objects.filter(madrasah=self.request.user.madrasah).prefetch_related('topics')
 
 
 class TopicListView(generics.ListCreateAPIView):

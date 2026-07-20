@@ -2,7 +2,7 @@ from rest_framework import generics, status, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Count, Q, Avg, F, Sum, DecimalField
+from django.db.models import Count, Q, Avg, F, Sum
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from datetime import timedelta, date
@@ -12,21 +12,11 @@ from .models import AtRiskPrediction, SkillAssessment, DigitalPortfolio
 from .serializers import (
     AtRiskPredictionSerializer, SkillAssessmentSerializer, DigitalPortfolioSerializer,
 )
+from config.permissions import IsMudeer, IsStaff
 from users.models import User
 from school_ops.models import Attendance
 from assessments.models import QuizAttempt
-from results.models import ExamResult
 from lessons.models import Homework, HomeworkSubmission
-
-
-class IsMudeer(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role in ('mudeer', 'idaarah')
-
-
-class IsStaff(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role in ('mudeer', 'ustaadh', 'idaarah')
 
 
 # ── At-Risk Prediction ──
@@ -370,20 +360,25 @@ class AdminDashboardView(APIView):
         ).count()
 
         # Performance trend (last 6 months avg scores)
+        six_months_ago = (now.replace(day=1) - timedelta(days=180)).replace(day=1)
+        monthly_avgs = (
+            QuizAttempt.objects.filter(
+                quiz__madrasah=madrasah,
+                submitted_at__gte=six_months_ago,
+                percentage__isnull=False,
+            )
+            .annotate(month=F('submitted_at__month'), year=F('submitted_at__year'))
+            .values('year', 'month')
+            .annotate(avg=Avg('percentage'))
+            .order_by('year', 'month')
+        )
+        month_map = {(row['year'], row['month']): row['avg'] for row in monthly_avgs}
+
         performance_trend = []
         for i in range(5, -1, -1):
             m_date = now - timedelta(days=i * 30)
-            m_start = m_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            if m_start.month == 12:
-                m_end = m_start.replace(year=m_start.year + 1, month=1)
-            else:
-                m_end = m_start.replace(month=m_start.month + 1)
-            avg = QuizAttempt.objects.filter(
-                quiz__madrasah=madrasah,
-                submitted_at__gte=m_start,
-                submitted_at__lt=m_end,
-                percentage__isnull=False,
-            ).aggregate(avg=Avg('percentage'))['avg']
+            m_start = m_date.replace(day=1)
+            avg = month_map.get((m_start.year, m_start.month))
             performance_trend.append({
                 'month': m_start.strftime('%b'),
                 'avg_score': round(float(avg), 1) if avg else 0,

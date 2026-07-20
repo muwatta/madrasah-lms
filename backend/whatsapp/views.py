@@ -1,13 +1,17 @@
+import hashlib
+import hmac
+import json
+import logging
+
+from django.conf import settings
+from django.http import HttpResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.exceptions import PermissionDenied
-import json
-import logging
 
 from .models import WhatsAppRecipient, WhatsAppMessage, WhatsAppTemplate
 from .serializers import (
@@ -176,29 +180,67 @@ class SendMessageView(APIView):
 @csrf_exempt
 def whatsapp_webhook(request):
     if request.method == 'GET':
+        mode = request.GET.get('hub.mode')
+        token = request.GET.get('hub.verify_token')
         challenge = request.GET.get('hub.challenge', '')
-        if challenge:
+
+        if mode == 'subscribe' and token == settings.WHATSAPP_WEBHOOK_VERIFY_TOKEN and challenge:
             return HttpResponse(challenge, content_type='text/plain')
-        return HttpResponse('ok', content_type='text/plain')
+        return HttpResponse('verification failed', status=403)
 
     if request.method == 'POST':
+        # Verify signature when access token is configured
+        signature = request.META.get('HTTP_X_HUB_SIGNATURE_256', '')
+        app_secret = settings.WHATSAPP_ACCESS_TOKEN
+        if app_secret and not _verify_webhook_signature(request.body, signature, app_secret):
+            logger.warning("[WHATSAPP] Invalid webhook signature")
+            return HttpResponse('invalid signature', status=403)
+
         try:
             payload = json.loads(request.body)
         except json.JSONDecodeError:
             return HttpResponse('bad json', status=400)
 
-        messages = payload.get('messages', [])
-        for msg_update in messages:
-            wa_id = msg_update.get('id', '')
-            new_status = msg_update.get('status', '')
-            if wa_id:
-                try:
-                    msg = WhatsAppMessage.objects.get(whatsapp_message_id=wa_id)
-                    msg.status = new_status
-                    msg.save(update_fields=['status'])
-                except WhatsAppMessage.DoesNotExist:
-                    logger.warning("[WHATSAPP] Status update for unknown message: %s", wa_id)
+        # Process status updates from the standard webhook structure
+        entries = payload.get('entry', [])
+        for entry in entries:
+            changes = entry.get('changes', [])
+            for change in changes:
+                value = change.get('value', {})
+                statuses = value.get('statuses', [])
+                for status_update in statuses:
+                    wa_id = status_update.get('id', '')
+                    new_status = status_update.get('status', '')
+                    if wa_id:
+                        try:
+                            msg = WhatsAppMessage.objects.get(whatsapp_message_id=wa_id)
+                            msg.status = new_status
+                            msg.save(update_fields=['status'])
+                        except WhatsAppMessage.DoesNotExist:
+                            logger.warning("[WHATSAPP] Status update for unknown message: %s", wa_id)
+                messages = value.get('messages', [])
+                for msg in messages:
+                    wa_id = msg.get('id', '')
+                    if wa_id:
+                        try:
+                            msg_obj = WhatsAppMessage.objects.get(whatsapp_message_id=wa_id)
+                            msg_obj.status = 'received'
+                            msg_obj.save(update_fields=['status'])
+                        except WhatsAppMessage.DoesNotExist:
+                            logger.warning("[WHATSAPP] Received message unknown: %s", wa_id)
 
         return HttpResponse('ok', content_type='text/plain')
 
     return HttpResponse('method not allowed', status=405)
+
+
+def _verify_webhook_signature(body, signature_header, app_secret):
+    """Verify the X-Hub-Signature-256 header from Meta."""
+    if not signature_header:
+        return False
+    expected = 'sha256=' + hmac.new(
+        app_secret.encode('utf-8'),
+        body,
+        hashlib.sha256,
+    ).hexdigest()
+    return hmac.compare_digest(expected, signature_header)

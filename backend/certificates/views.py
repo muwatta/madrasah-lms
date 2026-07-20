@@ -16,9 +16,10 @@ class CertificateListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        qs = Certificate.objects.filter(madrasah=user.madrasah).select_related('student')
         if user.role == 'student':
-            return Certificate.objects.filter(student=user)
-        return Certificate.objects.all()
+            qs = qs.filter(student=user)
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(
@@ -32,9 +33,10 @@ class CertificateDetailView(generics.RetrieveDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        qs = Certificate.objects.filter(madrasah=user.madrasah).select_related('student')
         if user.role == 'student':
-            return Certificate.objects.filter(student=user)
-        return Certificate.objects.all()
+            qs = qs.filter(student=user)
+        return qs
 
 
 class CertificateGenerateView(generics.CreateAPIView):
@@ -67,7 +69,7 @@ class CertificateGenerateView(generics.CreateAPIView):
 
 class CertificateDownloadView(generics.GenericAPIView):
     def get(self, request, pk):
-        cert = get_object_or_404(Certificate, pk=pk)
+        cert = get_object_or_404(Certificate.objects.filter(madrasah=request.user.madrasah), pk=pk)
         if request.user.role == 'student' and cert.student != request.user:
             return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
         if not cert.file:

@@ -2,6 +2,7 @@ from django.db import models
 from users.models import User, Madrasah
 from curriculum.models import Subject, SchoolClass
 from academic.models import ClassArm, Term
+from config.validators import validate_document, validate_generic_file
 
 
 class LessonPlan(models.Model):
@@ -59,7 +60,7 @@ class Homework(models.Model):
     due_date = models.DateTimeField()
     total_marks = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     attachments = models.JSONField(default=list, blank=True)
-    file = models.FileField(upload_to='homework/', blank=True, null=True)
+    file = models.FileField(upload_to='homework/', blank=True, null=True, validators=[validate_document])
     is_published = models.BooleanField(default=False)
     late_submission_allowed = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -87,7 +88,7 @@ class HomeworkSubmission(models.Model):
     )
     submitted_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(blank=True)
-    file = models.FileField(upload_to='submissions/', blank=True, null=True)
+    file = models.FileField(upload_to='submissions/', blank=True, null=True, validators=[validate_generic_file])
     attachments = models.JSONField(default=list, blank=True)
     is_late = models.BooleanField(default=False)
     score = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)

@@ -21,7 +21,9 @@ class ApplicationListView(generics.ListCreateAPIView):
         return ApplicationListSerializer
 
     def get_queryset(self):
-        qs = Application.objects.filter(madrasah=self.request.user.madrasah)
+        qs = Application.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('applying_for_class').prefetch_related('documents')
         status_filter = self.request.query_params.get('status')
         if status_filter:
             qs = qs.filter(status=status_filter)
@@ -35,7 +37,9 @@ class ApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ApplicationSerializer
 
     def get_queryset(self):
-        return Application.objects.filter(madrasah=self.request.user.madrasah)
+        return Application.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('applying_for_class').prefetch_related('documents')
 
 
 class ApplicationAcceptView(APIView):

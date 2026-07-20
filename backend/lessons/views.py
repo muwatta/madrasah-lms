@@ -14,10 +14,6 @@ from .serializers import (
 )
 
 
-class IsAuthenticatedRole(IsAuthenticated):
-    pass
-
-
 def _filter_by_madrasah(qs, user):
     return qs.filter(madrasah=user.madrasah)
 
@@ -28,7 +24,9 @@ class LessonPlanListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = _filter_by_madrasah(LessonPlan.objects.all(), user)
+        qs = _filter_by_madrasah(LessonPlan.objects.select_related(
+            'subject', 'school_class', 'teacher', 'class_arm', 'term', 'approved_by'
+        ), user)
 
         if user.role == 'ustaadh':
             qs = qs.filter(teacher=user)
@@ -59,7 +57,9 @@ class LessonPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = _filter_by_madrasah(LessonPlan.objects.all(), user)
+        qs = _filter_by_madrasah(LessonPlan.objects.select_related(
+            'subject', 'school_class', 'teacher', 'class_arm', 'term', 'approved_by'
+        ), user)
         if user.role == 'ustaadh':
             qs = qs.filter(teacher=user)
         return qs
@@ -98,7 +98,9 @@ class HomeworkListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = _filter_by_madrasah(Homework.objects.all(), user)
+        qs = _filter_by_madrasah(Homework.objects.select_related(
+            'subject', 'school_class', 'teacher'
+        ), user)
 
         if user.role == 'ustaadh':
             qs = qs.filter(teacher=user)
@@ -131,7 +133,9 @@ class HomeworkDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = _filter_by_madrasah(Homework.objects.all(), user)
+        qs = _filter_by_madrasah(Homework.objects.select_related(
+            'subject', 'school_class', 'teacher'
+        ), user)
         if user.role == 'ustaadh':
             qs = qs.filter(teacher=user)
         elif user.role == 'student':
@@ -146,7 +150,9 @@ class HomeworkSubmissionListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         homework_pk = self.kwargs.get('homework_pk')
-        qs = HomeworkSubmission.objects.filter(
+        qs = HomeworkSubmission.objects.select_related(
+            'student', 'homework', 'graded_by'
+        ).filter(
             homework_id=homework_pk,
             madrasah=user.madrasah,
         )
@@ -188,7 +194,9 @@ class PendingGradingView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = HomeworkSubmission.objects.filter(
+        qs = HomeworkSubmission.objects.select_related(
+            'student', 'homework', 'graded_by'
+        ).filter(
             madrasah=user.madrasah,
             status='submitted',
         )

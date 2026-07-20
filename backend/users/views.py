@@ -89,14 +89,14 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return User.objects.filter(madrasah=self.request.user.madrasah)
+        return User.objects.filter(madrasah=self.request.user.madrasah).select_related('madrasah')
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return User.objects.filter(madrasah=self.request.user.madrasah)
+        return User.objects.filter(madrasah=self.request.user.madrasah).select_related('madrasah')
 
 
 class MadrasahListView(generics.ListCreateAPIView):
@@ -114,11 +114,12 @@ class StudentParentListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        qs = StudentParent.objects.select_related('student', 'parent')
         if user.role == 'parent':
-            return StudentParent.objects.filter(parent=user)
+            return qs.filter(parent=user)
         elif user.role == 'student':
-            return StudentParent.objects.filter(student=user)
-        return StudentParent.objects.filter(student__madrasah=user.madrasah)
+            return qs.filter(student=user)
+        return qs.filter(student__madrasah=user.madrasah)
 
 
 class StudentParentDeleteView(generics.DestroyAPIView):

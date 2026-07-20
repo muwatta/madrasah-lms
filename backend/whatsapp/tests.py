@@ -261,9 +261,21 @@ class WhatsAppAPITest(TestCase):
 
     def test_webhook_verification(self):
         self.client2 = Client()
-        resp = self.client2.get('/api/whatsapp/webhook/?hub.challenge=abc123')
+        resp = self.client2.get(
+            '/api/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token=madrasah-webhook-token&hub.challenge=abc123'
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b'abc123')
+
+    def _sign_webhook(self, body):
+        import hashlib, hmac
+        from django.conf import settings
+        sig = hmac.new(
+            settings.WHATSAPP_ACCESS_TOKEN.encode('utf-8'),
+            body,
+            hashlib.sha256,
+        ).hexdigest()
+        return f'sha256={sig}'
 
     def test_webhook_status_update(self):
         r = WhatsAppRecipient.objects.create(
@@ -275,11 +287,22 @@ class WhatsAppAPITest(TestCase):
             body='test', status='sent', whatsapp_message_id='wa_msg_123',
         )
 
+        payload = {
+            'entry': [{
+                'changes': [{
+                    'value': {
+                        'statuses': [{'id': 'wa_msg_123', 'status': 'delivered'}],
+                    }
+                }]
+            }]
+        }
+        body = json.dumps(payload).encode('utf-8')
         self.client2 = Client()
         resp = self.client2.post(
             '/api/whatsapp/webhook/',
-            data=json.dumps({'messages': [{'id': 'wa_msg_123', 'status': 'delivered'}]}),
+            data=body,
             content_type='application/json',
+            HTTP_X_HUB_SIGNATURE_256=self._sign_webhook(body),
         )
         self.assertEqual(resp.status_code, 200)
         msg.refresh_from_db()

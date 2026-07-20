@@ -11,7 +11,7 @@ class ExamListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Exam.objects.filter(madrasah=user.madrasah)
+        qs = Exam.objects.filter(madrasah=user.madrasah).select_related('created_by', 'subject')
         subject_id = self.request.query_params.get('subject')
         if subject_id:
             qs = qs.filter(subject_id=subject_id)
@@ -35,7 +35,7 @@ class ExamResultListView(APIView):
         except Exam.DoesNotExist:
             return Response({'error': 'Exam not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        results = ExamResult.objects.filter(exam=exam)
+        results = ExamResult.objects.filter(exam=exam).select_related('student', 'exam')
         serializer = ExamResultSerializer(results, many=True)
         return Response(serializer.data)
 

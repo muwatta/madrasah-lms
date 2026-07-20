@@ -62,7 +62,7 @@ class TimetableViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Timetable.objects.filter(madrasah=self.request.user.madrasah)
+        return Timetable.objects.filter(madrasah=self.request.user.madrasah).prefetch_related('slots')
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -104,7 +104,7 @@ class TimetableViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def slots(self, request, pk=None):
         timetable = self.get_object()
-        slots = timetable.slots.all().order_by('day_of_week', 'start_time')
+        slots = timetable.slots.select_related('subject', 'teacher').order_by('day_of_week', 'start_time')
         serializer = TimetableSlotSerializer(slots, many=True)
         return Response(serializer.data)
 
@@ -159,7 +159,9 @@ class TimetableSlotViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         timetable_id = self.request.query_params.get('timetable')
-        qs = TimetableSlot.objects.filter(timetable__madrasah=self.request.user.madrasah)
+        qs = TimetableSlot.objects.filter(
+            timetable__madrasah=self.request.user.madrasah
+        ).select_related('subject', 'teacher')
         if timetable_id:
             qs = qs.filter(timetable_id=timetable_id)
         return qs
@@ -184,7 +186,7 @@ class StudentTimetableView(APIView):
             madrasah=request.user.madrasah,
             is_active=True,
         )
-        slots = TimetableSlot.objects.filter(timetable__in=timetables).order_by('day_of_week', 'start_time')
+        slots = TimetableSlot.objects.filter(timetable__in=timetables).select_related('subject', 'teacher').order_by('day_of_week', 'start_time')
         serializer = TimetableSlotSerializer(slots, many=True)
         return Response(serializer.data)
 
@@ -197,7 +199,7 @@ class TeacherTimetableView(APIView):
             teacher=request.user,
             timetable__madrasah=request.user.madrasah,
             timetable__is_active=True,
-        ).order_by('day_of_week', 'start_time')
+        ).select_related('subject', 'teacher').order_by('day_of_week', 'start_time')
         serializer = TimetableSlotSerializer(slots, many=True)
         return Response(serializer.data)
 

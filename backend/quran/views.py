@@ -19,7 +19,9 @@ class MemorizationTrackerListCreateView(generics.ListCreateAPIView):
     serializer_class = MemorizationTrackerSerializer
 
     def get_queryset(self):
-        qs = MemorizationTracker.objects.filter(madrasah=self.request.user.madrasah)
+        qs = MemorizationTracker.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student', 'teacher')
         student_id = self.request.query_params.get('student')
         if student_id:
             qs = qs.filter(student_id=student_id)
@@ -35,7 +37,9 @@ class MemorizationTrackerDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MemorizationTrackerSerializer
 
     def get_queryset(self):
-        qs = MemorizationTracker.objects.filter(madrasah=self.request.user.madrasah)
+        qs = MemorizationTracker.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student', 'teacher')
         if self.request.user.role == 'student':
             qs = qs.filter(student=self.request.user)
         return qs
@@ -45,7 +49,9 @@ class RevisionScheduleListCreateView(generics.ListCreateAPIView):
     serializer_class = RevisionScheduleSerializer
 
     def get_queryset(self):
-        qs = RevisionSchedule.objects.filter(madrasah=self.request.user.madrasah)
+        qs = RevisionSchedule.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student')
         student_id = self.request.query_params.get('student')
         if student_id:
             qs = qs.filter(student_id=student_id)
@@ -61,7 +67,9 @@ class RevisionScheduleDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RevisionScheduleSerializer
 
     def get_queryset(self):
-        qs = RevisionSchedule.objects.filter(madrasah=self.request.user.madrasah)
+        qs = RevisionSchedule.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student')
         if self.request.user.role == 'student':
             qs = qs.filter(student=self.request.user)
         return qs
@@ -86,7 +94,9 @@ class TajwidAssessmentListCreateView(generics.ListCreateAPIView):
     serializer_class = TajwidAssessmentSerializer
 
     def get_queryset(self):
-        qs = TajwidAssessment.objects.filter(madrasah=self.request.user.madrasah)
+        qs = TajwidAssessment.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student', 'teacher')
         student_id = self.request.query_params.get('student')
         if student_id:
             qs = qs.filter(student_id=student_id)
@@ -102,7 +112,9 @@ class TajwidAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TajwidAssessmentSerializer
 
     def get_queryset(self):
-        qs = TajwidAssessment.objects.filter(madrasah=self.request.user.madrasah)
+        qs = TajwidAssessment.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student', 'teacher')
         if self.request.user.role == 'student':
             qs = qs.filter(student=self.request.user)
         return qs

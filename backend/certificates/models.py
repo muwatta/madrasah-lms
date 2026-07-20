@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.conf import settings
+from config.validators import validate_document
 
 
 class Certificate(models.Model):
@@ -18,7 +19,7 @@ class Certificate(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     metadata = models.JSONField(default=dict, blank=True)
-    file = models.FileField(upload_to='certificates/', blank=True)
+    file = models.FileField(upload_to='certificates/', blank=True, validators=[validate_document])
     certificate_number = models.CharField(max_length=50, unique=True, blank=True)
     issued_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)

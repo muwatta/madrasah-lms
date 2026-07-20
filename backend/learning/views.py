@@ -39,12 +39,14 @@ class LearningPathViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'student':
-            return LearningPath.objects.filter(student=user, is_active=True)
+            return LearningPath.objects.filter(
+                student=user, is_active=True
+            ).select_related('subject', 'student').prefetch_related('items')
         elif user.role == 'ustaadh':
             return LearningPath.objects.filter(
                 subject__madrasah=user.madrasah,
                 student__role='student'
-            )
+            ).select_related('subject', 'student').prefetch_related('items')
         return LearningPath.objects.none()
 
     def get_serializer_class(self):
@@ -67,6 +69,17 @@ class LearningPathViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        from users.models import User as LmsUser
+        from curriculum.models import Subject as CurSubject
+        try:
+            student = LmsUser.objects.get(id=student_id, role='student', madrasah=request.user.madrasah)
+        except LmsUser.DoesNotExist:
+            return Response({'error': 'Student not found in your madrasah'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            CurSubject.objects.get(id=subject_id, madrasah=request.user.madrasah)
+        except CurSubject.DoesNotExist:
+            return Response({'error': 'Subject not found in your madrasah'}, status=status.HTTP_404_NOT_FOUND)
+
         existing = LearningPath.objects.filter(
             student_id=student_id, subject_id=subject_id
         ).first()
@@ -75,21 +88,23 @@ class LearningPathViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         path = LearningPath.objects.create(
-            student_id=student_id,
+            student_id=student.id,
             subject_id=subject_id,
             title=title or f"Learning Path",
             madrasah=request.user.madrasah
         )
 
         template = LEARNING_PATH_TEMPLATES['default']
-        for i, (item_title, item_type) in enumerate(template):
-            LearningPathItem.objects.create(
+        LearningPathItem.objects.bulk_create([
+            LearningPathItem(
                 learning_path=path,
                 title=item_title,
                 item_type=item_type,
                 order=i + 1,
                 content=f"Complete the {item_type}: {item_title}"
             )
+            for i, (item_title, item_type) in enumerate(template)
+        ])
 
         serializer = LearningPathSerializer(path, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -121,10 +136,16 @@ class FlashCardDeckViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == 'ustaadh':
-            return FlashCardDeck.objects.filter(created_by=user)
+            return FlashCardDeck.objects.filter(
+                created_by=user
+            ).select_related('created_by').prefetch_related('cards')
         return FlashCardDeck.objects.filter(
             madrasah=user.madrasah
-        ).filter(is_shared=True) | FlashCardDeck.objects.filter(created_by=user)
+        ).filter(
+            is_shared=True
+        ).select_related('created_by').prefetch_related('cards') | FlashCardDeck.objects.filter(
+            created_by=user
+        ).select_related('created_by').prefetch_related('cards')
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -144,7 +165,11 @@ class FlashCardViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         deck_id = self.kwargs.get('deck_pk')
-        return FlashCard.objects.filter(deck_id=deck_id)
+        user = self.request.user
+        qs = FlashCard.objects.filter(deck_id=deck_id).prefetch_related('reviews')
+        if user.role != 'ustaadh':
+            qs = qs.filter(deck__madrasah=user.madrasah)
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'list':

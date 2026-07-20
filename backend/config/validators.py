@@ -1,0 +1,50 @@
+import os
+
+from django.core.exceptions import ValidationError
+from django.template.defaultfilters import filesizeformat
+
+
+ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+ALLOWED_DOCUMENT_EXTENSIONS = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv'}
+ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a'}
+ALLOWED_GENERIC_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_DOCUMENT_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_IMAGE_SIZE = 5 * 1024 * 1024   # 5 MB
+MAX_AUDIO_SIZE = 20 * 1024 * 1024  # 20 MB
+
+
+def validate_file_extension(allowed_extensions):
+    def inner(value):
+        ext = os.path.splitext(value.name)[1].lower()
+        if ext not in allowed_extensions:
+            raise ValidationError(
+                f'Unsupported file extension "{ext}". Allowed: {", ".join(sorted(allowed_extensions))}.'
+            )
+    return inner
+
+
+def validate_file_size(max_size):
+    def inner(value):
+        if value.size > max_size:
+            raise ValidationError(
+                f'File size exceeds {filesizeformat(max_size)}. Current size: {filesizeformat(value.size)}.'
+            )
+    return inner
+
+
+validate_image = lambda value: (
+    validate_file_extension(ALLOWED_IMAGE_EXTENSIONS)(value) or validate_file_size(MAX_IMAGE_SIZE)(value)
+)
+
+validate_document = lambda value: (
+    validate_file_extension(ALLOWED_DOCUMENT_EXTENSIONS)(value) or validate_file_size(MAX_FILE_SIZE)(value)
+)
+
+validate_audio = lambda value: (
+    validate_file_extension(ALLOWED_AUDIO_EXTENSIONS)(value) or validate_file_size(MAX_AUDIO_SIZE)(value)
+)
+
+validate_generic_file = lambda value: (
+    validate_file_extension(ALLOWED_GENERIC_EXTENSIONS)(value) or validate_file_size(MAX_FILE_SIZE)(value)
+)

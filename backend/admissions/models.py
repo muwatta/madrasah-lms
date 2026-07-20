@@ -1,7 +1,8 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from users.models import Madrasah
 from curriculum.models import SchoolClass
+from config.validators import validate_document
 
 
 class Application(models.Model):
@@ -53,15 +54,16 @@ class Application(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.application_number:
-            year = timezone.now().year
-            last = Application.objects.filter(
-                application_number__startswith=f'APP-{year}-'
-            ).order_by('-application_number').first()
-            if last:
-                num = int(last.application_number.split('-')[-1]) + 1
-            else:
-                num = 1
-            self.application_number = f'APP-{year}-{num:04d}'
+            with transaction.atomic():
+                year = timezone.now().year
+                last = Application.objects.select_for_update().filter(
+                    application_number__startswith=f'APP-{year}-'
+                ).order_by('-application_number').first()
+                if last:
+                    num = int(last.application_number.split('-')[-1]) + 1
+                else:
+                    num = 1
+                self.application_number = f'APP-{year}-{num:04d}'
         super().save(*args, **kwargs)
 
 
@@ -78,7 +80,7 @@ class ApplicationDocument(models.Model):
     id = models.AutoField(primary_key=True)
     application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='documents')
     document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPE_CHOICES)
-    file = models.FileField(upload_to='applications/documents/')
+    file = models.FileField(upload_to='applications/documents/', validators=[validate_document])
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

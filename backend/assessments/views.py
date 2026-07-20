@@ -22,7 +22,7 @@ class QuestionListView(generics.ListCreateAPIView):
         return QuestionListSerializer
 
     def get_queryset(self):
-        qs = Question.objects.filter(madrasah=self.request.user.madrasah)
+        qs = Question.objects.filter(madrasah=self.request.user.madrasah).select_related('created_by', 'topic')
         ids = self.request.query_params.get('ids')
         topic_id = self.request.query_params.get('topic')
         q_type = self.request.query_params.get('type')
@@ -61,7 +61,7 @@ class QuizListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Quiz.objects.filter(madrasah=user.madrasah)
+        qs = Quiz.objects.filter(madrasah=user.madrasah).select_related('created_by', 'subject')
 
         if user.role == 'student':
             qs = qs.filter(is_published=True)

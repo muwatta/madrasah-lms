@@ -14,18 +14,9 @@ from .serializers import (
     AttendanceQRScanSerializer,
 )
 from .services import QRService
+from config.permissions import IsMudeer, IsStaff
 from curriculum.models import Enrollment, SchoolClass
 from users.models import User, StudentParent
-
-
-class IsMudeer(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role in ('mudeer', 'idaarah')
-
-
-class IsStaff(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role in ('mudeer', 'ustaadh', 'idaarah')
 
 
 class FeeStructureListView(generics.ListCreateAPIView):
@@ -45,7 +36,7 @@ class FeeListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Fee.objects.filter(madrasah=user.madrasah).select_related('student', 'fee_structure')
+        qs = Fee.objects.filter(madrasah=user.madrasah).select_related('student', 'fee_structure').prefetch_related('payments')
 
         if user.role == 'student':
             qs = qs.filter(student=user)
@@ -72,7 +63,9 @@ class FeeDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FeeSerializer
 
     def get_queryset(self):
-        return Fee.objects.filter(madrasah=self.request.user.madrasah)
+        return Fee.objects.filter(madrasah=self.request.user.madrasah).select_related(
+            'student', 'fee_structure'
+        ).prefetch_related('payments')
 
     def perform_destroy(self, instance):
         if self.request.user.role not in ('mudeer', 'idaarah'):
@@ -222,27 +215,37 @@ class BulkFeeCreateView(APIView):
             students = User.objects.filter(madrasah=request.user.madrasah, role='student')
             student_ids = list(students.values_list('id', flat=True))
 
-        created = 0
-        for student_id in student_ids:
-            try:
-                student = User.objects.get(id=student_id, madrasah=request.user.madrasah, role='student')
-            except User.DoesNotExist:
-                continue
-            fee, was_created = Fee.objects.get_or_create(
+        valid_student_ids = set(
+            User.objects.filter(
+                id__in=student_ids, madrasah=request.user.madrasah, role='student'
+            ).values_list('id', flat=True)
+        )
+        existing_student_ids = set(
+            Fee.objects.filter(
                 madrasah=request.user.madrasah,
-                student=student,
+                student_id__in=valid_student_ids,
+                amount=amount,
+                due_date=due_date,
+            ).values_list('student_id', flat=True)
+        )
+
+        fees_to_create = [
+            Fee(
+                madrasah=request.user.madrasah,
+                student_id=sid,
                 fee_structure_id=fee_structure_id if fee_structure_id else None,
                 amount=amount,
                 due_date=due_date,
-                defaults={
-                    'description': description,
-                    'status': 'pending',
-                }
+                description=description,
+                status='pending',
             )
-            if was_created:
-                created += 1
+            for sid in valid_student_ids
+            if sid not in existing_student_ids
+        ]
 
-        return Response({'created': created}, status=status.HTTP_201_CREATED)
+        Fee.objects.bulk_create(fees_to_create, ignore_conflicts=True)
+
+        return Response({'created': len(fees_to_create)}, status=status.HTTP_201_CREATED)
 
 
 class AttendanceListView(generics.ListCreateAPIView):
@@ -332,19 +335,26 @@ class AttendanceAnalyticsView(APIView):
             })
 
         if user.role == 'parent':
-            student_ids = StudentParent.objects.filter(parent=user).values_list('student_id', flat=True)
+            student_ids = list(StudentParent.objects.filter(parent=user).values_list('student_id', flat=True))
+            children_users = {u.id: u for u in User.objects.filter(id__in=student_ids)}
+            att_summary = Attendance.objects.filter(
+                student_id__in=student_ids, date__gte=week_ago
+            ).values('student_id').annotate(
+                total=Count('id'),
+                present=Count('id', filter=Q(status='present')),
+            )
             children_data = []
-            for sid in student_ids:
-                s_att = Attendance.objects.filter(student_id=sid, date__gte=week_ago)
-                s_total = s_att.count()
-                s_present = s_att.filter(status='present').count()
-                student = User.objects.get(id=sid)
+            for row in att_summary:
+                sid = row['student_id']
+                student = children_users.get(sid)
+                if not student:
+                    continue
                 children_data.append({
                     'student_id': sid,
                     'name': student.get_full_name(),
-                    'attendance_rate': round((s_present / s_total) * 100, 1) if s_total > 0 else 0,
-                    'total_days': s_total,
-                    'present': s_present,
+                    'attendance_rate': round((row['present'] / row['total']) * 100, 1) if row['total'] > 0 else 0,
+                    'total_days': row['total'],
+                    'present': row['present'],
                 })
             return Response({'children': children_data})
 
@@ -356,15 +366,22 @@ class AttendanceAnalyticsView(APIView):
         week_total = week_attendance.count()
         week_present = week_attendance.filter(status='present').count()
 
+        week_data = Attendance.objects.filter(
+            madrasah=madrasah, date__gte=week_ago, date__lte=today
+        ).values('date').annotate(
+            total=Count('id'),
+            present=Count('id', filter=Q(status='present')),
+        )
+        day_map = {row['date']: row for row in week_data}
+
         daily_trend = []
         for i in range(6, -1, -1):
             d = today - timedelta(days=i)
-            day_total = Attendance.objects.filter(madrasah=madrasah, date=d).count()
-            day_present = Attendance.objects.filter(madrasah=madrasah, date=d, status='present').count()
+            row = day_map.get(d, {})
             daily_trend.append({
                 'date': d.strftime('%a'),
-                'present': day_present,
-                'total': day_total,
+                'present': row.get('present', 0),
+                'total': row.get('total', 0),
             })
 
         student_rates = list(
@@ -413,7 +430,7 @@ class AnnouncementListView(generics.ListCreateAPIView):
             madrasah=user.madrasah,
         ).filter(
             Q(audience='all') | Q(audience=audience_key)
-        )
+        ).select_related('created_by')
 
     def perform_create(self, serializer):
         if self.request.user.role not in ('mudeer', 'idaarah', 'ustaadh'):
@@ -425,7 +442,7 @@ class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnnouncementSerializer
 
     def get_queryset(self):
-        return Announcement.objects.filter(madrasah=self.request.user.madrasah)
+        return Announcement.objects.filter(madrasah=self.request.user.madrasah).select_related('created_by')
 
     def perform_destroy(self, instance):
         if self.request.user.role not in ('mudeer', 'idaarah'):
@@ -441,7 +458,7 @@ class StudentReportView(APIView):
             return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
         try:
-            student = User.objects.get(id=student_id, role='student')
+            student = User.objects.get(id=student_id, role='student', madrasah=request.user.madrasah)
         except User.DoesNotExist:
             return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -449,8 +466,9 @@ class StudentReportView(APIView):
         attempts = QuizAttempt.objects.filter(student=student, submitted_at__isnull=False)
         avg = attempts.aggregate(avg=Avg('percentage'))['avg']
 
+        enrollments = Enrollment.objects.filter(student=student, madrasah=request.user.madrasah).select_related('subject')
         subject_perf = []
-        for enrollment in Enrollment.objects.filter(student=student).select_related('subject'):
+        for enrollment in enrollments:
             s_avg = attempts.filter(quiz__subject=enrollment.subject).aggregate(avg=Avg('percentage'))['avg']
             subject_perf.append({
                 'subject': enrollment.subject.name_ar,
@@ -459,7 +477,7 @@ class StudentReportView(APIView):
                 'attempts': attempts.filter(quiz__subject=enrollment.subject).count(),
             })
 
-        recent_attendance_qs = Attendance.objects.filter(student=student)
+        recent_attendance_qs = Attendance.objects.filter(student=student, madrasah=request.user.madrasah)
         att_total = recent_attendance_qs.count()
         att_present = recent_attendance_qs.filter(status='present').count()
         recent_attendance = recent_attendance_qs.order_by('-date')[:30]

@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User, Madrasah
+from config.validators import validate_generic_file
 
 
 class AtRiskPrediction(models.Model):
@@ -69,7 +70,7 @@ class DigitalPortfolio(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     url = models.URLField(blank=True)
-    file = models.FileField(upload_to='portfolios/', null=True, blank=True)
+    file = models.FileField(upload_to='portfolios/', null=True, blank=True, validators=[validate_generic_file])
     date_achieved = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import User, Madrasah
+from config.validators import validate_audio
 
 
 class MemorizationTracker(models.Model):
@@ -60,7 +61,7 @@ class TajwidAssessment(models.Model):
     waqf_score = models.IntegerField(null=True, blank=True)
     overall_score = models.IntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
-    audio_submission = models.FileField(upload_to='quran/tajwid/', null=True, blank=True)
+    audio_submission = models.FileField(upload_to='quran/tajwid/', null=True, blank=True, validators=[validate_audio])
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
