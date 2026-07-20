@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardAPI } from '../../api';
 import type { BoardDashboard as BoardDashboardType } from '../../types';
@@ -112,6 +113,32 @@ export default function BoardDashboard() {
           </ResponsiveContainer>
         </div>
       )}
+
+      <div className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '420ms' }}>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('quickLinks')}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <Link to="/board/finance" className="btn-press flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-4 text-center font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {t('nav.finance')}
+          </Link>
+          <Link to="/board/attendance" className="btn-press flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-4 text-center font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            {t('nav.attendance')}
+          </Link>
+          <Link to="/board/announcements" className="btn-press flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-4 text-center font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38a.5.5 0 01-.702-.422 7.746 7.746 0 01-.123-2.936m0 0a60.426 60.426 0 00-2.09.09m2.09-.09c1.03-.085 2.072-.13 3.124-.13m0 0c2.79 0 5.128.725 6.248 1.976.285.322.502.68.637 1.066.298.855-1.023 1.427-1.712.803-1.34-1.214-3.438-1.845-5.173-1.845m0 0v-2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {t('nav.announcements')}
+          </Link>
+          <Link to="/board/reports" className="btn-press flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-4 text-center font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+            {t('nav.reports')}
+          </Link>
+          <Link to="/board/engagement" className="btn-press flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50 p-4 text-center font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+            {t('nav.engagement')}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

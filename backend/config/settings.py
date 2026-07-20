@@ -21,6 +21,11 @@ INSTALLED_APPS = [
     'curriculum',
     'assessments',
     'results',
+    'school_ops',
+    'academic',
+    'lessons',
+    'admissions',
+    'quran',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +119,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
+CORS_ALLOW_CREDENTIALS = True
 
 JWT_SECRET = config('JWT_SECRET', default='jwt-secret-key-change')
 JWT_EXPIRATION_HOURS = config('JWT_EXPIRATION_HOURS', default=24, cast=int)

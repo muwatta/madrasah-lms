@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { dashboardAPI } from '../../api';
 import type { ParentDashboard as ParentDashboardType } from '../../types';
@@ -91,6 +92,68 @@ export default function ParentDashboard() {
               {summaryStats.overallAvg != null ? `${summaryStats.overallAvg.toFixed(1)}%` : '-'}
             </div>
             <div className="text-xs text-gray-500 mt-1">{t('parentDashboard.overallAverage')}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Attendance & Fee Summary */}
+      {data.attendance_summary && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Attendance Summary */}
+          <div className="card-hover bg-white rounded-xl shadow-sm border border-gray-200 p-5 opacity-0 animate-slide-up" style={{ animationDelay: '180ms' }}>
+            <h3 className="text-sm font-medium text-gray-500 mb-3">{t('parentDashboard.attendanceSummary')}</h3>
+            <div className="flex items-center gap-3 mb-3">
+              <span className={`text-3xl font-bold ${
+                data.attendance_summary.overall_rate >= 80 ? 'text-green-600' :
+                data.attendance_summary.overall_rate >= 60 ? 'text-amber-600' : 'text-red-600'
+              }`}>
+                {data.attendance_summary.overall_rate}%
+              </span>
+              <span className="text-xs text-gray-500">{t('parentDashboard.overallRate')}</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5 mb-3">
+              <div
+                className={`h-1.5 rounded-full ${
+                  data.attendance_summary.overall_rate >= 80 ? 'bg-green-500' :
+                  data.attendance_summary.overall_rate >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                }`}
+                style={{ width: `${Math.min(data.attendance_summary.overall_rate, 100)}%` }}
+              />
+            </div>
+            <div className="flex gap-4 text-xs text-gray-600">
+              <span>{t('parentDashboard.present')}: <strong>{data.attendance_summary.present}</strong></span>
+              <span>{t('parentDashboard.absent')}: <strong>{data.attendance_summary.absent}</strong></span>
+              <span>{t('attendance.totalDays')}: <strong>{data.attendance_summary.total_days}</strong></span>
+            </div>
+          </div>
+
+          {/* Fee Summary */}
+          <div className="card-hover bg-white rounded-xl shadow-sm border border-gray-200 p-5 opacity-0 animate-slide-up" style={{ animationDelay: '220ms' }}>
+            <h3 className="text-sm font-medium text-gray-500 mb-3">{t('parentDashboard.feeSummary')}</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">{t('parentDashboard.totalDue')}</span>
+                <span className="font-medium text-gray-900">{data.fee_summary.total_due.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">{t('parentDashboard.totalPaid')}</span>
+                <span className="font-medium text-green-600">{data.fee_summary.total_paid.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">{t('parentDashboard.outstanding')}</span>
+                <span className="font-medium text-amber-600">{data.fee_summary.outstanding.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">{t('parentDashboard.overdueCount')}</span>
+                <span className={`font-medium ${data.fee_summary.overdue_count > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                  {data.fee_summary.overdue_count}
+                </span>
+              </div>
+            </div>
+            <Link to="/parent/fees" className="btn-press mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+              {t('parentDashboard.viewFees')}
+            </Link>
           </div>
         </div>
       )}
@@ -249,6 +312,25 @@ export default function ParentDashboard() {
           )}
         </div>
       ))}
+
+      {/* Quick Links */}
+      <div className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '400ms' }}>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('quickLinks')}</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link to="/parent/fees" className="btn-press flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-50 p-4 font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {t('parentDashboard.feeStatus')}
+          </Link>
+          <Link to="/parent/attendance" className="btn-press flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-50 p-4 font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            {t('nav.attendance')}
+          </Link>
+          <Link to="/parent/announcements" className="btn-press flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-50 p-4 font-medium text-primary-700 transition-all hover:bg-primary-100 hover:shadow-sm">
+            <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38a.5.5 0 01-.702-.422 7.746 7.746 0 01-.123-2.936m0 0a60.426 60.426 0 00-2.09.09m2.09-.09c1.03-.085 2.072-.13 3.124-.13m0 0c2.79 0 5.128.725 6.248 1.976.285.322.502.68.637 1.066.298.855-1.023 1.427-1.712.803-1.34-1.214-3.438-1.845-5.173-1.845m0 0v-2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {t('nav.announcements')}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,8 @@ from users.models import User, Madrasah, StudentParent
 from curriculum.models import Subject, Topic, Enrollment, SchoolClass
 from assessments.models import Question, Quiz
 from results.models import Exam, ExamResult
+from decimal import Decimal
+from school_ops.models import FeeStructure, Fee, FeePayment, Attendance, Announcement
 
 
 CLASSES = [
@@ -63,8 +65,8 @@ TOPICS = {
     'التفسير': ['تفسير الفاتحة', 'تفسير آيات مختارة', 'أسباب النزول'],
     'السيرة النبوية': ['المولد النبوي', 'الهجرة', 'غزوات الرسول'],
     'الرياضيات': ['العمليات الحسابية', 'الكسور', 'النسبة المئوية'],
-    'العلوم': ['المخلوقات الحية', 'ال weather', 'الجسم الإنساني'],
-    'اللغة الإنجليزية': ['基础英语', 'Grammar Basics', 'Common Phrases'],
+    'العلوم': ['المخلوقات الحية', 'الطقس', 'الجسم الإنساني'],
+    'اللغة الإنجليزية': ['الإنجليزية الأساسية', 'Grammar Basics', 'Common Phrases'],
 }
 
 
@@ -306,6 +308,109 @@ class Command(BaseCommand):
                     student=student,
                     defaults={'score': score, 'grade': grade, 'remarks': 'أداء جيد'}
                 )
+
+        # --- School Ops seed data ---
+        import random
+        from datetime import date, timedelta
+
+        # Fee Structures
+        fee_structures = []
+        for fs_name, fs_name_ar, fs_amount, fs_desc in [
+            ('Tuition Fees', 'رسوم الدراسة', 500, 'Annual tuition fee'),
+            ('Books & Materials', 'الكتب والمواد', 150, 'Textbooks and learning materials'),
+            ('Activities', 'الأنشطة', 200, ' extracurricular activities fee'),
+        ]:
+            fs, _ = FeeStructure.objects.get_or_create(
+                madrasah=madrasah,
+                name=fs_name,
+                defaults={'name_ar': fs_name_ar, 'amount': fs_amount, 'description': fs_desc}
+            )
+            fee_structures.append(fs)
+
+        # Fees per student
+        today = date.today()
+        fee_statuses = ['paid', 'paid', 'overdue', 'pending', 'partial']
+        for i, student in enumerate(students):
+            due = today + timedelta(days=random.randint(-10, 30))
+            status = fee_statuses[i % len(fee_statuses)]
+            amount_paid = Decimal('500') if status == 'paid' else Decimal('250') if status == 'partial' else Decimal('0')
+            fee, _ = Fee.objects.get_or_create(
+                madrasah=madrasah,
+                student=student,
+                fee_structure=fee_structures[0],
+                defaults={
+                    'amount': Decimal('500'),
+                    'amount_paid': amount_paid,
+                    'due_date': due,
+                    'description': 'Tuition fee for current term',
+                    'status': status,
+                }
+            )
+
+        # Fee Payments (on the first paid fee)
+        first_fee = Fee.objects.filter(madrasah=madrasah, status='paid').first()
+        if first_fee:
+            FeePayment.objects.get_or_create(
+                fee=first_fee,
+                amount_paid=Decimal('500'),
+                defaults={'payment_method': 'cash', 'recorded_by': admin}
+            )
+            FeePayment.objects.get_or_create(
+                fee=first_fee,
+                amount_paid=Decimal('250'),
+                defaults={'payment_method': 'mobile_money', 'recorded_by': admin}
+            )
+
+        # Attendance (5 days per student over past week)
+        statuses = ['present', 'present', 'present', 'absent', 'late']
+        for student in students:
+            for days_ago in range(7, 0, -1):
+                att_date = today - timedelta(days=days_ago)
+                # skip weekends (Fri=4, Sat=5)
+                if att_date.weekday() in (4, 5):
+                    continue
+                att_status = random.choice(statuses)
+                Attendance.objects.get_or_create(
+                    madrasah=madrasah,
+                    student=student,
+                    date=att_date,
+                    defaults={'status': att_status, 'marked_by': teachers[0]}
+                )
+
+        # Announcements
+        Announcement.objects.get_or_create(
+            madrasah=madrasah,
+            title='New Academic Year Begins',
+            defaults={
+                'title_ar': 'بداية العام الدراسي الجديد',
+                'message': 'Welcome back! The new academic year starts on September 1st. Please ensure all fees are paid.',
+                'audience': 'all',
+                'is_pinned': True,
+                'created_by': admin,
+            }
+        )
+        Announcement.objects.get_or_create(
+            madrasah=madrasah,
+            title='Parent-Teacher Meeting',
+            defaults={
+                'title_ar': 'اجتماع أولياء الأمور والمعلمين',
+                'message': 'A parent-teacher meeting is scheduled for next Friday. All parents are expected to attend.',
+                'audience': 'parents',
+                'is_pinned': False,
+                'created_by': admin,
+            }
+        )
+        Announcement.objects.get_or_create(
+            madrasah=madrasah,
+            title='Staff Training Workshop',
+            defaults={
+                'title_ar': 'ورشة عمل للموظفين',
+                'message': 'Mandatory training workshop on new curriculum guidelines this Saturday at 10 AM.',
+                'audience': 'teachers',
+                'is_pinned': False,
+                'created_by': admin,
+            }
+        )
 
         self.stdout.write(self.style.SUCCESS('Database seeded successfully!'))
         self.stdout.write(f'  Madrasah: {madrasah.name}')

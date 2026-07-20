@@ -126,6 +126,26 @@ export default function TeacherDashboard() {
           {t('teacher.viewStudents')}
         </Link>
       </div>
+
+      <div className="mt-8 opacity-0 animate-slide-up" style={{ animationDelay: '360ms' }}>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('quickActions')}</h2>
+        <div className="flex flex-wrap gap-4">
+          <Link
+            to="/teacher/attendance"
+            className="btn-press inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-700 hover:shadow transition-all"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+            {t('teacher.markAttendance')}
+          </Link>
+          <Link
+            to="/teacher/announcements"
+            className="btn-press inline-flex items-center gap-2 rounded-xl border border-primary-600 px-5 py-2.5 text-sm font-medium text-primary-700 hover:bg-primary-50 transition-all"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38a.5.5 0 01-.702-.422 7.746 7.746 0 01-.123-2.936m0 0a60.426 60.426 0 00-2.09.09m2.09-.09c1.03-.085 2.072-.13 3.124-.13m0 0c2.79 0 5.128.725 6.248 1.976.285.322.502.68.637 1.066.298.855-1.023 1.427-1.712.803-1.34-1.214-3.438-1.845-5.173-1.845m0 0v-2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            {t('nav.announcements')}
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

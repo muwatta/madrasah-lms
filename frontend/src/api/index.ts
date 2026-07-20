@@ -128,3 +128,41 @@ export const interventionAPI = {
   alerts: () => api.get('/auth/intervention-alerts/'),
   engagement: () => api.get('/auth/admin-engagement/'),
 };
+
+export const schoolAPI = {
+  studentReport: (studentId: number) => api.get(`/school/reports/student/${studentId}/`),
+};
+
+export const feeStructureAPI = {
+  list: () => api.get('/school/fee-structures/'),
+  create: (data: any) => api.post('/school/fee-structures/', data),
+};
+
+export const feeAPI = {
+  list: (params?: any) => api.get('/school/fees/', { params }),
+  create: (data: any) => api.post('/school/fees/', data),
+  update: (id: number, data: any) => api.put(`/school/fees/${id}/`, data),
+  delete: (id: number) => api.delete(`/school/fees/${id}/`),
+  bulkCreate: (data: any) => api.post('/school/fees/bulk-create/', data),
+  pay: (feeId: number, data: any) => api.post(`/school/fees/${feeId}/pay/`, data),
+  analytics: () => api.get('/school/fees/analytics/'),
+};
+
+export const attendanceAPI = {
+  list: (params?: any) => api.get('/school/attendance/', { params }),
+  bulk: (data: { date: string; records: any[] }) => api.post('/school/attendance/bulk/', data),
+  analytics: () => api.get('/school/attendance/analytics/'),
+};
+
+export const announcementAPI = {
+  list: () => api.get('/school/announcements/'),
+  create: (data: any) => api.post('/school/announcements/', data),
+  delete: (id: number) => api.delete(`/school/announcements/${id}/`),
+};
+
+export const notificationAPI = {
+  list: (params?: any) => api.get('/school/notifications/', { params }),
+  unreadCount: () => api.get('/school/notifications/unread-count/'),
+  markRead: (id: number) => api.post(`/school/notifications/mark-read/${id}/`),
+  markAllRead: () => api.post('/school/notifications/mark-all-read/'),
+};

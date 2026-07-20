@@ -187,6 +187,19 @@ export interface ParentDashboard {
       exam_date: string;
     }[];
   }[];
+  fee_summary: {
+    total_due: number;
+    total_paid: number;
+    outstanding: number;
+    overdue_count: number;
+    overdue_amount: number;
+  };
+  attendance_summary: {
+    total_days: number;
+    present: number;
+    absent: number;
+    overall_rate: number;
+  };
 }
 
 export interface AdminDashboard {

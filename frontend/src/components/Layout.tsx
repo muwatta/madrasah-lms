@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { notificationAPI } from '../api';
 import type { User } from '../types';
 
 interface NavLink {
@@ -16,6 +17,8 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.myResults', path: '/results' },
     { labelKey: 'nav.exams', path: '/exams' },
     { labelKey: 'nav.progress', path: '/progress' },
+    { labelKey: 'nav.attendance', path: '/attendance' },
+    { labelKey: 'nav.announcements', path: '/announcements' },
     { labelKey: 'nav.messages', path: '/messages' },
   ],
   ustaadh: [
@@ -23,11 +26,16 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.myQuizzes', path: '/quizzes' },
     { labelKey: 'nav.questionBank', path: '/questions' },
     { labelKey: 'nav.students', path: '/students' },
+    { labelKey: 'nav.attendance', path: '/attendance' },
+    { labelKey: 'nav.announcements', path: '/announcements' },
     { labelKey: 'nav.messages', path: '/messages' },
   ],
   parent: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
     { labelKey: 'nav.messages', path: '/messages' },
+    { labelKey: 'nav.attendance', path: '/attendance' },
+    { labelKey: 'nav.feeStatus', path: '/fees' },
+    { labelKey: 'nav.announcements', path: '/announcements' },
   ],
   mudeer: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
@@ -35,12 +43,21 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.subjects', path: '/subjects' },
     { labelKey: 'nav.exams', path: '/exams' },
     { labelKey: 'nav.enrollments', path: '/enrollments' },
+    { labelKey: 'nav.finance', path: '/finance' },
+    { labelKey: 'nav.attendance', path: '/attendance' },
+    { labelKey: 'nav.announcements', path: '/announcements' },
+    { labelKey: 'nav.reports', path: '/reports' },
     { labelKey: 'nav.interventions', path: '/interventions' },
     { labelKey: 'nav.engagement', path: '/engagement' },
     { labelKey: 'nav.messages', path: '/messages' },
   ],
   idaarah: [
     { labelKey: 'nav.dashboard', path: '/dashboard' },
+    { labelKey: 'nav.finance', path: '/finance' },
+    { labelKey: 'nav.attendance', path: '/attendance' },
+    { labelKey: 'nav.announcements', path: '/announcements' },
+    { labelKey: 'nav.reports', path: '/reports' },
+    { labelKey: 'nav.engagement', path: '/engagement' },
   ],
 };
 
@@ -75,17 +92,57 @@ export default function Layout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setAccountMenuOpen(false);
       }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    notificationAPI.unreadCount()
+      .then(res => setUnreadCount(res.data.count))
+      .catch(() => {});
+  }, []);
+
+  const loadNotifications = () => {
+    notificationAPI.list()
+      .then(res => setNotifications(res.data.results ?? res.data))
+      .catch(() => {});
+  };
+
+  const handleMarkAllRead = () => {
+    notificationAPI.markAllRead().then(() => {
+      setUnreadCount(0);
+      setNotifications([]);
+    }).catch(() => {});
+  };
+
+  const handleMarkRead = (id: number) => {
+    notificationAPI.markRead(id).then(() => {
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    }).catch(() => {});
+  };
+
+  const toggleNotifMenu = () => {
+    if (!notifMenuOpen) {
+      loadNotifications();
+    }
+    setNotifMenuOpen(!notifMenuOpen);
+  };
 
   const links = user ? roleNavLinks[user.role].map(l => ({
     ...l,
@@ -202,8 +259,79 @@ export default function Layout() {
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
-              {language === 'ar' ? 'EN' : 'عربي'}
+              <span className="hidden sm:inline">{language === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
+
+            {/* Notification bell */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={toggleNotifMenu}
+                className="btn-press relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100"
+                title={t('common.notifications')}
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -end-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notifMenuOpen && (
+                <div className="absolute end-0 top-full z-50 mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg animate-scale-in">
+                  <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                    <p className="text-sm font-semibold text-gray-900">{t('common.notifications')}</p>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllRead}
+                        className="text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
+                      >
+                        {t('common.markAllRead')}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 && (
+                      <div className="px-4 py-8 text-center">
+                        <p className="text-sm text-gray-400">{t('common.noNotifications')}</p>
+                      </div>
+                    )}
+                    {notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className="flex items-start gap-3 border-b border-gray-50 px-4 py-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900">{notif.title}</p>
+                          {notif.message && (
+                            <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{notif.message}</p>
+                          )}
+                          <p className="mt-1 text-[11px] text-gray-400">{notif.created_at ? new Date(notif.created_at).toLocaleString() : ''}</p>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleMarkRead(notif.id); }}
+                          className="shrink-0 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                          title={t('common.markRead')}
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Account switcher */}
             <div className="relative" ref={menuRef}>

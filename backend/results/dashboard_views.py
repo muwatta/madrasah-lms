@@ -1,10 +1,14 @@
-from django.db.models import Avg, Count, Q
+from datetime import timedelta
+
+from django.db.models import Avg, Count, Q, Sum
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User, StudentParent
 from assessments.models import Quiz, QuizAttempt
 from results.models import Exam, ExamResult
 from curriculum.models import Subject, Enrollment
+from school_ops.models import Attendance, Fee
 
 
 class TeacherDashboardView(APIView):
@@ -167,8 +171,42 @@ class ParentDashboardView(APIView):
                 'exam_results': exams,
             })
 
+        thirty_days_ago = timezone.now().date() - timedelta(days=30)
+
+        total_due = Fee.objects.filter(
+            student__in=children, status__in=['pending', 'overdue', 'partial']
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        total_paid = Fee.objects.filter(
+            student__in=children
+        ).aggregate(total=Sum('amount_paid'))['total'] or 0
+
+        overdue_fees = Fee.objects.filter(student__in=children, status='overdue')
+        overdue_count = overdue_fees.count()
+        overdue_amount = overdue_fees.aggregate(total=Sum('amount'))['total'] or 0
+
+        att_records = Attendance.objects.filter(
+            student__in=children, date__gte=thirty_days_ago
+        )
+        att_total = att_records.count()
+        att_present = att_records.filter(status='present').count()
+        att_absent = att_records.filter(status='absent').count()
+
         return Response({
             'children': children_data,
+            'fee_summary': {
+                'total_due': float(total_due),
+                'total_paid': float(total_paid),
+                'outstanding': float(total_due - total_paid),
+                'overdue_count': overdue_count,
+                'overdue_amount': float(overdue_amount),
+            },
+            'attendance_summary': {
+                'total_days': att_total,
+                'present': att_present,
+                'absent': att_absent,
+                'overall_rate': round((att_present / att_total) * 100, 1) if att_total > 0 else 0,
+            },
         })
 
 

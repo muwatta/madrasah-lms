@@ -30,12 +30,21 @@ const StudentProgressPage = lazy(() => import('./pages/student/StudentProgressPa
 const MessagesPage = lazy(() => import('./pages/shared/MessagesPage'));
 const InterventionAlertsPage = lazy(() => import('./pages/admin/InterventionAlertsPage'));
 const AdminEngagementPage = lazy(() => import('./pages/admin/AdminEngagementPage'));
+const FinancePage = lazy(() => import('./pages/admin/FinancePage'));
+const StudentReportPage = lazy(() => import('./pages/admin/StudentReportPage'));
+const AnnouncementsPage = lazy(() => import('./pages/shared/AnnouncementsPage'));
+const AttendancePage = lazy(() => import('./pages/teacher/AttendancePage'));
+const StudentAttendancePage = lazy(() => import('./pages/student/StudentAttendancePage'));
+const FeeStatusPage = lazy(() => import('./pages/parent/FeeStatusPage'));
+
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
       <LanguageProvider>
       <AuthProvider>
         <Router>
+          <ErrorBoundary>
           <Suspense fallback={<div className="flex h-64 items-center justify-center animate-fade-in"><LoadingSpinner size="lg" /></div>}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -57,6 +66,8 @@ function App() {
               <Route path="exams" element={<ExamResultsPage />} />
               <Route path="progress" element={<StudentProgressPage />} />
               <Route path="messages" element={<MessagesPage />} />
+              <Route path="attendance" element={<StudentAttendancePage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
 
             <Route
@@ -74,6 +85,8 @@ function App() {
               <Route path="questions" element={<QuestionBankPage />} />
               <Route path="students" element={<StudentPerformancePage />} />
               <Route path="messages" element={<MessagesPage />} />
+              <Route path="attendance" element={<AttendancePage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
 
             <Route
@@ -87,6 +100,9 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<ParentDashboard />} />
               <Route path="messages" element={<MessagesPage />} />
+              <Route path="fees" element={<FeeStatusPage />} />
+              <Route path="attendance" element={<StudentAttendancePage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
 
             <Route
@@ -107,6 +123,10 @@ function App() {
               <Route path="interventions" element={<InterventionAlertsPage />} />
               <Route path="engagement" element={<AdminEngagementPage />} />
               <Route path="messages" element={<MessagesPage />} />
+              <Route path="finance" element={<FinancePage />} />
+              <Route path="attendance" element={<AttendancePage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="reports" element={<StudentReportPage />} />
             </Route>
 
             <Route
@@ -119,12 +139,18 @@ function App() {
             >
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<BoardDashboard />} />
+              <Route path="finance" element={<FinancePage />} />
+              <Route path="attendance" element={<AttendancePage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
+              <Route path="reports" element={<StudentReportPage />} />
+              <Route path="engagement" element={<AdminEngagementPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
           </Suspense>
+          </ErrorBoundary>
         </Router>
       </AuthProvider>
       </LanguageProvider>
