@@ -9,6 +9,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
+const ChangePasswordPage = lazy(() => import('./pages/auth/ChangePasswordPage'));
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
 const QuizListPage = lazy(() => import('./pages/student/QuizListPage'));
 const QuizTakePage = lazy(() => import('./pages/student/QuizTakePage'));
@@ -69,6 +73,9 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
             <Route
               path="/student"
@@ -96,6 +103,7 @@ function App() {
               <Route path="path" element={<LearningPathPage />} />
               <Route path="flashcards" element={<FlashCardPage />} />
               <Route path="character" element={<StudentCharacterPage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
             <Route
@@ -120,6 +128,7 @@ function App() {
               <Route path="quran" element={<QuranPage />} />
               <Route path="character" element={<CharacterPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
             <Route
@@ -138,6 +147,7 @@ function App() {
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="whatsapp" element={<WhatsAppOptInPage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
             <Route
@@ -188,6 +198,7 @@ function App() {
               <Route path="lesson-planner" element={<LessonPlannerPage />} />
               <Route path="homework" element={<HomeworkPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
             <Route path="/" element={<LandingPage />} />

@@ -431,12 +431,20 @@ export default function Layout() {
                     <div className="border-b border-gray-100 px-4 py-3">
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-[11px] font-medium uppercase text-gray-400">{t('common.currentAccount')}</p>
-                        <button
-                          onClick={handleLogout}
-                          className="text-[11px] font-medium text-red-500 hover:text-red-600 transition-colors"
-                        >
-                          {t('nav.logout')}
-                        </button>
+                        <div className="flex gap-2">
+                          <Link
+                            to={`${rolePrefixMap[user.role]}/change-password`}
+                            className="text-[11px] font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                          >
+                            Password
+                          </Link>
+                          <button
+                            onClick={handleLogout}
+                            className="text-[11px] font-medium text-red-500 hover:text-red-600 transition-colors"
+                          >
+                            {t('nav.logout')}
+                          </button>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2.5">
                         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${roleColors[user.role]}`}>

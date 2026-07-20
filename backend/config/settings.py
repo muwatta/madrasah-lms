@@ -162,6 +162,11 @@ WHATSAPP_API_VERSION = config('WHATSAPP_API_VERSION', default='v22.0')
 WHATSAPP_WEBHOOK_VERIFY_TOKEN = config('WHATSAPP_WEBHOOK_VERIFY_TOKEN', default='madrasah-webhook-token')
 WHATSAPP_BASE_URL = 'https://graph.facebook.com'
 
+# ── Email (Resend) ──────────────────────────────────────────────────────────
+RESEND_API_KEY = config('RESEND_API_KEY', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@madrasahlms.com')
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
+
 # ── OpenAI ──────────────────────────────────────────────────────────────────
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')

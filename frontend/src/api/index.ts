@@ -18,6 +18,21 @@ export const authAPI = {
     api.post('/auth/refresh-token/', { refresh }),
 
   getMe: () => api.get('/auth/me/'),
+
+  forgotPassword: (email: string) =>
+    api.post('/auth/password-reset/', { email }),
+
+  resetPassword: (uidb64: string, token: string, new_password: string) =>
+    api.post('/auth/password-reset/confirm/', { uidb64, token, new_password }),
+
+  changePassword: (old_password: string, new_password: string) =>
+    api.post('/auth/change-password/', { old_password, new_password }),
+
+  requestVerifyEmail: (email: string) =>
+    api.post('/auth/verify-email/', { email }),
+
+  verifyEmailConfirm: (uidb64: string, token: string) =>
+    api.post('/auth/verify-email/confirm/', { uidb64, token }),
 };
 
 export const subjectAPI = {

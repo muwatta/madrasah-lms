@@ -153,9 +153,9 @@ source venv/bin/activate
 python -m pytest tests/ -v
 ```
 
-24 tests covering: authentication, curriculum, assessments, quiz auto-grading, dashboards.
+37 tests covering: authentication, curriculum, assessments, quiz auto-grading, dashboards, WhatsApp, templates.
 
-## What's Built (MVP Complete)
+## What's Built
 
 - [x] JWT authentication with 5 role-based portals
 - [x] Question bank with 4 question types (MCQ, fill-blank, short-answer, essay)
@@ -170,23 +170,28 @@ python -m pytest tests/ -v
 - [x] Exam results recording (individual + bulk upload)
 - [x] CSV/JSON data export
 - [x] Mobile-responsive UI
-- [x] 24 passing tests
 - [x] Seed data command for demo setup
+- [x] Multi-language support (Arabic RTL with full translations)
+- [x] Notifications and alerts with unread badge
+- [x] Attendance tracking (QR + manual + camera)
+- [x] AI-powered tutor (OpenAI integration)
+- [x] Teacher-parent-student messaging
+- [x] WhatsApp Cloud API integration (opt-in, templates, notifications)
+- [x] Character evaluation for students
+- [x] QR code attendance scanning (generate + scan)
+- [x] Parent WhatsApp self-service opt-in page
+- [x] Student learning path and flashcards
+- [x] Career guidance and prayer times
+- [x] Email service (Resend.com) for password reset & verification
+- [x] 37 passing tests
 
-## What's Left (Phase 2)
+## What's Left
 
-- [ ] Password reset / email verification flow
-- [ ] Change password page
 - [ ] Assignments with file uploads
 - [ ] Rich text editor for essay questions
-- [ ] Notifications and alerts
-- [ ] Teacher-parent messaging
-- [ ] Attendance tracking
-- [ ] Certificate generation
+- [ ] Certificate generation (PDF)
 - [ ] Scheduling and calendar integration
-- [ ] Multi-language support (Arabic RTL)
 - [ ] Mobile app (iOS/Android)
-- [ ] AI-powered recommendations
 
 ## Security Features
 
