@@ -125,12 +125,13 @@ export default function UserManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <h1 className="text-2xl font-bold text-gray-900">{t('userManagement.title')}</h1>
         <button onClick={openCreate} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
           {t('userManagement.addUser')}
         </button>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.userManagement')}</p>
 
       <div className="flex flex-wrap items-end gap-4">
         <div>

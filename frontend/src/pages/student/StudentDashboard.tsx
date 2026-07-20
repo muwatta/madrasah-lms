@@ -200,24 +200,28 @@ export default function StudentDashboard() {
         <StatCard
           title={t('student.enrolledSubjects')}
           value={subjectJourneys.filter((j) => j.enrolled).length}
+          delay={0}
           icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>}
         />
         <StatCard
           title={t('student.quizzesCompleted')}
           value={completedAttempts.length}
           color="bg-blue-600"
+          delay={60}
           icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
         />
         <StatCard
           title={t('student.averageScore')}
           value={`${overallAvg}%`}
           color="bg-emerald-600"
+          delay={120}
           icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>}
         />
         <StatCard
           title={t('student.studyStreak')}
           value={`${studyStreak} ${t('student.days')}`}
           color="bg-amber-600"
+          delay={180}
           icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" /><path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z" /></svg>}
         />
       </div>
@@ -231,8 +235,8 @@ export default function StudentDashboard() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {subjectJourneys.filter((j) => j.enrolled).map((journey) => (
-              <div key={journey.subjectId} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+            {subjectJourneys.filter((j) => j.enrolled).map((journey, i) => (
+              <div key={journey.subjectId} className="card-hover bg-white rounded-xl shadow-sm border border-gray-100 p-5 opacity-0 animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-gray-800 truncate">{journey.subjectName}</h3>
@@ -283,7 +287,7 @@ export default function StudentDashboard() {
       )}
 
       {chartData.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 opacity-0 animate-slide-up" style={{ animationDelay: '250ms' }}>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('student.performanceTrend')}</h2>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
@@ -302,10 +306,10 @@ export default function StudentDashboard() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">{t('student.recentActivity')}</h2>
-            <Link to="/student/results" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+            <Link to="/student/results" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
               {t('student.quizResults')}
             </Link>
           </div>
@@ -317,7 +321,7 @@ export default function StudentDashboard() {
                 const quiz = quizzes.find((q) => q.id === attempt.quiz);
                 const passingScore = quiz?.passing_score ?? 50;
                 return (
-                  <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                  <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGradeBg(attempt.percentage || 0)}`}>
                       <span className={`text-sm font-bold ${getGradeColor(attempt.percentage || 0)}`}>
                         {attempt.percentage}%
@@ -343,10 +347,10 @@ export default function StudentDashboard() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 opacity-0 animate-slide-up" style={{ animationDelay: '350ms' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">{t('student.examResults')}</h2>
-            <Link to="/student/exams" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+            <Link to="/student/exams" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
               {t('student.viewAll')}
             </Link>
           </div>

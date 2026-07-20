@@ -65,12 +65,13 @@ export default function EnrollmentManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <h1 className="text-2xl font-bold text-gray-900">{t('enrollmentManagement.title')}</h1>
         <button onClick={() => { setForm({ student: '', subject: '', ustaadh: '' }); setFormError(null); setShowForm(true); }} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
           {t('enrollmentManagement.addEnrollment')}
         </button>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.enrollmentManagement')}</p>
 
       <div className="flex flex-wrap items-end gap-4">
         <div>

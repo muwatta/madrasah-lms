@@ -56,6 +56,12 @@ export const translations = {
     openMenu: { ar: 'فتح القائمة', en: 'Open menu' },
     toggleLanguage: { ar: 'التبديل إلى الإنجليزية', en: 'Switch to Arabic' },
     confirm: { ar: 'تأكيد', en: 'Confirm' },
+    switchAccount: { ar: 'تبديل الحساب', en: 'Switch Account' },
+    savedAccounts: { ar: 'الحسابات المحفوظة', en: 'Saved Accounts' },
+    removeAccount: { ar: 'إزالة الحساب', en: 'Remove Account' },
+    noOtherAccounts: { ar: 'لا توجد حسابات أخرى محفوظة', en: 'No other saved accounts' },
+    switchConfirm: { ar: 'التبديل إلى', en: 'Switch to' },
+    currentAccount: { ar: 'الحساب الحالي', en: 'Current account' },
   },
   // Fields
   fields: {
@@ -468,6 +474,24 @@ export const translations = {
     studentCount: { ar: 'عدد الطلاب', en: 'Student Count' },
     quizCount: { ar: 'عدد الاختبارات', en: 'Quiz Count' },
     subjectsList: { ar: 'المواد', en: 'Subjects' },
+  },
+  // Page guides
+  guides: {
+    quizList: { ar: 'اختر اختباراً من موادك المتاحة وابدأ بالإجابة.', en: 'Choose a quiz from your enrolled subjects and start answering.' },
+    quizResults: { ar: 'راجع درجاتك ونسبة نجاحك في كل اختبار.', en: 'Review your scores and pass rates for each quiz.' },
+    examResults: { ar: 'اطلع على نتائج امتحاناتك والدرجات المحصلة.', en: 'View your exam results and grades.' },
+    teacherDashboard: { ar: 'تابع أداء طلابك واختباراتك من مكان واحد.', en: 'Track your students\' performance and quizzes in one place.' },
+    quizManagement: { ar: 'أنشئ اختبارات جديدة وعدّل الاختبارات الحالية.', en: 'Create new quizzes and edit existing ones.' },
+    questionBank: { ar: 'أضف أسئلة متعددة الخيارات والفراغات والإجابات القصيرة.', en: 'Add multiple-choice, fill-in-the-blank, and short-answer questions.' },
+    studentPerformance: { ar: 'اختر طالباً لعرض تفاصيل أدائه في الاختبارات.', en: 'Select a student to view their detailed quiz performance.' },
+    parentDashboard: { ar: 'تابع تقدم أبنائك الأكاديمي ودرجاتهم في الاختبارات والامتحانات.', en: 'Track your children\'s academic progress and scores in quizzes and exams.' },
+    adminDashboard: { ar: 'نظرة عامة على المستخدمين والمواد والاختبارات في المدرسة.', en: 'Overview of users, subjects, and quizzes across the school.' },
+    userManagement: { ar: 'أضف مستخدمين جدد وعدّل بيانات أو إلغاء تنشيط حسابات.', en: 'Add new users, edit profiles, or deactivate accounts.' },
+    subjectManagement: { ar: 'أضف المواد والمواضيع الدراسية مع أسمائها بالعربية والإنجليزية.', en: 'Add subjects and topics with Arabic and English names.' },
+    enrollmentManagement: { ar: 'سجّل الطلاب في المواد الدراسية.', en: 'Enroll students in subjects.' },
+    examManagement: { ar: 'أنشئ امتحانات وسجّل نتائج الطلاب يدوياً أو بالرفع المجمع.', en: 'Create exams and record student results manually or via bulk upload.' },
+    parentStudent: { ar: 'اربط حسابات أولياء الأمور بأبنائهم الطلاب.', en: 'Link parent accounts to their children.' },
+    boardDashboard: { ar: 'تابع أداء المعلمين وتفوق الطلاب في المواد المختلفة.', en: 'Track teacher effectiveness and student performance across subjects.' },
   },
 } as const;
 

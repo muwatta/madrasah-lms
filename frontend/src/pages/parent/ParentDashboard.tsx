@@ -68,24 +68,25 @@ export default function ParentDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">{t('parentDashboard.title')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('parentDashboard.title')}</h1>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.parentDashboard')}</p>
 
       {/* Summary stats */}
       {summaryStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+          <div className="card-hover bg-white rounded-xl shadow-sm border border-gray-200 p-4 text-center opacity-0 animate-slide-up" style={{ animationDelay: '0ms' }}>
             <div className="text-2xl font-bold text-gray-900">{summaryStats.totalChildren}</div>
             <div className="text-xs text-gray-500 mt-1">{t('parentDashboard.totalChildren')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+          <div className="card-hover bg-white rounded-xl shadow-sm border border-gray-200 p-4 text-center opacity-0 animate-slide-up" style={{ animationDelay: '50ms' }}>
             <div className="text-2xl font-bold text-emerald-600">{summaryStats.totalQuizzes}</div>
             <div className="text-xs text-gray-500 mt-1">{t('parentDashboard.totalQuizzes')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+          <div className="card-hover bg-white rounded-xl shadow-sm border border-gray-200 p-4 text-center opacity-0 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <div className="text-2xl font-bold text-blue-600">{summaryStats.totalExams}</div>
             <div className="text-xs text-gray-500 mt-1">{t('student.examResults')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
+          <div className="card-hover bg-white rounded-xl shadow-sm border border-gray-200 p-4 text-center opacity-0 animate-slide-up" style={{ animationDelay: '150ms' }}>
             <div className="text-2xl font-bold text-purple-600">
               {summaryStats.overallAvg != null ? `${summaryStats.overallAvg.toFixed(1)}%` : '-'}
             </div>
@@ -95,8 +96,8 @@ export default function ParentDashboard() {
       )}
 
       {/* Children */}
-      {data.children.map((child) => (
-        <div key={child.id} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-5">
+      {data.children.map((child, childIdx) => (
+        <div key={child.id} className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm space-y-5 opacity-0 animate-slide-up" style={{ animationDelay: `${200 + childIdx * 80}ms` }}>
           {/* Child header */}
           <div className="flex items-center gap-4">
             <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${getAvatarColor(child.name)}`}>

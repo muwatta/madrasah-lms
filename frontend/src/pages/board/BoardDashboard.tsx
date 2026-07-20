@@ -27,13 +27,14 @@ export default function BoardDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">{t('boardDashboard.title')}</h1>
+      <h1 className="mb-1 text-2xl font-bold text-gray-900">{t('boardDashboard.title')}</h1>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.boardDashboard')}</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title={t('adminDashboard.totalStudents')} value={data.total_students} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342" /></svg>} />
-        <StatCard title={t('boardDashboard.totalTeachers')} value={data.total_teachers} color="bg-purple-600" icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>} />
-        <StatCard title={t('adminDashboard.totalSubjects')} value={data.total_subjects} color="bg-teal-600" icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>} />
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <StatCard title={t('adminDashboard.totalStudents')} value={data.total_students} delay={0} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.636 50.636 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.903 59.903 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342" /></svg>} />
+        <StatCard title={t('boardDashboard.totalTeachers')} value={data.total_teachers} color="bg-purple-600" delay={60} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>} />
+        <StatCard title={t('adminDashboard.totalSubjects')} value={data.total_subjects} color="bg-teal-600" delay={120} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>} />
+        <div className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '180ms' }}>
           <p className="text-sm font-medium text-gray-500">{t('adminDashboard.avgPerformance')}</p>
           <p className={`mt-1 text-2xl font-bold ${perfColor}`}>{data.average_performance.toFixed(1)}%</p>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
@@ -43,7 +44,7 @@ export default function BoardDashboard() {
       </div>
 
       {data.teacher_effectiveness.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '240ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('boardDashboard.effectivenessRanking')}</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -63,7 +64,7 @@ export default function BoardDashboard() {
                     const rankColor = i === 0 ? 'bg-green-100 text-green-700' : i === 1 ? 'bg-blue-100 text-blue-700' : i === 2 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600';
                     const scoreColor = item.average_student_score >= 70 ? 'text-green-600' : item.average_student_score >= 50 ? 'text-yellow-600' : 'text-red-600';
                     return (
-                      <tr key={item.teacher_id} className="border-b border-gray-50">
+                      <tr key={item.teacher_id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                         <td className="py-3 pl-4">
                           <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${rankColor}`}>
                             {i + 1}
@@ -83,7 +84,7 @@ export default function BoardDashboard() {
       )}
 
       {data.top_subjects.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('boardDashboard.topSubjects')}</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.top_subjects}>
@@ -98,7 +99,7 @@ export default function BoardDashboard() {
       )}
 
       {data.teacher_effectiveness.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="card-hover rounded-xl border border-gray-200 bg-white p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '360ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('boardDashboard.performanceByTeacher')}</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data.teacher_effectiveness.map((item) => ({ name: item.name.length > 12 ? item.name.slice(0, 12) + '…' : item.name, score: item.average_student_score }))}>

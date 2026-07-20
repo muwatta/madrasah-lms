@@ -75,7 +75,8 @@ export default function StudentPerformancePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">{t('teacher.studentPerformance')}</h1>
+      <h1 className="mb-1 text-2xl font-bold text-gray-900">{t('teacher.studentPerformance')}</h1>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.studentPerformance')}</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">

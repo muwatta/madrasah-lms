@@ -84,7 +84,7 @@ export default function ParentStudentPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <h1 className="text-2xl font-bold text-gray-900">{t('parentStudent.title')}</h1>
         <button
           onClick={() => { setForm({ student: '', parent: '', relationship: 'father' }); setFormError(null); setShowForm(true); }}
@@ -93,6 +93,7 @@ export default function ParentStudentPage() {
           {t('parentStudent.addLink')}
         </button>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.parentStudent')}</p>
 
       {showForm && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">

@@ -157,7 +157,7 @@ export default function QuizManagementPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">{t('quizManagement.title')}</h1>
         <button
           onClick={openCreate}
@@ -166,6 +166,7 @@ export default function QuizManagementPage() {
           {'+ ' + t('quizManagement.newQuiz')}
         </button>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.quizManagement')}</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">

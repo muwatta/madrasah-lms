@@ -302,6 +302,6 @@ class Command(BaseCommand):
         self.stdout.write(f'  Madrasah: {madrasah.name}')
         self.stdout.write(f'  Admin: admin@madrasah.com / admin123')
         self.stdout.write(f'  Teacher: teacher@madrasah.com / teacher123')
-        self.stdout.write(f'  Students: student1-5@madrasah.com / student123')
+        self.stdout.write(f'  Students: student1@madrasah.com / student123')
         self.stdout.write(f'  Parent: parent@madrasah.com / parent123')
         self.stdout.write(f'  Board: board@madrasah.com / board123')

@@ -140,7 +140,7 @@ export default function ExamManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <h1 className="text-2xl font-bold text-gray-900">{t('examManagement.title')}</h1>
         <button
           onClick={() => { setForm({ title: '', subject: '', exam_date: '', total_marks: '', description: '' }); setFormError(null); setShowForm(true); }}
@@ -149,6 +149,7 @@ export default function ExamManagementPage() {
           {t('examManagement.createExam')}
         </button>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.examManagement')}</p>
 
       {showForm && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">

@@ -50,7 +50,8 @@ export default function QuizResultsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t('student.quizResults')}</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('student.quizResults')}</h1>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.quizResults')}</p>
 
       {error && (
         <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-4">{error}</div>

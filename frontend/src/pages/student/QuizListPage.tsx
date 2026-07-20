@@ -69,7 +69,7 @@ export default function QuizListPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <h1 className="text-2xl font-bold text-gray-800">{t('student.quizzes')}</h1>
         <select
           value={filterSubject}
@@ -82,6 +82,7 @@ export default function QuizListPage() {
           ))}
         </select>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.quizList')}</p>
 
       {loading ? (
         <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>

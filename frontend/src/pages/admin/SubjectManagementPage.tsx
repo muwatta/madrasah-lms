@@ -126,12 +126,13 @@ export default function SubjectManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-bold text-gray-900">{t('subjectManagement.title')}</h1>
         <button onClick={() => { setSubjectForm({ name_ar: '', name_en: '', code: '', description: '' }); setEditingSubjectId(null); setShowSubjectForm(true); }} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
           {t('subjectManagement.addSubject')}
         </button>
       </div>
+      <p className="text-sm text-gray-500 mb-6">{t('guides.subjectManagement')}</p>
 
       {showSubjectForm && (
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
