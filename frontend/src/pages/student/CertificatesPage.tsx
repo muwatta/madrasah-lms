@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { certificateAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonCard } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface Certificate {
@@ -44,34 +44,44 @@ export default function CertificatesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-4 w-64 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">{language === 'ar' ? 'الشهادات' : 'Certificates'}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{language === 'ar' ? 'الشهادات' : 'Certificates'}</h1>
       </div>
-      <p className="mb-6 text-sm text-gray-500">{language === 'ar' ? 'شهادات الإنجاز والتقدير' : 'Achievement and recognition certificates'}</p>
+      <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">{language === 'ar' ? 'شهادات الإنجاز والتقدير' : 'Achievement and recognition certificates'}</p>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{error}</div>
       )}
 
       {certificates.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+            <svg className="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد شهادات بعد' : 'No certificates yet'}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{language === 'ar' ? 'لا توجد شهادات بعد' : 'No certificates yet'}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {certificates.map((cert) => {
             const t = typeLabels[cert.certificate_type] || { en: cert.certificate_type, ar: cert.certificate_type };
             return (
-              <div key={cert.id} className="card-hover rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md">
+              <div key={cert.id} className="card-hover rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm transition-all hover:shadow-md">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-sm">
                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -81,8 +91,8 @@ export default function CertificatesPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-semibold text-gray-900">{cert.title}</h3>
-                        <p className="text-xs text-gray-500">{language === 'ar' ? t.ar : t.en} &middot; {cert.certificate_number}</p>
+                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{cert.title}</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{language === 'ar' ? t.ar : t.en} &middot; {cert.certificate_number}</p>
                       </div>
                       {cert.file && (
                         <a
@@ -99,9 +109,9 @@ export default function CertificatesPage() {
                       )}
                     </div>
                     {cert.description && (
-                      <p className="mt-1.5 text-sm text-gray-600">{cert.description}</p>
+                      <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-400">{cert.description}</p>
                     )}
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                       {new Date(cert.issued_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                   </div>

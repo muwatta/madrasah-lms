@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { questionAPI, subjectAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { Question, Subject, Topic } from '../../types';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonTable } from '../../components/Skeleton';
 import ConfirmModal from '../../components/ConfirmModal';
 import RichTextEditor from '../../components/RichTextEditor';
 import { useLanguage } from '../../context/LanguageContext';
@@ -156,16 +156,37 @@ export default function QuestionBankPage() {
     return map[d] ?? 'bg-gray-100 text-gray-800';
   };
 
-  if (loading && !showForm) return <LoadingSpinner size="lg" className="mt-20" />;
+  if (loading && !showForm) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="flex gap-2">
+            <div className="h-10 w-32 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            <div className="h-10 w-36 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          </div>
+        </div>
+        <div className="h-4 w-64 mt-2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          ))}
+        </div>
+        <div className="mt-6">
+          <SkeletonTable rows={5} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('questionBank.title')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('questionBank.title')}</h1>
         <div className="flex gap-2">
           <button
             onClick={() => setShowBulkUpload(!showBulkUpload)}
-            className="rounded-lg border border-primary-200 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50"
+            className="rounded-lg border border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20"
           >
             {t('bulkUpload.title')}
           </button>
@@ -177,10 +198,10 @@ export default function QuestionBankPage() {
           </button>
         </div>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.questionBank')}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.questionBank')}</p>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
           {error}
           <button onClick={() => setError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
@@ -198,7 +219,7 @@ export default function QuestionBankPage() {
           placeholder={t('filters.searchQuestions')}
           value={filters.search}
           onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         />
         <select
           value={selectedSubject}
@@ -207,7 +228,7 @@ export default function QuestionBankPage() {
             setSelectedSubject(val);
             setFilters({ ...filters, topic: '' });
           }}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
           <option value="">{t('filters.allSubjects')}</option>
           {subjects.map((s) => (
@@ -217,7 +238,7 @@ export default function QuestionBankPage() {
         <select
           value={filters.topic}
           onChange={(e) => setFilters({ ...filters, topic: e.target.value })}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
           <option value="">{t('filters.allTopics')}</option>
           {topics.map((topic) => (
@@ -227,7 +248,7 @@ export default function QuestionBankPage() {
         <select
           value={filters.type}
           onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
           <option value="">{t('filters.allTypes')}</option>
           <option value="mcq">{t('questionTypes.mcq')}</option>
@@ -238,7 +259,7 @@ export default function QuestionBankPage() {
         <select
           value={filters.difficulty}
           onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
         >
           <option value="">{t('filters.allLevels')}</option>
           <option value="easy">{t('difficulty.easy')}</option>
@@ -248,13 +269,13 @@ export default function QuestionBankPage() {
       </div>
 
       {showForm && (
-        <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">
+        <div className="mb-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
             {editingId ? t('questionBank.editQuestion') : t('questionBank.createQuestion')}
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t('fields.subject')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.subject')}</label>
               <select
                 value={selectedSubject}
                 onChange={(e) => {
@@ -262,7 +283,7 @@ export default function QuestionBankPage() {
                   setSelectedSubject(val);
                   setForm({ ...form, topic: '' });
                 }}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
                 <option value="">{t('filters.chooseSubject')}</option>
                 {subjects.map((s) => (
@@ -271,11 +292,11 @@ export default function QuestionBankPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t('fields.topic')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.topic')}</label>
               <select
                 value={form.topic}
                 onChange={(e) => setForm({ ...form, topic: e.target.value ? Number(e.target.value) : '' })}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
                 <option value="">{t('filters.chooseTopic')}</option>
                 {topics.map((topic) => (
@@ -284,11 +305,11 @@ export default function QuestionBankPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t('fields.questionType')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.questionType')}</label>
               <select
                 value={form.question_type}
                 onChange={(e) => setForm({ ...form, question_type: e.target.value as QuestionForm['question_type'] })}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
                 <option value="mcq">{t('questionTypes.mcq')}</option>
                 <option value="fill_blank">{t('questionTypes.fillBlank')}</option>
@@ -297,11 +318,11 @@ export default function QuestionBankPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t('fields.difficulty')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.difficulty')}</label>
               <select
                 value={form.difficulty}
                 onChange={(e) => setForm({ ...form, difficulty: e.target.value as QuestionForm['difficulty'] })}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               >
                 <option value="easy">{t('difficulty.easy')}</option>
                 <option value="medium">{t('difficulty.medium')}</option>
@@ -309,7 +330,7 @@ export default function QuestionBankPage() {
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">{t('fields.questionText')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.questionText')}</label>
               <RichTextEditor
                 value={form.question_text}
                 onChange={(val) => setForm({ ...form, question_text: val })}
@@ -321,7 +342,7 @@ export default function QuestionBankPage() {
 
           {form.question_type === 'mcq' && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">{t('fields.options')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.options')}</label>
               <div className="mt-1 space-y-2">
                 {form.options.map((opt, i) => (
                   <div key={i} className="flex items-center gap-2">
@@ -330,7 +351,7 @@ export default function QuestionBankPage() {
                       value={opt}
                       onChange={(e) => updateOption(i, e.target.value)}
                       placeholder={t('questionBank.option') + ' ' + (i + 1)}
-                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                     />
                     {form.options.length > 2 && (
                       <button
@@ -356,14 +377,14 @@ export default function QuestionBankPage() {
 
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {form.question_type === 'mcq' ? t('teacher.correctAnswerHint') : t('fields.correctAnswer')}
               </label>
               {form.question_type === 'mcq' ? (
                 <select
                   value={form.correct_answer}
                   onChange={(e) => setForm({ ...form, correct_answer: e.target.value })}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                 >
                   <option value="">{t('questionBank.chooseCorrectAnswer')}</option>
                   {form.options.filter((o) => o.trim()).map((opt, i) => (
@@ -387,12 +408,12 @@ export default function QuestionBankPage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">{t('fields.explanation')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('fields.explanation')}</label>
               <input
                 type="text"
                 value={form.explanation}
                 onChange={(e) => setForm({ ...form, explanation: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
               />
             </div>
           </div>
@@ -407,7 +428,7 @@ export default function QuestionBankPage() {
             </button>
             <button
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               {t('common.cancel')}
             </button>
@@ -416,50 +437,50 @@ export default function QuestionBankPage() {
       )}
 
       {questions.length === 0 ? (
-        <p className="text-center text-gray-500">{t('questionBank.noQuestions')}</p>
+        <p className="text-center text-gray-500 dark:text-gray-400">{t('questionBank.noQuestions')}</p>
       ) : (
         <div className="space-y-3">
           {questions.map((q) => (
-            <div key={q.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+            <div key={q.id} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-gray-900 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: q.question_text }} />
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: q.question_text }} />
                   <div className="mt-1 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                    <span className="rounded-full bg-blue-100 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-400">
                       {typeLabel(q.question_type)}
                     </span>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${difficultyColor(q.difficulty)}`}>
                       {difficultyLabel(q.difficulty)}
                     </span>
-                    <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                    <span className="rounded-full bg-gray-100 dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300">
                       {q.topic_name}
                     </span>
                   </div>
                   {q.question_type === 'mcq' && q.options && (
-                    <ul className="mt-2 list-disc list-inside text-xs text-gray-600">
+                    <ul className="mt-2 list-disc list-inside text-xs text-gray-600 dark:text-gray-400">
                       {q.options.map((opt, i) => (
-                        <li key={i} className={opt === q.correct_answer ? 'font-semibold text-primary-700' : ''}>
+                        <li key={i} className={opt === q.correct_answer ? 'font-semibold text-primary-700 dark:text-primary-400' : ''}>
                           {opt} {opt === q.correct_answer && '(' + t('questionBank.correct') + ')'}
                         </li>
                       ))}
                     </ul>
                   )}
                   {q.question_type !== 'mcq' && q.correct_answer && (
-                    <div className="mt-1 text-xs text-gray-500">
-                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700 prose prose-sm max-w-none inline-block" dangerouslySetInnerHTML={{ __html: q.correct_answer }} />
-                    </p>
+                    <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700 dark:text-primary-400 prose prose-sm max-w-none dark:prose-invert inline-block" dangerouslySetInnerHTML={{ __html: q.correct_answer }} />
+                    </div>
                   )}
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <button
                     onClick={() => openEdit(q)}
-                    className="text-sm text-primary-600 hover:text-primary-800"
+                    className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300"
                   >
                     {t('common.edit')}
                   </button>
                   <button
                     onClick={() => deleteQuestion(q.id)}
-                    className="text-sm text-red-600 hover:text-red-800"
+                    className="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                   >
                     {t('common.delete')}
                   </button>

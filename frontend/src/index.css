@@ -2,10 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-bg-tertiary: #f3f4f6;
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+}
+
+.dark {
+  --color-bg-primary: #1e293b;
+  --color-bg-secondary: #0f172a;
+  --color-bg-tertiary: #334155;
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #64748b;
+  --color-border: #334155;
+  --color-border-light: #1e293b;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  line-height: 1.7;
+}
+
+[dir="rtl"] body {
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  letter-spacing: 0.005em;
+}
+
+[dir="ltr"] body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  letter-spacing: -0.01em;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  h1 { font-size: 1.5rem; letter-spacing: -0.02em; }
+  h2 { font-size: 1.25rem; letter-spacing: -0.015em; }
+  h3 { font-size: 1.125rem; }
+
+  [dir="rtl"] h1 { letter-spacing: 0; }
+  [dir="rtl"] h2 { letter-spacing: 0; }
+
+  p { line-height: 1.7; color: var(--color-text-secondary); }
+  small { font-size: 0.8125rem; color: var(--color-text-muted); }
+
+  a { color: #16a34a; transition: color 0.15s ease; }
+  a:hover { color: #15803d; }
+  .dark a { color: #4ade80; }
+  .dark a:hover { color: #86efac; }
+
+  input, select, textarea, button { transition: all 0.15s ease; }
+
+  *, *::before, *::after {
+    border-color: var(--color-border);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease;
+  }
+}
+
+/* Override Tailwind text colors to use theme variables (unlayered beats layered) */
+.text-gray-900, .text-gray-800 { color: var(--color-text-primary); }
+.text-gray-700, .text-gray-600 { color: var(--color-text-secondary); }
+.text-gray-500, .text-gray-400 { color: var(--color-text-muted); }
+.group:hover .group-hover\:text-gray-900 { color: var(--color-text-primary); }
+.border-gray-200, .border-gray-300, .border-gray-100 { border-color: var(--color-border); }
+.border-white { border-color: var(--color-bg-primary); }
+.divide-gray-100, .divide-gray-200 { border-color: var(--color-border-light); }
+.bg-white { background-color: var(--color-bg-primary); }
+.bg-gray-50 { background-color: var(--color-bg-secondary); }
+.bg-gray-100 { background-color: var(--color-bg-tertiary); }
+.hover\:bg-gray-50:hover { background-color: var(--color-bg-tertiary); }
+
+.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3); }
+.dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4); }
+.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2); }
+.dark .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2); }
+
+[dir="rtl"] .text-gray-900,
+[dir="rtl"] .text-gray-800,
+[dir="rtl"] .text-gray-700,
+[dir="rtl"] .text-gray-600 {
+  letter-spacing: 0.005em;
 }
 
 [dir="rtl"] body {
@@ -42,6 +143,14 @@ html {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 /* Animations */
@@ -138,9 +247,17 @@ html {
   border-radius: 0.5rem;
 }
 
+.dark .skeleton {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+}
+
 /* Focus ring utility */
 .focus-ring {
   @apply outline-none ring-2 ring-offset-2 ring-emerald-500;
+}
+
+.dark .focus-ring {
+  @apply ring-offset-gray-900;
 }
 
 /* Card hover lift */

@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { feeAPI, dashboardAPI } from '../../api';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
+import { Skeleton, SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 
 interface Fee {
   id: number;
@@ -18,10 +18,10 @@ interface Fee {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  paid: 'bg-green-100 text-green-700 border border-green-200',
-  partial: 'bg-amber-100 text-amber-700 border border-amber-200',
-  pending: 'bg-blue-100 text-blue-700 border border-blue-200',
-  overdue: 'bg-red-100 text-red-700 border border-red-200',
+  paid: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800',
+  partial: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800',
+  pending: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
+  overdue: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
 };
 
 const STATUS_OPTIONS = ['pending', 'paid', 'partial', 'overdue'];
@@ -122,14 +122,25 @@ export default function FeeStatusPage() {
     }
   };
 
-  const selectCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
-  const inputCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const selectCls = 'w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-[var(--color-bg-primary)] dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const inputCls = 'w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-[var(--color-bg-primary)] dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-100';
 
-  if (loading) return <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>;
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <div className="rounded-2xl bg-gradient-to-br from-primary-600 via-primary-500 to-emerald-500 p-6 text-white shadow-lg shadow-primary-500/20 sm:p-8">
+          <Skeleton className="h-8 w-48 bg-white/20" />
+          <Skeleton className="h-4 w-64 mt-2 bg-white/20" />
+        </div>
+        <SkeletonStatsGrid />
+        <SkeletonTable rows={4} />
+      </div>
+    );
+  }
 
   if (error) return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-700 flex items-center gap-3">
+      <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-red-700 dark:text-red-400 flex items-center gap-3">
         <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
@@ -176,10 +187,10 @@ export default function FeeStatusPage() {
         />
       </div>
 
-      <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[160px] flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.filterByStatus')}</label>
+            <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('finance.filterByStatus')}</label>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={selectCls}>
               <option value="">{t('finance.allStatuses')}</option>
               {STATUS_OPTIONS.map((s) => (
@@ -190,7 +201,7 @@ export default function FeeStatusPage() {
           {statusFilter && (
             <button
               onClick={() => setStatusFilter('')}
-              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2.5 text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               {language === 'ar' ? 'مسح' : 'Clear'}
@@ -200,31 +211,31 @@ export default function FeeStatusPage() {
       </div>
 
       {fees.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+        <div className="rounded-2xl border border-dashed border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
+            <svg className="h-8 w-8 text-[var(--color-text-muted)] dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{t('finance.noFeesRecorded')}</p>
-          <p className="mt-1 text-xs text-gray-400">{language === 'ar' ? 'سيظهر هنا أي رسوم مخصصة لأبنائك' : 'Any fees assigned to your children will appear here'}</p>
+          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{t('finance.noFeesRecorded')}</p>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'سيظهر هنا أي رسوم مخصصة لأبنائك' : 'Any fees assigned to your children will appear here'}</p>
         </div>
       ) : filteredFees.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-12 text-center">
-          <p className="text-sm text-gray-500">{t('finance.noFeesWithStatus')}</p>
+        <div className="rounded-2xl border border-dashed border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 py-12 text-center">
+          <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('finance.noFeesWithStatus')}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {Object.entries(groupedFees).map(([studentName, studentFees], groupIdx) => (
-            <div key={studentName} className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: `${200 + groupIdx * 80}ms` }}>
-              <div className="flex items-center gap-3 border-b border-gray-100 bg-gray-50/60 px-5 py-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700">
+            <div key={studentName} className="card-hover rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: `${200 + groupIdx * 80}ms` }}>
+              <div className="flex items-center gap-3 border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-5 py-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30 text-xs font-bold text-primary-700 dark:text-primary-400">
                   {studentName.split(' ').map((w) => w[0]).join('').slice(0, 2)}
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900">{studentName}</h3>
+                <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{studentName}</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-100 text-end text-xs font-medium uppercase text-gray-500">
+                    <tr className="border-b border-[var(--color-border-light)] dark:border-gray-700/50 text-end text-xs font-medium uppercase text-[var(--color-text-muted)] dark:text-gray-400">
                       <th className="px-5 py-2.5">{t('finance.description')}</th>
                       <th className="px-5 py-2.5">{t('finance.amount')}</th>
                       <th className="px-5 py-2.5">{t('finance.paid')}</th>
@@ -234,24 +245,24 @@ export default function FeeStatusPage() {
                       <th className="px-5 py-2.5 text-center">{language === 'ar' ? 'إجراء' : 'Action'}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                     {studentFees.map((fee) => (
-                      <tr key={fee.id} className="transition-colors hover:bg-gray-50/60">
-                        <td className="whitespace-nowrap px-5 py-3 text-gray-700">{fee.description || '—'}</td>
-                        <td className="whitespace-nowrap px-5 py-3 font-medium text-gray-900">{fee.amount}</td>
-                        <td className="whitespace-nowrap px-5 py-3 text-green-600 font-medium">{fee.paid}</td>
-                        <td className="whitespace-nowrap px-5 py-3 text-amber-600 font-medium">{fee.balance}</td>
+                      <tr key={fee.id} className="transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                        <td className="whitespace-nowrap px-5 py-3 text-[var(--color-text-secondary)] dark:text-gray-300">{fee.description || '—'}</td>
+                        <td className="whitespace-nowrap px-5 py-3 font-medium text-[var(--color-text-primary)] dark:text-gray-100">{fee.amount}</td>
+                        <td className="whitespace-nowrap px-5 py-3 text-green-600 dark:text-green-400 font-medium">{fee.paid}</td>
+                        <td className="whitespace-nowrap px-5 py-3 text-amber-600 dark:text-amber-400 font-medium">{fee.balance}</td>
                         <td className="whitespace-nowrap px-5 py-3">
                           <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[fee.status] || ''}`}>
                             {statusLabels[fee.status] || fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-3 text-gray-500 text-xs">{new Date(fee.due_date).toLocaleDateString()}</td>
+                        <td className="whitespace-nowrap px-5 py-3 text-[var(--color-text-muted)] dark:text-gray-400 text-xs">{new Date(fee.due_date).toLocaleDateString()}</td>
                         <td className="whitespace-nowrap px-5 py-3 text-center">
                           {fee.status !== 'paid' && (
                             <button
                               onClick={() => { setPaymentFee(fee); setPaymentForm({ amount: fee.balance, payment_method: 'cash' }); setPaymentError(null); setShowPaymentModal(true); }}
-                              className="btn-press inline-flex items-center gap-1 rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition-colors hover:bg-green-100"
+                              className="btn-press inline-flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-900/20 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-400 transition-colors hover:bg-green-100 dark:hover:bg-green-900/40"
                             >
                               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                               {language === 'ar' ? 'ادفع' : 'Pay'}
@@ -270,26 +281,26 @@ export default function FeeStatusPage() {
 
       {showPaymentModal && paymentFee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowPaymentModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{t('finance.recordPayment')}</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{t('finance.recordPayment')}</h3>
+              <button onClick={() => setShowPaymentModal(false)} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="mb-4 rounded-lg bg-gray-50 p-3">
-              <p className="text-sm text-gray-600">{t('finance.student')}: <span className="font-medium text-gray-900">{paymentFee.student_name}</span></p>
-              <p className="text-sm text-gray-600">{t('finance.balance')}: <span className="font-medium text-amber-600">{paymentFee.balance}</span></p>
+            <div className="mb-4 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3">
+              <p className="text-sm text-[var(--color-text-secondary)] dark:text-gray-300">{t('finance.student')}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{paymentFee.student_name}</span></p>
+              <p className="text-sm text-[var(--color-text-secondary)] dark:text-gray-300">{t('finance.balance')}: <span className="font-medium text-amber-600 dark:text-amber-400">{paymentFee.balance}</span></p>
             </div>
             {paymentError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 {paymentError}
               </div>
             )}
             <form onSubmit={handleRecordPayment} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.paymentAmount')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('finance.paymentAmount')}</label>
                 <input
                   required
                   type="number"
@@ -303,7 +314,7 @@ export default function FeeStatusPage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.paymentMethod')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('finance.paymentMethod')}</label>
                 <select value={paymentForm.payment_method} onChange={(e) => setPaymentForm({ ...paymentForm, payment_method: e.target.value })} className={selectCls}>
                   {PAYMENT_METHODS.map((m) => (
                     <option key={m} value={m}>{paymentMethodLabels[m] || m.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</option>
@@ -318,7 +329,7 @@ export default function FeeStatusPage() {
                     <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t('finance.confirmPayment')}</>
                   )}
                 </button>
-                <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+                <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-press rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-border)] dark:hover:bg-gray-600">{t('common.cancel')}</button>
               </div>
             </form>
           </div>

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { attendanceAPI, enrollmentAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton, SkeletonTable } from '../../components/Skeleton';
 
 type Status = 'present' | 'absent' | 'late' | 'excused';
 
@@ -107,24 +107,36 @@ export default function AttendancePage() {
     }
   };
 
-  if (loading) return <LoadingSpinner size="lg" className="mt-20" />;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <Skeleton className="h-8 w-64 mb-2" />
+        <Skeleton className="h-4 w-80 mb-6" />
+        <div className="mb-6 flex gap-4">
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-44" />
+        </div>
+        <SkeletonTable rows={6} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">{t('attendance.markAttendance')}</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('attendance.markAttendance')}</h1>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.attendance')}</p>
+      <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mb-6">{t('guides.attendance')}</p>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
           {error}
           <button onClick={() => setError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 
       {successMsg && (
-        <div className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+        <div className="mb-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 p-3 text-sm text-emerald-700 dark:text-emerald-400">
           {successMsg}
           <button onClick={() => setSuccessMsg(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
@@ -132,29 +144,29 @@ export default function AttendancePage() {
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-gray-700">{t('attendance.date')}</label>
+          <label className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('attendance.date')}</label>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           />
         </div>
         <button
           onClick={markAllPresent}
-          className="btn-press inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100"
+          className="btn-press inline-flex items-center gap-2 rounded-lg border border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50"
         >
           {t('attendance.markAllPresent')}
         </button>
       </div>
 
       {students.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm">
+        <div className="rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-8 text-center text-[var(--color-text-muted)] dark:text-gray-400 shadow-sm">
           {t('attendance.noStudents')}
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="hidden sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] border-b border-gray-200 bg-gray-50 px-6 py-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+        <div className="rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
+          <div className="hidden sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] border-b border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3 text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">
             <span>{t('attendance.student')}</span>
             {STATUS_OPTIONS.map((opt) => (
               <span key={opt.value} className="text-center w-24">{t(opt.labelKey)}</span>
@@ -164,19 +176,19 @@ export default function AttendancePage() {
           {students.map((student, idx) => (
             <div
               key={student.student_id}
-              className="opacity-0 animate-slide-up flex flex-col gap-3 border-b border-gray-100 px-6 py-4 sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] sm:items-center sm:gap-0 last:border-b-0 hover:bg-gray-50/50"
+              className="opacity-0 animate-slide-up flex flex-col gap-3 border-b border-[var(--color-border-light)] dark:border-gray-700/50 px-6 py-4 sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] sm:items-center sm:gap-0 last:border-b-0 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30"
               style={{ animationDelay: `${idx * 40}ms` }}
             >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-gray-900">{student.student_name}</p>
-                <p className="truncate text-xs text-gray-400">{student.student_email}</p>
+                <p className="truncate text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</p>
+                <p className="truncate text-xs text-[var(--color-text-muted)] dark:text-gray-400">{student.student_email}</p>
               </div>
               {STATUS_OPTIONS.map((opt) => (
                 <div key={opt.value} className="flex justify-center">
                   <button
                     onClick={() => setStudentStatus(student.student_id, opt.value)}
                     className={`btn-press w-24 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-                      marks[student.student_id] === opt.value ? opt.activeColor : opt.color + ' bg-white hover:bg-gray-50'
+                      marks[student.student_id] === opt.value ? opt.activeColor : opt.color + ' bg-[var(--color-bg-primary)] dark:bg-gray-800 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700'
                     }`}
                   >
                     {t(opt.labelKey)}

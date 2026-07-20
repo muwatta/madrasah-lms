@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { characterAPI, enrollmentAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton, SkeletonCard, SkeletonTable } from '../../components/Skeleton';
 
 interface Trait { id: number; name: string; name_ar: string; category: string; is_active: boolean; }
 interface Student { id: number; full_name: string; }
@@ -27,18 +27,18 @@ export default function CharacterPage() {
   const [summary, setSummary] = useState<any>(null);
 
   useEffect(() => {
-    characterAPI.traits.list().then(r => setTraits(r.data.results ?? r.data)).catch(() => {});
-    enrollmentAPI.teacherStudents().then(r => setStudents(r.data.results ?? r.data)).catch(() => {});
-    loadEvaluations();
+    Promise.all([
+      characterAPI.traits.list().then(r => setTraits(r.data.results ?? r.data)),
+      enrollmentAPI.teacherStudents().then(r => setStudents(r.data.results ?? r.data)),
+      loadEvaluations(),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const loadEvaluations = async () => {
-    setLoading(true);
     try {
       const r = await characterAPI.evaluations.list();
       setEvaluations(r.data.results ?? r.data);
     } catch {}
-    setLoading(false);
   };
 
   const handleCreateEvaluation = async () => {
@@ -73,55 +73,72 @@ export default function CharacterPage() {
     } catch {}
   };
 
+  const inputCls = 'w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-[var(--color-bg-primary)] dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-100';
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Skeleton className="h-8 w-64 mb-2" />
+        <Skeleton className="h-4 w-80 mb-6" />
+        <Skeleton className="h-10 w-80 mb-6" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1 className="mb-4 text-2xl font-bold">Character Evaluation</h1>
-      <div className="mb-4 flex gap-2 border-b">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <h1 className="mb-1 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">Character Evaluation</h1>
+      <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mb-4">Track and evaluate student character development</p>
+      <div className="mb-4 flex gap-2 border-b border-[var(--color-border)] dark:border-gray-700">
         {(['evaluate', 'traits', 'summary'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              tab === t ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              tab === t ? 'border-primary-600 text-primary-600 dark:text-primary-400' : 'border-transparent text-[var(--color-text-muted)] dark:text-gray-400 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300'
             }`}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
         ))}
       </div>
 
       {tab === 'evaluate' && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-lg border p-4">
-            <h2 className="mb-4 text-lg font-semibold">New Evaluation</h2>
+          <div className="rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">New Evaluation</h2>
             <div className="mb-3">
-              <label className="mb-1 block text-sm font-medium">Student</label>
-              <select value={studentId} onChange={e => setStudentId(Number(e.target.value) || '')} className="input-field">
+              <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Student</label>
+              <select value={studentId} onChange={e => setStudentId(Number(e.target.value) || '')} className={inputCls}>
                 <option value="">Select student...</option>
                 {students.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
               </select>
             </div>
             <div className="mb-3">
-              <label className="mb-1 block text-sm font-medium">Date</label>
-              <input type="date" value={evalDate} onChange={e => setEvalDate(e.target.value)} className="input-field" />
+              <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Date</label>
+              <input type="date" value={evalDate} onChange={e => setEvalDate(e.target.value)} className={inputCls} />
             </div>
             <div className="mb-4 space-y-3">
-              <h3 className="text-sm font-medium">Scores (1-5)</h3>
+              <h3 className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Scores (1-5)</h3>
               {traits.map(trait => (
                 <div key={trait.id} className="flex items-center gap-3">
-                  <span className="w-32 text-sm">{trait.name} ({trait.name_ar})</span>
+                  <span className="w-32 text-sm text-[var(--color-text-primary)] dark:text-gray-100">{trait.name} ({trait.name_ar})</span>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map(n => (
                       <button key={n} onClick={() => setScores(p => ({...p, [trait.id]: n}))}
                         className={`h-8 w-8 rounded-full text-xs font-medium transition-colors ${
-                          scores[trait.id] === n ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          scores[trait.id] === n ? 'bg-primary-600 text-white' : 'bg-[var(--color-bg-secondary)] dark:bg-gray-700 text-[var(--color-text-secondary)] dark:text-gray-300 hover:bg-[var(--color-border)] dark:hover:bg-gray-600'
                         }`}>{n}</button>
                     ))}
                   </div>
                   {scores[trait.id] && (
-                    <span className="text-xs text-gray-500">{SCORE_LABELS[scores[trait.id]]}</span>
+                    <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{SCORE_LABELS[scores[trait.id]]}</span>
                   )}
                 </div>
               ))}
             </div>
             <div className="mb-4">
-              <label className="mb-1 block text-sm font-medium">Overall Notes</label>
-              <textarea value={notes} onChange={e => setNotes(e.target.value)} className="input-field" rows={3} />
+              <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Overall Notes</label>
+              <textarea value={notes} onChange={e => setNotes(e.target.value)} className={inputCls} rows={3} />
             </div>
             <button onClick={handleCreateEvaluation} disabled={!studentId || Object.keys(scores).length === 0}
               className="rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
@@ -129,18 +146,19 @@ export default function CharacterPage() {
             </button>
           </div>
 
-          <div className="rounded-lg border p-4">
-            <h2 className="mb-4 text-lg font-semibold">Recent Evaluations</h2>
-            {loading ? <LoadingSpinner /> : (
-              <div className="space-y-3">
-                {evaluations.slice(0, 10).map((ev: any) => (
-                  <div key={ev.id} className="border-b pb-2">
-                    <p className="text-sm font-medium">{ev.student_name}</p>
-                    <p className="text-xs text-gray-500">{ev.evaluation_date} — Avg: {ev.average_score ?? '-'}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">Recent Evaluations</h2>
+            <div className="space-y-3">
+              {evaluations.slice(0, 10).map((ev: any) => (
+                <div key={ev.id} className="border-b border-[var(--color-border-light)] dark:border-gray-700/50 pb-2">
+                  <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{ev.student_name}</p>
+                  <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{ev.evaluation_date} — Avg: {ev.average_score ?? '-'}</p>
+                </div>
+              ))}
+              {evaluations.length === 0 && (
+                <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">No evaluations yet</p>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -152,39 +170,39 @@ export default function CharacterPage() {
             {showTraitForm ? 'Cancel' : 'New Trait'}
           </button>
           {showTraitForm && (
-            <div className="mb-6 max-w-md rounded-lg border p-4">
+            <div className="mb-6 max-w-md rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
               <div className="mb-3">
-                <label className="mb-1 block text-sm font-medium">Name</label>
-                <input value={traitForm.name} onChange={e => setTraitForm(p => ({...p, name: e.target.value}))} className="input-field" />
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Name</label>
+                <input value={traitForm.name} onChange={e => setTraitForm(p => ({...p, name: e.target.value}))} className={inputCls} />
               </div>
               <div className="mb-3">
-                <label className="mb-1 block text-sm font-medium">Name (Arabic)</label>
-                <input value={traitForm.name_ar} onChange={e => setTraitForm(p => ({...p, name_ar: e.target.value}))} className="input-field" />
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Name (Arabic)</label>
+                <input value={traitForm.name_ar} onChange={e => setTraitForm(p => ({...p, name_ar: e.target.value}))} className={inputCls} />
               </div>
               <div className="mb-3">
-                <label className="mb-1 block text-sm font-medium">Category</label>
-                <select value={traitForm.category} onChange={e => setTraitForm(p => ({...p, category: e.target.value}))} className="input-field">
+                <label className="mb-1 block text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">Category</label>
+                <select value={traitForm.category} onChange={e => setTraitForm(p => ({...p, category: e.target.value}))} className={inputCls}>
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
-              <button onClick={handleCreateTrait} className="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white">Save</button>
+              <button onClick={handleCreateTrait} className="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white hover:bg-primary-700">Save</button>
             </div>
           )}
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50"><tr>
-                <th className="px-4 py-3 text-start font-medium">Name</th>
-                <th className="px-4 py-3 text-start font-medium">Arabic</th>
-                <th className="px-4 py-3 text-start font-medium">Category</th>
-                <th className="px-4 py-3 text-start font-medium">Active</th>
+          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] dark:border-gray-700">
+            <table className="min-w-full text-sm">
+              <thead className="bg-[var(--color-bg-secondary)] dark:bg-gray-700/50"><tr>
+                <th className="px-4 py-3 text-start font-medium text-[var(--color-text-muted)] dark:text-gray-400">Name</th>
+                <th className="px-4 py-3 text-start font-medium text-[var(--color-text-muted)] dark:text-gray-400">Arabic</th>
+                <th className="px-4 py-3 text-start font-medium text-[var(--color-text-muted)] dark:text-gray-400">Category</th>
+                <th className="px-4 py-3 text-start font-medium text-[var(--color-text-muted)] dark:text-gray-400">Active</th>
               </tr></thead>
-              <tbody>
+              <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                 {traits.map(trait => (
-                  <tr key={trait.id} className="border-t">
-                    <td className="px-4 py-3">{trait.name}</td>
-                    <td className="px-4 py-3">{trait.name_ar}</td>
-                    <td className="px-4 py-3">{trait.category}</td>
-                    <td className="px-4 py-3">{trait.is_active ? 'Yes' : 'No'}</td>
+                  <tr key={trait.id} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                    <td className="px-4 py-3 text-[var(--color-text-primary)] dark:text-gray-100">{trait.name}</td>
+                    <td className="px-4 py-3 text-[var(--color-text-primary)] dark:text-gray-100">{trait.name_ar}</td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)] dark:text-gray-300">{trait.category}</td>
+                    <td className="px-4 py-3 text-[var(--color-text-secondary)] dark:text-gray-300">{trait.is_active ? 'Yes' : 'No'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -196,26 +214,26 @@ export default function CharacterPage() {
       {tab === 'summary' && (
         <div className="max-w-lg">
           <div className="mb-4 flex gap-3">
-            <select value={selectedStudent} onChange={e => setSelectedStudent(Number(e.target.value) || '')} className="input-field flex-1">
+            <select value={selectedStudent} onChange={e => setSelectedStudent(Number(e.target.value) || '')} className={`${inputCls} flex-1`}>
               <option value="">Select student...</option>
               {students.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
             </select>
             <button onClick={handleLoadSummary} disabled={!selectedStudent}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white disabled:opacity-50">Load</button>
+              className="rounded-lg bg-primary-600 px-4 py-2 text-sm text-white disabled:opacity-50 hover:bg-primary-700">Load</button>
           </div>
           {summary && (
-            <div className="rounded-lg border p-4">
-              <h2 className="mb-2 text-lg font-semibold">{summary.student_name}</h2>
-              <p className="mb-3 text-sm text-gray-500">Overall Average: <strong>{summary.overall_average ?? 'N/A'}</strong> | Evaluations: {summary.total_evaluations}</p>
+            <div className="rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
+              <h2 className="mb-2 text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{summary.student_name}</h2>
+              <p className="mb-3 text-sm text-[var(--color-text-muted)] dark:text-gray-400">Overall Average: <strong className="text-[var(--color-text-primary)] dark:text-gray-100">{summary.overall_average ?? 'N/A'}</strong> | Evaluations: {summary.total_evaluations}</p>
               <div className="space-y-2">
                 {summary.traits?.map((t: any) => (
-                  <div key={t.trait_id} className="flex items-center gap-3 border-b pb-2">
-                    <span className="w-32 text-sm font-medium">{t.trait_name}</span>
-                    <span className="text-xs text-gray-400">({t.category})</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                  <div key={t.trait_id} className="flex items-center gap-3 border-b border-[var(--color-border-light)] dark:border-gray-700/50 pb-2">
+                    <span className="w-32 text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{t.trait_name}</span>
+                    <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">({t.category})</span>
+                    <div className="flex-1 bg-[var(--color-bg-secondary)] dark:bg-gray-700 rounded-full h-2">
                       <div className="bg-primary-500 h-2 rounded-full" style={{ width: `${(t.average_score / 5) * 100}%` }} />
                     </div>
-                    <span className="text-sm font-medium">{t.average_score}</span>
+                    <span className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{t.average_score}</span>
                   </div>
                 ))}
               </div>

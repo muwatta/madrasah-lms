@@ -1,11 +1,41 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        arabic: ['Cairo', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
+        'xs': ['0.75rem', { lineHeight: '1.125rem' }],
+        'sm': ['0.8125rem', { lineHeight: '1.375rem' }],
+        'base': ['0.9375rem', { lineHeight: '1.625rem' }],
+        'lg': ['1.0625rem', { lineHeight: '1.625rem' }],
+        'xl': ['1.1875rem', { lineHeight: '1.5rem' }],
+        '2xl': ['1.375rem', { lineHeight: '1.75rem' }],
+        '3xl': ['1.75rem', { lineHeight: '2.25rem' }],
+      },
+      fontWeight: {
+        normal: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700',
+      },
+      letterSpacing: {
+        tight: '-0.015em',
+        normal: '0',
+        wide: '0.025em',
+      },
+      borderRadius: {
+        '2xl': '0.875rem',
+        '3xl': '1.125rem',
+      },
       colors: {
         primary: {
           50: '#f0fdf4',

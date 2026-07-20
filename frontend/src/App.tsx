@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -69,6 +70,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 function App() {
   return (
       <LanguageProvider>
+      <ThemeProvider>
       <AuthProvider>
         <Router>
           <ErrorBoundary>
@@ -214,6 +216,7 @@ function App() {
           </ErrorBoundary>
         </Router>
       </AuthProvider>
+      </ThemeProvider>
       </LanguageProvider>
   );
 }

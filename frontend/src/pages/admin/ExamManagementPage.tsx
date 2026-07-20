@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { examAPI, subjectAPI } from '../../api';
 import type { Exam, ExamResult, Subject } from '../../types';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import { useLanguage } from '../../context/LanguageContext';
+import { Skeleton, SkeletonTable } from '../../components/Skeleton';
 
 export default function ExamManagementPage() {
   const { t } = useLanguage();
@@ -141,7 +141,7 @@ export default function ExamManagementPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
-        <h1 className="text-2xl font-bold text-gray-900">{t('examManagement.title')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{t('examManagement.title')}</h1>
         <button
           onClick={() => { setForm({ title: '', subject: '', exam_date: '', total_marks: '', description: '' }); setFormError(null); setShowForm(true); }}
           className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
@@ -149,41 +149,41 @@ export default function ExamManagementPage() {
           {t('examManagement.createExam')}
         </button>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.examManagement')}</p>
+      <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)] mb-6">{t('guides.examManagement')}</p>
 
       {showForm && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('examManagement.newExam')}</h2>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{formError}</div>}
+        <div className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('examManagement.newExam')}</h2>
+          {formError && <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{formError}</div>}
           <form onSubmit={handleCreateExam} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.title')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.title')}</label>
               <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.subject')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.subject')}</label>
               <select required value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inputClass}>
                 <option value="">{t('filters.chooseSubject')}</option>
                 {subjects.map((s) => <option key={s.id} value={s.id}>{s.name_ar}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.examDate')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.examDate')}</label>
               <input required type="date" value={form.exam_date} onChange={(e) => setForm({ ...form, exam_date: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.totalMarks')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.totalMarks')}</label>
               <input required type="number" min="1" value={form.total_marks} onChange={(e) => setForm({ ...form, total_marks: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.description')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.description')}</label>
               <input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={inputClass} />
             </div>
             <div className="sm:col-span-2 flex gap-3">
               <button type="submit" disabled={saving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
                 {saving ? t('common.creating') : t('examManagement.createExam')}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-300 dark:border-[var(--color-border)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-gray-50 dark:hover:bg-gray-700/30">
                 {t('common.cancel')}
               </button>
             </div>
@@ -192,38 +192,38 @@ export default function ExamManagementPage() {
       )}
 
       {showRecordResult && selectedExam && (
-        <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
-          <h3 className="mb-3 font-semibold text-gray-900">{t('examManagement.recordResultFor')} {activeExam?.title}</h3>
+        <div className="rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 p-6">
+          <h3 className="mb-3 font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('examManagement.recordResultFor')} {activeExam?.title}</h3>
           {resultError && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
               {resultError}
               <button onClick={() => setResultError(null)} className="me-2 underline">{t('common.dismiss')}</button>
             </div>
           )}
           <form onSubmit={handleRecordResult} className="grid grid-cols-1 gap-4 sm:grid-cols-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.student')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.student')}</label>
               <input required type="number" value={resultForm.student} onChange={(e) => setResultForm({ ...resultForm, student: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.score')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.score')}</label>
               <input required type="number" min="0" value={resultForm.score} onChange={(e) => setResultForm({ ...resultForm, score: e.target.value })} className={inputClass} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.grade')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.grade')}</label>
               <select value={resultForm.grade} onChange={(e) => setResultForm({ ...resultForm, grade: e.target.value })} className={inputClass}>
                 {['A', 'B', 'C', 'D', 'F'].map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.remarks')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.remarks')}</label>
               <input value={resultForm.remarks} onChange={(e) => setResultForm({ ...resultForm, remarks: e.target.value })} className={inputClass} />
             </div>
             <div className="sm:col-span-4 flex gap-3">
               <button type="submit" disabled={resultSaving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
                 {resultSaving ? t('common.saving') : t('common.save')}
               </button>
-              <button type="button" onClick={() => setShowRecordResult(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <button type="button" onClick={() => setShowRecordResult(false)} className="rounded-lg border border-gray-300 dark:border-[var(--color-border)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-gray-50 dark:hover:bg-gray-700/30">
                 {t('common.cancel')}
               </button>
             </div>
@@ -232,13 +232,13 @@ export default function ExamManagementPage() {
       )}
 
       {showBulkUpload && selectedExam && (
-        <div className="rounded-lg border border-primary-200 bg-primary-50 p-6">
-          <h3 className="mb-3 font-semibold text-gray-900">{t('common.bulkUpload')} - {activeExam?.title}</h3>
-          <p className="mb-2 text-sm text-gray-600">
+        <div className="rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 p-6">
+          <h3 className="mb-3 font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('common.bulkUpload')} - {activeExam?.title}</h3>
+          <p className="mb-2 text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">
             {t('examManagement.csvFormat')} <code className="rounded bg-gray-100 px-1">student_id, score, grade, remarks</code> ({t('examManagement.onePerLine')})
           </p>
           {bulkError && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
               {bulkError}
               <button onClick={() => setBulkError(null)} className="me-2 underline">{t('common.dismiss')}</button>
             </div>
@@ -254,7 +254,7 @@ export default function ExamManagementPage() {
             <button onClick={handleBulkUpload} disabled={bulkSaving || !bulkText.trim()} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
               {bulkSaving ? t('common.uploading') : t('common.upload')}
             </button>
-            <button onClick={() => { setShowBulkUpload(false); setBulkText(''); }} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button onClick={() => { setShowBulkUpload(false); setBulkText(''); }} className="rounded-lg border border-gray-300 dark:border-[var(--color-border)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-gray-50 dark:hover:bg-gray-700/30">
               {t('common.cancel')}
             </button>
             <label className="me-auto cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -278,14 +278,14 @@ export default function ExamManagementPage() {
       )}
 
       {loading ? (
-        <div className="flex h-40 items-center justify-center"><LoadingSpinner /></div>
+        <SkeletonTable rows={5} />
       ) : error ? (
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-400">{error}</div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto">
+        <div className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] shadow-sm overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-end text-xs font-medium uppercase text-gray-500">
+              <tr className="border-b border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                 <th className="px-4 py-3">{t('fields.title')}</th>
                 <th className="px-4 py-3">{t('fields.subject')}</th>
                 <th className="px-4 py-3">{t('fields.date')}</th>
@@ -297,11 +297,11 @@ export default function ExamManagementPage() {
             <tbody>
               {exams.map((exam) => (
                 <tr key={exam.id} className={`border-b border-gray-50 hover:bg-gray-50 ${selectedExam === exam.id ? 'bg-primary-50' : ''}`}>
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{exam.title}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{exam.subject_name}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{new Date(exam.exam_date).toLocaleDateString()}</td>
-                  <td className="px-4 py-3 text-gray-600">{exam.total_marks}</td>
-                  <td className="px-4 py-3 text-gray-600">{exam.result_count}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{exam.title}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-gray-600 dark:text-[var(--color-text-secondary)]">{exam.subject_name}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-gray-600 dark:text-[var(--color-text-secondary)]">{new Date(exam.exam_date).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-[var(--color-text-secondary)]">{exam.total_marks}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-[var(--color-text-secondary)]">{exam.result_count}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => loadResults(exam.id)} className="text-sm font-medium text-primary-600 hover:underline">
@@ -318,7 +318,7 @@ export default function ExamManagementPage() {
                 </tr>
               ))}
               {!exams.length && (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500">{t('examManagement.noExams')}</td></tr>
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500 dark:text-[var(--color-text-muted)]">{t('examManagement.noExams')}</td></tr>
               )}
             </tbody>
           </table>
@@ -326,7 +326,7 @@ export default function ExamManagementPage() {
       )}
 
       {selectedExam && !showRecordResult && !showBulkUpload && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">{t('examManagement.resultsFor')} {activeExam?.title}</h2>
             <div className="flex gap-2">
@@ -339,15 +339,15 @@ export default function ExamManagementPage() {
             </div>
           </div>
           {resultsError && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{resultsError}</div>
+            <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{resultsError}</div>
           )}
           {resultsLoading ? (
-            <div className="flex h-24 items-center justify-center"><LoadingSpinner size="sm" /></div>
+            <SkeletonTable rows={3} />
           ) : results.length ? (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 text-end text-xs font-medium uppercase text-gray-500">
+                  <tr className="border-b border-gray-200 dark:border-[var(--color-border)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                     <th className="pb-2 pe-4">{t('fields.student')}</th>
                     <th className="pb-2 pe-4">{t('fields.score')}</th>
                     <th className="pb-2 pe-4">{t('fields.grade')}</th>
@@ -356,18 +356,18 @@ export default function ExamManagementPage() {
                 </thead>
                 <tbody>
                   {results.map((r) => (
-                    <tr key={r.id} className="border-b border-gray-50">
-                      <td className="py-2 pe-4 font-medium text-gray-900">{r.student_name}</td>
-                      <td className="py-2 pe-4 text-gray-600">{r.score} / {activeExam?.total_marks}</td>
+                    <tr key={r.id} className="border-b border-gray-50 dark:border-[var(--color-border-light)]">
+                      <td className="py-2 pe-4 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{r.student_name}</td>
+                      <td className="py-2 pe-4 text-gray-600 dark:text-[var(--color-text-secondary)]">{r.score} / {activeExam?.total_marks}</td>
                       <td className="py-2 pe-4">{gradeBadge(r.grade)}</td>
-                      <td className="py-2 text-gray-500">{r.remarks || '—'}</td>
+                      <td className="py-2 text-gray-500 dark:text-[var(--color-text-muted)]">{r.remarks || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <p className="py-4 text-center text-sm text-gray-500">{t('examManagement.noResults')}</p>
+            <p className="py-4 text-center text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t('examManagement.noResults')}</p>
           )}
         </div>
       )}

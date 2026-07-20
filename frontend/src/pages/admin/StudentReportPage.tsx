@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { schoolAPI, userAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton, SkeletonCard, SkeletonChart } from '../../components/Skeleton';
 
 interface Student {
   id: number;
@@ -96,17 +96,17 @@ export default function StudentReportPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">{t('studentReport.title')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{t('studentReport.title')}</h1>
 
-      <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm opacity-0 animate-slide-up">
+      <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm opacity-0 animate-slide-up">
         <label className="mb-1 block text-xs font-medium text-gray-500">{t('studentReport.selectStudent')}</label>
         {loadingStudents ? (
-          <LoadingSpinner size="sm" />
+          <Skeleton className="h-10 w-full" />
         ) : (
           <select
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value ? Number(e.target.value) : '')}
-            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            className="w-full rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-primary)] px-3 py-2.5 text-sm text-gray-900 dark:text-[var(--color-text-primary)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
           >
             <option value="">{language === 'ar' ? '-- اختر طالب --' : '-- Select a student --'}</option>
             {students.map((s) => (
@@ -117,22 +117,22 @@ export default function StudentReportPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-sm text-red-700 dark:text-red-400">{error}</div>
       )}
 
       {loadingReport && (
-        <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>
+        <div className="space-y-6"><SkeletonCard /><SkeletonChart /><SkeletonCard /></div>
       )}
 
       {report && !loadingReport && (
         <>
-          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm opacity-0 animate-slide-up">
+          <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm opacity-0 animate-slide-up">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-xl font-bold text-primary-700">
                 {report.student.name.charAt(0)}
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">{report.student.name}</h2>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{report.student.name}</h2>
                 <p className="text-sm text-gray-400">{report.student.email}</p>
               </div>
             </div>
@@ -140,23 +140,23 @@ export default function StudentReportPage() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className={`card-hover rounded-xl border p-5 shadow-sm ${getScoreBg(report.overall_average)}`}>
-              <p className="text-xs font-medium text-gray-500">{t('studentReport.overallAverage')}</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('studentReport.overallAverage')}</p>
               <p className={`mt-1 text-3xl font-bold ${getScoreColor(report.overall_average)}`}>{report.overall_average}%</p>
             </div>
             <div className="card-hover rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-              <p className="text-xs font-medium text-gray-500">{t('studentReport.totalAttempts')}</p>
-              <p className="mt-1 text-3xl font-bold text-gray-900">{report.total_attempts}</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('studentReport.totalAttempts')}</p>
+              <p className="mt-1 text-3xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{report.total_attempts}</p>
             </div>
             <div className={`card-hover rounded-xl border p-5 shadow-sm ${getScoreBg(report.attendance.rate)}`}>
-              <p className="text-xs font-medium text-gray-500">{t('studentReport.attendanceRate')}</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('studentReport.attendanceRate')}</p>
               <p className={`mt-1 text-3xl font-bold ${getScoreColor(report.attendance.rate)}`}>{report.attendance.rate}%</p>
-              <p className="mt-1 text-xs text-gray-400">{report.attendance.present}/{report.attendance.total} {t('student.days')}</p>
+              <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{report.attendance.present}/{report.attendance.total} {t('student.days')}</p>
             </div>
           </div>
 
           {report.subject_performance.length > 0 && (
-            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm opacity-0 animate-slide-up">
-              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('studentReport.subjectPerformance')}</h2>
+            <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm opacity-0 animate-slide-up">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('studentReport.subjectPerformance')}</h2>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 30 }}>
@@ -173,8 +173,8 @@ export default function StudentReportPage() {
               </div>
               <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {report.subject_performance.map((s) => (
-                  <div key={s.subject_en} className="flex items-center justify-between rounded-lg border border-gray-50 bg-gray-50/50 px-3 py-2">
-                    <span className="text-xs text-gray-700">{language === 'ar' ? s.subject : s.subject_en}</span>
+                  <div key={s.subject_en} className="flex items-center justify-between rounded-lg border border-gray-50 dark:border-[var(--color-border-light)] bg-gray-50/50 dark:bg-[var(--color-bg-primary)] px-3 py-2">
+                    <span className="text-xs text-gray-700 dark:text-[var(--color-text-secondary)]">{language === 'ar' ? s.subject : s.subject_en}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-gray-400">{s.attempts} {language === 'ar' ? 'محاولة' : 'attempts'}</span>
                       <span className={`text-xs font-bold ${getScoreColor(s.average)}`}>{s.average}%</span>
@@ -185,8 +185,8 @@ export default function StudentReportPage() {
             </div>
           )}
 
-          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm opacity-0 animate-slide-up">
-            <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('attendance.title')}</h2>
+          <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm opacity-0 animate-slide-up">
+            <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('attendance.title')}</h2>
             <div className="flex items-center gap-6">
               <div className="relative h-24 w-24">
                 <svg width={96} height={96} className="-rotate-90">
@@ -205,10 +205,10 @@ export default function StudentReportPage() {
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">
                   <span className="font-semibold text-emerald-600">{report.attendance.present}</span> {language === 'ar' ? 'أيام حضور من أصل' : 'days present out of'} <span className="font-semibold">{report.attendance.total}</span>
                 </p>
-                <p className="mt-1 text-xs text-gray-400">
+                <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">
                   {report.attendance.rate >= 90
                     ? (language === 'ar' ? 'حضور ممتاز' : 'Excellent attendance')
                     : report.attendance.rate >= 75
@@ -255,8 +255,8 @@ export default function StudentReportPage() {
           )}
 
           {report.recommendations.length > 0 && (
-            <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm opacity-0 animate-slide-up">
-              <h2 className="mb-4 text-sm font-semibold text-gray-700">{t('studentReport.recommendations')}</h2>
+            <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm opacity-0 animate-slide-up">
+              <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('studentReport.recommendations')}</h2>
               <div className="space-y-3">
                 {report.recommendations.map((rec, i) => {
                   const { icon, style } = getRecommendationIcon(rec.type);
@@ -264,7 +264,7 @@ export default function StudentReportPage() {
                     <div key={i} className={`flex items-start gap-3 rounded-lg border p-4 ${style}`}>
                       <span className="mt-0.5 text-lg">{icon}</span>
                       <div className="flex-1">
-                        <p className="inline-block rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-semibold text-gray-600">
+                        <p className="inline-block rounded-full bg-white/60 dark:bg-gray-800/60 px-2 py-0.5 text-[10px] font-semibold text-gray-600 dark:text-[var(--color-text-secondary)]">
                           {rec.type === 'weak_subject' ? (language === 'ar' ? 'مادة ضعيفة' : 'Weak Subject') : rec.type === 'attendance' ? (language === 'ar' ? 'حضور' : 'Attendance') : (language === 'ar' ? 'متقدم' : 'Advanced')}
                         </p>
                         <p className="mt-1 text-sm text-gray-700">{language === 'ar' ? rec.message_ar : rec.message_en}</p>
@@ -279,11 +279,11 @@ export default function StudentReportPage() {
       )}
 
       {!loadingReport && !report && selectedId === '' && !error && (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center opacity-0 animate-slide-up">
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center opacity-0 animate-slide-up">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
             <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{t('studentReport.noStudent')}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{t('studentReport.noStudent')}</p>
         </div>
       )}
     </div>

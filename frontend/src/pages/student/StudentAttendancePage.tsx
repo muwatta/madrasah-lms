@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { attendanceAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import StatCard from '../../components/StatCard';
+import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 
 interface AttendanceRecord {
   id: number;
@@ -22,10 +22,10 @@ interface AttendanceAnalytics {
 }
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; labelKey: string }> = {
-  present: { bg: 'bg-emerald-100', text: 'text-emerald-700', labelKey: 'attendance.present' },
-  absent: { bg: 'bg-red-100', text: 'text-red-700', labelKey: 'attendance.absent' },
-  late: { bg: 'bg-amber-100', text: 'text-amber-700', labelKey: 'attendance.late' },
-  excused: { bg: 'bg-blue-100', text: 'text-blue-700', labelKey: 'attendance.excused' },
+  present: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400', labelKey: 'attendance.present' },
+  absent: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400', labelKey: 'attendance.absent' },
+  late: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400', labelKey: 'attendance.late' },
+  excused: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400', labelKey: 'attendance.excused' },
 };
 
 function formatDate(dateStr: string) {
@@ -46,16 +46,25 @@ export default function StudentAttendancePage() {
       .finally(() => setLoading(false));
   }, [t]);
 
-  if (loading) return <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>;
-  if (error) return <div className="max-w-5xl mx-auto px-4 py-8"><div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-700">{error}</div></div>;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-4 w-64 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <SkeletonStatsGrid />
+        <SkeletonTable rows={5} />
+      </div>
+    );
+  }
+  if (error) return <div className="max-w-5xl mx-auto px-4 py-8"><div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-red-700 dark:text-red-400">{error}</div></div>;
   if (!analytics) return null;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">{t('attendance.myAttendance')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('attendance.myAttendance')}</h1>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.studentAttendance')}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.studentAttendance')}</p>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
         <StatCard
@@ -88,32 +97,32 @@ export default function StudentAttendancePage() {
         />
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-700">{t('attendance.recentRecords')}</h2>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('attendance.recentRecords')}</h2>
         </div>
         {analytics.recent_records.length === 0 ? (
-          <p className="p-6 text-sm text-gray-500 text-center">{t('attendance.noRecords')}</p>
+          <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">{t('attendance.noRecords')}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
+            <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('attendance.date')}</th>
+                  <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('attendance.date')}</th>
                   {analytics.recent_records[0]?.subject_name !== undefined && (
-                    <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.subject')}</th>
+                    <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('fields.subject')}</th>
                   )}
-                  <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{t('fields.status')}</th>
+                  <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('fields.status')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {analytics.recent_records.map((record) => {
                   const style = STATUS_STYLES[record.status] || STATUS_STYLES.absent;
                   return (
-                    <tr key={record.id} className="hover:bg-gray-50/50">
-                      <td className="px-6 py-3.5 text-sm text-gray-700">{formatDate(record.date)}</td>
+                    <tr key={record.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50">
+                      <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-gray-300">{formatDate(record.date)}</td>
                       {record.subject_name !== undefined && (
-                        <td className="px-6 py-3.5 text-sm text-gray-700">{record.subject_name}</td>
+                        <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-gray-300">{record.subject_name}</td>
                       )}
                       <td className="px-6 py-3.5">
                         <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${style.bg} ${style.text}`}>

@@ -133,15 +133,15 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-lg">M</div>
-          <span className="text-xl font-bold text-gray-900">Madrasah LMS</span>
+          <span className="text-xl font-bold text-gray-900 dark:text-white">Madrasah LMS</span>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Login</Link>
+          <Link to="/login" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Login</Link>
           <Link to="/register" className="text-sm font-medium bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">Register</Link>
         </div>
       </nav>
@@ -170,7 +170,7 @@ export default function LandingPage() {
 
       {/* Stats */}
       {statsLoaded && (
-        <section className="bg-emerald-800 border-t border-emerald-700">
+        <section className="bg-emerald-800 dark:bg-emerald-950 border-t border-emerald-700 dark:border-emerald-800">
           <div className="max-w-5xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
             <StatCard value={stats.students} label="Students" />
             <StatCard value={stats.teachers} label="Teachers" />
@@ -183,42 +183,42 @@ export default function LandingPage() {
       {/* Features */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Everything Your Madrasah Needs</h2>
-          <p className="mt-4 text-gray-500 max-w-xl mx-auto">Built specifically for Islamic educational institutions with modern technology and deep respect for tradition.</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Everything Your Madrasah Needs</h2>
+          <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Built specifically for Islamic educational institutions with modern technology and deep respect for tradition.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((f) => (
-            <div key={f.title} className="group p-7 rounded-2xl border border-gray-200 hover:border-emerald-300 hover:shadow-lg transition-all duration-200">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+            <div key={f.title} className="group p-7 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-lg dark:hover:shadow-emerald-900/20 bg-white dark:bg-gray-800 transition-all duration-200">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors">
                 {f.icon}
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-gray-900">{f.title}</h3>
-              <p className="mt-2 text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+              <h3 className="mt-5 text-lg font-semibold text-gray-900 dark:text-white">{f.title}</h3>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="bg-gray-50 border-y border-gray-200">
+      <section className="bg-gray-50 dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-6 py-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-14">Trusted by Educators</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-14">Trusted by Educators</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl p-7 shadow-sm border border-gray-100">
+              <div key={t.name} className="bg-white dark:bg-gray-900 rounded-2xl p-7 shadow-sm dark:shadow-gray-900/50 border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-1 text-amber-400 mb-4">
                   {[...Array(5)].map((_, i) => (
                     <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
                   ))}
                 </div>
-                <p className="text-gray-600 text-sm leading-relaxed">{t.text}</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{t.text}</p>
                 <div className="mt-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-semibold text-sm">
                     {t.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="text-sm font-semibold text-gray-900">{t.name}</div>
-                    <div className="text-xs text-gray-400">{t.role}</div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500">{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -229,8 +229,8 @@ export default function LandingPage() {
 
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-6 py-20 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Ready to Transform Your Madrasah?</h2>
-        <p className="mt-4 text-gray-500 max-w-lg mx-auto">Join hundreds of institutions already using Madrasah LMS to deliver quality Islamic education.</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Ready to Transform Your Madrasah?</h2>
+        <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-lg mx-auto">Join hundreds of institutions already using Madrasah LMS to deliver quality Islamic education.</p>
         <div className="mt-8">
           <Link to="/register" className="inline-block px-10 py-4 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-lg text-lg">
             Get Started Free
@@ -239,7 +239,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400">
+      <footer className="bg-gray-900 dark:bg-black text-gray-400">
         <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -272,7 +272,7 @@ export default function LandingPage() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-800 text-center py-6 text-sm">
+        <div className="border-t border-gray-800 dark:border-gray-950 text-center py-6 text-sm">
           &copy; {new Date().getFullYear()} Madrasah LMS. All rights reserved.
         </div>
       </footer>

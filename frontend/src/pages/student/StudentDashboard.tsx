@@ -5,7 +5,7 @@ import { dashboardAPI } from '../../api';
 import type { Quiz, QuizAttempt, Enrollment, ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import StatCard from '../../components/StatCard';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonStatsGrid, SkeletonCard, SkeletonChart } from '../../components/Skeleton';
 
 interface SubjectJourney {
   subjectId: number;
@@ -175,8 +175,26 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="h-4 w-64 mt-2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        </div>
+        <SkeletonStatsGrid />
+        <div className="mt-8 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </div>
+        <div className="mt-8">
+          <SkeletonChart />
+        </div>
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
@@ -184,7 +202,7 @@ export default function StudentDashboard() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700">{error}</div>
+        <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400">{error}</div>
       </div>
     );
   }
@@ -192,8 +210,8 @@ export default function StudentDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">{t('student.myJourney')}</h1>
-        <p className="text-gray-500 mt-1">{t('student.journeySubtitle')}</p>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{t('student.myJourney')}</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">{t('student.journeySubtitle')}</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -229,18 +247,18 @@ export default function StudentDashboard() {
       {subjectJourneys.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">{t('student.enrolledSubjects')}</h2>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{t('student.enrolledSubjects')}</h2>
             <Link to="/student/quizzes" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
               {t('student.browseQuizzes')}
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {subjectJourneys.filter((j) => j.enrolled).map((journey, i) => (
-              <div key={journey.subjectId} className="card-hover bg-white rounded-xl shadow-sm border border-gray-100 p-5 opacity-0 animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
+              <div key={journey.subjectId} className="card-hover bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 opacity-0 animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="flex items-start justify-between mb-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-gray-800 truncate">{journey.subjectName}</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <h3 className="font-semibold text-gray-800 dark:text-gray-100 truncate">{journey.subjectName}</h3>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                       {journey.quizzes.length} {t('student.quizzesAvailable')}
                     </p>
                   </div>
@@ -252,22 +270,22 @@ export default function StudentDashboard() {
                 </div>
 
                 <div className="mb-3">
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                     <span>{journey.completedCount} / {journey.quizzes.length} {t('student.quizzesCompleted')}</span>
                     {journey.lastActivity && (
                       <span>{new Date(journey.lastActivity).toLocaleDateString()}</span>
                     )}
                   </div>
-                  <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${journey.completedCount > 0 ? getProgressColor(journey.avgScore) : 'bg-gray-300'}`}
+                      className={`h-full rounded-full transition-all duration-500 ${journey.completedCount > 0 ? getProgressColor(journey.avgScore) : 'bg-gray-300 dark:bg-gray-600'}`}
                       style={{ width: `${journey.quizzes.length > 0 ? Math.min((journey.completedCount / journey.quizzes.length) * 100, 100) : 0}%` }}
                     />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
                     {journey.completedCount > 0 ? t('student.started') : t('student.notStarted')}
                   </span>
                   <Link
@@ -287,15 +305,15 @@ export default function StudentDashboard() {
       )}
 
       {chartData.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8 opacity-0 animate-slide-up" style={{ animationDelay: '250ms' }}>
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('student.performanceTrend')}</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mb-8 opacity-0 animate-slide-up" style={{ animationDelay: '250ms' }}>
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{t('student.performanceTrend')}</h2>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="idx" tick={{ fontSize: 12 }} stroke="#9ca3af" />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="#9ca3af" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+              <XAxis dataKey="idx" tick={{ fontSize: 12 }} stroke="var(--color-text-muted)" />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="var(--color-text-muted)" />
               <Tooltip
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                contentStyle={{ borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}
                 formatter={(value) => [`${value}%`, t('fields.score')]}
                 labelFormatter={(label) => `${t('student.quiz')} #${label}`}
               />
@@ -306,37 +324,37 @@ export default function StudentDashboard() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">{t('student.recentActivity')}</h2>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{t('student.recentActivity')}</h2>
             <Link to="/student/results" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
               {t('student.quizResults')}
             </Link>
           </div>
           {recentAttempts.length === 0 ? (
-            <p className="text-gray-500 text-sm">{t('student.noActivity')}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">{t('student.noActivity')}</p>
           ) : (
             <div className="space-y-3">
               {recentAttempts.map((attempt) => {
                 const quiz = quizzes.find((q) => q.id === attempt.quiz);
                 const passingScore = quiz?.passing_score ?? 50;
                 return (
-                  <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div key={attempt.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${getGradeBg(attempt.percentage || 0)}`}>
                       <span className={`text-sm font-bold ${getGradeColor(attempt.percentage || 0)}`}>
                         {attempt.percentage}%
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-800 truncate">{attempt.quiz_title}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{attempt.quiz_title}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
                         {attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleDateString() : '-'}
                       </p>
                     </div>
                     <span className={`shrink-0 inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
                       (attempt.percentage || 0) >= passingScore
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                     }`}>
                       {(attempt.percentage || 0) >= passingScore ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
                     </span>
@@ -347,9 +365,9 @@ export default function StudentDashboard() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 opacity-0 animate-slide-up" style={{ animationDelay: '350ms' }}>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 opacity-0 animate-slide-up" style={{ animationDelay: '350ms' }}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">{t('student.examResults')}</h2>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{t('student.examResults')}</h2>
             <Link to="/student/exams" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors">
               {t('student.viewAll')}
             </Link>
@@ -357,62 +375,62 @@ export default function StudentDashboard() {
           {examResults.length > 0 ? (
             <div className="space-y-3">
               {examResults.slice(0, 5).map((result) => (
-                <div key={result.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+                <div key={result.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                    result.grade === 'A' || result.grade === 'B' ? 'bg-emerald-100' :
-                    result.grade === 'C' ? 'bg-amber-100' : 'bg-red-100'
+                    result.grade === 'A' || result.grade === 'B' ? 'bg-emerald-100 dark:bg-emerald-900/30' :
+                    result.grade === 'C' ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-red-100 dark:bg-red-900/30'
                   }`}>
                     <span className={`text-sm font-bold ${
-                      result.grade === 'A' || result.grade === 'B' ? 'text-emerald-600' :
-                      result.grade === 'C' ? 'text-amber-600' : 'text-red-500'
+                      result.grade === 'A' || result.grade === 'B' ? 'text-emerald-600 dark:text-emerald-400' :
+                      result.grade === 'C' ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400'
                     }`}>{result.grade}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-800 truncate">{result.exam_title}</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate">{result.exam_title}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
                       {new Date(result.recorded_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <span className="shrink-0 text-sm font-semibold text-gray-700">{result.score}</span>
+                  <span className="shrink-0 text-sm font-semibold text-gray-700 dark:text-gray-300">{result.score}</span>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500 text-sm">{t('student.noExamResults')}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">{t('student.noExamResults')}</p>
             </div>
           )}
         </div>
       </div>
 
       <div className="mt-8 opacity-0 animate-slide-up" style={{ animationDelay: '400ms' }}>
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Quick Links</h2>
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Quick Links</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link to="/student/attendance" className="card-hover flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-              <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+          <Link to="/student/attendance" className="card-hover flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+              <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">{t('student.myAttendance')}</p>
-              <p className="text-xs text-gray-500">{t('student.viewAttendance')}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{t('student.myAttendance')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('student.viewAttendance')}</p>
             </div>
           </Link>
-          <Link to="/student/announcements" className="card-hover flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100">
-              <svg className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38a.5.5 0 01-.702-.422 7.746 7.746 0 01-.123-2.936m0 0a60.426 60.426 0 00-2.09.09m2.09-.09c1.03-.085 2.072-.13 3.124-.13m0 0c2.79 0 5.128.725 6.248 1.976.285.322.502.68.637 1.066.298.855-1.023 1.427-1.712.803-1.34-1.214-3.438-1.845-5.173-1.845m0 0v-2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <Link to="/student/announcements" className="card-hover flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
+              <svg className="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38a.5.5 0 01-.702-.422 7.746 7.746 0 01-.123-2.936m0 0a60.426 60.426 0 00-2.09.09m2.09-.09c1.03-.085 2.072-.13 3.124-.13m0 0c2.79 0 5.128.725 6.248 1.976.285.322.502.68.637 1.066.298.855-1.023 1.427-1.712.803-1.34-1.214-3.438-1.845-5.173-1.845m0 0v-2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">{t('nav.announcements')}</p>
-              <p className="text-xs text-gray-500">{t('student.viewAnnouncements')}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{t('nav.announcements')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('student.viewAnnouncements')}</p>
             </div>
           </Link>
-          <Link to="/student/progress" className="card-hover flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-              <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+          <Link to="/student/progress" className="card-hover flex items-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+              <svg className="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
             </div>
             <div>
-              <p className="font-medium text-gray-900">{t('student.myProgress')}</p>
-              <p className="text-xs text-gray-500">{t('student.trackProgress')}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100">{t('student.myProgress')}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t('student.trackProgress')}</p>
             </div>
           </Link>
         </div>

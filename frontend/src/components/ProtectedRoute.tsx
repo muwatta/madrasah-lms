@@ -22,7 +22,7 @@ export default function ProtectedRoute({ allowedRoles, children }: ProtectedRout
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
         <LoadingSpinner size="lg" />
       </div>
     );

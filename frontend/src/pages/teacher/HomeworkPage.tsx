@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { lessonAPI, subjectAPI, schoolClassAPI } from '../../api';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
+import { Skeleton, SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 
 interface Homework {
   id: number;
@@ -33,9 +33,9 @@ interface Submission {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 border border-green-200',
-  overdue: 'bg-red-100 text-red-700 border border-red-200',
-  closed: 'bg-gray-100 text-gray-700 border border-gray-200',
+  active: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800',
+  overdue: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
+  closed: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600',
 };
 
 export default function HomeworkPage() {
@@ -54,7 +54,6 @@ export default function HomeworkPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  // Create modal
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     title: '', description: '', subject: '', class_obj: '',
@@ -65,12 +64,10 @@ export default function HomeworkPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [createFieldErrors, setCreateFieldErrors] = useState<Record<string, string>>({});
 
-  // Submissions view
   const [viewingHomework, setViewingHomework] = useState<Homework | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
 
-  // Grade modal
   const [showGradeModal, setShowGradeModal] = useState(false);
   const [gradingSubmission, setGradingSubmission] = useState<Submission | null>(null);
   const [gradeForm, setGradeForm] = useState({ score: '', feedback: '' });
@@ -217,8 +214,8 @@ export default function HomeworkPage() {
     setPage(1);
   };
 
-  const selectCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
-  const inputCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const selectCls = 'w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-[var(--color-bg-primary)] dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const inputCls = 'w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-[var(--color-bg-primary)] dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-100';
 
   return (
     <div className="page-enter space-y-6">
@@ -233,7 +230,6 @@ export default function HomeworkPage() {
         </div>
       )}
 
-      {/* Header */}
       <div className="rounded-2xl bg-gradient-to-br from-amber-600 via-amber-500 to-orange-500 p-6 text-white shadow-lg shadow-amber-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -248,7 +244,6 @@ export default function HomeworkPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard title={language === 'ar' ? 'إجمالي' : 'Total'} value={stats.total} color="bg-amber-500" delay={0}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>}
@@ -264,24 +259,23 @@ export default function HomeworkPage() {
         />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[160px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'المادة' : 'Subject'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</label>
           <select value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setPage(1); }} className={selectCls}>
             <option value="">{language === 'ar' ? 'جميع المواد' : 'All Subjects'}</option>
             {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div className="w-full sm:w-auto sm:min-w-[160px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الفصل' : 'Class'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</label>
           <select value={classFilter} onChange={(e) => { setClassFilter(e.target.value); setPage(1); }} className={selectCls}>
             <option value="">{language === 'ar' ? 'جميع الفصول' : 'All Classes'}</option>
             {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
         <div className="w-full sm:w-auto sm:min-w-[140px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الحالة' : 'Status'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الحالة' : 'Status'}</label>
           <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className={selectCls}>
             <option value="">{language === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
             <option value="active">{language === 'ar' ? 'نشط' : 'Active'}</option>
@@ -291,35 +285,37 @@ export default function HomeworkPage() {
         </div>
         {(subjectFilter || classFilter || statusFilter) && (
           <button onClick={clearFilters}
-            className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700">
+            className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2.5 text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             {language === 'ar' ? 'مسح' : 'Clear'}
           </button>
         )}
       </div>
 
-      {/* Content */}
       {loading ? (
-        <div className="flex h-48 items-center justify-center"><LoadingSpinner size="lg" /></div>
+        <div className="space-y-6">
+          <SkeletonStatsGrid />
+          <SkeletonTable rows={6} />
+        </div>
       ) : error ? (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           {error}
         </div>
       ) : filteredHomeworks.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+        <div className="rounded-2xl border border-dashed border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
+            <svg className="h-8 w-8 text-[var(--color-text-muted)] dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد واجبات' : 'No homework assignments yet'}</p>
-          <p className="mt-1 text-xs text-gray-400">{language === 'ar' ? 'ابدأ بإنشاء واجب' : 'Start by creating homework'}</p>
+          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'لا توجد واجبات' : 'No homework assignments yet'}</p>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ابدأ بإنشاء واجب' : 'Start by creating homework'}</p>
         </div>
       ) : (
-        <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <div className="card-hover rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                <tr className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 text-end text-xs font-medium uppercase text-[var(--color-text-muted)] dark:text-gray-400">
                   <th className="px-4 py-3">{language === 'ar' ? 'العنوان' : 'Title'}</th>
                   <th className="px-4 py-3">{language === 'ar' ? 'المادة' : 'Subject'}</th>
                   <th className="px-4 py-3">{language === 'ar' ? 'الفصل' : 'Class'}</th>
@@ -329,18 +325,18 @@ export default function HomeworkPage() {
                   <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                 {pagedHomeworks.map((hw) => (
-                  <tr key={hw.id} className="transition-colors hover:bg-gray-50/60">
+                  <tr key={hw.id} className="transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
                     <td className="whitespace-nowrap px-4 py-3">
-                      <span className="font-medium text-gray-900">{hw.title}</span>
-                      {hw.total_marks && <p className="text-xs text-gray-400 mt-0.5">{hw.total_marks} {language === 'ar' ? 'درجة' : 'marks'}</p>}
+                      <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.title}</span>
+                      {hw.total_marks && <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mt-0.5">{hw.total_marks} {language === 'ar' ? 'درجة' : 'marks'}</p>}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-gray-500">{hw.subject_name}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-gray-500">{hw.class_name}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(hw.due_date).toLocaleDateString()}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)] dark:text-gray-400">{hw.subject_name}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)] dark:text-gray-400">{hw.class_name}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)] dark:text-gray-400 text-xs">{new Date(hw.due_date).toLocaleDateString()}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-center">
-                      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-blue-100 px-2 text-xs font-semibold text-blue-700">
+                      <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 text-xs font-semibold text-blue-700 dark:text-blue-400">
                         {hw.submissions_count || 0}
                       </span>
                     </td>
@@ -352,12 +348,12 @@ export default function HomeworkPage() {
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center justify-center gap-1.5">
                         <button onClick={() => handleViewSubmissions(hw)}
-                          className="btn-press inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-2 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100">
+                          className="btn-press inline-flex items-center gap-1 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-2.5 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/40">
                           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                           {language === 'ar' ? 'تسليمات' : 'Submissions'}
                         </button>
                         <button onClick={() => handleDelete(hw.id)}
-                          className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100">
+                          className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-2.5 py-2 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40">
                           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                       </div>
@@ -368,41 +364,40 @@ export default function HomeworkPage() {
             </table>
           </div>
 
-          {/* Mobile cards */}
           <div className="block md:hidden space-y-3 p-4">
             {pagedHomeworks.map((hw) => (
-              <div key={hw.id} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+              <div key={hw.id} className="rounded-lg border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-gray-900">{hw.title}</span>
+                  <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.title}</span>
                   <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[hw.status] || ''}`}>
                     {hw.status.charAt(0).toUpperCase() + hw.status.slice(1)}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <p className="text-xs text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</p>
-                    <p className="font-medium text-gray-900">{hw.subject_name}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</p>
+                    <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.subject_name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</p>
-                    <p className="font-medium text-gray-900">{hw.class_name}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</p>
+                    <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.class_name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">{language === 'ar' ? 'التسليمات' : 'Submissions'}</p>
-                    <p className="font-medium text-gray-900">{hw.submissions_count || 0}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التسليمات' : 'Submissions'}</p>
+                    <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.submissions_count || 0}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">{language === 'ar' ? 'تاريخ التسليم' : 'Due'}</p>
-                    <p className="font-medium text-gray-900 text-xs">{new Date(hw.due_date).toLocaleDateString()}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'تاريخ التسليم' : 'Due'}</p>
+                    <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100 text-xs">{new Date(hw.due_date).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2 border-t border-gray-50 pt-3">
+                <div className="mt-3 flex items-center gap-2 border-t border-[var(--color-border-light)] dark:border-gray-700/50 pt-3">
                   <button onClick={() => handleViewSubmissions(hw)}
-                    className="btn-press inline-flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100">
+                    className="btn-press inline-flex items-center gap-1 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/40">
                     {language === 'ar' ? 'تسليمات' : 'Submissions'}
                   </button>
                   <button onClick={() => handleDelete(hw.id)}
-                    className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100">
+                    className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-3 py-2 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40">
                     {language === 'ar' ? 'حذف' : 'Delete'}
                   </button>
                 </div>
@@ -410,13 +405,12 @@ export default function HomeworkPage() {
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
-              <p className="text-xs text-gray-500">{filteredHomeworks.length} {language === 'ar' ? 'إجمالي' : 'total'}</p>
+            <div className="flex items-center justify-between border-t border-[var(--color-border-light)] dark:border-gray-700/50 px-4 py-3">
+              <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{filteredHomeworks.length} {language === 'ar' ? 'إجمالي' : 'total'}</p>
               <div className="flex items-center gap-1">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40">
+                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 disabled:opacity-40">
                   <svg className={`h-3.5 w-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   {language === 'ar' ? 'السابق' : 'Prev'}
                 </button>
@@ -424,15 +418,15 @@ export default function HomeworkPage() {
                   .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .map((p, idx, arr) => (
                     <span key={p} className="inline-flex items-center">
-                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-xs text-gray-400">...</span>}
+                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">...</span>}
                       <button onClick={() => setPage(p)}
-                        className={`btn-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-medium transition-colors ${page === p ? 'bg-primary-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        className={`btn-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-medium transition-colors ${page === p ? 'bg-primary-600 text-white shadow-sm' : 'text-[var(--color-text-secondary)] dark:text-gray-300 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700'}`}>
                         {p}
                       </button>
                     </span>
                   ))}
                 <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40">
+                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 disabled:opacity-40">
                   {language === 'ar' ? 'التالي' : 'Next'}
                   <svg className={`h-3.5 w-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </button>
@@ -442,43 +436,42 @@ export default function HomeworkPage() {
         </div>
       )}
 
-      {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowCreateModal(false)}>
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'واجب جديد' : 'New Homework'}</h3>
-              <button onClick={() => setShowCreateModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'واجب جديد' : 'New Homework'}</h3>
+              <button onClick={() => setShowCreateModal(false)} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             {createError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 {createError}
               </div>
             )}
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'العنوان' : 'Title'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'العنوان' : 'Title'}</label>
                 <input required type="text" value={createForm.title} onChange={(e) => { setCreateForm({ ...createForm, title: e.target.value }); setCreateFieldErrors(fe => { const n = { ...fe }; delete n.title; return n; }); }}
-                  className={`${inputCls} ${createFieldErrors.title ? 'border-red-300' : ''}`} />
-                {createFieldErrors.title && <p className="mt-1 text-xs text-red-500">{createFieldErrors.title}</p>}
+                  className={`${inputCls} ${createFieldErrors.title ? 'border-red-300 dark:border-red-700' : ''}`} />
+                {createFieldErrors.title && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{createFieldErrors.title}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الوصف' : 'Description'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الوصف' : 'Description'}</label>
                 <textarea value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} className={inputCls} rows={3} />
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'المادة' : 'Subject'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</label>
                   <select required value={createForm.subject} onChange={(e) => setCreateForm({ ...createForm, subject: e.target.value })} className={selectCls}>
                     <option value="">{language === 'ar' ? 'اختر مادة' : 'Select subject'}</option>
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الفصل' : 'Class'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</label>
                   <select required value={createForm.class_obj} onChange={(e) => setCreateForm({ ...createForm, class_obj: e.target.value })} className={selectCls}>
                     <option value="">{language === 'ar' ? 'اختر فصل' : 'Select class'}</option>
                     {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -487,18 +480,18 @@ export default function HomeworkPage() {
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'تاريخ التسليم' : 'Due Date'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'تاريخ التسليم' : 'Due Date'}</label>
                   <input required type="date" value={createForm.due_date} onChange={(e) => setCreateForm({ ...createForm, due_date: e.target.value })} className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'إجمالي الدرجات' : 'Total Marks'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إجمالي الدرجات' : 'Total Marks'}</label>
                   <input required type="number" min="1" value={createForm.total_marks} onChange={(e) => setCreateForm({ ...createForm, total_marks: e.target.value })} className={inputCls} />
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'ملف مرفق (اختياري)' : 'Attachment (optional)'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ملف مرفق (اختياري)' : 'Attachment (optional)'}</label>
                 <input type="file" onChange={(e) => setCreateFile(e.target.files?.[0] || null)} className={`${inputCls} file:me-2 file:rounded file:border-0 file:bg-primary-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-700 hover:file:bg-primary-100`} />
-                {createFile && <p className="mt-1 text-xs text-gray-400">{createFile.name}</p>}
+                {createFile && <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{createFile.name}</p>}
               </div>
               <div className="flex items-center gap-3 pt-2">
                 <button type="submit" disabled={createSaving} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
@@ -508,37 +501,36 @@ export default function HomeworkPage() {
                     <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t('common.create')}</>
                   )}
                 </button>
-                <button type="button" onClick={() => setShowCreateModal(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="btn-press rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-border)] dark:hover:bg-gray-600">{t('common.cancel')}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Submissions View Modal */}
       {viewingHomework && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => { setViewingHomework(null); setSubmissions([]); }}>
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-2xl rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{viewingHomework.title} - {language === 'ar' ? 'التسليمات' : 'Submissions'}</h3>
-              <button onClick={() => { setViewingHomework(null); setSubmissions([]); }} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.title} - {language === 'ar' ? 'التسليمات' : 'Submissions'}</h3>
+              <button onClick={() => { setViewingHomework(null); setSubmissions([]); }} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="mb-3 rounded-lg bg-gray-50 p-3 text-sm">
-              <p className="text-gray-600">{language === 'ar' ? 'المادة' : 'Subject'}: <span className="font-medium text-gray-900">{viewingHomework.subject_name}</span></p>
-              <p className="text-gray-600">{language === 'ar' ? 'الفصل' : 'Class'}: <span className="font-medium text-gray-900">{viewingHomework.class_name}</span></p>
-              <p className="text-gray-600">{language === 'ar' ? 'تاريخ التسليم' : 'Due'}: <span className="font-medium text-gray-900">{new Date(viewingHomework.due_date).toLocaleDateString()}</span></p>
-              <p className="text-gray-600">{language === 'ar' ? 'إجمالي الدرجات' : 'Total Marks'}: <span className="font-medium text-gray-900">{viewingHomework.total_marks}</span></p>
+            <div className="mb-3 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3 text-sm">
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'المادة' : 'Subject'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.subject_name}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'الفصل' : 'Class'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.class_name}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'تاريخ التسليم' : 'Due'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{new Date(viewingHomework.due_date).toLocaleDateString()}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'إجمالي الدرجات' : 'Total Marks'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.total_marks}</span></p>
             </div>
             {submissionsLoading ? (
-              <div className="flex h-32 items-center justify-center"><LoadingSpinner size="md" /></div>
+              <SkeletonTable rows={3} />
             ) : submissions.length === 0 ? (
-              <p className="text-center text-sm text-gray-500 py-8">{language === 'ar' ? 'لا توجد تسليمات بعد' : 'No submissions yet'}</p>
+              <p className="text-center text-sm text-[var(--color-text-muted)] dark:text-gray-400 py-8">{language === 'ar' ? 'لا توجد تسليمات بعد' : 'No submissions yet'}</p>
             ) : (
               <table className="min-w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 text-end text-xs font-medium uppercase text-gray-500">
+                  <tr className="border-b border-[var(--color-border-light)] dark:border-gray-700/50 text-end text-xs font-medium uppercase text-[var(--color-text-muted)] dark:text-gray-400">
                     <th className="pb-2 ps-4">{language === 'ar' ? 'الطالب' : 'Student'}</th>
                     <th className="pb-2 ps-4">{language === 'ar' ? 'التاريخ' : 'Submitted'}</th>
                     <th className="pb-2 ps-4">{language === 'ar' ? 'ملف' : 'File'}</th>
@@ -546,26 +538,26 @@ export default function HomeworkPage() {
                     <th className="pb-2 ps-4 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                   {submissions.map((sub) => (
-                    <tr key={sub.id} className="transition-colors hover:bg-gray-50/60">
-                      <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{sub.student_name}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(sub.submitted_at).toLocaleString()}</td>
+                    <tr key={sub.id} className="transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                      <td className="whitespace-nowrap px-4 py-3 font-medium text-[var(--color-text-primary)] dark:text-gray-100">{sub.student_name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)] dark:text-gray-400 text-xs">{new Date(sub.submitted_at).toLocaleString()}</td>
                       <td className="whitespace-nowrap px-4 py-3">
                         {sub.file ? (
-                          <a href={sub.file} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:underline">
+                          <a href={sub.file} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">
                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                             {language === 'ar' ? 'عرض' : 'View'}
                           </a>
                         ) : (
-                          <span className="text-xs text-gray-400">—</span>
+                          <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">—</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         {sub.is_graded ? (
-                          <span className="font-semibold text-green-600">{sub.score}/{viewingHomework.total_marks}</span>
+                          <span className="font-semibold text-green-600 dark:text-green-400">{sub.score}/{viewingHomework.total_marks}</span>
                         ) : (
-                          <span className="text-xs text-gray-400">{language === 'ar' ? 'لم يُقيَّم' : 'Not graded'}</span>
+                          <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'لم يُقيَّم' : 'Not graded'}</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
@@ -576,7 +568,7 @@ export default function HomeworkPage() {
                               setGradeForm({ score: sub.score || '', feedback: sub.feedback || '' });
                               setShowGradeModal(true);
                             }}
-                            className="btn-press inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-2 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100"
+                            className="btn-press inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 text-xs font-medium text-amber-700 dark:text-amber-400 transition-colors hover:bg-amber-100 dark:hover:bg-amber-900/40"
                           >
                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             {sub.is_graded ? (language === 'ar' ? 'تعديل' : 'Edit') : (language === 'ar' ? 'تقييم' : 'Grade')}
@@ -592,35 +584,34 @@ export default function HomeworkPage() {
         </div>
       )}
 
-      {/* Grade Modal */}
       {showGradeModal && gradingSubmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowGradeModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'تقييم' : 'Grade'} - {gradingSubmission.student_name}</h3>
-              <button onClick={() => setShowGradeModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'تقييم' : 'Grade'} - {gradingSubmission.student_name}</h3>
+              <button onClick={() => setShowGradeModal(false)} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             {gradingSubmission.answer_text && (
-              <div className="mb-4 rounded-lg bg-gray-50 p-3">
-                <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'إجابة الطالب' : 'Student Answer'}</p>
-                <p className="text-sm text-gray-700">{gradingSubmission.answer_text}</p>
+              <div className="mb-4 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3">
+                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mb-1">{language === 'ar' ? 'إجابة الطالب' : 'Student Answer'}</p>
+                <p className="text-sm text-[var(--color-text-secondary)] dark:text-gray-300">{gradingSubmission.answer_text}</p>
               </div>
             )}
             {gradingSubmission.file && (
-              <div className="mb-4 rounded-lg bg-gray-50 p-3">
-                <p className="text-xs text-gray-500 mb-1">{language === 'ar' ? 'الملف المرفق' : 'Attached File'}</p>
-                <a href={gradingSubmission.file} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 hover:underline">{language === 'ar' ? 'عرض الملف' : 'View File'}</a>
+              <div className="mb-4 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3">
+                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mb-1">{language === 'ar' ? 'الملف المرفق' : 'Attached File'}</p>
+                <a href={gradingSubmission.file} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">{language === 'ar' ? 'عرض الملف' : 'View File'}</a>
               </div>
             )}
             <form onSubmit={handleGrade} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الدرجة' : 'Score'} (/{viewingHomework?.total_marks})</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة' : 'Score'} (/{viewingHomework?.total_marks})</label>
                 <input required type="number" min="0" max={viewingHomework?.total_marks} value={gradeForm.score} onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })} className={inputCls} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'ملاحظات' : 'Feedback'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ملاحظات' : 'Feedback'}</label>
                 <textarea value={gradeForm.feedback} onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })} className={inputCls} rows={4} placeholder={language === 'ar' ? 'أضف ملاحظات...' : 'Add feedback...'} />
               </div>
               <div className="flex items-center gap-3 pt-2">
@@ -631,7 +622,7 @@ export default function HomeworkPage() {
                     <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{language === 'ar' ? 'حفظ التقييم' : 'Save Grade'}</>
                   )}
                 </button>
-                <button type="button" onClick={() => setShowGradeModal(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+                <button type="button" onClick={() => setShowGradeModal(false)} className="btn-press rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-border)] dark:hover:bg-gray-600">{t('common.cancel')}</button>
               </div>
             </form>
           </div>

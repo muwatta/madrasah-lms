@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { notificationAPI } from '../api';
 import type { User } from '../types';
 
@@ -164,6 +165,7 @@ const roleColors: Record<User['role'], string> = {
 export default function Layout() {
   const { user, logout, switchAccount, getStoredSessions, removeStoredSession } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -293,7 +295,7 @@ export default function Layout() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 lg:block">{sidebarContent}</aside>
 
@@ -313,27 +315,44 @@ export default function Layout() {
       {/* Main area */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Header */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm sm:px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b px-4 shadow-sm sm:px-6" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="btn-press rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+              className="btn-press rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden" style={{ color: 'var(--color-text-muted)' }}
               aria-label={t('common.openMenu')}
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-lg font-semibold text-islamic-dark">
+            <h1 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               {user?.madrasah_name || t('nav.schoolLms')}
             </h1>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="btn-press rounded-lg border border-gray-200 p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
-              className="btn-press flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="btn-press flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               title={t('common.toggleLanguage')}
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,9 +380,9 @@ export default function Layout() {
               </button>
 
               {notifMenuOpen && (
-                <div className="absolute end-0 top-full z-50 mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg animate-scale-in">
-                  <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                    <p className="text-sm font-semibold text-gray-900">{t('common.notifications')}</p>
+                <div className="absolute end-0 top-full z-50 mt-2 w-80 rounded-xl border shadow-lg animate-scale-in dark:border-gray-700 dark:bg-gray-800" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+                  <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: 'var(--color-border-light)' }}>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('common.notifications')}</p>
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllRead}
@@ -377,29 +396,29 @@ export default function Layout() {
                   <div className="max-h-80 overflow-y-auto">
                     {notifications.length === 0 && (
                       <div className="px-4 py-8 text-center">
-                        <p className="text-sm text-gray-400">{t('common.noNotifications')}</p>
+                        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{t('common.noNotifications')}</p>
                       </div>
                     )}
                     {notifications.map((notif) => (
                       <div
                         key={notif.id}
-                        className="flex items-start gap-3 border-b border-gray-50 px-4 py-3 hover:bg-gray-50 transition-colors"
+                        className="flex items-start gap-3 border-b px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50" style={{ borderColor: 'var(--color-border-light)' }}
                       >
-                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600 dark:bg-primary-900/30">
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                           </svg>
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-gray-900">{notif.title}</p>
+                          <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{notif.title}</p>
                           {notif.message && (
-                            <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{notif.message}</p>
+                            <p className="mt-0.5 text-xs line-clamp-2" style={{ color: 'var(--color-text-muted)' }}>{notif.message}</p>
                           )}
-                          <p className="mt-1 text-[11px] text-gray-400">{notif.created_at ? new Date(notif.created_at).toLocaleString() : ''}</p>
+                          <p className="mt-1 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{notif.created_at ? new Date(notif.created_at).toLocaleString() : ''}</p>
                         </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); handleMarkRead(notif.id); }}
-                          className="shrink-0 rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                          className="shrink-0 rounded p-1 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700" style={{ color: 'var(--color-text-muted)' }}
                           title={t('common.markRead')}
                         >
                           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -417,7 +436,7 @@ export default function Layout() {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                className="btn-press flex items-center gap-2 rounded-lg border border-gray-200 py-1.5 ps-1.5 pe-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="btn-press flex items-center gap-2 rounded-lg border py-1.5 ps-1.5 pe-2.5 text-sm font-medium transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
               >
                 {user && (
                   <span className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white ${roleColors[user.role]}`}>
@@ -430,16 +449,16 @@ export default function Layout() {
               </button>
 
               {accountMenuOpen && (
-                <div className="absolute end-0 top-full z-50 mt-2 w-72 rounded-xl border border-gray-200 bg-white py-2 shadow-lg animate-scale-in">
+                <div className="absolute end-0 top-full z-50 mt-2 w-72 rounded-xl border py-2 shadow-lg animate-scale-in dark:border-gray-700 dark:bg-gray-800" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
                   {/* Current account */}
                   {user && (
-                    <div className="border-b border-gray-100 px-4 py-3">
+                    <div className="border-b px-4 py-3" style={{ borderColor: 'var(--color-border-light)' }}>
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-[11px] font-medium uppercase text-gray-400">{t('common.currentAccount')}</p>
+                        <p className="text-[11px] font-medium uppercase" style={{ color: 'var(--color-text-muted)' }}>{t('common.currentAccount')}</p>
                         <div className="flex gap-2">
                           <Link
                             to={`${rolePrefixMap[user.role]}/change-password`}
-                            className="text-[11px] font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                            className="text-[11px] font-medium transition-colors hover:text-gray-700 dark:hover:text-gray-300" style={{ color: 'var(--color-text-muted)' }}
                           >
                             Password
                           </Link>
@@ -456,8 +475,8 @@ export default function Layout() {
                           {user.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                         </span>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{user.full_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                          <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{user.full_name}</p>
+                          <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>{user.email}</p>
                         </div>
                       </div>
                     </div>
@@ -466,9 +485,9 @@ export default function Layout() {
                   {/* Other accounts */}
                   {otherAccounts.length > 0 && (
                     <div className="px-2 py-1">
-                      <p className="px-2 py-1 text-[11px] font-medium uppercase text-gray-400">{t('common.savedAccounts')}</p>
+                      <p className="px-2 py-1 text-[11px] font-medium uppercase" style={{ color: 'var(--color-text-muted)' }}>{t('common.savedAccounts')}</p>
                       {otherAccounts.map((session) => (
-                        <div key={session.user.email} className="flex items-center gap-2 rounded-lg px-2 py-2 hover:bg-gray-50 transition-colors group">
+                        <div key={session.user.email} className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 group">
                           <button
                             onClick={() => handleSwitchAccount(session.user.email)}
                             className="flex flex-1 items-center gap-2.5 text-start"
@@ -477,13 +496,13 @@ export default function Layout() {
                               {session.user.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                             </span>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{session.user.full_name}</p>
-                              <p className="text-xs text-gray-500 truncate">{t('roles.' + session.user.role)} — {session.user.email}</p>
+                              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{session.user.full_name}</p>
+                              <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>{t('roles.' + session.user.role)} — {session.user.email}</p>
                             </div>
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleRemoveAccount(session.user.email); }}
-                            className="shrink-0 rounded p-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 transition-all"
+                            className="shrink-0 rounded p-1 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20" style={{ color: 'var(--color-text-muted)' }}
                             title={t('common.removeAccount')}
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -497,7 +516,7 @@ export default function Layout() {
 
                   {otherAccounts.length === 0 && (
                     <div className="px-4 py-3 text-center">
-                      <p className="text-xs text-gray-400">{t('common.noOtherAccounts')}</p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('common.noOtherAccounts')}</p>
                     </div>
                   )}
                 </div>
@@ -507,7 +526,7 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6"><div className="page-enter"><Outlet /></div></main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)' }}><div className="page-enter"><Outlet /></div></main>
       </div>
     </div>
   );

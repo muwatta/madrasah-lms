@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { admissionsAPI, schoolClassAPI } from '../../api';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
+import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 
 interface Application {
   id: number;
@@ -223,8 +223,8 @@ export default function AdmissionsPage() {
       <div className="rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-500 p-6 text-white shadow-lg shadow-indigo-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('admissions.title') || (language === 'ar' ? 'القبول والتسجيل' : 'Admissions')}</h1>
-            <p className="mt-1 text-sm text-indigo-100">{t('admissions.subtitle') || (language === 'ar' ? 'إدارة طلبات القبول' : 'Manage admission applications')}</p>
+            <h1 className="text-2xl font-bold sm:text-3xl dark:text-[var(--color-text-primary)]">{t('admissions.title') || (language === 'ar' ? 'القبول والتسجيل' : 'Admissions')}</h1>
+            <p className="mt-1 text-sm text-indigo-100 dark:text-indigo-200">{t('admissions.subtitle') || (language === 'ar' ? 'إدارة طلبات القبول' : 'Manage admission applications')}</p>
           </div>
           <button
             onClick={() => {
@@ -260,7 +260,7 @@ export default function AdmissionsPage() {
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[180px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'بحث' : 'Search'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'بحث' : 'Search'}</label>
           <div className="relative">
             <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input
@@ -268,12 +268,12 @@ export default function AdmissionsPage() {
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
               placeholder={language === 'ar' ? 'ابحث بالاسم...' : 'Search by name...'}
-              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 ps-9 pe-3 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="w-full rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-primary)] py-2.5 ps-9 pe-3 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
             />
           </div>
         </div>
         <div className="w-full sm:w-auto sm:min-w-[160px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الحالة' : 'Status'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الحالة' : 'Status'}</label>
           <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className={selectCls}>
             <option value="">{language === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
             {STATUS_OPTIONS.map((s) => (
@@ -294,25 +294,25 @@ export default function AdmissionsPage() {
 
       {/* Main content */}
       {loading ? (
-        <div className="flex h-48 items-center justify-center"><LoadingSpinner size="lg" /></div>
+        <div className="space-y-6"><SkeletonStatsGrid /><SkeletonTable rows={5} /></div>
       ) : error ? (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           {error}
         </div>
       ) : filteredApps.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
             <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد طلبات' : 'No applications found'}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'لا توجد طلبات' : 'No applications found'}</p>
         </div>
       ) : (
         <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                   <th className="px-4 py-3">{language === 'ar' ? 'الاسم' : 'Name'}</th>
                   <th className="px-4 py-3">{language === 'ar' ? 'البريد' : 'Email'}</th>
                   <th className="px-4 py-3">{language === 'ar' ? 'الفصل' : 'Class'}</th>
@@ -321,15 +321,15 @@ export default function AdmissionsPage() {
                   <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                 {pagedApps.map((app) => (
                   <React.Fragment key={app.id}>
-                    <tr className="transition-colors hover:bg-gray-50/60 cursor-pointer" onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}>
+                    <tr className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30 cursor-pointer" onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}>
                       <td className="whitespace-nowrap px-4 py-3">
-                        <span className="font-medium text-gray-900">{app.first_name} {app.last_name}</span>
+                        <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.first_name} {app.last_name}</span>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-500">{app.email}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-gray-500">{app.class_applied_name}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{app.email}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{app.class_applied_name}</td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[app.status] || ''}`}>
                           {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
@@ -370,36 +370,36 @@ export default function AdmissionsPage() {
                         <td colSpan={6} className="px-4 py-4 bg-gray-50/60">
                           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 text-sm">
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'الهاتف' : 'Phone'}</p>
-                              <p className="font-medium text-gray-900">{app.phone || '-'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الهاتف' : 'Phone'}</p>
+                              <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.phone || '-'}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}</p>
-                              <p className="font-medium text-gray-900">{app.date_of_birth ? new Date(app.date_of_birth).toLocaleDateString() : '-'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}</p>
+                              <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.date_of_birth ? new Date(app.date_of_birth).toLocaleDateString() : '-'}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'الجنس' : 'Gender'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الجنس' : 'Gender'}</p>
                               <p className="font-medium text-gray-900 capitalize">{app.gender || '-'}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'العنوان' : 'Address'}</p>
-                              <p className="font-medium text-gray-900">{app.address || '-'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'العنوان' : 'Address'}</p>
+                              <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.address || '-'}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'المدرسة السابقة' : 'Previous School'}</p>
-                              <p className="font-medium text-gray-900">{app.previous_school || '-'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'المدرسة السابقة' : 'Previous School'}</p>
+                              <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.previous_school || '-'}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'نتيجة الامتحان' : 'Entrance Score'}</p>
-                              <p className="font-medium text-gray-900">{app.entrance_score || '-'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'نتيجة الامتحان' : 'Entrance Score'}</p>
+                              <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.entrance_score || '-'}</p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-400">{language === 'ar' ? 'موعد المقابلة' : 'Interview Date'}</p>
-                              <p className="font-medium text-gray-900">{app.interview_date ? new Date(app.interview_date).toLocaleDateString() : '-'}</p>
+                              <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'موعد المقابلة' : 'Interview Date'}</p>
+                              <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.interview_date ? new Date(app.interview_date).toLocaleDateString() : '-'}</p>
                             </div>
                             {app.documents && app.documents.length > 0 && (
                               <div className="sm:col-span-2 lg:col-span-3">
-                                <p className="text-xs text-gray-400 mb-1">{language === 'ar' ? 'المستندات' : 'Documents'}</p>
+                                <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] mb-1">{language === 'ar' ? 'المستندات' : 'Documents'}</p>
                                 <div className="flex flex-wrap gap-2">
                                   {app.documents.map((doc) => (
                                     <span key={doc.id} className="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-xs text-gray-700">
@@ -418,8 +418,8 @@ export default function AdmissionsPage() {
                             )}
                             {app.notes && (
                               <div className="sm:col-span-2 lg:col-span-3">
-                                <p className="text-xs text-gray-400">{language === 'ar' ? 'ملاحظات' : 'Notes'}</p>
-                                <p className="text-sm text-gray-700">{app.notes}</p>
+                                <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'ملاحظات' : 'Notes'}</p>
+                                <p className="text-sm text-gray-700 dark:text-[var(--color-text-secondary)]">{app.notes}</p>
                               </div>
                             )}
                           </div>
@@ -435,20 +435,20 @@ export default function AdmissionsPage() {
           {/* Mobile cards */}
           <div className="block md:hidden space-y-3 p-4">
             {pagedApps.map((app) => (
-              <div key={app.id} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+              <div key={app.id} className="rounded-lg border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-gray-900">{app.first_name} {app.last_name}</span>
+                  <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{app.first_name} {app.last_name}</span>
                   <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[app.status] || ''}`}>
                     {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <p className="text-xs text-gray-400">{language === 'ar' ? 'البريد' : 'Email'}</p>
+                    <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'البريد' : 'Email'}</p>
                     <p className="font-medium text-gray-900 text-xs truncate">{app.email}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</p>
+                    <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الفصل' : 'Class'}</p>
                     <p className="font-medium text-gray-900 text-xs">{app.class_applied_name}</p>
                   </div>
                 </div>
@@ -490,7 +490,7 @@ export default function AdmissionsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-[var(--color-border)] px-4 py-3">
               <p className="text-xs text-gray-500">{filteredApps.length} {language === 'ar' ? 'إجمالي' : 'total'}</p>
               <div className="flex items-center gap-1">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
@@ -523,70 +523,70 @@ export default function AdmissionsPage() {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowCreateModal(false)}>
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'طلب قبول جديد' : 'New Application'}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'طلب قبول جديد' : 'New Application'}</h3>
               <button onClick={() => setShowCreateModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             {createError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 {createError}
               </div>
             )}
             <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الاسم الأول' : 'First Name'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الاسم الأول' : 'First Name'}</label>
                 <input required type="text" value={createForm.first_name} onChange={(e) => { setCreateForm({ ...createForm, first_name: e.target.value }); setCreateFieldErrors(fe => { const n = { ...fe }; delete n.first_name; return n; }); }}
                   className={`${inputCls} ${createFieldErrors.first_name ? 'border-red-300' : ''}`} />
                 {createFieldErrors.first_name && <p className="mt-1 text-xs text-red-500">{createFieldErrors.first_name}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'اسم العائلة' : 'Last Name'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'اسم العائلة' : 'Last Name'}</label>
                 <input required type="text" value={createForm.last_name} onChange={(e) => { setCreateForm({ ...createForm, last_name: e.target.value }); setCreateFieldErrors(fe => { const n = { ...fe }; delete n.last_name; return n; }); }}
                   className={`${inputCls} ${createFieldErrors.last_name ? 'border-red-300' : ''}`} />
                 {createFieldErrors.last_name && <p className="mt-1 text-xs text-red-500">{createFieldErrors.last_name}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</label>
                 <input required type="email" value={createForm.email} onChange={(e) => { setCreateForm({ ...createForm, email: e.target.value }); setCreateFieldErrors(fe => { const n = { ...fe }; delete n.email; return n; }); }}
                   className={`${inputCls} ${createFieldErrors.email ? 'border-red-300' : ''}`} />
                 {createFieldErrors.email && <p className="mt-1 text-xs text-red-500">{createFieldErrors.email}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الهاتف' : 'Phone'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الهاتف' : 'Phone'}</label>
                 <input type="text" value={createForm.phone} onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })} className={inputCls} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'تاريخ الميلاد' : 'Date of Birth'}</label>
                 <input type="date" value={createForm.date_of_birth} onChange={(e) => setCreateForm({ ...createForm, date_of_birth: e.target.value })} className={inputCls} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الجنس' : 'Gender'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الجنس' : 'Gender'}</label>
                 <select value={createForm.gender} onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })} className={selectCls}>
                   <option value="male">{language === 'ar' ? 'ذكر' : 'Male'}</option>
                   <option value="female">{language === 'ar' ? 'أنثى' : 'Female'}</option>
                 </select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الفصل المطلوب' : 'Class Applied'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الفصل المطلوب' : 'Class Applied'}</label>
                 <select required value={createForm.class_applied} onChange={(e) => setCreateForm({ ...createForm, class_applied: e.target.value })} className={selectCls}>
                   <option value="">{language === 'ar' ? 'اختر فصل' : 'Select class'}</option>
                   {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'المدرسة السابقة' : 'Previous School'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'المدرسة السابقة' : 'Previous School'}</label>
                 <input type="text" value={createForm.previous_school} onChange={(e) => setCreateForm({ ...createForm, previous_school: e.target.value })} className={inputCls} />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'العنوان' : 'Address'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'العنوان' : 'Address'}</label>
                 <input type="text" value={createForm.address} onChange={(e) => setCreateForm({ ...createForm, address: e.target.value })} className={inputCls} />
               </div>
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'ملاحظات' : 'Notes'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'ملاحظات' : 'Notes'}</label>
                 <textarea value={createForm.notes} onChange={(e) => setCreateForm({ ...createForm, notes: e.target.value })} className={inputCls} rows={3} />
               </div>
               <div className="flex items-center gap-3 sm:col-span-2 pt-2">
@@ -607,15 +607,15 @@ export default function AdmissionsPage() {
       {/* Reject Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowRejectModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'رفض الطلب' : 'Reject Application'}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'رفض الطلب' : 'Reject Application'}</h3>
               <button onClick={() => setShowRejectModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <div className="mb-4">
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'سبب الرفض' : 'Rejection Reason'}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'سبب الرفض' : 'Rejection Reason'}</label>
               <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className={inputCls} rows={4} placeholder={language === 'ar' ? 'أدخل سبب الرفض...' : 'Enter reason for rejection...'} />
             </div>
             <div className="flex items-center gap-3">

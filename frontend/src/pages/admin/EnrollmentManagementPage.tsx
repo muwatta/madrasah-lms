@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { enrollmentAPI, userAPI, subjectAPI } from '../../api';
 import type { Enrollment, User, Subject } from '../../types';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import { useLanguage } from '../../context/LanguageContext';
+import { SkeletonStatsGrid, SkeletonCard } from '../../components/Skeleton';
 
 const AVATAR_COLORS = [
   'bg-emerald-500', 'bg-blue-500', 'bg-purple-500', 'bg-amber-500', 'bg-rose-500',
@@ -115,8 +115,8 @@ export default function EnrollmentManagementPage() {
       <div className="rounded-2xl bg-gradient-to-br from-primary-600 via-primary-500 to-emerald-500 p-6 text-white shadow-lg shadow-primary-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('enrollmentManagement.title')}</h1>
-            <p className="mt-1 text-sm text-primary-100">{t('guides.enrollmentManagement')}</p>
+            <h1 className="text-2xl font-bold sm:text-3xl dark:text-[var(--color-text-primary)]">{t('enrollmentManagement.title')}</h1>
+            <p className="mt-1 text-sm text-primary-100 dark:text-primary-200">{t('guides.enrollmentManagement')}</p>
           </div>
           <button
             onClick={() => { setForm({ student: '', subject: '', ustaadh: '' }); setFormError(null); setFieldErrors({}); setShowForm(true); }}
@@ -129,25 +129,25 @@ export default function EnrollmentManagementPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'إجمالي التسجيلات' : 'Total Enrollments'}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{enrollments.length}</p>
+        <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
+          <p className="text-xs font-medium text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'إجمالي التسجيلات' : 'Total Enrollments'}</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{enrollments.length}</p>
         </div>
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'الطلاب' : 'Students'}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{groupOrder.length}</p>
+        <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
+          <p className="text-xs font-medium text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'الطلاب' : 'Students'}</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{groupOrder.length}</p>
         </div>
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'المواد' : 'Subjects'}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{totalSubjects}</p>
+        <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
+          <p className="text-xs font-medium text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'المواد' : 'Subjects'}</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{totalSubjects}</p>
         </div>
-        <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'المعلمين' : 'Teachers'}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">{totalTeachers}</p>
+        <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
+          <p className="text-xs font-medium text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'المعلمين' : 'Teachers'}</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{totalTeachers}</p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[160px] flex-1">
             <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('filters.filterByStudent')}</label>
@@ -188,7 +188,7 @@ export default function EnrollmentManagementPage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100">
               <svg className="h-4 w-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">{t('enrollmentManagement.createEnrollment')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('enrollmentManagement.createEnrollment')}</h2>
           </div>
           {formError && (
             <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -236,19 +236,19 @@ export default function EnrollmentManagementPage() {
       )}
 
       {loading ? (
-        <div className="flex h-48 items-center justify-center"><LoadingSpinner size="lg" /></div>
+        <div className="space-y-6"><SkeletonStatsGrid /><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div></div>
       ) : error ? (
         <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           {error}
         </div>
       ) : !groupOrder.length ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
             <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{t('enrollmentManagement.noEnrollments')}</p>
-          <p className="mt-1 text-xs text-gray-400">{language === 'ar' ? 'ابدأ بتسجيل الطلاب في المواد' : 'Start by enrolling students in subjects'}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{t('enrollmentManagement.noEnrollments')}</p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'ابدأ بتسجيل الطلاب في المواد' : 'Start by enrolling students in subjects'}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -262,23 +262,23 @@ export default function EnrollmentManagementPage() {
                       {getInitials(studentName)}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-gray-900">{studentName}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="truncate text-sm font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{studentName}</p>
+                      <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)]">
                         {items.length} {language === 'ar' ? 'موارد مسجلة' : 'enrolled subjects'}
                       </p>
                     </div>
                   </div>
-                  <ul className="divide-y divide-gray-50">
+                  <ul className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                     {items.map((e, idx) => (
                       <li key={e.id} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50/60">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-[10px] font-bold text-primary-600">
                           {idx + 1}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-gray-700">{language === 'ar' ? e.subject_name : e.subject_name_en}</p>
-                          <p className="truncate text-xs text-gray-400">{e.ustaadh_name || '—'}</p>
+                          <p className="truncate text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{language === 'ar' ? e.subject_name : e.subject_name_en}</p>
+                          <p className="truncate text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{e.ustaadh_name || '—'}</p>
                         </div>
-                        <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500">
+                        <span className="shrink-0 rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:text-[var(--color-text-muted)]">
                           {new Date(e.enrolled_at).toLocaleDateString()}
                         </span>
                       </li>

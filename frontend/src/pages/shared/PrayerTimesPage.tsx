@@ -3,7 +3,7 @@ import { quranAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton, SkeletonCard, SkeletonTable } from '../../components/Skeleton';
 
 interface PrayerTime {
   id: number;
@@ -26,12 +26,12 @@ const PRAYER_LABELS: Record<string, { en: string; ar: string }> = {
   isha: { en: 'Isha', ar: 'العشاء' },
 };
 const PRAYER_COLORS: Record<string, string> = {
-  fajr: 'bg-indigo-50 border-indigo-200 text-indigo-700',
-  sunrise: 'bg-amber-50 border-amber-200 text-amber-700',
-  dhuhr: 'bg-sky-50 border-sky-200 text-sky-700',
-  asr: 'bg-orange-50 border-orange-200 text-orange-700',
-  maghrib: 'bg-rose-50 border-rose-200 text-rose-700',
-  isha: 'bg-purple-50 border-purple-200 text-purple-700',
+  fajr: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-400',
+  sunrise: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400',
+  dhuhr: 'bg-sky-50 dark:bg-sky-900/20 border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-400',
+  asr: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400',
+  maghrib: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400',
+  isha: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-400',
 };
 const PRAYER_ICONS: Record<string, string> = {
   fajr: 'M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z',
@@ -134,17 +134,29 @@ export default function PrayerTimesPage() {
     }
   };
 
-  if (loading) return <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-4 w-64 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <SkeletonTable rows={5} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">{language === 'ar' ? 'مواقيت الصلاة' : 'Prayer Times'}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{language === 'ar' ? 'مواقيت الصلاة' : 'Prayer Times'}</h1>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{language === 'ar' ? 'عرض مواقيت الصلاة اليومية' : 'View daily prayer times'}</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{language === 'ar' ? 'عرض مواقيت الصلاة اليومية' : 'View daily prayer times'}</p>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
           {error}
           <button onClick={() => setError('')} className="me-2 underline">{t('common.close')}</button>
         </div>
@@ -163,20 +175,20 @@ export default function PrayerTimesPage() {
       )}
 
       {showForm && (
-        <div className="animate-slide-down mb-6 rounded-xl border border-primary-100 bg-white p-6 shadow-md">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">{language === 'ar' ? 'مواقيت جديدة' : 'New Prayer Times'}</h2>
+        <div className="animate-slide-down mb-6 rounded-xl border border-primary-100 dark:border-primary-800 bg-white dark:bg-gray-800 p-6 shadow-md">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{language === 'ar' ? 'مواقيت جديدة' : 'New Prayer Times'}</h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
+              <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
               <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none sm:max-w-xs" />
+                className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none sm:max-w-xs" />
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {PRAYER_KEYS.map((key) => (
                 <div key={key}>
-                  <label className="mb-1 block text-xs font-medium text-gray-500">{PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}</label>
+                  <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}</label>
                   <input type="time" value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none" />
+                    className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none" />
                 </div>
               ))}
             </div>
@@ -185,7 +197,7 @@ export default function PrayerTimesPage() {
                 className="btn-press rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
                 {submitting ? t('common.saving') : t('common.save')}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50">
+              <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
                 {t('common.cancel')}
               </button>
             </div>
@@ -194,10 +206,10 @@ export default function PrayerTimesPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-            <h2 className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'مواقيت اليوم' : "Today's Prayer Times"}</h2>
-            <p className="text-xs text-gray-400">{today ? formatDate(today.date) : '-'}</p>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+          <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{language === 'ar' ? 'مواقيت اليوم' : "Today's Prayer Times"}</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{today ? formatDate(today.date) : '-'}</p>
           </div>
           {today ? (
             <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
@@ -212,71 +224,71 @@ export default function PrayerTimesPage() {
               ))}
             </div>
           ) : (
-            <p className="p-6 text-sm text-gray-500 text-center">{language === 'ar' ? 'لا توجد مواقيت لهذا اليوم' : 'No prayer times available for today'}</p>
+            <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد مواقيت لهذا اليوم' : 'No prayer times available for today'}</p>
           )}
         </div>
 
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-            <h2 className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'مواقيت أمس' : "Yesterday's Prayer Times"}</h2>
-            <p className="text-xs text-gray-400">{yesterday ? formatDate(yesterday.date) : '-'}</p>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+          <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{language === 'ar' ? 'مواقيت أمس' : "Yesterday's Prayer Times"}</h2>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{yesterday ? formatDate(yesterday.date) : '-'}</p>
           </div>
           {yesterday ? (
             <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
               {PRAYER_KEYS.map((key) => (
-                <div key={key} className="rounded-lg border border-gray-100 bg-gray-50 p-3 text-center">
-                  <p className="text-xs font-medium text-gray-500">{PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}</p>
-                  <p className="mt-1 text-lg font-bold text-gray-700">{(yesterday as any)[key]}</p>
+                <div key={key} className="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-3 text-center">
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}</p>
+                  <p className="mt-1 text-lg font-bold text-gray-700 dark:text-gray-300">{(yesterday as any)[key]}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="p-6 text-sm text-gray-500 text-center">{language === 'ar' ? 'لا توجد مواقيت لأمس' : 'No prayer times available for yesterday'}</p>
+            <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد مواقيت لأمس' : 'No prayer times available for yesterday'}</p>
           )}
         </div>
       </div>
 
-      <div className="mt-8 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
-          <h2 className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'العرض الشهري' : 'Monthly View'}</h2>
+      <div className="mt-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{language === 'ar' ? 'العرض الشهري' : 'Monthly View'}</h2>
           <div className="flex items-center gap-2">
-            <button onClick={() => navigateMonth(-1)} className="rounded-lg border border-gray-200 p-1.5 hover:bg-gray-100">
-              <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            <button onClick={() => navigateMonth(-1)} className="rounded-lg border border-gray-200 dark:border-gray-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <svg className="h-4 w-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <span className="min-w-[140px] text-center text-sm font-semibold text-gray-700">
+            <span className="min-w-[140px] text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
               {currentDate.toLocaleString(language === 'ar' ? 'ar' : 'en', { month: 'long', year: 'numeric' })}
             </span>
-            <button onClick={() => navigateMonth(1)} className="rounded-lg border border-gray-200 p-1.5 hover:bg-gray-100">
-              <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            <button onClick={() => navigateMonth(1)} className="rounded-lg border border-gray-200 dark:border-gray-600 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700">
+              <svg className="h-4 w-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         </div>
         {monthData.length === 0 ? (
-          <p className="p-6 text-sm text-gray-500 text-center">{language === 'ar' ? 'لا توجد مواقيت لهذا الشهر' : 'No prayer times for this month'}</p>
+          <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد مواقيت لهذا الشهر' : 'No prayer times for this month'}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-100">
+            <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
               <thead>
                 <tr>
-                  <th className="px-4 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'التاريخ' : 'Date'}</th>
+                  <th className="px-4 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</th>
                   {PRAYER_KEYS.map((key) => (
-                    <th key={key} className="px-4 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <th key={key} className="px-4 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       {PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {monthData.map((pt) => {
                   const isToday = pt.date === toInputDate(new Date());
                   return (
-                    <tr key={pt.id} className={`hover:bg-gray-50/50 ${isToday ? 'bg-primary-50/50' : ''}`}>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                    <tr key={pt.id} className={`hover:bg-gray-50/50 dark:hover:bg-gray-700/50 ${isToday ? 'bg-primary-50/50 dark:bg-primary-900/20' : ''}`}>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                         {new Date(pt.date).toLocaleDateString(language === 'ar' ? 'ar' : 'en', { weekday: 'short', day: 'numeric' })}
-                        {isToday && <span className="ms-2 inline-block rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-semibold text-primary-700">{language === 'ar' ? 'اليوم' : 'Today'}</span>}
+                        {isToday && <span className="ms-2 inline-block rounded-full bg-primary-100 dark:bg-primary-900/30 px-2 py-0.5 text-[10px] font-semibold text-primary-700 dark:text-primary-400">{language === 'ar' ? 'اليوم' : 'Today'}</span>}
                       </td>
                       {PRAYER_KEYS.map((key) => (
-                        <td key={key} className="px-4 py-3 text-sm text-gray-600">{(pt as any)[key]}</td>
+                        <td key={key} className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{(pt as any)[key]}</td>
                       ))}
                     </tr>
                   );

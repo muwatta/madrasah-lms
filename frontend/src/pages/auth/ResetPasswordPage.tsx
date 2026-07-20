@@ -40,50 +40,50 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 to-green-100 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 to-green-100 dark:from-gray-900 dark:to-gray-800 px-4">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-emerald-100 bg-white p-8 shadow-xl">
+        <div className="rounded-2xl border border-emerald-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-xl dark:shadow-gray-900/50">
           <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-              <svg className="h-8 w-8 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg className="h-8 w-8 text-emerald-700 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Set New Password</h1>
-            <p className="mt-1 text-gray-500">Enter your new password below.</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Set New Password</h1>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">Enter your new password below.</p>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            <div className="mb-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{error}</div>
           )}
 
           {success ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center text-sm text-emerald-700">
+            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-400">
               Password reset successfully! Redirecting to login...
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">New Password</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
                 <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
                   placeholder="••••••••" minLength={8} />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Confirm Password</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
                 <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
                   placeholder="••••••••" minLength={8} />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {loading ? 'Resetting...' : 'Reset Password'}
               </button>
             </form>
           )}
 
-          <p className="mt-6 text-center text-sm text-gray-500">
-            <Link to="/login" className="font-medium text-emerald-600 hover:text-emerald-700">Back to Login</Link>
+          <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            <Link to="/login" className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300">Back to Login</Link>
           </p>
         </div>
       </div>

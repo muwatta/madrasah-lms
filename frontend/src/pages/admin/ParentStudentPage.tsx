@@ -3,9 +3,9 @@ import api from '../../api/client';
 import { userAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import type { User } from '../../types';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
+import { SkeletonTable } from '../../components/Skeleton';
 
 interface StudentParentLink {
   id: number;
@@ -85,7 +85,7 @@ export default function ParentStudentPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
-        <h1 className="text-2xl font-bold text-gray-900">{t('parentStudent.title')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{t('parentStudent.title')}</h1>
         <button
           onClick={() => { setForm({ student: '', parent: '', relationship: 'father' }); setFormError(null); setShowForm(true); }}
           className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
@@ -93,29 +93,29 @@ export default function ParentStudentPage() {
           {t('parentStudent.addLink')}
         </button>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.parentStudent')}</p>
+      <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)] mb-6">{t('guides.parentStudent')}</p>
 
       {showForm && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t('parentStudent.linkParentToStudent')}</h2>
-          {formError && <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{formError}</div>}
+        <div className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('parentStudent.linkParentToStudent')}</h2>
+          {formError && <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{formError}</div>}
           <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('fields.student')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.student')}</label>
               <select required value={form.student} onChange={(e) => setForm({ ...form, student: e.target.value })} className={inputClass}>
                 <option value="">{t('parentStudent.selectStudent')}</option>
                 {students.map((s) => <option key={s.id} value={s.id}>{s.full_name} ({s.email})</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('parentStudent.selectParent')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('parentStudent.selectParent')}</label>
               <select required value={form.parent} onChange={(e) => setForm({ ...form, parent: e.target.value })} className={inputClass}>
                 <option value="">{t('parentStudent.selectParent')}</option>
                 {parents.map((p) => <option key={p.id} value={p.id}>{p.full_name} ({p.email})</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">{t('parentStudent.relationship')}</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('parentStudent.relationship')}</label>
               <select value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} className={inputClass}>
                 <option value="father">{t('relationship.father')}</option>
                 <option value="mother">{t('relationship.mother')}</option>
@@ -126,7 +126,7 @@ export default function ParentStudentPage() {
               <button type="submit" disabled={saving} className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
                 {saving ? t('common.saving') : t('parentStudent.createLink')}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+              <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-gray-300 dark:border-[var(--color-border)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-gray-50 dark:hover:bg-gray-700/30">
                 {t('common.cancel')}
               </button>
             </div>
@@ -135,21 +135,21 @@ export default function ParentStudentPage() {
       )}
 
       {deleteError && (
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-400">
           {deleteError}
           <button onClick={() => setDeleteError(null)} className="me-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 
       {loading ? (
-        <div className="flex h-40 items-center justify-center"><LoadingSpinner /></div>
+        <SkeletonTable rows={5} />
       ) : error ? (
-        <div className="rounded-lg bg-red-50 p-4 text-red-700">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-400">{error}</div>
       ) : (
-        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-x-auto">
+        <div className="rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] shadow-sm overflow-x-auto">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-start text-xs font-medium uppercase text-gray-500">
+              <tr className="border-b border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-primary)] text-start text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                 <th className="px-4 py-3">{t('fields.student')}</th>
                 <th className="px-4 py-3">{t('parentStudent.selectParent')}</th>
                 <th className="px-4 py-3">{t('parentStudent.relationship')}</th>
@@ -158,10 +158,10 @@ export default function ParentStudentPage() {
             </thead>
             <tbody>
               {links.map((link) => (
-                <tr key={link.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{link.student_name}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-gray-600">{link.parent_name}</td>
-                  <td className="px-4 py-3 text-gray-600 capitalize">{link.relationship === 'father' ? t('relationship.father') : link.relationship === 'mother' ? t('relationship.mother') : t('relationship.guardian')}</td>
+                <tr key={link.id} className="border-b border-gray-50 dark:border-[var(--color-border-light)] hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{link.student_name}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-gray-600 dark:text-[var(--color-text-secondary)]">{link.parent_name}</td>
+                  <td className="px-4 py-3 text-gray-600 dark:text-[var(--color-text-secondary)] capitalize">{link.relationship === 'father' ? t('relationship.father') : link.relationship === 'mother' ? t('relationship.mother') : t('relationship.guardian')}</td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => setConfirmDeleteLinkId(link.id)}
@@ -173,7 +173,7 @@ export default function ParentStudentPage() {
                 </tr>
               ))}
               {!links.length && (
-                <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500">{t('parentStudent.noLinks')}</td></tr>
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500 dark:text-[var(--color-text-muted)]">{t('parentStudent.noLinks')}</td></tr>
               )}
             </tbody>
           </table>

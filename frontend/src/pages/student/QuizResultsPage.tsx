@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { attemptAPI } from '../../api';
 import type { QuizAttempt } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 
 export default function QuizResultsPage() {
   const { t } = useLanguage();
@@ -42,65 +42,68 @@ export default function QuizResultsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-4 w-64 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <SkeletonStatsGrid />
+        <SkeletonTable rows={5} />
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('student.quizResults')}</h1>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.quizResults')}</p>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">{t('student.quizResults')}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.quizResults')}</p>
 
       {error && (
-        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-4">{error}</div>
+        <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 mb-4">{error}</div>
       )}
 
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.totalAttempts')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.totalAttempts')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-emerald-600">{stats.average}%</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.averageScore')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.average}%</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.averageScore')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.best}%</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.bestScore')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.best}%</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.bestScore')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.passRate}%</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.passRate')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.passRate}%</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.passRate')}</div>
           </div>
         </div>
       )}
 
       {attempts.length === 0 ? (
         <div className="text-center py-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+            <svg className="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="text-gray-500 mb-3">{t('student.noAttemptsYet')}</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-3">{t('student.noAttemptsYet')}</p>
           <Link to="/student/quizzes" className="inline-block px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition">
             {t('student.takeAQuiz')}
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="text-end py-3 px-4 font-medium text-gray-600">{t('student.quiz')}</th>
-                <th className="text-end py-3 px-4 font-medium text-gray-600">{t('fields.score')}</th>
-                <th className="text-end py-3 px-4 font-medium text-gray-600">{t('fields.percentage')}</th>
-                <th className="text-end py-3 px-4 font-medium text-gray-600">{t('fields.attempt')}</th>
-                <th className="text-end py-3 px-4 font-medium text-gray-600">{t('fields.status')}</th>
-                <th className="text-end py-3 px-4 font-medium text-gray-600">{t('fields.date')}</th>
+                <th className="text-end py-3 px-4 font-medium text-gray-600 dark:text-gray-400">{t('student.quiz')}</th>
+                <th className="text-end py-3 px-4 font-medium text-gray-600 dark:text-gray-400">{t('fields.score')}</th>
+                <th className="text-end py-3 px-4 font-medium text-gray-600 dark:text-gray-400">{t('fields.percentage')}</th>
+                <th className="text-end py-3 px-4 font-medium text-gray-600 dark:text-gray-400">{t('fields.attempt')}</th>
+                <th className="text-end py-3 px-4 font-medium text-gray-600 dark:text-gray-400">{t('fields.status')}</th>
+                <th className="text-end py-3 px-4 font-medium text-gray-600 dark:text-gray-400">{t('fields.date')}</th>
               </tr>
             </thead>
             <tbody>
@@ -108,49 +111,49 @@ export default function QuizResultsPage() {
                 const hasResult = attempt.score !== null;
                 const pct = attempt.percentage || 0;
                 return (
-                  <tr key={attempt.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4 font-medium text-gray-800">{attempt.quiz_title}</td>
+                  <tr key={attempt.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="py-3 px-4 font-medium text-gray-800 dark:text-gray-200">{attempt.quiz_title}</td>
                     <td className="py-3 px-4">
                       {hasResult ? (
-                        <span className="font-semibold text-gray-900">{attempt.score}</span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{attempt.score}</span>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-400 dark:text-gray-500">-</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
                       {hasResult ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                             <div
                               className={`h-2 rounded-full ${pct >= 70 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
                               style={{ width: `${Math.min(pct, 100)}%` }}
                             />
                           </div>
-                          <span className="text-xs font-medium text-gray-600">{pct}%</span>
+                          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{pct}%</span>
                         </div>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-400 dark:text-gray-500">-</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-gray-500">#{attempt.attempt_number}</td>
+                    <td className="py-3 px-4 text-gray-500 dark:text-gray-400">#{attempt.attempt_number}</td>
                     <td className="py-3 px-4">
                       {hasResult ? (
                         <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                           pct >= 70
-                            ? 'bg-green-100 text-green-800'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
                             : pct >= 50
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                         }`}>
                           {pct >= 50 ? t('enrollmentStatus.passed') : t('enrollmentStatus.failed')}
                         </span>
                       ) : (
-                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400">
                           {t('enrollmentStatus.inProgress')}
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-gray-500 text-xs">
+                    <td className="py-3 px-4 text-gray-500 dark:text-gray-400 text-xs">
                       {attempt.submitted_at
                         ? new Date(attempt.submitted_at).toLocaleDateString()
                         : new Date(attempt.started_at).toLocaleDateString()}

@@ -23,44 +23,44 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 to-green-100 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 to-green-100 dark:from-gray-900 dark:to-gray-800 px-4">
       <div className="w-full max-w-md">
-        <div className="rounded-2xl border border-emerald-100 bg-white p-8 shadow-xl">
+        <div className="rounded-2xl border border-emerald-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-xl dark:shadow-gray-900/50">
           <div className="mb-8 text-center">
-            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-              <svg className="h-8 w-8 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <svg className="h-8 w-8 text-emerald-700 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">Forgot Password</h1>
-            <p className="mt-1 text-gray-500">Enter your email and we'll send you a reset link.</p>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Forgot Password</h1>
+            <p className="mt-1 text-gray-500 dark:text-gray-400">Enter your email and we'll send you a reset link.</p>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+            <div className="mb-4 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{error}</div>
           )}
 
           {sent ? (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center text-sm text-emerald-700">
+            <div className="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 text-center text-sm text-emerald-700 dark:text-emerald-400">
               If that email exists, a reset link has been sent.
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                 <input id="email" type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2.5 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500"
                   placeholder="you@example.com" />
               </div>
               <button type="submit" disabled={loading}
-                className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white transition hover:bg-emerald-700 disabled:bg-emerald-400 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
             </form>
           )}
 
-          <p className="mt-6 text-center text-sm text-gray-500">
-            <Link to="/login" className="font-medium text-emerald-600 hover:text-emerald-700">Back to Login</Link>
+          <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            <Link to="/login" className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300">Back to Login</Link>
           </p>
         </div>
       </div>

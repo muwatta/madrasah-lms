@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { feeAPI, feeStructureAPI, userAPI } from '../../api';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
+import { SkeletonStatsGrid, SkeletonChart, SkeletonTable } from '../../components/Skeleton';
 
 interface Fee {
   id: number;
@@ -261,8 +261,8 @@ export default function FinancePage() {
       <div className="rounded-2xl bg-gradient-to-br from-primary-600 via-primary-500 to-emerald-500 p-6 text-white shadow-lg shadow-primary-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('finance.title')}</h1>
-            <p className="mt-1 text-sm text-primary-100">{t('guides.finance')}</p>
+            <h1 className="text-2xl font-bold sm:text-3xl dark:text-[var(--color-text-primary)]">{t('finance.title')}</h1>
+            <p className="mt-1 text-sm text-primary-100 dark:text-primary-200">{t('guides.finance')}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <button
@@ -326,7 +326,7 @@ export default function FinancePage() {
 
       {chartData.length > 0 && (
         <div className="card-hover rounded-xl border border-gray-100 bg-white p-5 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
-          <h3 className="mb-4 text-sm font-semibold text-gray-700">{t('finance.financialOverview')}</h3>
+          <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('finance.financialOverview')}</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -343,11 +343,11 @@ export default function FinancePage() {
 
       {analytics?.recent_payments && analytics.recent_payments.length > 0 && (
         <div className="card-hover rounded-xl border border-gray-100 bg-white p-5 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '250ms' }}>
-          <h3 className="mb-3 text-sm font-semibold text-gray-700">{t('finance.recentPayments')}</h3>
+          <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('finance.recentPayments')}</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 text-end text-xs font-medium uppercase text-gray-500">
+                <tr className="border-b border-gray-100 dark:border-[var(--color-border)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                   <th className="pb-2 ps-4">{t('finance.student')}</th>
                   <th className="pb-2 ps-4">{t('finance.amount')}</th>
                   <th className="pb-2 ps-4">{t('finance.paymentMethod')}</th>
@@ -356,10 +356,10 @@ export default function FinancePage() {
               </thead>
               <tbody>
                 {analytics.recent_payments.slice(0, 5).map((p) => (
-                  <tr key={p.id} className="border-b border-gray-50 last:border-0">
-                    <td className="py-2.5 ps-4 font-medium text-gray-900">{p.student_name}</td>
+                  <tr key={p.id} className="border-b border-gray-50 dark:border-[var(--color-border-light)] last:border-0">
+                    <td className="py-2.5 ps-4 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{p.student_name}</td>
                     <td className="py-2.5 ps-4 text-green-600 font-semibold">{p.amount}</td>
-                    <td className="py-2.5 ps-4 text-gray-500 capitalize">{paymentMethodLabels[p.payment_method] || p.payment_method?.replace('_', ' ')}</td>
+                    <td className="py-2.5 ps-4 text-gray-500 dark:text-[var(--color-text-muted)] capitalize">{paymentMethodLabels[p.payment_method] || p.payment_method?.replace('_', ' ')}</td>
                     <td className="py-2.5 text-gray-500 text-xs">{new Date(p.paid_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
@@ -369,10 +369,10 @@ export default function FinancePage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[160px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.searchStudent') || (language === 'ar' ? 'بحث عن طالب' : 'Search student')}</label>
+          <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.searchStudent') || (language === 'ar' ? 'بحث عن طالب' : 'Search student')}</label>
           <div className="relative">
             <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input
@@ -380,12 +380,12 @@ export default function FinancePage() {
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
               placeholder={language === 'ar' ? 'ابحث بالاسم...' : 'Search by name...'}
-              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 ps-9 pe-3 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
+              className="w-full rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-primary)] py-2.5 ps-9 pe-3 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100"
             />
           </div>
         </div>
         <div className="w-full sm:w-auto sm:min-w-[140px]">
-          <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.filterByStatus')}</label>
+          <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.filterByStatus')}</label>
           <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className={selectCls}>
               <option value="">{t('finance.allStatuses')}</option>
               {STATUS_OPTIONS.map((s) => (
@@ -411,7 +411,7 @@ export default function FinancePage() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100">
               <svg className="h-4 w-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">{t('finance.createNewFee')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.createNewFee')}</h2>
           </div>
           {createError && (
             <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -421,7 +421,7 @@ export default function FinancePage() {
           )}
           <form onSubmit={handleCreateFee} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.student')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.student')}</label>
               <select
                 required
                 value={createForm.student}
@@ -434,7 +434,7 @@ export default function FinancePage() {
               {createFieldErrors.student && <p className="mt-1 text-xs text-red-500">{createFieldErrors.student}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.amount')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.amount')}</label>
               <input
                 required
                 type="number"
@@ -448,7 +448,7 @@ export default function FinancePage() {
               {createFieldErrors.amount && <p className="mt-1 text-xs text-red-500">{createFieldErrors.amount}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.dueDate')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.dueDate')}</label>
               <input
                 required
                 type="date"
@@ -459,7 +459,7 @@ export default function FinancePage() {
               {createFieldErrors.due_date && <p className="mt-1 text-xs text-red-500">{createFieldErrors.due_date}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.description')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.description')}</label>
               <input
                 type="text"
                 value={createForm.description}
@@ -469,7 +469,7 @@ export default function FinancePage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.status')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('fields.status')}</label>
               <select value={createForm.status} onChange={(e) => setCreateForm({ ...createForm, status: e.target.value })} className={selectCls}>
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s} value={s}>{statusLabels[s] || s.charAt(0).toUpperCase() + s.slice(1)}</option>
@@ -492,16 +492,16 @@ export default function FinancePage() {
 
       {showPaymentModal && paymentFee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowPaymentModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{t('finance.recordPayment')}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.recordPayment')}</h3>
               <button onClick={() => setShowPaymentModal(false)} className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <div className="mb-4 rounded-lg bg-gray-50 p-3">
-              <p className="text-sm text-gray-600">{t('finance.student')}: <span className="font-medium text-gray-900">{paymentFee.student_name}</span></p>
-              <p className="text-sm text-gray-600">{t('finance.balance')}: <span className="font-medium text-amber-600">{paymentFee.balance}</span></p>
+              <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">{t('finance.student')}: <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{paymentFee.student_name}</span></p>
+              <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">{t('finance.balance')}: <span className="font-medium text-amber-600">{paymentFee.balance}</span></p>
             </div>
             {paymentError && (
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
@@ -511,7 +511,7 @@ export default function FinancePage() {
             )}
             <form onSubmit={handleRecordPayment} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.paymentAmount')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.paymentAmount')}</label>
                 <input
                   required
                   type="number"
@@ -525,7 +525,7 @@ export default function FinancePage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.paymentMethod')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.paymentMethod')}</label>
                 <select value={paymentForm.payment_method} onChange={(e) => setPaymentForm({ ...paymentForm, payment_method: e.target.value })} className={selectCls}>
                   {PAYMENT_METHODS.map((m) => (
                     <option key={m} value={m}>{paymentMethodLabels[m] || m.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</option>
@@ -549,9 +549,9 @@ export default function FinancePage() {
 
       {showBulkModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowBulkModal(false)}>
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">{t('finance.bulkCreateFees')}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.bulkCreateFees')}</h3>
               <button onClick={() => setShowBulkModal(false)} className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -570,7 +570,7 @@ export default function FinancePage() {
             )}
             <form onSubmit={handleBulkCreate} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.feeStructure')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.feeStructure')}</label>
                 <select
                   value={bulkForm.fee_structure}
                   onChange={(e) => {
@@ -593,7 +593,7 @@ export default function FinancePage() {
               </div>
               {!bulkForm.fee_structure && (
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.manualAmount')}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.manualAmount')}</label>
                   <input
                     required
                     type="number"
@@ -607,7 +607,7 @@ export default function FinancePage() {
                 </div>
               )}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.dueDate')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.dueDate')}</label>
                 <input
                   required
                   type="date"
@@ -617,7 +617,7 @@ export default function FinancePage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.description')}</label>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.description')}</label>
                 <input
                   type="text"
                   value={bulkForm.description}
@@ -639,7 +639,7 @@ export default function FinancePage() {
               </div>
               {!bulkForm.assign_all && (
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('finance.selectStudents')}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.selectStudents')}</label>
                   <select
                     multiple
                     value={bulkForm.selected_students.map(String)}
@@ -671,18 +671,18 @@ export default function FinancePage() {
       )}
 
       {loading ? (
-        <div className="flex h-48 items-center justify-center"><LoadingSpinner size="lg" /></div>
+        <div className="space-y-6"><SkeletonStatsGrid /><SkeletonChart /><SkeletonTable rows={5} /></div>
       ) : error ? (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           {error}
         </div>
       ) : pagedFees.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
+        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
             <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{t('finance.noFees')}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.noFees')}</p>
           <p className="mt-1 text-xs text-gray-400">{language === 'ar' ? 'ابدأ بإضافة رسوم للطلاب' : 'Start by adding fees for students'}</p>
         </div>
       ) : (
@@ -690,7 +690,7 @@ export default function FinancePage() {
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                   <th className="px-4 py-3">{t('finance.student')}</th>
                   <th className="px-4 py-3">{t('finance.amount')}</th>
                   <th className="px-4 py-3">{t('finance.paid')}</th>
@@ -702,12 +702,12 @@ export default function FinancePage() {
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {filteredFees.map((fee) => (
-                  <tr key={fee.id} className="transition-colors hover:bg-gray-50/60">
+                  <tr key={fee.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
                     <td className="whitespace-nowrap px-4 py-3">
-                      <span className="font-medium text-gray-900">{fee.student_name}</span>
-                      {fee.description && <p className="text-xs text-gray-400 mt-0.5">{fee.description}</p>}
+                      <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{fee.student_name}</span>
+                      {fee.description && <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] mt-0.5">{fee.description}</p>}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{fee.amount}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{fee.amount}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-green-600 font-medium">{fee.paid}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-amber-600 font-medium">{fee.balance}</td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -715,7 +715,7 @@ export default function FinancePage() {
                         {statusLabels[fee.status] || fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(fee.due_date).toLocaleDateString()}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(fee.due_date).toLocaleDateString()}</td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center justify-center gap-1.5">
                         {fee.status !== 'paid' && (
@@ -757,22 +757,22 @@ export default function FinancePage() {
             {pagedFees.map((fee) => (
               <div key={fee.id} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-gray-900">{fee.student_name}</span>
+                  <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{fee.student_name}</span>
                   <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[fee.status] || ''}`}>
                     {statusLabels[fee.status]}
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div>
-                    <p className="text-xs text-gray-400">{t('finance.amount')}</p>
-                    <p className="font-medium text-gray-900">{fee.amount}</p>
+                    <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{t('finance.amount')}</p>
+                    <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{fee.amount}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">{t('finance.paid')}</p>
+                    <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{t('finance.paid')}</p>
                     <p className="font-medium text-green-600">{fee.paid}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">{t('finance.balance')}</p>
+                    <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{t('finance.balance')}</p>
                     <p className="font-medium text-amber-600">{fee.balance}</p>
                   </div>
                 </div>
@@ -810,8 +810,8 @@ export default function FinancePage() {
             ))}
           </div>
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
-              <p className="text-xs text-gray-500">
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-[var(--color-border)] px-4 py-3">
+              <p className="text-xs text-gray-500 dark:text-[var(--color-text-muted)]">
                 {language === 'ar' ? `إجمالي ${filteredFees.length}` : `${filteredFees.length} total`}
               </p>
               <div className="flex items-center gap-1">

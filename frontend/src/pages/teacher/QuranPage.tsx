@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { quranAPI, userAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton, SkeletonTable, SkeletonStatsGrid } from '../../components/Skeleton';
 
 interface Student {
   id: number;
@@ -154,28 +154,40 @@ export default function QuranPage() {
     }
   };
 
-  if (loading && !selectedStudent) return <div className="flex h-64 items-center justify-center"><LoadingSpinner size="lg" /></div>;
+  const inputCls = 'w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-2.5 py-2 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100';
+
+  if (loading && !selectedStudent) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Skeleton className="h-8 w-64 mb-2" />
+        <Skeleton className="h-4 w-80 mb-6" />
+        <Skeleton className="h-10 w-64 mb-6" />
+        <SkeletonStatsGrid />
+        <SkeletonTable rows={4} />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">{language === 'ar' ? 'القرآن الكريم' : 'Quran Memorization'}</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'القرآن الكريم' : 'Quran Memorization'}</h1>
       </div>
-      <p className="text-sm text-gray-500 mb-6">{language === 'ar' ? 'تتبع تحفيظ الطلاب وتقييم التجويد' : 'Track student memorization and tajweed assessment'}</p>
+      <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mb-6">{language === 'ar' ? 'تتبع تحفيظ الطلاب وتقييم التجويد' : 'Track student memorization and tajweed assessment'}</p>
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
           {error}
           <button onClick={() => setError('')} className="me-2 underline">{t('common.close')}</button>
         </div>
       )}
 
       <div className="mb-6">
-        <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'اختر الطالب' : 'Select Student'}</label>
+        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'اختر الطالب' : 'Select Student'}</label>
         <select
           value={selectedStudent ?? ''}
           onChange={(e) => setSelectedStudent(Number(e.target.value) || null)}
-          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none sm:max-w-xs"
+          className={`${inputCls} sm:max-w-xs`}
         >
           <option value="">{language === 'ar' ? '-- اختر طالب --' : '-- Select a student --'}</option>
           {students.map((s) => (
@@ -184,34 +196,39 @@ export default function QuranPage() {
         </select>
       </div>
 
-      {selectedStudent && loading && <div className="flex h-32 items-center justify-center"><LoadingSpinner size="lg" /></div>}
+      {selectedStudent && loading && (
+        <div className="space-y-6">
+          <SkeletonStatsGrid />
+          <SkeletonTable rows={5} />
+        </div>
+      )}
 
       {selectedStudent && !loading && (
         <>
           {progress && (
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'إجمالي السور' : 'Total Surahs'}</p>
-                <p className="mt-1 text-2xl font-bold text-primary-600">{progress.total_surahs}</p>
+              <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
+                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إجمالي السور' : 'Total Surahs'}</p>
+                <p className="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{progress.total_surahs}</p>
               </div>
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'إجمالي الآيات' : 'Total Ayahs'}</p>
-                <p className="mt-1 text-2xl font-bold text-blue-600">{progress.total_ayahs}</p>
+              <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
+                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إجمالي الآيات' : 'Total Ayahs'}</p>
+                <p className="mt-1 text-2xl font-bold text-blue-600 dark:text-blue-400">{progress.total_ayahs}</p>
               </div>
-              <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-                <p className="text-xs font-medium text-gray-400">{language === 'ar' ? 'متوسط الدرجات' : 'Average Score'}</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-600">{progress.average_score.toFixed(1)}%</p>
+              <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
+                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'متوسط الدرجات' : 'Average Score'}</p>
+                <p className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{progress.average_score.toFixed(1)}%</p>
               </div>
             </div>
           )}
 
-          <div className="mb-4 flex gap-1 rounded-lg border border-gray-200 bg-gray-50 p-1">
+          <div className="mb-4 flex gap-1 rounded-lg border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-1">
             {(['records', 'revisions', 'tajwid'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                  activeTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  activeTab === tab ? 'bg-[var(--color-bg-primary)] dark:bg-gray-800 text-[var(--color-text-primary)] dark:text-gray-100 shadow-sm' : 'text-[var(--color-text-muted)] dark:text-gray-400 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300'
                 }`}
               >
                 {tab === 'records' ? (language === 'ar' ? 'التحفيظ' : 'Memorization') : tab === 'revisions' ? (language === 'ar' ? 'المراجعات' : 'Revisions') : (language === 'ar' ? 'التجويد' : 'Tajwid')}
@@ -220,9 +237,9 @@ export default function QuranPage() {
           </div>
 
           {activeTab === 'records' && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
-                <h2 className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'سجلات التحفيظ' : 'Memorization Records'}</h2>
+            <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3">
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'سجلات التحفيظ' : 'Memorization Records'}</h2>
                 <button
                   onClick={() => setShowForm(!showForm)}
                   className="btn-press inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700"
@@ -233,36 +250,36 @@ export default function QuranPage() {
               </div>
 
               {showForm && (
-                <div className="border-b border-gray-100 bg-primary-50/30 px-6 py-4">
+                <div className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-primary-50/30 dark:bg-primary-900/10 px-6 py-4">
                   <form onSubmit={handleCreateRecord} className="grid grid-cols-1 gap-3 sm:grid-cols-6">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'السورة' : 'Surah'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'السورة' : 'Surah'}</label>
                       <select value={form.surah} onChange={(e) => setForm({ ...form, surah: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none">
+                        className={`${inputCls} w-full`}>
                         {SURAH_NAMES.map((name, i) => (
                           <option key={i + 1} value={i + 1}>{i + 1}. {name}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'من آية' : 'From Ayah'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'من آية' : 'From Ayah'}</label>
                       <input type="number" min={1} value={form.ayah_start} onChange={(e) => setForm({ ...form, ayah_start: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                        className={`${inputCls} w-full`} />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'إلى آية' : 'To Ayah'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إلى آية' : 'To Ayah'}</label>
                       <input type="number" min={1} value={form.ayah_end} onChange={(e) => setForm({ ...form, ayah_end: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                        className={`${inputCls} w-full`} />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
                       <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                        className={`${inputCls} w-full`} />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الدرجة' : 'Score'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة' : 'Score'}</label>
                       <input type="number" min={0} max={100} value={form.score} onChange={(e) => setForm({ ...form, score: Number(e.target.value) })}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                        className={`${inputCls} w-full`} />
                     </div>
                     <div className="flex items-end">
                       <button type="submit" disabled={submitting}
@@ -274,39 +291,39 @@ export default function QuranPage() {
                   <div className="mt-2">
                     <input type="text" placeholder={language === 'ar' ? 'ملاحظات...' : 'Notes...'} value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                      className={inputCls} />
                   </div>
                 </div>
               )}
 
               {records.length === 0 ? (
-                <p className="p-6 text-sm text-gray-500 text-center">{language === 'ar' ? 'لا توجد سجلات بعد' : 'No records yet'}</p>
+                <p className="p-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد سجلات بعد' : 'No records yet'}</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-100">
+                  <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                     <thead>
                       <tr>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'السورة' : 'Surah'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'الآيات' : 'Ayah Range'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'التاريخ' : 'Date'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'الدرجة' : 'Score'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'ملاحظات' : 'Notes'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'السورة' : 'Surah'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الآيات' : 'Ayah Range'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة' : 'Score'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ملاحظات' : 'Notes'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                       {records.map((r) => (
-                        <tr key={r.id} className="hover:bg-gray-50/50">
-                          <td className="px-6 py-3.5 text-sm font-medium text-gray-900">{SURAH_NAMES[r.surah - 1] || r.surah}</td>
-                          <td className="px-6 py-3.5 text-sm text-gray-700">{r.ayah_start} - {r.ayah_end}</td>
-                          <td className="px-6 py-3.5 text-sm text-gray-500">{formatDate(r.date)}</td>
+                        <tr key={r.id} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                          <td className="px-6 py-3.5 text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{SURAH_NAMES[r.surah - 1] || r.surah}</td>
+                          <td className="px-6 py-3.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300">{r.ayah_start} - {r.ayah_end}</td>
+                          <td className="px-6 py-3.5 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{formatDate(r.date)}</td>
                           <td className="px-6 py-3.5">
                             <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                              r.score >= 90 ? 'bg-emerald-100 text-emerald-700' : r.score >= 70 ? 'bg-blue-100 text-blue-700' : r.score >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                              r.score >= 90 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : r.score >= 70 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : r.score >= 50 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                             }`}>
                               {r.score}%
                             </span>
                           </td>
-                          <td className="px-6 py-3.5 text-sm text-gray-500 max-w-[200px] truncate">{r.notes || '-'}</td>
+                          <td className="px-6 py-3.5 text-sm text-[var(--color-text-muted)] dark:text-gray-400 max-w-[200px] truncate">{r.notes || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -317,29 +334,29 @@ export default function QuranPage() {
           )}
 
           {activeTab === 'revisions' && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-                <h2 className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'المراجعات القادمة' : 'Upcoming Revisions'}</h2>
+            <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
+              <div className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3">
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'المراجعات القادمة' : 'Upcoming Revisions'}</h2>
               </div>
               {revisions.length === 0 ? (
-                <p className="p-6 text-sm text-gray-500 text-center">{language === 'ar' ? 'لا توجد مراجعات قادمة' : 'No upcoming revisions'}</p>
+                <p className="p-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد مراجعات قادمة' : 'No upcoming revisions'}</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-100">
+                  <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                     <thead>
                       <tr>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'السورة' : 'Surah'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'الآيات' : 'Ayah Range'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'التاريخ المجدول' : 'Scheduled Date'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500">{language === 'ar' ? 'الإجراء' : 'Action'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'السورة' : 'Surah'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الآيات' : 'Ayah Range'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ المجدول' : 'Scheduled Date'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الإجراء' : 'Action'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                       {revisions.map((r) => (
-                        <tr key={r.id} className="hover:bg-gray-50/50">
-                          <td className="px-6 py-3.5 text-sm font-medium text-gray-900">{SURAH_NAMES[r.surah - 1] || r.surah}</td>
-                          <td className="px-6 py-3.5 text-sm text-gray-700">{r.ayah_start} - {r.ayah_end}</td>
-                          <td className="px-6 py-3.5 text-sm text-gray-500">{formatDate(r.scheduled_date)}</td>
+                        <tr key={r.id} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                          <td className="px-6 py-3.5 text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{SURAH_NAMES[r.surah - 1] || r.surah}</td>
+                          <td className="px-6 py-3.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300">{r.ayah_start} - {r.ayah_end}</td>
+                          <td className="px-6 py-3.5 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{formatDate(r.scheduled_date)}</td>
                           <td className="px-6 py-3.5">
                             <button
                               onClick={() => handleMarkComplete(r.id)}
@@ -359,9 +376,9 @@ export default function QuranPage() {
           )}
 
           {activeTab === 'tajwid' && (
-            <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
-                <h2 className="text-sm font-semibold text-gray-700">{language === 'ar' ? 'تقييم التجويد' : 'Tajwid Assessment'}</h2>
+            <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3">
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'تقييم التجويد' : 'Tajwid Assessment'}</h2>
                 <button
                   onClick={() => setShowTajwidForm(!showTajwidForm)}
                   className="btn-press inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700"
@@ -372,19 +389,19 @@ export default function QuranPage() {
               </div>
 
               {showTajwidForm && (
-                <div className="border-b border-gray-100 bg-primary-50/30 px-6 py-4">
+                <div className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-primary-50/30 dark:bg-primary-900/10 px-6 py-4">
                   <form onSubmit={handleCreateTajwid} className="space-y-3">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
+                        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
                         <input type="date" value={tajwidForm.date} onChange={(e) => setTajwidForm({ ...tajwidForm, date: e.target.value })}
-                          className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                          className={`${inputCls} w-full`} />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الدرجة الكلية' : 'Overall Score'}</label>
+                        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة الكلية' : 'Overall Score'}</label>
                         <input type="number" min={0} max={100} value={tajwidForm.overall_score}
                           onChange={(e) => setTajwidForm({ ...tajwidForm, overall_score: Number(e.target.value) })}
-                          className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                          className={`${inputCls} w-full`} />
                       </div>
                       <div className="flex items-end">
                         <button type="submit" disabled={tajwidSubmitting}
@@ -401,25 +418,25 @@ export default function QuranPage() {
                         { key: 'qalqalah_score', label: language === 'ar' ? 'القلقلة' : 'Qalqalah' },
                       ].map(({ key, label }) => (
                         <div key={key}>
-                          <label className="mb-1 block text-xs font-medium text-gray-500">{label}</label>
+                          <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{label}</label>
                           <input type="number" min={0} max={100}
                             value={(tajwidForm as any)[key]}
                             onChange={(e) => setTajwidForm({ ...tajwidForm, [key]: Number(e.target.value) })}
-                            className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                            className={`${inputCls} w-full`} />
                         </div>
                       ))}
                     </div>
                     <div>
                       <input type="text" placeholder={language === 'ar' ? 'ملاحظات...' : 'Notes...'} value={tajwidForm.notes}
                         onChange={(e) => setTajwidForm({ ...tajwidForm, notes: e.target.value })}
-                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-primary-400 focus:outline-none" />
+                        className={inputCls} />
                     </div>
                   </form>
                 </div>
               )}
 
               <div className="p-6 text-center">
-                <p className="text-sm text-gray-500">{language === 'ar' ? 'بيانات التقييم ستظهر هنا بعد الإنشاء' : 'Assessment data will appear here once created'}</p>
+                <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'بيانات التقييم ستظهر هنا بعد الإنشاء' : 'Assessment data will appear here once created'}</p>
               </div>
             </div>
           )}
@@ -427,11 +444,11 @@ export default function QuranPage() {
       )}
 
       {!selectedStudent && !loading && (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
-            <svg className="h-8 w-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+        <div className="rounded-2xl border border-dashed border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 py-16 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
+            <svg className="h-8 w-8 text-[var(--color-text-muted)] dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
           </div>
-          <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'اختر طالبًا لعرض التفاصيل' : 'Select a student to view details'}</p>
+          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'اختر طالبًا لعرض التفاصيل' : 'Select a student to view details'}</p>
         </div>
       )}
     </div>

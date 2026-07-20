@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import { academicAPI, schoolClassAPI } from '../../api';
-import LoadingSpinner from '../../components/LoadingSpinner';
 import StatCard from '../../components/StatCard';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
+import { Skeleton, SkeletonTable, SkeletonStatsGrid } from '../../components/Skeleton';
 
 interface Session {
   id: number;
@@ -397,7 +397,7 @@ export default function AcademicPage() {
       <div className="rounded-2xl bg-gradient-to-br from-primary-600 via-primary-500 to-emerald-500 p-6 text-white shadow-lg shadow-primary-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('academic.title') || (language === 'ar' ? 'الإدارة الأكاديمية' : 'Academic Management')}</h1>
+            <h1 className="text-2xl font-bold sm:text-3xl dark:text-[var(--color-text-primary)]">{t('academic.title') || (language === 'ar' ? 'الإدارة الأكاديمية' : 'Academic Management')}</h1>
             <p className="mt-1 text-sm text-primary-100">{t('academic.subtitle') || (language === 'ar' ? 'إدارة الفصول والterms والجداول الزمنية' : 'Manage sessions, terms, and timetables')}</p>
           </div>
         </div>
@@ -420,9 +420,9 @@ export default function AcademicPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-48 items-center justify-center"><LoadingSpinner size="lg" /></div>
+        <div className="space-y-6"><SkeletonStatsGrid /><SkeletonTable rows={5} /></div>
       ) : error ? (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           {error}
         </div>
@@ -453,18 +453,18 @@ export default function AcademicPage() {
               </div>
 
               {sessions.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
+                <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                     <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد فصول دراسية' : 'No sessions yet'}</p>
-                  <p className="mt-1 text-xs text-gray-400">{language === 'ar' ? 'ابدأ بإنشاء فصل دراسي' : 'Start by creating a session'}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'لا توجد فصول دراسية' : 'No sessions yet'}</p>
+                  <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'ابدأ بإنشاء فصل دراسي' : 'Start by creating a session'}</p>
                 </div>
               ) : (
                 <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '100ms' }}>
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                      <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                         <th className="px-4 py-3">{language === 'ar' ? 'الاسم' : 'Name'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'تاريخ البدء' : 'Start Date'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}</th>
@@ -472,12 +472,12 @@ export default function AcademicPage() {
                         <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                       {sessions.map((s) => (
-                        <tr key={s.id} className="transition-colors hover:bg-gray-50/60">
-                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{s.name}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(s.start_date).toLocaleDateString()}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(s.end_date).toLocaleDateString()}</td>
+                        <tr key={s.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{s.name}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(s.start_date).toLocaleDateString()}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(s.end_date).toLocaleDateString()}</td>
                           <td className="whitespace-nowrap px-4 py-3">
                             {s.is_current ? (
                               <span className="inline-block rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 border border-green-200">{language === 'ar' ? 'نعم' : 'Yes'}</span>
@@ -532,14 +532,14 @@ export default function AcademicPage() {
               </div>
 
               {filteredTerms.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-                  <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد terms' : 'No terms found'}</p>
+                <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
+                  <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'لا توجد terms' : 'No terms found'}</p>
                 </div>
               ) : (
                 <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '100ms' }}>
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                      <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                         <th className="px-4 py-3">{language === 'ar' ? 'الاسم' : 'Name'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'الفصل' : 'Session'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'رقم term' : 'Term #'}</th>
@@ -549,14 +549,14 @@ export default function AcademicPage() {
                         <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                       {filteredTerms.map((term) => (
-                        <tr key={term.id} className="transition-colors hover:bg-gray-50/60">
-                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{term.name}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500">{term.session_name}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500">{term.term_number}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(term.start_date).toLocaleDateString()}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(term.end_date).toLocaleDateString()}</td>
+                        <tr key={term.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{term.name}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{term.session_name}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{term.term_number}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(term.start_date).toLocaleDateString()}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(term.end_date).toLocaleDateString()}</td>
                           <td className="whitespace-nowrap px-4 py-3">
                             {term.is_current ? (
                               <span className="inline-block rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700 border border-green-200">{language === 'ar' ? 'نعم' : 'Yes'}</span>
@@ -594,7 +594,7 @@ export default function AcademicPage() {
           {activeTab === 'calendar' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">{calendarEvents.length} {language === 'ar' ? 'أحداث' : 'events'}</p>
+                <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{calendarEvents.length} {language === 'ar' ? 'أحداث' : 'events'}</p>
                 <button
                   onClick={() => { setCalendarForm({ title: '', event_type: 'event', start_date: '', end_date: '', description: '' }); setCalendarError(null); setShowCalendarModal(true); }}
                   className="btn-press inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700"
@@ -605,17 +605,17 @@ export default function AcademicPage() {
               </div>
 
               {calendarEvents.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
+                <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
                   <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
                     <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد أحداث' : 'No events yet'}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'لا توجد أحداث' : 'No events yet'}</p>
                 </div>
               ) : (
                 <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '100ms' }}>
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                      <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                         <th className="px-4 py-3">{language === 'ar' ? 'العنوان' : 'Title'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'النوع' : 'Type'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'من' : 'From'}</th>
@@ -623,15 +623,15 @@ export default function AcademicPage() {
                         <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                       {calendarEvents.map((ev) => (
-                        <tr key={ev.id} className="transition-colors hover:bg-gray-50/60">
-                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{ev.title}</td>
+                        <tr key={ev.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{ev.title}</td>
                           <td className="whitespace-nowrap px-4 py-3">
                             <span className="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-200 capitalize">{ev.event_type}</span>
                           </td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(ev.start_date).toLocaleDateString()}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 text-xs">{new Date(ev.end_date).toLocaleDateString()}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(ev.start_date).toLocaleDateString()}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)] text-xs">{new Date(ev.end_date).toLocaleDateString()}</td>
                           <td className="whitespace-nowrap px-4 py-3">
                             <div className="flex items-center justify-center">
                               <button
@@ -655,7 +655,7 @@ export default function AcademicPage() {
           {activeTab === 'classArms' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">{classArms.length} {language === 'ar' ? 'فروع' : 'arms'}</p>
+                <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{classArms.length} {language === 'ar' ? 'فروع' : 'arms'}</p>
                 <button
                   onClick={() => { setClassArmForm({ name: '', school_class: '' }); setClassArmError(null); setShowClassArmModal(true); }}
                   className="btn-press inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700"
@@ -666,23 +666,23 @@ export default function AcademicPage() {
               </div>
 
               {classArms.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-                  <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد فروع' : 'No class arms yet'}</p>
+                <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
+                  <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'لا توجد فروع' : 'No class arms yet'}</p>
                 </div>
               ) : (
                 <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '100ms' }}>
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                      <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                         <th className="px-4 py-3">{language === 'ar' ? 'الاسم' : 'Name'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'الفصل' : 'School Class'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                       {classArms.map((ca) => (
-                        <tr key={ca.id} className="transition-colors hover:bg-gray-50/60">
-                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{ca.name}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500">{ca.school_class_name}</td>
+                        <tr key={ca.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{ca.name}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{ca.school_class_name}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -696,7 +696,7 @@ export default function AcademicPage() {
           {activeTab === 'timetables' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">{timetables.length} {language === 'ar' ? 'جداول' : 'timetables'}</p>
+                <p className="text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{timetables.length} {language === 'ar' ? 'جداول' : 'timetables'}</p>
                 <button
                   onClick={() => { setTimetableForm({ name: '', class_arm: '', term: '' }); setTimetableError(null); setShowTimetableModal(true); }}
                   className="btn-press inline-flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700"
@@ -707,26 +707,26 @@ export default function AcademicPage() {
               </div>
 
               {timetables.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
-                  <p className="text-sm font-medium text-gray-900">{language === 'ar' ? 'لا توجد جداول زمنية' : 'No timetables yet'}</p>
+                <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
+                  <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{language === 'ar' ? 'لا توجد جداول زمنية' : 'No timetables yet'}</p>
                 </div>
               ) : (
                 <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '100ms' }}>
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/80 text-end text-xs font-medium uppercase text-gray-500">
+                      <tr className="border-b border-gray-100 dark:border-[var(--color-border)] bg-gray-50/80 dark:bg-[var(--color-bg-primary)] text-end text-xs font-medium uppercase text-gray-500 dark:text-[var(--color-text-muted)]">
                         <th className="px-4 py-3">{language === 'ar' ? 'الاسم' : 'Name'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'الفصل' : 'Class Arm'}</th>
                         <th className="px-4 py-3">{language === 'ar' ? 'Term' : 'Term'}</th>
                         <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                       {timetables.map((tt) => (
-                        <tr key={tt.id} className="transition-colors hover:bg-gray-50/60">
-                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">{tt.name}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500">{tt.class_arm_name}</td>
-                          <td className="whitespace-nowrap px-4 py-3 text-gray-500">{tt.term_name}</td>
+                        <tr key={tt.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
+                          <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{tt.name}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{tt.class_arm_name}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-gray-500 dark:text-[var(--color-text-muted)]">{tt.term_name}</td>
                           <td className="whitespace-nowrap px-4 py-3">
                             <div className="flex items-center justify-center gap-1.5">
                               <button
@@ -763,36 +763,36 @@ export default function AcademicPage() {
                     </button>
                   </div>
                   {slotsLoading ? (
-                    <div className="flex h-32 items-center justify-center"><LoadingSpinner size="md" /></div>
+                    <SkeletonTable rows={4} />
                   ) : timetableSlots.length === 0 ? (
-                    <p className="text-center text-sm text-gray-500 py-8">{language === 'ar' ? 'لا توجد حصص. اضغط "توليد" لإنشاء الجدول.' : 'No slots. Click "Generate" to create the timetable.'}</p>
+                    <p className="text-center text-sm text-gray-500 dark:text-[var(--color-text-muted)] py-8">{language === 'ar' ? 'لا توجد حصص. اضغط "توليد" لإنشاء الجدول.' : 'No slots. Click "Generate" to create the timetable.'}</p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="min-w-full text-sm border border-gray-200">
                         <thead>
-                          <tr className="bg-gray-50">
-                            <th className="border border-gray-200 px-3 py-2 text-xs font-medium text-gray-500">{language === 'ar' ? 'اليوم' : 'Day'}</th>
+                          <tr className="bg-gray-50 dark:bg-[var(--color-bg-primary)]">
+                            <th className="border border-gray-200 dark:border-[var(--color-border)] px-3 py-2 text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'اليوم' : 'Day'}</th>
                             {periods.map((p) => (
-                              <th key={p} className="border border-gray-200 px-3 py-2 text-xs font-medium text-gray-500">{language === 'ar' ? `الحصة ${p}` : `Period ${p}`}</th>
+                              <th key={p} className="border border-gray-200 dark:border-[var(--color-border)] px-3 py-2 text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? `الحصة ${p}` : `Period ${p}`}</th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
                           {DAYS.filter(d => Object.keys(timetableGrid[d] || {}).length > 0 || timetableSlots.some(s => s.day === d)).map((day) => (
                             <tr key={day}>
-                              <td className="border border-gray-200 px-3 py-2 font-medium text-gray-700 bg-gray-50 text-xs">{day}</td>
+                              <td className="border border-gray-200 dark:border-[var(--color-border)] px-3 py-2 font-medium text-gray-700 dark:text-[var(--color-text-secondary)] bg-gray-50 dark:bg-[var(--color-bg-primary)] text-xs">{day}</td>
                               {periods.map((p) => {
                                 const slot = timetableGrid[day]?.[p];
                                 return (
-                                  <td key={p} className="border border-gray-200 px-3 py-2 text-center">
+                                  <td key={p} className="border border-gray-200 dark:border-[var(--color-border)] px-3 py-2 text-center">
                                     {slot ? (
                                       <div>
-                                        <p className="font-medium text-gray-900 text-xs">{slot.subject_name}</p>
-                                        <p className="text-[11px] text-gray-500">{slot.teacher_name}</p>
-                                        {slot.room && <p className="text-[11px] text-gray-400">{slot.room}</p>}
+                                        <p className="font-medium text-gray-900 dark:text-[var(--color-text-primary)] text-xs">{slot.subject_name}</p>
+                                        <p className="text-[11px] text-gray-500 dark:text-[var(--color-text-muted)]">{slot.teacher_name}</p>
+                                        {slot.room && <p className="text-[11px] text-gray-400 dark:text-[var(--color-text-muted)]">{slot.room}</p>}
                                       </div>
                                     ) : (
-                                      <span className="text-gray-300">-</span>
+                                      <span className="text-gray-300 dark:text-[var(--color-text-muted)]">-</span>
                                     )}
                                   </td>
                                 );
@@ -813,7 +813,7 @@ export default function AcademicPage() {
       {/* Session Modal */}
       {showSessionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowSessionModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">{editingSession ? (language === 'ar' ? 'تعديل الفصل' : 'Edit Session') : (language === 'ar' ? 'إضافة فصل' : 'Add Session')}</h3>
               <button onClick={() => setShowSessionModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
@@ -821,7 +821,7 @@ export default function AcademicPage() {
               </button>
             </div>
             {sessionError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 {sessionError}
               </div>
@@ -857,7 +857,7 @@ export default function AcademicPage() {
       {/* Term Modal */}
       {showTermModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowTermModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">{editingTerm ? (language === 'ar' ? 'تعديل term' : 'Edit Term') : (language === 'ar' ? 'إضافة term' : 'Add Term')}</h3>
               <button onClick={() => setShowTermModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
@@ -865,7 +865,7 @@ export default function AcademicPage() {
               </button>
             </div>
             {termError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">{termError}</div>
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{termError}</div>
             )}
             <form onSubmit={handleSaveTerm} className="space-y-4">
               <div>
@@ -913,7 +913,7 @@ export default function AcademicPage() {
       {/* Calendar Event Modal */}
       {showCalendarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowCalendarModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'إضافة حدث' : 'Add Event'}</h3>
               <button onClick={() => setShowCalendarModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
@@ -921,7 +921,7 @@ export default function AcademicPage() {
               </button>
             </div>
             {calendarError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">{calendarError}</div>
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{calendarError}</div>
             )}
             <form onSubmit={handleSaveCalendarEvent} className="space-y-4">
               <div>
@@ -964,7 +964,7 @@ export default function AcademicPage() {
       {/* Class Arm Modal */}
       {showClassArmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowClassArmModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'إضافة فرع' : 'Add Class Arm'}</h3>
               <button onClick={() => setShowClassArmModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
@@ -972,7 +972,7 @@ export default function AcademicPage() {
               </button>
             </div>
             {classArmError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">{classArmError}</div>
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{classArmError}</div>
             )}
             <form onSubmit={handleSaveClassArm} className="space-y-4">
               <div>
@@ -1004,7 +1004,7 @@ export default function AcademicPage() {
       {/* Timetable Modal */}
       {showTimetableModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowTimetableModal(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">{language === 'ar' ? 'إضافة جدول' : 'Add Timetable'}</h3>
               <button onClick={() => setShowTimetableModal(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
@@ -1012,7 +1012,7 @@ export default function AcademicPage() {
               </button>
             </div>
             {timetableError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">{timetableError}</div>
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{timetableError}</div>
             )}
             <form onSubmit={handleSaveTimetable} className="space-y-4">
               <div>

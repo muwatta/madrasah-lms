@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { examAPI } from '../../api';
 import type { ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonStatsGrid, SkeletonCard } from '../../components/Skeleton';
 
 export default function ExamResultsPage() {
   const { t } = useLanguage();
@@ -44,37 +44,42 @@ export default function ExamResultsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <LoadingSpinner size="lg" />
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <div className="h-8 w-48 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-4 w-64 rounded bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <SkeletonStatsGrid />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('student.examResults')}</h1>
-      <p className="text-sm text-gray-500 mb-6">{t('guides.examResults')}</p>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">{t('student.examResults')}</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.examResults')}</p>
 
       {error && (
-        <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-4">{error}</div>
+        <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 mb-4">{error}</div>
       )}
 
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.totalExams')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.totalExams')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-emerald-600">{stats.average}</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.averageGrade')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.average}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.averageGrade')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.passRate}%</div>
-            <div className="text-xs text-gray-500 mt-1">{t('student.passRate')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.passRate}%</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('student.passRate')}</div>
           </div>
-          <div className="bg-white rounded-xl shadow border border-gray-200 p-4">
-            <div className="text-xs text-gray-500 mb-2 text-center">{t('student.gradeDistribution')}</div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-gray-200 dark:border-gray-700 p-4">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{t('student.gradeDistribution')}</div>
             <div className="flex items-center justify-center gap-1.5">
               {['A', 'B', 'C', 'D', 'F'].map((g) => {
                 const count = stats.gradeCounts[g] || 0;
@@ -82,14 +87,14 @@ export default function ExamResultsPage() {
                 return (
                   <div key={g} className="text-center">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                      g === 'A' ? 'bg-green-100 text-green-700' :
-                      g === 'B' ? 'bg-blue-100 text-blue-700' :
-                      g === 'C' ? 'bg-amber-100 text-amber-700' :
-                      'bg-red-100 text-red-700'
+                      g === 'A' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                      g === 'B' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+                      g === 'C' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
+                      'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                     }`}>
                       {g}
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5">{count}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{count}</div>
                   </div>
                 );
               })}
@@ -100,53 +105,53 @@ export default function ExamResultsPage() {
 
       {results.length === 0 ? (
         <div className="text-center py-16">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+            <svg className="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <p className="text-gray-500">{t('student.noExamResults')}</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('student.noExamResults')}</p>
         </div>
       ) : (
         <div className="grid gap-4">
           {results.map((result) => {
             const gradeColor =
-              result.grade === 'A' ? 'border-green-300 bg-green-50/50' :
-              result.grade === 'B' ? 'border-blue-300 bg-blue-50/50' :
-              result.grade === 'C' ? 'border-amber-300 bg-amber-50/50' :
-              'border-red-300 bg-red-50/50';
+              result.grade === 'A' ? 'border-green-300 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10' :
+              result.grade === 'B' ? 'border-blue-300 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10' :
+              result.grade === 'C' ? 'border-amber-300 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10' :
+              'border-red-300 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10';
             const gradeTextColor =
-              result.grade === 'A' ? 'text-green-600' :
-              result.grade === 'B' ? 'text-blue-600' :
-              result.grade === 'C' ? 'text-amber-600' :
-              'text-red-600';
+              result.grade === 'A' ? 'text-green-600 dark:text-green-400' :
+              result.grade === 'B' ? 'text-blue-600 dark:text-blue-400' :
+              result.grade === 'C' ? 'text-amber-600 dark:text-amber-400' :
+              'text-red-600 dark:text-red-400';
             const passed = result.grade !== 'D' && result.grade !== 'F';
 
             return (
-              <div key={result.id} className={`bg-white rounded-xl shadow border ${gradeColor} p-6`}>
+              <div key={result.id} className={`bg-white dark:bg-gray-800 rounded-xl shadow border ${gradeColor} p-6`}>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-semibold text-gray-800">{result.exam_title}</h2>
+                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{result.exam_title}</h2>
                       {passed && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                           {t('enrollmentStatus.passed')}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                       {t('student.recordedOn')} {new Date(result.recorded_at).toLocaleDateString()}
                     </p>
                     {result.remarks && (
-                      <p className="mt-2 text-sm text-gray-600 italic">{result.remarks}</p>
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 italic">{result.remarks}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-gray-900">{result.score}</div>
-                      <div className="text-xs text-gray-500">{t('fields.score')}</div>
+                      <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{result.score}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{t('fields.score')}</div>
                     </div>
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold ${gradeTextColor} bg-gray-50`}>
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold ${gradeTextColor} bg-gray-50 dark:bg-gray-700`}>
                       {result.grade}
                     </div>
                   </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { whatsappAPI, userAPI } from '../../api';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonTable } from '../../components/Skeleton';
 
 interface Template {
   id: number; name: string; message_type: string;
@@ -85,7 +85,7 @@ export default function WhatsAppPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold">WhatsApp</h1>
+      <h1 className="mb-4 text-2xl font-bold dark:text-[var(--color-text-primary)]">WhatsApp</h1>
       <div className="mb-4 flex gap-2 border-b">
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
@@ -105,25 +105,25 @@ export default function WhatsAppPage() {
             <div className="mb-6 rounded-lg border p-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <input placeholder="Name" value={form.name} onChange={e => setForm(p => ({...p, name: e.target.value}))}
-                  className="input-field" />
+                  className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]" />
                 <select value={form.message_type} onChange={e => setForm(p => ({...p, message_type: e.target.value}))}
-                  className="input-field">
+                  className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]">
                   {['result','attendance','fee_reminder','announcement','homework','general'].map(mt => (
                     <option key={mt} value={mt}>{mt}</option>
                   ))}
                 </select>
                 <textarea placeholder="Body (Arabic)" value={form.body_ar} onChange={e => setForm(p => ({...p, body_ar: e.target.value}))}
-                  className="input-field col-span-2" rows={3} />
+                  className="input-field col-span-2 dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]" rows={3} />
                 <textarea placeholder="Body (English)" value={form.body_en} onChange={e => setForm(p => ({...p, body_en: e.target.value}))}
-                  className="input-field col-span-2" rows={3} />
+                  className="input-field col-span-2 dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]" rows={3} />
                 <input placeholder="Variables (comma-separated)" value={form.variables}
-                  onChange={e => setForm(p => ({...p, variables: e.target.value}))} className="input-field col-span-2" />
+                  onChange={e => setForm(p => ({...p, variables: e.target.value}))} className="input-field col-span-2 dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]" />
               </div>
               <button onClick={handleCreateTemplate} className="mt-3 rounded-lg bg-primary-600 px-4 py-2 text-sm text-white">Save</button>
             </div>
           )}
-          {loading ? <LoadingSpinner /> : (
-            <div className="overflow-x-auto rounded-lg border">
+          {loading ? <SkeletonTable rows={5} /> : (
+            <div className="overflow-x-auto rounded-lg border dark:border-[var(--color-border)]">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50"><tr>
                   <th className="px-4 py-3 text-start font-medium">Name</th>
@@ -133,7 +133,7 @@ export default function WhatsAppPage() {
                 </tr></thead>
                 <tbody>
                   {templates.map(tmpl => (
-                    <tr key={tmpl.id} className="border-t">
+                    <tr key={tmpl.id} className="border-t dark:border-[var(--color-border)]">
                       <td className="px-4 py-3">{tmpl.name}</td>
                       <td className="px-4 py-3">{tmpl.message_type}</td>
                       <td className="px-4 py-3">{tmpl.is_active ? 'Yes' : 'No'}</td>
@@ -150,8 +150,8 @@ export default function WhatsAppPage() {
       )}
 
       {tab === 'recipients' && (
-        loading ? <LoadingSpinner /> : (
-          <div className="overflow-x-auto rounded-lg border">
+        loading ? <SkeletonTable rows={5} /> : (
+          <div className="overflow-x-auto rounded-lg border dark:border-[var(--color-border)]">
             <table className="w-full text-sm">
               <thead className="bg-gray-50"><tr>
                 <th className="px-4 py-3 text-start font-medium">Parent</th>
@@ -161,7 +161,7 @@ export default function WhatsAppPage() {
               </tr></thead>
               <tbody>
                 {recipients.map(r => (
-                  <tr key={r.id} className="border-t">
+                  <tr key={r.id} className="border-t dark:border-[var(--color-border)]">
                     <td className="px-4 py-3">{r.parent_name}</td>
                     <td className="px-4 py-3">{r.phone_number}</td>
                     <td className="px-4 py-3">
@@ -179,8 +179,8 @@ export default function WhatsAppPage() {
       )}
 
       {tab === 'messages' && (
-        loading ? <LoadingSpinner /> : (
-          <div className="overflow-x-auto rounded-lg border">
+        loading ? <SkeletonTable rows={5} /> : (
+          <div className="overflow-x-auto rounded-lg border dark:border-[var(--color-border)]">
             <table className="w-full text-sm">
               <thead className="bg-gray-50"><tr>
                 <th className="px-4 py-3 text-start font-medium">Recipient</th>
@@ -191,7 +191,7 @@ export default function WhatsAppPage() {
               </tr></thead>
               <tbody>
                 {messages.map(m => (
-                  <tr key={m.id} className="border-t">
+                  <tr key={m.id} className="border-t dark:border-[var(--color-border)]">
                     <td className="px-4 py-3">{m.recipient_name}</td>
                     <td className="px-4 py-3">{m.message_type}</td>
                     <td className="px-4 py-3">
@@ -212,11 +212,11 @@ export default function WhatsAppPage() {
       )}
 
       {tab === 'send' && (
-        <div className="max-w-lg rounded-lg border p-6">
+        <div className="max-w-lg rounded-lg border dark:border-[var(--color-border)] p-6">
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">Parent</label>
+            <label className="mb-1 block text-sm font-medium dark:text-[var(--color-text-secondary)]">Parent</label>
             <select value={sendForm.parent_id} onChange={e => setSendForm(p => ({...p, parent_id: Number(e.target.value)}))}
-              className="input-field">
+              className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]">
               <option value={0}>Select parent...</option>
               {parents.map(p => (
                 <option key={p.id} value={p.id}>{p.full_name} ({p.email})</option>
@@ -224,28 +224,28 @@ export default function WhatsAppPage() {
             </select>
           </div>
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">Type</label>
+            <label className="mb-1 block text-sm font-medium dark:text-[var(--color-text-secondary)]">Type</label>
             <select value={sendForm.message_type} onChange={e => setSendForm(p => ({...p, message_type: e.target.value}))}
-              className="input-field">
+              className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]">
               {['general','result','attendance','fee_reminder','announcement','homework'].map(mt => (
                 <option key={mt} value={mt}>{mt}</option>
               ))}
             </select>
           </div>
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">Message</label>
+            <label className="mb-1 block text-sm font-medium dark:text-[var(--color-text-secondary)]">Message</label>
             <textarea value={sendForm.body} onChange={e => setSendForm(p => ({...p, body: e.target.value}))}
-              className="input-field" rows={4} placeholder="Type your message here..." />
+              className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]" rows={4} placeholder="Type your message here..." />
           </div>
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">Phone Number</label>
+            <label className="mb-1 block text-sm font-medium dark:text-[var(--color-text-secondary)]">Phone Number</label>
             <input value={sendForm.phone_number} onChange={e => setSendForm(p => ({...p, phone_number: e.target.value}))}
-              className="input-field" placeholder="+1234567890" />
+              className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]" placeholder="+1234567890" />
           </div>
           <div className="mb-4">
-            <label className="mb-1 block text-sm font-medium">Language</label>
+            <label className="mb-1 block text-sm font-medium dark:text-[var(--color-text-secondary)]">Language</label>
             <select value={sendForm.language} onChange={e => setSendForm(p => ({...p, language: e.target.value}))}
-              className="input-field">
+              className="input-field dark:bg-[var(--color-bg-primary)] dark:text-[var(--color-text-primary)] dark:border-[var(--color-border)]">
               <option value="ar">Arabic</option>
               <option value="en">English</option>
             </select>

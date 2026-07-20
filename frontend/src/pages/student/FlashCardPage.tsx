@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { learningAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonCard } from '../../components/Skeleton';
 
 interface FlashCardDeck {
   id: number;
@@ -27,9 +27,9 @@ interface FlashCard {
 }
 
 const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: 'bg-emerald-100 text-emerald-700',
-  medium: 'bg-amber-100 text-amber-700',
-  hard: 'bg-red-100 text-red-700',
+  easy: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+  medium: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  hard: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
 };
 
 export default function FlashCardPage() {
@@ -187,8 +187,18 @@ export default function FlashCardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="h-6 w-48 animate-pulse rounded bg-gray-200 dark:bg-gray-700 mb-2" />
+            <div className="h-4 w-64 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
       </div>
     );
   }
@@ -200,45 +210,45 @@ export default function FlashCardPage() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => setStudyMode(false)}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-3 py-1.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 transition-colors"
           >
             ← {t('learning.exitStudy')}
           </button>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">
             {currentCardIndex + 1} / {studyCards.length}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="h-2 flex-1 rounded-full bg-gray-100">
+          <div className="h-2 flex-1 rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
             <div
               className="h-2 rounded-full bg-primary-500 transition-all"
               style={{ width: `${((currentCardIndex + 1) / studyCards.length) * 100}%` }}
             />
           </div>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">
             {reviewedCount} {t('learning.reviewed')}
           </span>
         </div>
 
         <div
           onClick={() => setIsFlipped(!isFlipped)}
-          className="relative cursor-pointer rounded-2xl border-2 border-gray-200 bg-white p-8 shadow-sm transition-all hover:shadow-md min-h-[240px] flex flex-col items-center justify-center"
+          className="relative cursor-pointer rounded-2xl border-2 border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-8 shadow-sm transition-all hover:shadow-md min-h-[240px] flex flex-col items-center justify-center"
         >
-          <p className="mb-2 text-xs font-medium text-gray-400 uppercase">
+          <p className="mb-2 text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400 uppercase">
             {isFlipped ? t('learning.answer') : t('learning.question')}
           </p>
-          <p className="text-center text-lg text-gray-900 whitespace-pre-wrap">
+          <p className="text-center text-lg text-[var(--color-text-primary)] dark:text-gray-100 whitespace-pre-wrap">
             {isFlipped ? card.back : card.front}
           </p>
           {isFlipped && card.hint && (
-            <p className="mt-4 text-sm text-gray-500 italic">{card.hint}</p>
+            <p className="mt-4 text-sm text-[var(--color-text-muted)] dark:text-gray-400 italic">{card.hint}</p>
           )}
           <span className={`absolute top-3 right-3 rounded-full px-2 py-0.5 text-[10px] font-medium ${DIFFICULTY_COLORS[card.difficulty] || ''}`}>
             {card.difficulty}
           </span>
           {!isFlipped && (
-            <p className="mt-4 text-xs text-gray-400">{t('learning.clickToReveal')}</p>
+            <p className="mt-4 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('learning.clickToReveal')}</p>
           )}
         </div>
 
@@ -270,25 +280,25 @@ export default function FlashCardPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => { setSelectedDeck(null); setCards([]); setDueCards([]); }}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-3 py-1.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 transition-colors"
           >
             ← {t('common.previous')}
           </button>
-          <h1 className="text-xl font-bold text-gray-900">{selectedDeck.title}</h1>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{selectedDeck.title}</h1>
         </div>
 
         {error && (
-          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
+          <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">{error}</div>
         )}
 
         <div className="flex flex-wrap gap-3">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm">
-            <p className="text-2xl font-bold text-gray-900">{cards.length}</p>
-            <p className="text-xs text-gray-500">{t('learning.totalCards')}</p>
+          <div className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{cards.length}</p>
+            <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('learning.totalCards')}</p>
           </div>
-          <div className="rounded-xl border border-gray-200 bg-white p-4 text-center shadow-sm">
-            <p className="text-2xl font-bold text-amber-600">{dueCards.length}</p>
-            <p className="text-xs text-gray-500">{t('learning.dueForReview')}</p>
+          <div className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 text-center shadow-sm">
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{dueCards.length}</p>
+            <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('learning.dueForReview')}</p>
           </div>
           <div className="flex items-center">
             <button
@@ -304,7 +314,7 @@ export default function FlashCardPage() {
         </div>
 
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-gray-700">{t('learning.cards')}</p>
+          <p className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('learning.cards')}</p>
           <button
             onClick={() => setShowCardForm(!showCardForm)}
             className="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700 transition-colors"
@@ -314,43 +324,43 @@ export default function FlashCardPage() {
         </div>
 
         {showCardForm && (
-          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+          <div className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-5 shadow-sm space-y-3">
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">{t('learning.front')}</label>
+              <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('learning.front')}</label>
               <textarea
                 value={cardForm.front}
                 onChange={e => setCardForm({ ...cardForm, front: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100"
                 rows={2}
                 placeholder={t('learning.frontPlaceholder')}
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-gray-600">{t('learning.back')}</label>
+              <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('learning.back')}</label>
               <textarea
                 value={cardForm.back}
                 onChange={e => setCardForm({ ...cardForm, back: e.target.value })}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100"
                 rows={2}
                 placeholder={t('learning.backPlaceholder')}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">{t('learning.hint')}</label>
+                <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('learning.hint')}</label>
                 <input
                   value={cardForm.hint}
                   onChange={e => setCardForm({ ...cardForm, hint: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100"
                   placeholder={t('learning.hintPlaceholder')}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">{t('fields.difficulty')}</label>
+                <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('fields.difficulty')}</label>
                 <select
                   value={cardForm.difficulty}
                   onChange={e => setCardForm({ ...cardForm, difficulty: e.target.value })}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100"
                 >
                   <option value="easy">{t('difficulty.easy')}</option>
                   <option value="medium">{t('difficulty.medium')}</option>
@@ -368,7 +378,7 @@ export default function FlashCardPage() {
               </button>
               <button
                 onClick={() => setShowCardForm(false)}
-                className="rounded-lg border border-gray-200 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                className="rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-4 py-1.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 transition-colors"
               >
                 {t('common.cancel')}
               </button>
@@ -377,28 +387,31 @@ export default function FlashCardPage() {
         )}
 
         {cardsLoading ? (
-          <LoadingSpinner size="md" />
+          <div className="space-y-2">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
         ) : cards.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <p className="text-gray-500">{t('learning.noCards')}</p>
+          <div className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-8 text-center">
+            <p className="text-[var(--color-text-muted)] dark:text-gray-400">{t('learning.noCards')}</p>
           </div>
         ) : (
           <div className="space-y-2">
             {cards.map(card => (
               <div
                 key={card.id}
-                className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                className="flex items-start gap-3 rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm"
               >
                 <span className={`mt-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${DIFFICULTY_COLORS[card.difficulty] || ''}`}>
                   {card.difficulty}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-900">{card.front}</p>
-                  <p className="mt-1 text-xs text-gray-500 line-clamp-1">{card.back}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{card.front}</p>
+                  <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400 line-clamp-1">{card.back}</p>
                 </div>
                 <button
                   onClick={() => handleDeleteCard(card.id)}
-                  className="shrink-0 rounded p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  className="shrink-0 rounded p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -416,8 +429,8 @@ export default function FlashCardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">{t('learning.flashcards')}</h1>
-          <p className="text-sm text-gray-500">{t('learning.flashcardsSubtitle')}</p>
+          <h1 className="text-xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('learning.flashcards')}</h1>
+          <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('learning.flashcardsSubtitle')}</p>
         </div>
         {(user?.role === 'ustaadh' || user?.role === 'mudeer') && (
           <button
@@ -434,28 +447,28 @@ export default function FlashCardPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>
+        <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400">{error}</div>
       )}
 
       {showForm && (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
-          <h3 className="text-sm font-semibold text-gray-900">
+        <div className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-5 shadow-sm space-y-3">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
             {editingDeck ? t('learning.editDeck') : t('learning.createDeck')}
           </h3>
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">{t('fields.title')}</label>
+            <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('fields.title')}</label>
             <input
               value={deckForm.title}
               onChange={e => setDeckForm({ ...deckForm, title: e.target.value })}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">{t('fields.description')}</label>
+            <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('fields.description')}</label>
             <textarea
               value={deckForm.description}
               onChange={e => setDeckForm({ ...deckForm, description: e.target.value })}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100"
               rows={2}
             />
           </div>
@@ -469,7 +482,7 @@ export default function FlashCardPage() {
             </button>
             <button
               onClick={() => { setShowForm(false); setEditingDeck(null); }}
-              className="rounded-lg border border-gray-200 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-4 py-1.5 text-sm text-[var(--color-text-secondary)] dark:text-gray-300 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 transition-colors"
             >
               {t('common.cancel')}
             </button>
@@ -478,30 +491,30 @@ export default function FlashCardPage() {
       )}
 
       {decks.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-          <p className="text-gray-500">{t('learning.noDecks')}</p>
+        <div className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-8 text-center">
+          <p className="text-[var(--color-text-muted)] dark:text-gray-400">{t('learning.noDecks')}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {decks.map(deck => (
             <div
               key={deck.id}
-              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-all"
+              className="rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-5 shadow-sm hover:shadow-md transition-all"
             >
               <div className="flex items-start justify-between">
                 <button
                   onClick={() => handleSelectDeck(deck)}
                   className="text-left flex-1"
                 >
-                  <p className="text-sm font-semibold text-gray-900">{deck.title}</p>
+                  <p className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{deck.title}</p>
                   {deck.description && (
-                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">{deck.description}</p>
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400 line-clamp-2">{deck.description}</p>
                   )}
                 </button>
                 {(user?.role === 'ustaadh' || user?.role === 'mudeer') && (
                   <button
                     onClick={() => handleDeleteDeck(deck.id)}
-                    className="shrink-0 rounded p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    className="shrink-0 rounded p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                   >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -510,11 +523,11 @@ export default function FlashCardPage() {
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between">
-                <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                <span className="rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300">
                   {deck.card_count} {t('learning.cards')}
                 </span>
                 {deck.is_shared && (
-                  <span className="rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-medium text-primary-600">
+                  <span className="rounded-full bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 text-[10px] font-medium text-primary-600 dark:text-primary-400">
                     {t('learning.shared')}
                   </span>
                 )}
