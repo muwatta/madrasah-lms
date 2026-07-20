@@ -19,4 +19,8 @@ urlpatterns = [
     path('notifications/mark-read/<int:pk>/', views.NotificationMarkReadView.as_view(), name='notification-mark-read'),
     path('notifications/mark-all-read/', views.NotificationMarkAllReadView.as_view(), name='notification-mark-all-read'),
     path('notifications/unread-count/', views.NotificationUnreadCountView.as_view(), name='notification-unread-count'),
+    path('attendance/qr/class/<int:class_id>/', views.AttendanceQRClassView.as_view(), name='attendance-qr-class'),
+    path('attendance/qr/student/<int:student_id>/', views.AttendanceQRStudentView.as_view(), name='attendance-qr-student'),
+    path('attendance/scan/', views.AttendanceScanView.as_view(), name='attendance-scan'),
+    path('attendance/scans/', views.AttendanceScanListView.as_view(), name='attendance-scan-list'),
 ]

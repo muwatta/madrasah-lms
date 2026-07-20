@@ -7,12 +7,14 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from datetime import timedelta, date
 from decimal import Decimal
-from .models import FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification
+from .models import FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification, AttendanceQRScan
 from .serializers import (
     FeeStructureSerializer, FeeSerializer, FeePaymentSerializer,
     AttendanceSerializer, AnnouncementSerializer, NotificationSerializer,
+    AttendanceQRScanSerializer,
 )
-from curriculum.models import Enrollment
+from .services import QRService
+from curriculum.models import Enrollment, SchoolClass
 from users.models import User, StudentParent
 
 
@@ -546,3 +548,142 @@ class NotificationUnreadCountView(APIView):
     def get(self, request):
         count = Notification.objects.filter(recipient=request.user, is_read=False).count()
         return Response({'unread_count': count})
+
+
+class AttendanceQRClassView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsStaff]
+
+    def get(self, request, class_id):
+        try:
+            school_class = SchoolClass.objects.get(id=class_id, madrasah=request.user.madrasah)
+        except SchoolClass.DoesNotExist:
+            return Response({'error': 'Class not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        qr_service = QRService()
+        buf, payload = qr_service.generate_class_qr(school_class, request.user.madrasah)
+
+        import base64
+        qr_b64 = base64.b64encode(buf.read()).decode()
+
+        return Response({
+            'qr_data_url': f'data:image/png;base64,{qr_b64}',
+            'payload': payload,
+            'expires_in_seconds': QRService.EXPIRY_MINUTES * 60,
+        })
+
+
+class AttendanceQRStudentView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsStaff]
+
+    def get(self, request, student_id):
+        try:
+            student = User.objects.get(id=student_id, madrasah=request.user.madrasah, role='student')
+        except User.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        qr_service = QRService()
+        buf, payload = qr_service.generate_student_qr(student, request.user.madrasah)
+
+        import base64
+        qr_b64 = base64.b64encode(buf.read()).decode()
+
+        return Response({
+            'qr_data_url': f'data:image/png;base64,{qr_b64}',
+            'payload': payload,
+            'expires_in_seconds': QRService.EXPIRY_MINUTES * 60,
+        })
+
+
+class AttendanceScanView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsStaff]
+
+    def post(self, request):
+        qr_data_raw = request.data.get('qr_data')
+        identifier = request.data.get('student_identifier')
+        scanner_location = request.data.get('scanner_location', '')
+
+        if not qr_data_raw and not identifier:
+            return Response({'error': 'qr_data or student_identifier required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        qr_service = QRService()
+        student = None
+        school_class = None
+        scan_method = 'qr_code'
+
+        if qr_data_raw:
+            valid, result = qr_service.verify_qr_data(qr_data_raw)
+            if not valid:
+                return Response({'error': result}, status=status.HTTP_400_BAD_REQUEST)
+
+            data = result
+            try:
+                student = User.objects.get(id=data['s'], madrasah=request.user.madrasah, role='student')
+            except User.DoesNotExist:
+                return Response({'error': 'Student not found in this madrasah'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if data.get('c'):
+                try:
+                    school_class = SchoolClass.objects.get(id=data['c'], madrasah=request.user.madrasah)
+                except SchoolClass.DoesNotExist:
+                    pass
+        else:
+            scan_method = 'rfid'
+            try:
+                student = User.objects.get(id=identifier, madrasah=request.user.madrasah, role='student')
+            except User.DoesNotExist:
+                try:
+                    student = User.objects.get(email=identifier, madrasah=request.user.madrasah, role='student')
+                except User.DoesNotExist:
+                    return Response({'error': 'Student not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+        today = date.today()
+        if Attendance.objects.filter(student=student, date=today, madrasah=request.user.madrasah).exists():
+            return Response({'error': 'Already scanned today', 'student': student.get_full_name()}, status=status.HTTP_409_CONFLICT)
+
+        attendance_status = 'present'
+
+        scan_record = AttendanceQRScan.objects.create(
+            madrasah=request.user.madrasah,
+            student=student,
+            school_class=school_class,
+            scanner_location=scanner_location,
+            method=scan_method,
+            qr_data=qr_data_raw or '',
+        )
+
+        attendance = Attendance.objects.create(
+            madrasah=request.user.madrasah,
+            student=student,
+            date=today,
+            status=attendance_status,
+            marked_by=request.user,
+        )
+
+        scan_record.attendance = attendance
+        scan_record.save(update_fields=['attendance'])
+
+        return Response({
+            'status': 'ok',
+            'student': student.get_full_name(),
+            'attendance_status': attendance_status,
+            'attendance_id': attendance.id,
+            'scan_id': scan_record.id,
+        }, status=status.HTTP_201_CREATED)
+
+
+class AttendanceScanListView(generics.ListAPIView):
+    serializer_class = AttendanceQRScanSerializer
+    permission_classes = [permissions.IsAuthenticated, IsStaff]
+
+    def get_queryset(self):
+        qs = AttendanceQRScan.objects.filter(
+            madrasah=self.request.user.madrasah
+        ).select_related('student', 'attendance')
+
+        date_filter = self.request.query_params.get('date')
+        if date_filter:
+            qs = qs.filter(scanned_at__date=date_filter)
+        else:
+            qs = qs.filter(scanned_at__date=date.today())
+
+        return qs

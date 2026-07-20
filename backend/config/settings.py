@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'analytics',
     'guidance',
     'learning',
+    'whatsapp',
+    'character',
 ]
 
 MIDDLEWARE = [
@@ -129,3 +131,39 @@ CORS_ALLOW_CREDENTIALS = True
 
 JWT_SECRET = config('JWT_SECRET', default='jwt-secret-key-change')
 JWT_EXPIRATION_HOURS = config('JWT_EXPIRATION_HOURS', default=24, cast=int)
+QR_SECRET_KEY = config('QR_SECRET_KEY', default='change-me-in-production')
+
+# ── Celery ──────────────────────────────────────────────────────────────────
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Lagos'
+CELERY_BEAT_SCHEDULE = {
+    'send-fee-reminders': {
+        'task': 'whatsapp.tasks.send_overdue_fee_reminders',
+        'schedule': 43200,  # every 12 hours
+    },
+    'send-daily-attendance-summary': {
+        'task': 'whatsapp.tasks.send_daily_attendance_summary',
+        'schedule': 86400,  # once daily
+    },
+    'process-pending-messages': {
+        'task': 'whatsapp.tasks.process_pending_messages',
+        'schedule': 300,  # every 5 minutes
+    },
+}
+
+# ── WhatsApp Cloud API ──────────────────────────────────────────────────────
+WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
+WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')
+WHATSAPP_API_VERSION = config('WHATSAPP_API_VERSION', default='v22.0')
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = config('WHATSAPP_WEBHOOK_VERIFY_TOKEN', default='madrasah-webhook-token')
+WHATSAPP_BASE_URL = 'https://graph.facebook.com'
+
+# ── OpenAI ──────────────────────────────────────────────────────────────────
+OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')
+OPENAI_MAX_TOKENS = config('OPENAI_MAX_TOKENS', default=1024, cast=int)
+OPENAI_TEMPERATURE = config('OPENAI_TEMPERATURE', default=0.7, cast=float)

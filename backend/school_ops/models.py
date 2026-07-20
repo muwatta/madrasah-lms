@@ -100,6 +100,29 @@ class Attendance(models.Model):
         return f"{self.student.get_full_name()} - {self.date} - {self.status}"
 
 
+class AttendanceQRScan(models.Model):
+    METHOD_CHOICES = [
+        ('qr_code', 'QR Code'),
+        ('rfid', 'RFID'),
+        ('manual', 'Manual'),
+    ]
+
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='qr_scans')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='qr_scans')
+    school_class = models.ForeignKey('curriculum.SchoolClass', on_delete=models.SET_NULL, null=True, blank=True, related_name='qr_scans')
+    scanned_at = models.DateTimeField(auto_now_add=True)
+    scanner_location = models.CharField(max_length=100, blank=True)
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, default='qr_code')
+    qr_data = models.TextField(blank=True)
+    attendance = models.ForeignKey(Attendance, on_delete=models.SET_NULL, null=True, blank=True, related_name='qr_scans')
+
+    class Meta:
+        ordering = ['-scanned_at']
+
+    def __str__(self):
+        return f"{self.student.get_full_name()} - {self.scanned_at} ({self.method})"
+
+
 class Announcement(models.Model):
     AUDIENCE_CHOICES = [
         ('all', 'All'),

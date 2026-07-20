@@ -1,12 +1,16 @@
 import pytest
+import json
 from decimal import Decimal
 from datetime import date, timedelta
+from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 from users.models import User, Madrasah, StudentParent
+from curriculum.models import Subject, Topic, Enrollment, SchoolClass
 from school_ops.models import (
-    FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification,
+    FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification, AttendanceQRScan,
 )
+from school_ops.services import QRService
 
 
 @pytest.fixture
@@ -396,3 +400,142 @@ class TestBulkFeeCreate:
             'amount': '5000.00',
         }, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# --- QR Attendance ---
+
+@pytest.fixture
+def school_class(madrasah):
+    return SchoolClass.objects.create(madrasah=madrasah, name_ar='صف الأول', name_en='Class 1', order=1)
+
+
+@pytest.fixture
+def qr_service():
+    return QRService()
+
+
+@pytest.mark.django_db
+class TestQRGeneration:
+    def test_class_qr_returns_base64(self, ustaadh, auth_client, school_class):
+        client = auth_client(ustaadh)
+        response = client.get(f'/api/school/attendance/qr/class/{school_class.id}/')
+        assert response.status_code == status.HTTP_200_OK
+        assert 'qr_data_url' in response.data
+        assert response.data['qr_data_url'].startswith('data:image/png;base64,')
+        assert 'payload' in response.data
+
+    def test_student_qr_returns_base64(self, ustaadh, auth_client, student):
+        client = auth_client(ustaadh)
+        response = client.get(f'/api/school/attendance/qr/student/{student.id}/')
+        assert response.status_code == status.HTTP_200_OK
+        assert 'qr_data_url' in response.data
+        assert response.data['payload']['s'] == student.id
+
+    def test_nonexistent_class_returns_404(self, ustaadh, auth_client):
+        client = auth_client(ustaadh)
+        response = client.get('/api/school/attendance/qr/class/99999/')
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_student_cannot_generate_qr(self, student, auth_client):
+        client = auth_client(student)
+        response = client.get(f'/api/school/attendance/qr/student/{student.id}/')
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db
+class TestQRService:
+    def test_generate_and_verify_class_qr(self, qr_service, school_class, madrasah):
+        buf, payload = qr_service.generate_class_qr(school_class, madrasah)
+        assert buf is not None
+        assert payload['v'] == 1
+        assert payload['m'] == madrasah.id
+        assert payload['c'] == school_class.id
+
+        valid, result = qr_service.verify_qr_data(json.dumps(payload))
+        assert valid is True
+
+    def test_generate_and_verify_student_qr(self, qr_service, student, madrasah):
+        buf, payload = qr_service.generate_student_qr(student, madrasah)
+        assert buf is not None
+        assert payload['s'] == student.id
+
+        valid, result = qr_service.verify_qr_data(json.dumps(payload))
+        assert valid is True
+
+    def test_tampered_qr_rejected(self, qr_service, madrasah, school_class):
+        buf, payload = qr_service.generate_class_qr(school_class, madrasah)
+        payload['s'] = 99999
+
+        valid, result = qr_service.verify_qr_data(json.dumps(payload))
+        assert valid is False
+        assert 'signature' in result.lower() or 'tamper' in result.lower() or 'Invalid' in result
+
+    def test_expired_qr_rejected(self, qr_service, madrasah, school_class):
+        buf, payload = qr_service.generate_class_qr(school_class, madrasah)
+        payload['t'] = (timezone.now() - timedelta(minutes=10)).isoformat()
+
+        payload_str = f"1|{payload['m']}|{payload['s']}|{payload['c']}|{payload['t']}"
+        import hmac as hmac_mod
+        import hashlib
+        payload['h'] = hmac_mod.new(
+            qr_service._get_secret().encode(),
+            payload_str.encode(),
+            hashlib.sha256,
+        ).hexdigest()
+
+        valid, result = qr_service.verify_qr_data(json.dumps(payload))
+        assert valid is False
+        assert 'expired' in result.lower()
+
+
+@pytest.mark.django_db
+class TestQRScan:
+    def test_scan_creates_attendance(self, ustaadh, auth_client, student, madrasah, qr_service):
+        buf, payload = qr_service.generate_student_qr(student, madrasah)
+        client = auth_client(ustaadh)
+        response = client.post('/api/school/attendance/scan/', {
+            'qr_data': json.dumps(payload),
+        }, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['attendance_status'] == 'present'
+        assert Attendance.objects.filter(student=student, date=date.today()).exists()
+
+    def test_scan_creates_qr_scan_record(self, ustaadh, auth_client, student, madrasah, qr_service):
+        buf, payload = qr_service.generate_student_qr(student, madrasah)
+        client = auth_client(ustaadh)
+        response = client.post('/api/school/attendance/scan/', {
+            'qr_data': json.dumps(payload),
+            'scanner_location': 'gate_1',
+        }, format='json')
+        assert response.status_code == status.HTTP_201_CREATED
+        scan = AttendanceQRScan.objects.get(id=response.data['scan_id'])
+        assert scan.scanner_location == 'gate_1'
+        assert scan.method == 'qr_code'
+
+    def test_duplicate_scan_rejected(self, ustaadh, auth_client, student, madrasah, qr_service):
+        buf, payload = qr_service.generate_student_qr(student, madrasah)
+        client = auth_client(ustaadh)
+        client.post('/api/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
+        response = client.post('/api/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
+        assert response.status_code == status.HTTP_409_CONFLICT
+
+    def test_expired_scan_rejected(self, ustaadh, auth_client, student, madrasah):
+        client = auth_client(ustaadh)
+        response = client.post('/api/school/attendance/scan/', {
+            'qr_data': json.dumps({"v": 1, "m": madrasah.id, "s": student.id, "c": 0, "t": (timezone.now() - timedelta(minutes=10)).isoformat(), "h": "fake"}),
+        }, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_tampered_scan_rejected(self, ustaadh, auth_client, student, madrasah):
+        client = auth_client(ustaadh)
+        response = client.post('/api/school/attendance/scan/', {
+            'qr_data': json.dumps({"v": 1, "m": madrasah.id, "s": student.id, "c": 0, "t": timezone.now().isoformat(), "h": "tampered"}),
+        }, format='json')
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_scan_list_shows_today(self, ustaadh, auth_client, student, madrasah, qr_service):
+        buf, payload = qr_service.generate_student_qr(student, madrasah)
+        client = auth_client(ustaadh)
+        client.post('/api/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
+        response = client.get('/api/school/attendance/scans/')
+        assert response.status_code == status.HTTP_200_OK

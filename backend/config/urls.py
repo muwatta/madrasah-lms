@@ -19,4 +19,6 @@ urlpatterns = [
     path('api/analytics/', include('analytics.urls')),
     path('api/guidance/', include('guidance.urls')),
     path('api/learning/', include('learning.urls')),
+    path('api/whatsapp/', include('whatsapp.urls')),
+    path('api/character/', include('character.urls')),
 ]

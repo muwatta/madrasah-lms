@@ -1,11 +1,15 @@
 import re
+import logging
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import CareerRecommendation, AITutorSession
 from .serializers import CareerRecommendationSerializer, AITutorSessionSerializer
+from .services import AIService
 from users.models import User
+
+logger = logging.getLogger(__name__)
 
 
 CAREER_PROFILES = {
@@ -252,6 +256,12 @@ class CareerGuidanceView(APIView):
         profile_key = get_profile_key(student)
         profile = CAREER_PROFILES[profile_key]
 
+        ai = AIService()
+        ai_response = ai.career_recommendation(
+            student,
+            subject_scores=None,
+        )
+
         CareerRecommendation.objects.filter(
             student=student, is_current=True,
         ).update(is_current=False)
@@ -281,14 +291,21 @@ class AITutorSessionView(APIView):
             return Response({'error': 'question is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         subject = None
+        subject_name = None
         if subject_id:
             from curriculum.models import Subject
             try:
                 subject = Subject.objects.get(id=subject_id, madrasah=request.user.madrasah)
+                subject_name = subject.name_en
             except Subject.DoesNotExist:
                 pass
 
-        response_text = get_tutor_response(question)
+        ai = AIService()
+        response_text = ai.tutor_response(
+            question,
+            subject_name=subject_name,
+            student_name=request.user.get_full_name(),
+        )
 
         session = AITutorSession.objects.create(
             madrasah=request.user.madrasah,

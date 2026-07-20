@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification
+from .models import FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification, AttendanceQRScan
 
 
 class FeeStructureSerializer(serializers.ModelSerializer):
@@ -54,3 +54,14 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'recipient', 'notification_type', 'title', 'message', 'link', 'is_read', 'created_at']
         read_only_fields = ['recipient']
+
+
+class AttendanceQRScanSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    attendance_status = serializers.CharField(source='attendance.status', read_only=True, default=None)
+
+    class Meta:
+        model = AttendanceQRScan
+        fields = ['id', 'madrasah', 'student', 'student_name', 'school_class', 'scanned_at',
+                  'scanner_location', 'method', 'attendance', 'attendance_status']
+        read_only_fields = ['madrasah', 'student', 'school_class', 'attendance', 'scanned_at']
