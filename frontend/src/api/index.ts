@@ -97,6 +97,37 @@ export const examAPI = {
   myResults: () => api.get('/results/my-exams/'),
 };
 
+export const resultsAPI = {
+  teacher: {
+    subjects: () => api.get('/results/teacher/subjects/'),
+    terms: () => api.get('/results/teacher/terms/'),
+    components: (params?: any) => api.get('/results/components/', { params }),
+    generateComponents: (data: any) => api.post('/results/components/generate/', data),
+    createComponent: (data: any) => api.post('/results/components/', data),
+    updateComponent: (id: number, data: any) => api.put(`/results/components/${id}/`, data),
+    deleteComponent: (id: number) => api.delete(`/results/components/${id}/`),
+    scores: (params?: any) => api.get('/results/scores/', { params }),
+    bulkScores: (componentId: number, data: any) => api.post(`/results/scores/bulk/${componentId}/`, data),
+    submit: (data: any) => api.post('/results/teacher/submit/', data),
+  },
+  admin: {
+    templates: (params?: any) => api.get('/results/templates/', { params }),
+    createTemplate: (data: any) => api.post('/results/templates/', data),
+    getTemplate: (id: number) => api.get(`/results/templates/${id}/`),
+    updateTemplate: (id: number, data: any) => api.put(`/results/templates/${id}/`, data),
+    deleteTemplate: (id: number) => api.delete(`/results/templates/${id}/`),
+    saveTemplateItems: (templateId: number, data: any) => api.post(`/results/templates/${templateId}/items/`, data),
+    pending: (params?: any) => api.get('/results/admin/pending/', { params }),
+    publish: (data: any) => api.post('/results/admin/publish/', data),
+  },
+  student: {
+    myResults: (params?: any) => api.get('/results/my-results/', { params }),
+  },
+  parent: {
+    childResults: (params?: any) => api.get('/results/child-results/', { params }),
+  },
+};
+
 export const enrollmentAPI = {
   list: (params?: any) => api.get('/enrollments/', { params }),
   create: (data: any) => api.post('/enrollments/', data),

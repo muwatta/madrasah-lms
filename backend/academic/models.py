@@ -7,6 +7,7 @@ from curriculum.models import SchoolClass, Subject
 class Session(models.Model):
     madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='academic_sessions')
     name = models.CharField(max_length=100)
+    hijri_year = models.IntegerField(null=True, blank=True, help_text='e.g. 1446')
     start_date = models.DateField()
     end_date = models.DateField()
     is_current = models.BooleanField(default=False)
@@ -27,6 +28,8 @@ class Term(models.Model):
     term_number = models.IntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
+    hijri_start = models.CharField(max_length=50, blank=True, help_text='e.g. 1 Muharram 1446')
+    hijri_end = models.CharField(max_length=50, blank=True, help_text='e.g. 29 Rabi al-Thani 1446')
     is_current = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -35,7 +38,8 @@ class Term(models.Model):
         unique_together = ['madrasah', 'session', 'name']
 
     def __str__(self):
-        return f"{self.session.name} - {self.name}"
+        hijri = f" ({self.hijri_start} - {self.hijri_end})" if self.hijri_start else ""
+        return f"{self.session.name} - {self.name}{hijri}"
 
 
 class AcademicCalendar(models.Model):

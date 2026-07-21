@@ -46,7 +46,7 @@ class GenerateAtRiskPredictionsView(APIView):
 
 class TeacherWorkloadListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
-    serializer_class = AtRiskPredictionSerializer  # placeholder, we override list
+    serializer_class = AtRiskPredictionSerializer  
 
     def list(self, request, *args, **kwargs):
         from datetime import date, timedelta
@@ -129,8 +129,6 @@ class TeacherWorkloadMeView(APIView):
         })
 
 
-# ── Skill Assessment ──
-
 class SkillAssessmentListCreateView(generics.ListCreateAPIView):
     serializer_class = SkillAssessmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -170,7 +168,6 @@ class SkillAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.delete()
 
 
-# ── Digital Portfolio ──
 
 class DigitalPortfolioListCreateView(generics.ListCreateAPIView):
     serializer_class = DigitalPortfolioSerializer

@@ -64,7 +64,16 @@ const WhatsAppPage = lazy(() => import('./pages/admin/WhatsAppPage'));
 const CertificatesPage = lazy(() => import('./pages/student/CertificatesPage'));
 const CalendarPage = lazy(() => import('./pages/student/CalendarPage'));
 const TeacherTimetablePage = lazy(() => import('./pages/teacher/TimetablePage'));
+const ResultEntryPage = lazy(() => import('./pages/teacher/ResultEntryPage'));
+const ResultsPublishPage = lazy(() => import('./pages/admin/ResultsPublishPage'));
+const MyResultsPage = lazy(() => import('./pages/student/MyResultsPage'));
+const PricingPage = lazy(() => import('./pages/public/PricingPage'));
+const DocsPage = lazy(() => import('./pages/public/DocsPage'));
+const ContactPage = lazy(() => import('./pages/public/ContactPage'));
+const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/public/TermsPage'));
 
+import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
@@ -74,6 +83,7 @@ function App() {
       <AuthProvider>
         <Router>
           <ErrorBoundary>
+          <Toaster position="top-left" />
           <Suspense fallback={<div className="flex h-64 items-center justify-center animate-fade-in"><LoadingSpinner size="lg" /></div>}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -110,6 +120,7 @@ function App() {
               <Route path="path" element={<LearningPathPage />} />
               <Route path="flashcards" element={<FlashCardPage />} />
               <Route path="character" element={<StudentCharacterPage />} />
+              <Route path="my-results" element={<MyResultsPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -136,6 +147,7 @@ function App() {
               <Route path="character" element={<CharacterPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="timetable" element={<TeacherTimetablePage />} />
+              <Route path="results" element={<ResultEntryPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -155,6 +167,7 @@ function App() {
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="whatsapp" element={<WhatsAppOptInPage />} />
+              <Route path="child-results" element={<MyResultsPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -187,6 +200,7 @@ function App() {
               <Route path="character" element={<CharacterPage />} />
               <Route path="whatsapp" element={<WhatsAppPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
+              <Route path="results" element={<ResultsPublishPage />} />
             </Route>
 
             <Route
@@ -210,6 +224,11 @@ function App() {
             </Route>
 
             <Route path="/" element={<LandingPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
           </Suspense>
