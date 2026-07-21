@@ -186,9 +186,9 @@ class FeeAnalyticsView(APIView):
         ).select_related('fee', 'fee__student')[:10]
 
         return Response({
-            'total_amount': float(total_amount),
+            'total_fees': float(total_amount),
             'total_collected': float(total_collected),
-            'outstanding': float(outstanding),
+            'total_outstanding': float(outstanding),
             'overdue_count': overdue_count,
             'overdue_amount': float(overdue_count * total_amount / max(total_fees.count(), 1)),
             'this_month_collected': float(this_month_collected),
@@ -197,7 +197,7 @@ class FeeAnalyticsView(APIView):
                 'id': p.id,
                 'student_name': p.fee.student.get_full_name(),
                 'amount': float(p.amount_paid),
-                'method': p.payment_method,
+                'payment_method': p.payment_method,
                 'paid_at': p.payment_date.isoformat(),
                 'date': p.payment_date.isoformat(),
             } for p in recent_payments],
@@ -539,8 +539,8 @@ class StudentReportView(APIView):
         att_present = recent_attendance_qs.filter(status='present').count()
         recent_attendance = recent_attendance_qs.order_by('-date')[:30]
 
-        weak_subjects = [s for s in subject_perf if s['average'] > 0 and s['average'] < 60]
-        strong_subjects = [s for s in subject_perf if s['average'] >= 80]
+        weak_subjects = [s['subject'] for s in subject_perf if s['average'] > 0 and s['average'] < 60]
+        strong_subjects = [s['subject'] for s in subject_perf if s['average'] >= 80]
 
         recommendations = []
         if weak_subjects:

@@ -5,7 +5,7 @@ from rest_framework import status
 @pytest.mark.django_db
 class TestRegister:
     def test_register_user(self, client, madrasah):
-        response = client.post('/api/auth/register/', {
+        response = client.post('/api/v1/auth/register/', {
             'email': 'new@test.com',
             'password': 'TestPass123!',
             'password_confirm': 'TestPass123!',
@@ -19,7 +19,7 @@ class TestRegister:
         assert 'tokens' in response.data
 
     def test_register_password_mismatch(self, client, madrasah):
-        response = client.post('/api/auth/register/', {
+        response = client.post('/api/v1/auth/register/', {
             'email': 'new@test.com',
             'password': 'TestPass123!',
             'password_confirm': 'DifferentPass!',
@@ -34,7 +34,7 @@ class TestRegister:
 @pytest.mark.django_db
 class TestLogin:
     def test_login_success(self, client, admin_user):
-        response = client.post('/api/auth/login/', {
+        response = client.post('/api/v1/auth/login/', {
             'email': 'admin@test.com',
             'password': 'admin123',
         })
@@ -42,7 +42,7 @@ class TestLogin:
         assert 'tokens' in response.data
 
     def test_login_invalid_credentials(self, client, admin_user):
-        response = client.post('/api/auth/login/', {
+        response = client.post('/api/v1/auth/login/', {
             'email': 'admin@test.com',
             'password': 'wrongpassword',
         })
@@ -52,10 +52,10 @@ class TestLogin:
 @pytest.mark.django_db
 class TestMe:
     def test_get_me(self, auth_client):
-        response = auth_client.get('/api/auth/me/')
+        response = auth_client.get('/api/v1/auth/me/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['email'] == 'admin@test.com'
 
     def test_get_me_unauthenticated(self, client):
-        response = client.get('/api/auth/me/')
+        response = client.get('/api/v1/auth/me/')
         assert response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)

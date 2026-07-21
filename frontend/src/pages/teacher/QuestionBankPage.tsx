@@ -29,7 +29,7 @@ const emptyForm: QuestionForm = {
 };
 
 export default function QuestionBankPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -334,7 +334,7 @@ export default function QuestionBankPage() {
               <RichTextEditor
                 value={form.question_text}
                 onChange={(val) => setForm({ ...form, question_text: val })}
-                placeholder={language === 'ar' ? 'اكتب السؤال هنا...' : 'Enter the question...'}
+                placeholder={t('questionBank.questionPlaceholder')}
                 minHeight="100px"
               />
             </div>
@@ -395,7 +395,7 @@ export default function QuestionBankPage() {
                 <RichTextEditor
                   value={form.correct_answer}
                   onChange={(val) => setForm({ ...form, correct_answer: val })}
-                  placeholder={language === 'ar' ? 'أضف إجابة نموذجية...' : 'Add a model answer...'}
+                  placeholder={t('questionBank.modelAnswerPlaceholder')}
                   minHeight="150px"
                 />
               ) : (

@@ -80,12 +80,12 @@ class TeacherWorkloadListView(generics.ListAPIView):
         data = []
         for teacher in teachers:
             data.append({
-                'teacher_id': teacher.id,
+                'teacher': teacher.id,
                 'teacher_name': teacher.get_full_name(),
                 'lesson_plans_count': hw_count_map.get(teacher.id, 0),
                 'homework_count': hw_count_map.get(teacher.id, 0),
-                'ungraded_submissions': ungraded_map.get(teacher.id, 0),
-                'upcoming_this_week': upcoming_map.get(teacher.id, 0),
+                'ungraded_submissions_count': ungraded_map.get(teacher.id, 0),
+                'upcoming_lessons': upcoming_map.get(teacher.id, 0),
             })
 
         return Response(data)
@@ -120,12 +120,12 @@ class TeacherWorkloadMeView(APIView):
         ).count()
 
         return Response({
-            'teacher_id': user.id,
+            'teacher': user.id,
             'teacher_name': user.get_full_name(),
             'lesson_plans_count': lesson_plans,
             'homework_count': homework_count,
-            'ungraded_submissions': ungraded,
-            'upcoming_this_week': upcoming,
+            'ungraded_submissions_count': ungraded,
+            'upcoming_lessons': upcoming,
         })
 
 

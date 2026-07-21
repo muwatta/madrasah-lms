@@ -5,7 +5,7 @@ from . import intervention_views
 from . import bulk_import_views
 from . import email_views
 
-urlpatterns = [
+auth_urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('refresh-token/', views.RefreshTokenView.as_view(), name='refresh-token'),
@@ -15,6 +15,9 @@ urlpatterns = [
     path('password-reset/confirm/', email_views.ConfirmPasswordResetView.as_view(), name='password-reset-confirm'),
     path('verify-email/', email_views.RequestEmailVerificationView.as_view(), name='verify-email'),
     path('verify-email/confirm/', email_views.ConfirmEmailVerificationView.as_view(), name='verify-email-confirm'),
+]
+
+user_urlpatterns = [
     path('', views.UserListView.as_view(), name='user-list'),
     path('<int:pk>/', views.UserDetailView.as_view(), name='user-detail'),
     path('madrasahs/', views.MadrasahListView.as_view(), name='madrasah-list'),

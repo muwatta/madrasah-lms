@@ -4,8 +4,8 @@ from . import progress_views
 
 urlpatterns = [
     path('questions/', views.QuestionListView.as_view(), name='question-list'),
-    path('questions/<int:pk>/', views.QuestionDetailView.as_view(), name='question-detail'),
     path('questions/bulk-upload/', progress_views.BulkQuestionUploadView.as_view(), name='question-bulk-upload'),
+    path('questions/<int:pk>/', views.QuestionDetailView.as_view(), name='question-detail'),
     path('quizzes/', views.QuizListView.as_view(), name='quiz-list'),
     path('quizzes/<int:pk>/', views.QuizDetailView.as_view(), name='quiz-detail'),
     path('quizzes/<int:pk>/publish/', views.QuizPublishView.as_view(), name='quiz-publish'),
@@ -14,6 +14,6 @@ urlpatterns = [
     path('quiz-attempts/<int:pk>/', views.QuizAttemptDetailView.as_view(), name='quiz-attempt-detail'),
     path('quiz-attempts/<int:pk>/submit/', views.QuizAttemptSubmitView.as_view(), name='quiz-attempt-submit'),
     path('my-attempts/', views.StudentQuizAttemptsView.as_view(), name='my-attempts'),
-    path('student/progress/', progress_views.StudentProgressView.as_view(), name='student-progress'),
+    path('progress/', progress_views.StudentProgressView.as_view(), name='student-progress'),
     path('generate-questions/', views.QuestionGeneratorView.as_view(), name='generate-questions'),
 ]

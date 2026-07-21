@@ -106,13 +106,13 @@ def notification(madrasah, student):
 class TestFeeStructures:
     def test_list_fee_structures(self, mudeer, auth_client, fee_structure):
         client = auth_client(mudeer)
-        response = client.get('/api/school/fee-structures/')
+        response = client.get('/api/v1/school/fee-structures/')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 1
 
     def test_create_fee_structure(self, mudeer, auth_client, madrasah):
         client = auth_client(mudeer)
-        response = client.post('/api/school/fee-structures/', {
+        response = client.post('/api/v1/school/fee-structures/', {
             'name': 'Registration',
             'name_ar': 'رسوم التسجيل',
             'amount': '10000.00',
@@ -124,7 +124,7 @@ class TestFeeStructures:
 
     def test_student_cannot_create_fee_structure(self, student, auth_client):
         client = auth_client(student)
-        response = client.post('/api/school/fee-structures/', {
+        response = client.post('/api/v1/school/fee-structures/', {
             'name': 'Hack Fee',
             'amount': '0.00',
         }, format='json')
@@ -137,13 +137,13 @@ class TestFeeStructures:
 class TestFees:
     def test_list_fees(self, mudeer, auth_client, fee):
         client = auth_client(mudeer)
-        response = client.get('/api/school/fees/')
+        response = client.get('/api/v1/school/fees/')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 1
 
     def test_create_fee(self, mudeer, auth_client, student, madrasah):
         client = auth_client(mudeer)
-        response = client.post('/api/school/fees/', {
+        response = client.post('/api/v1/school/fees/', {
             'student': student.id,
             'amount': '25000.00',
             'due_date': (date.today() + timedelta(days=14)).isoformat(),
@@ -154,7 +154,7 @@ class TestFees:
 
     def test_student_cannot_create_fee(self, student, auth_client, mudeer):
         client = auth_client(student)
-        response = client.post('/api/school/fees/', {
+        response = client.post('/api/v1/school/fees/', {
             'student': mudeer.id,
             'amount': '0.00',
             'due_date': date.today().isoformat(),
@@ -168,7 +168,7 @@ class TestFees:
 class TestFeePayments:
     def test_record_payment(self, mudeer, auth_client, fee):
         client = auth_client(mudeer)
-        response = client.post(f'/api/school/fees/{fee.id}/pay/', {
+        response = client.post(f'/api/v1/school/fees/{fee.id}/pay/', {
             'amount_paid': '25000.00',
             'payment_method': 'cash',
             'notes': 'Partial payment',
@@ -181,7 +181,7 @@ class TestFeePayments:
 
     def test_full_payment_marks_paid(self, mudeer, auth_client, fee):
         client = auth_client(mudeer)
-        response = client.post(f'/api/school/fees/{fee.id}/pay/', {
+        response = client.post(f'/api/v1/school/fees/{fee.id}/pay/', {
             'amount_paid': '50000.00',
             'payment_method': 'bank_transfer',
         }, format='json')
@@ -193,7 +193,7 @@ class TestFeePayments:
 
     def test_payment_amount_validation(self, mudeer, auth_client, fee):
         client = auth_client(mudeer)
-        response = client.post(f'/api/school/fees/{fee.id}/pay/', {}, format='json')
+        response = client.post(f'/api/v1/school/fees/{fee.id}/pay/', {}, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -203,7 +203,7 @@ class TestFeePayments:
 class TestAttendance:
     def test_mark_attendance(self, ustaadh, auth_client, student, madrasah):
         client = auth_client(ustaadh)
-        response = client.post('/api/school/attendance/', {
+        response = client.post('/api/v1/school/attendance/', {
             'student': student.id,
             'date': date.today().isoformat(),
             'status': 'present',
@@ -219,7 +219,7 @@ class TestAttendance:
             email='other@test.com', password='testpass123', role='student',
             madrasah=madrasah, first_name='Other', last_name='Student',
         )
-        response = client.post('/api/school/attendance/', {
+        response = client.post('/api/v1/school/attendance/', {
             'student': other.id,
             'date': date.today().isoformat(),
             'status': 'present',
@@ -232,7 +232,7 @@ class TestAttendance:
             madrasah=madrasah, first_name='Second', last_name='Student',
         )
         client = auth_client(ustaadh)
-        response = client.post('/api/school/attendance/bulk/', {
+        response = client.post('/api/v1/school/attendance/bulk/', {
             'date': date.today().isoformat(),
             'records': [
                 {'student': student.id, 'status': 'present'},
@@ -257,7 +257,7 @@ class TestAttendanceAnalytics:
                 marked_by=mudeer,
             )
         client = auth_client(mudeer)
-        response = client.get('/api/school/attendance/analytics/')
+        response = client.get('/api/v1/school/attendance/analytics/')
         assert response.status_code == status.HTTP_200_OK
         assert 'week_attendance_rate' in response.data
         assert 'daily_trend' in response.data
@@ -269,19 +269,19 @@ class TestAttendanceAnalytics:
 class TestAnnouncements:
     def test_list_announcements(self, mudeer, auth_client, announcement):
         client = auth_client(mudeer)
-        response = client.get('/api/school/announcements/')
+        response = client.get('/api/v1/school/announcements/')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 1
 
     def test_student_sees_all_audience_announcements(self, student, auth_client, announcement):
         client = auth_client(student)
-        response = client.get('/api/school/announcements/')
+        response = client.get('/api/v1/school/announcements/')
         assert response.status_code == status.HTTP_200_OK
         assert any(a['id'] == announcement.id for a in response.data.get('results', response.data))
 
     def test_create_announcement(self, mudeer, auth_client, madrasah):
         client = auth_client(mudeer)
-        response = client.post('/api/school/announcements/', {
+        response = client.post('/api/v1/school/announcements/', {
             'title': 'Ramadan Schedule',
             'title_ar': 'جدول رمضان',
             'message': 'Adjusted hours during Ramadan',
@@ -292,7 +292,7 @@ class TestAnnouncements:
 
     def test_student_cannot_create_announcement(self, student, auth_client):
         client = auth_client(student)
-        response = client.post('/api/school/announcements/', {
+        response = client.post('/api/v1/school/announcements/', {
             'title': 'Fake News',
             'message': 'Haha',
         }, format='json')
@@ -305,19 +305,19 @@ class TestAnnouncements:
 class TestNotifications:
     def test_list_notifications(self, student, auth_client, notification):
         client = auth_client(student)
-        response = client.get('/api/school/notifications/')
+        response = client.get('/api/v1/school/notifications/')
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) >= 1
 
     def test_unread_count(self, student, auth_client, notification):
         client = auth_client(student)
-        response = client.get('/api/school/notifications/unread-count/')
+        response = client.get('/api/v1/school/notifications/unread-count/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['unread_count'] == 1
 
     def test_mark_read(self, student, auth_client, notification):
         client = auth_client(student)
-        response = client.post(f'/api/school/notifications/mark-read/{notification.id}/')
+        response = client.post(f'/api/v1/school/notifications/mark-read/{notification.id}/')
         assert response.status_code == status.HTTP_200_OK
         notification.refresh_from_db()
         assert notification.is_read is True
@@ -336,7 +336,7 @@ class TestStudentReport:
                 marked_by=mudeer,
             )
         client = auth_client(mudeer)
-        response = client.get(f'/api/school/reports/student/{student.id}/')
+        response = client.get(f'/api/v1/school/reports/student/{student.id}/')
         assert response.status_code == status.HTTP_200_OK
         assert response.data['student']['id'] == student.id
         assert 'overall_average' in response.data
@@ -346,7 +346,7 @@ class TestStudentReport:
 
     def test_student_cannot_access_report(self, student, auth_client):
         client = auth_client(student)
-        response = client.get(f'/api/school/reports/student/{student.id}/')
+        response = client.get(f'/api/v1/school/reports/student/{student.id}/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -356,7 +356,7 @@ class TestStudentReport:
 class TestBulkFeeCreate:
     def test_bulk_create_with_structure(self, mudeer, auth_client, fee_structure, student, madrasah):
         client = auth_client(mudeer)
-        response = client.post('/api/school/fees/bulk-create/', {
+        response = client.post('/api/v1/school/fees/bulk-create/', {
             'fee_structure': fee_structure.id,
             'student_ids': [student.id],
             'due_date': (date.today() + timedelta(days=30)).isoformat(),
@@ -375,7 +375,7 @@ class TestBulkFeeCreate:
             madrasah=madrasah, first_name='Student', last_name='Two',
         )
         client = auth_client(mudeer)
-        response = client.post('/api/school/fees/bulk-create/', {
+        response = client.post('/api/v1/school/fees/bulk-create/', {
             'amount': '10000.00',
             'due_date': (date.today() + timedelta(days=14)).isoformat(),
             'description': 'Exam fee',
@@ -386,7 +386,7 @@ class TestBulkFeeCreate:
 
     def test_student_cannot_bulk_create(self, student, auth_client):
         client = auth_client(student)
-        response = client.post('/api/school/fees/bulk-create/', {
+        response = client.post('/api/v1/school/fees/bulk-create/', {
             'amount': '5000.00',
             'due_date': date.today().isoformat(),
         }, format='json')
@@ -394,7 +394,7 @@ class TestBulkFeeCreate:
 
     def test_bulk_create_missing_date(self, mudeer, auth_client):
         client = auth_client(mudeer)
-        response = client.post('/api/school/fees/bulk-create/', {
+        response = client.post('/api/v1/school/fees/bulk-create/', {
             'amount': '5000.00',
         }, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -416,7 +416,7 @@ def qr_service():
 class TestQRGeneration:
     def test_class_qr_returns_base64(self, ustaadh, auth_client, school_class):
         client = auth_client(ustaadh)
-        response = client.get(f'/api/school/attendance/qr/class/{school_class.id}/')
+        response = client.get(f'/api/v1/school/attendance/qr/class/{school_class.id}/')
         assert response.status_code == status.HTTP_200_OK
         assert 'qr_data_url' in response.data
         assert response.data['qr_data_url'].startswith('data:image/png;base64,')
@@ -424,19 +424,19 @@ class TestQRGeneration:
 
     def test_student_qr_returns_base64(self, ustaadh, auth_client, student):
         client = auth_client(ustaadh)
-        response = client.get(f'/api/school/attendance/qr/student/{student.id}/')
+        response = client.get(f'/api/v1/school/attendance/qr/student/{student.id}/')
         assert response.status_code == status.HTTP_200_OK
         assert 'qr_data_url' in response.data
         assert response.data['payload']['s'] == student.id
 
     def test_nonexistent_class_returns_404(self, ustaadh, auth_client):
         client = auth_client(ustaadh)
-        response = client.get('/api/school/attendance/qr/class/99999/')
+        response = client.get('/api/v1/school/attendance/qr/class/99999/')
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_student_cannot_generate_qr(self, student, auth_client):
         client = auth_client(student)
-        response = client.get(f'/api/school/attendance/qr/student/{student.id}/')
+        response = client.get(f'/api/v1/school/attendance/qr/student/{student.id}/')
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -491,7 +491,7 @@ class TestQRScan:
     def test_scan_creates_attendance(self, ustaadh, auth_client, student, madrasah, qr_service):
         buf, payload = qr_service.generate_student_qr(student, madrasah)
         client = auth_client(ustaadh)
-        response = client.post('/api/school/attendance/scan/', {
+        response = client.post('/api/v1/school/attendance/scan/', {
             'qr_data': json.dumps(payload),
         }, format='json')
         assert response.status_code == status.HTTP_201_CREATED
@@ -501,7 +501,7 @@ class TestQRScan:
     def test_scan_creates_qr_scan_record(self, ustaadh, auth_client, student, madrasah, qr_service):
         buf, payload = qr_service.generate_student_qr(student, madrasah)
         client = auth_client(ustaadh)
-        response = client.post('/api/school/attendance/scan/', {
+        response = client.post('/api/v1/school/attendance/scan/', {
             'qr_data': json.dumps(payload),
             'scanner_location': 'gate_1',
         }, format='json')
@@ -513,20 +513,20 @@ class TestQRScan:
     def test_duplicate_scan_rejected(self, ustaadh, auth_client, student, madrasah, qr_service):
         buf, payload = qr_service.generate_student_qr(student, madrasah)
         client = auth_client(ustaadh)
-        client.post('/api/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
-        response = client.post('/api/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
+        client.post('/api/v1/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
+        response = client.post('/api/v1/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
         assert response.status_code == status.HTTP_409_CONFLICT
 
     def test_expired_scan_rejected(self, ustaadh, auth_client, student, madrasah):
         client = auth_client(ustaadh)
-        response = client.post('/api/school/attendance/scan/', {
+        response = client.post('/api/v1/school/attendance/scan/', {
             'qr_data': json.dumps({"v": 1, "m": madrasah.id, "s": student.id, "c": 0, "t": (timezone.now() - timedelta(minutes=10)).isoformat(), "h": "fake"}),
         }, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_tampered_scan_rejected(self, ustaadh, auth_client, student, madrasah):
         client = auth_client(ustaadh)
-        response = client.post('/api/school/attendance/scan/', {
+        response = client.post('/api/v1/school/attendance/scan/', {
             'qr_data': json.dumps({"v": 1, "m": madrasah.id, "s": student.id, "c": 0, "t": timezone.now().isoformat(), "h": "tampered"}),
         }, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -534,6 +534,6 @@ class TestQRScan:
     def test_scan_list_shows_today(self, ustaadh, auth_client, student, madrasah, qr_service):
         buf, payload = qr_service.generate_student_qr(student, madrasah)
         client = auth_client(ustaadh)
-        client.post('/api/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
-        response = client.get('/api/school/attendance/scans/')
+        client.post('/api/v1/school/attendance/scan/', {'qr_data': json.dumps(payload)}, format='json')
+        response = client.get('/api/v1/school/attendance/scans/')
         assert response.status_code == status.HTTP_200_OK

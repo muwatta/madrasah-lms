@@ -8,7 +8,7 @@ interface BulkUploadResult {
 }
 
 export default function BulkUpload({ onComplete }: { onComplete: () => void }) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<BulkUploadResult | null>(null);
@@ -45,7 +45,7 @@ export default function BulkUpload({ onComplete }: { onComplete: () => void }) {
       const data = err.response?.data;
       setResult({
         created: 0,
-        errors: data?.errors || [{ row: 0, error: data?.error || 'Upload failed' }],
+        errors: data?.errors || [{ row: 0, error: data?.error || t('bulkUpload.uploadFailed') }],
       });
     } finally {
       setUploading(false);
@@ -106,7 +106,7 @@ export default function BulkUpload({ onComplete }: { onComplete: () => void }) {
       </div>
 
       {fileName && !uploading && (
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{language === 'ar' ? 'الملف:' : 'File:'} {fileName}</p>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t('bulkUpload.file')} {fileName}</p>
       )}
 
       {result && (
@@ -121,7 +121,7 @@ export default function BulkUpload({ onComplete }: { onComplete: () => void }) {
               <p className="font-medium text-red-600 dark:text-red-400">{result.errors.length} {t('bulkUpload.errors')}</p>
               <ul className="mt-1 max-h-32 space-y-1 overflow-y-auto text-xs">
                 {result.errors.map((e, i) => (
-                  <li key={i} className="text-red-600 dark:text-red-400">Row {e.row}: {e.error}</li>
+                  <li key={i} className="text-red-600 dark:text-red-400">{t('bulkUpload.rowError')} {e.row}: {e.error}</li>
                 ))}
               </ul>
             </div>

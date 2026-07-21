@@ -45,7 +45,7 @@ function getDifficultyBadge(d: string) {
 
 export default function QuizAnalyticsPage() {
   const { id } = useParams<{ id: string }>();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [data, setData] = useState<QuizAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -54,7 +54,7 @@ export default function QuizAnalyticsPage() {
     if (!id) return;
     quizAPI.analytics(Number(id))
       .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.detail || 'Failed to load analytics'))
+      .catch((err) => setError(err.response?.data?.detail || t('quizAnalytics.loadFailed')))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -85,7 +85,7 @@ export default function QuizAnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <Link to="/teacher/quizzes" className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 mb-1 inline-block">
-            {language === 'ar' ? 'العودة للاختبارات' : '← Back to Quizzes'}
+            {t('quizAnalytics.backToQuizzes')}
           </Link>
           <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{data.quiz.title}</h1>
           <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('quizAnalytics.title')}</p>
@@ -106,7 +106,7 @@ export default function QuizAnalyticsPage() {
           <p className="mt-1 text-2xl font-bold text-blue-600 dark:text-blue-400">{data.pass_rate}%</p>
         </div>
         <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
-          <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'نقطة النجاح' : 'Passing Score'}</p>
+          <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.passingScore')}</p>
           <p className="mt-1 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{data.quiz.passing_score}%</p>
         </div>
       </div>
@@ -136,14 +136,14 @@ export default function QuizAnalyticsPage() {
             {Object.entries(data.difficulty_breakdown).map(([diff, info]) => (
               <div key={diff} className="text-center">
                 <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${getDifficultyBadge(diff)}`}>
-                  {diff}
+                  {t('difficulty.' + diff)}
                 </span>
                 <p className="mt-2 text-lg font-bold text-[var(--color-text-primary)] dark:text-gray-100">{info.total}</p>
-                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'سؤال' : 'questions'}</p>
+                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('student.questions')}</p>
                 <div className="mt-2 h-2 w-full rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
                   <div className={`h-2 rounded-full ${getBarColor(info.avg_accuracy)}`} style={{ width: `${info.avg_accuracy}%` }} />
                 </div>
-                <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{info.avg_accuracy}% {language === 'ar' ? 'متوسط الدقة' : 'avg accuracy'}</p>
+                <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{info.avg_accuracy}% {t('quizAnalytics.avgAccuracy')}</p>
               </div>
             ))}
           </div>
@@ -160,8 +160,8 @@ export default function QuizAnalyticsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-bold text-[var(--color-text-muted)] dark:text-gray-400">Q{i + 1}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getDifficultyBadge(q.difficulty)}`}>{q.difficulty}</span>
-                      <span className="rounded-full bg-[var(--color-bg-primary)] dark:bg-gray-700 px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{q.question_type}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getDifficultyBadge(q.difficulty)}`}>{t('difficulty.' + q.difficulty)}</span>
+                      <span className="rounded-full bg-[var(--color-bg-primary)] dark:bg-gray-700 px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('questionTypes.' + q.question_type)}</span>
                     </div>
                     <p className="text-sm text-[var(--color-text-primary)] dark:text-gray-100">{q.question_text}</p>
                   </div>
@@ -173,7 +173,7 @@ export default function QuizAnalyticsPage() {
                   <div className="h-1.5 flex-1 rounded-full bg-[var(--color-bg-primary)] dark:bg-gray-700">
                     <div className={`h-1.5 rounded-full ${getBarColor(q.accuracy)}`} style={{ width: `${q.accuracy}%` }} />
                   </div>
-                  <span className="text-[10px] text-[var(--color-text-muted)] dark:text-gray-400">{q.correct_count}/{q.total_answered} {language === 'ar' ? 'صحيح' : 'correct'}</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)] dark:text-gray-400">{q.correct_count}/{q.total_answered} {t('quizTake.correct')}</span>
                 </div>
                 {q.top_wrong_answers.length > 0 && (
                   <div className="mt-2">

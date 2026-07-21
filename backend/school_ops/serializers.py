@@ -23,11 +23,12 @@ class FeeSerializer(serializers.ModelSerializer):
     balance = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     payments = FeePaymentSerializer(many=True, read_only=True)
     fee_structure_name = serializers.CharField(source='fee_structure.name', read_only=True, default=None)
+    paid = serializers.DecimalField(source='amount_paid', max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
         model = Fee
-        fields = ['id', 'madrasah', 'student', 'student_name', 'fee_structure', 'fee_structure_name', 'amount', 'amount_paid', 'balance', 'due_date', 'description', 'status', 'payments', 'created_at']
-        read_only_fields = ['madrasah', 'amount_paid']
+        fields = ['id', 'madrasah', 'student', 'student_name', 'fee_structure', 'fee_structure_name', 'amount', 'paid', 'balance', 'due_date', 'description', 'status', 'payments', 'created_at']
+        read_only_fields = ['madrasah', 'paid']
 
 
 class AttendanceSerializer(serializers.ModelSerializer):

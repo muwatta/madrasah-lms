@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { attendanceAPI, schoolClassAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface SchoolClass {
   id: number;
@@ -20,6 +21,7 @@ interface ScanRecord {
 }
 
 export default function QRScannerPage() {
+  const { t } = useLanguage();
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export default function QRScannerPage() {
       setQrImage(res.data.qr_data_url);
       setExpiresAt(Date.now() + (res.data.expires_in_seconds || 300) * 1000);
     } catch {
-      setError('Failed to generate QR code');
+      setError(t('qrScanner.generateFailed'));
     } finally {
       setQrLoading(false);
     }
@@ -119,12 +121,12 @@ export default function QRScannerPage() {
       setSuccessMsg(`${res.data.student} - ${res.data.attendance_status}`);
       loadScans();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Scan failed');
+      setError(err.response?.data?.error || t('qrScanner.scanFailed'));
     }
   };
 
   const startCamera = async () => {
-    if (!libLoaded) { setError('QR scanner library not loaded'); return; }
+    if (!libLoaded) { setError(t('qrScanner.libraryNotLoaded')); return; }
     setError(null);
     try {
       if (scannerRef.current) {
@@ -144,7 +146,7 @@ export default function QRScannerPage() {
       );
     } catch (err: any) {
       setScannerActive(false);
-      setError(err?.message || 'Camera access denied or not available');
+      setError(err?.message || t('qrScanner.cameraDenied'));
     }
   };
 
@@ -169,7 +171,7 @@ export default function QRScannerPage() {
       setManualInput('');
       loadScans();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Scan failed');
+      setError(err.response?.data?.error || t('qrScanner.scanFailed'));
     }
   };
 
@@ -181,20 +183,20 @@ export default function QRScannerPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">QR Attendance</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('qrScanner.title')}</h1>
       </div>
-      <p className="mb-6 text-sm text-gray-500">Generate, scan, or manually enter QR codes for attendance.</p>
+      <p className="mb-6 text-sm text-gray-500">{t('qrScanner.subtitle')}</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           {error}
-          <button onClick={() => setError(null)} className="ms-2 underline">Dismiss</button>
+          <button onClick={() => setError(null)} className="ms-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
       {successMsg && (
         <div className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
           {successMsg}
-          <button onClick={() => setSuccessMsg(null)} className="ms-2 underline">Dismiss</button>
+          <button onClick={() => setSuccessMsg(null)} className="ms-2 underline">{t('common.dismiss')}</button>
         </div>
       )}
 
@@ -204,7 +206,7 @@ export default function QRScannerPage() {
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               scanMode === mode ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
-            {mode === 'generate' ? 'Generate QR' : mode === 'camera' ? 'Camera Scan' : 'Manual Entry'}
+            {mode === 'generate' ? t('qrScanner.generateQR') : mode === 'camera' ? t('qrScanner.cameraScan') : t('qrScanner.manualEntry')}
           </button>
         ))}
       </div>
@@ -214,21 +216,21 @@ export default function QRScannerPage() {
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
             <select value={selectedClass || ''} onChange={e => setSelectedClass(Number(e.target.value) || null)}
               className="input-field">
-              <option value="">Select class...</option>
+              <option value="">{t('qrScanner.selectClass')}</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name_ar} - {c.name_en}</option>)}
             </select>
             <button onClick={generateQR} disabled={!selectedClass || qrLoading}
               className="btn-press rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50">
-              {qrLoading ? 'Generating...' : 'Generate QR'}
+              {qrLoading ? t('common.loading') : t('qrScanner.generateQR')}
             </button>
           </div>
           {qrImage && (
             <div className="flex flex-col items-center gap-3">
               <img src={qrImage} alt="Attendance QR Code" className="h-64 w-64" />
               <p className="text-xs text-gray-500">
-                Expires in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
+                {t('qrScanner.expiresIn')} {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, '0')}
               </p>
-              <button onClick={generateQR} className="text-sm text-primary-600 underline hover:text-primary-700">Refresh QR</button>
+              <button onClick={generateQR} className="text-sm text-primary-600 underline hover:text-primary-700">{t('qrScanner.refreshQR')}</button>
             </div>
           )}
         </div>
@@ -238,24 +240,24 @@ export default function QRScannerPage() {
         <div className="rounded-lg border bg-white p-6 shadow-sm">
           <div className="mb-4">
             <input type="text" value={manualLocation} onChange={e => setManualLocation(e.target.value)}
-              placeholder="Scanner location (optional)" className="input-field" />
+              placeholder={t('qrScanner.scannerLocation')} className="input-field" />
           </div>
           <div id="qr-reader" ref={readerRef} className="mx-auto max-w-md overflow-hidden rounded-lg" />
           <div className="mt-4 flex justify-center gap-3">
             {!scannerActive ? (
               <button onClick={startCamera}
                 className="rounded-lg bg-primary-600 px-6 py-2 text-sm font-medium text-white hover:bg-primary-700">
-                Start Camera
+                {t('qrScanner.startCamera')}
               </button>
             ) : (
               <button onClick={stopCamera}
                 className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700">
-                Stop Camera
+                {t('qrScanner.stopCamera')}
               </button>
             )}
           </div>
-          {scannerActive && <p className="mt-3 text-center text-xs text-gray-500">Point the camera at a QR code to scan</p>}
-          {!libLoaded && <p className="mt-2 text-center text-xs text-amber-600">Loading QR scanner library...</p>}
+          {scannerActive && <p className="mt-3 text-center text-xs text-gray-500">{t('qrScanner.pointCamera')}</p>}
+          {!libLoaded && <p className="mt-2 text-center text-xs text-amber-600">{t('qrScanner.loadingLibrary')}</p>}
         </div>
       )}
 
@@ -263,12 +265,12 @@ export default function QRScannerPage() {
         <div className="rounded-lg border bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-3">
             <textarea value={manualInput} onChange={e => setManualInput(e.target.value)}
-              placeholder='Paste QR JSON data here...' rows={4} className="input-field font-mono" />
+              placeholder={t('qrScanner.pasteData')} rows={4} className="input-field font-mono" />
             <input type="text" value={manualLocation} onChange={e => setManualLocation(e.target.value)}
-              placeholder="Scanner location (optional)" className="input-field" />
+              placeholder={t('qrScanner.scannerLocation')} className="input-field" />
             <button onClick={handleManualScan} disabled={!manualInput.trim()}
               className="btn-press rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
-              Submit Scan
+              {t('qrScanner.submitScan')}
             </button>
           </div>
         </div>
@@ -276,14 +278,14 @@ export default function QRScannerPage() {
 
       <div className="mt-8 overflow-hidden rounded-lg border bg-white shadow-sm">
         <div className="border-b bg-gray-50 px-6 py-3">
-          <h3 className="text-sm font-semibold text-gray-900">Today's Scans</h3>
+          <h3 className="text-sm font-semibold text-gray-900">{t('qrScanner.todaysScans')}</h3>
         </div>
         {scans.length === 0 ? (
-          <div className="p-8 text-center text-sm text-gray-500">No scans today</div>
+          <div className="p-8 text-center text-sm text-gray-500">{t('qrScanner.noScans')}</div>
         ) : (
           <div className="divide-y">
             <div className="hidden grid-cols-[1fr_auto_auto_auto] bg-gray-50 px-6 py-2 text-xs font-medium uppercase tracking-wider text-gray-500 sm:grid">
-              <span>Student</span><span>Time</span><span>Method</span><span>Status</span>
+              <span>{t('fields.student')}</span><span>{t('qrScanner.time')}</span><span>{t('qrScanner.method')}</span><span>{t('fields.status')}</span>
             </div>
             {scans.map(scan => (
               <div key={scan.id} className="flex flex-col gap-1 px-6 py-3 hover:bg-gray-50/50 sm:grid sm:grid-cols-[1fr_auto_auto_auto]">

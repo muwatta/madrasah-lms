@@ -91,7 +91,7 @@ export default function HomeworkPage() {
         setSubjects(subRes.data.results ?? subRes.data);
         setSchoolClasses(clsRes.data.results ?? clsRes.data);
       })
-      .catch((err) => setError(err.response?.data?.detail || 'Failed to load homework'))
+      .catch((err) => setError(err.response?.data?.detail || t('homework.loadFailed')))
       .finally(() => setLoading(false));
   };
 
@@ -142,7 +142,7 @@ export default function HomeworkPage() {
       setShowCreateModal(false);
       setCreateFile(null);
       setCreateForm({ title: '', description: '', subject: '', class_obj: '', due_date: '', total_marks: '100' });
-      showToast('success', 'Homework created');
+      showToast('success', t('homework.created'));
       loadData();
     } catch (err: any) {
       const data = err.response?.data;
@@ -154,9 +154,9 @@ export default function HomeworkPage() {
         setCreateFieldErrors(fields);
         const nonField = Object.keys(fields).filter(k => k === 'non_field_errors' || k === 'detail');
         if (nonField.length) setCreateError(fields[nonField[0]]);
-        else if (!Object.keys(fields).length) setCreateError('Failed to create homework');
+        else if (!Object.keys(fields).length) setCreateError(t('homework.createFailed'));
       } else {
-        setCreateError(typeof data === 'string' ? data : 'Failed to create homework');
+        setCreateError(typeof data === 'string' ? data : t('homework.createFailed'));
       }
     } finally {
       setCreateSaving(false);
@@ -188,10 +188,10 @@ export default function HomeworkPage() {
       setShowGradeModal(false);
       setGradingSubmission(null);
       setGradeForm({ score: '', feedback: '' });
-      showToast('success', 'Graded successfully');
+      showToast('success', t('homework.gradedSuccess'));
       if (viewingHomework) handleViewSubmissions(viewingHomework);
     } catch (err: any) {
-      showToast('error', err.response?.data?.detail || 'Failed to grade');
+      showToast('error', err.response?.data?.detail || t('homework.gradeFailed'));
     } finally {
       setGradeSaving(false);
     }
@@ -200,10 +200,10 @@ export default function HomeworkPage() {
   const handleDelete = async (id: number) => {
     try {
       await lessonAPI.homework.delete(id);
-      showToast('success', 'Homework deleted');
+      showToast('success', t('homework.deleted'));
       loadData();
     } catch (err: any) {
-      showToast('error', err.response?.data?.detail || 'Failed to delete');
+      showToast('error', err.response?.data?.detail || t('homework.deleteFailed'));
     }
   };
 
@@ -233,61 +233,61 @@ export default function HomeworkPage() {
       <div className="rounded-2xl bg-gradient-to-br from-amber-600 via-amber-500 to-orange-500 p-6 text-white shadow-lg shadow-amber-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold sm:text-3xl">{t('homework.title') || (language === 'ar' ? 'الواجبات' : 'Homework Management')}</h1>
-            <p className="mt-1 text-sm text-amber-100">{t('homework.subtitle') || (language === 'ar' ? 'إنشاء وتقييم الواجبات' : 'Create and grade homework assignments')}</p>
+            <h1 className="text-2xl font-bold sm:text-3xl">{t('homework.title')}</h1>
+            <p className="mt-1 text-sm text-amber-100">{t('homework.subtitle')}</p>
           </div>
           <button onClick={() => { setCreateForm({ title: '', description: '', subject: '', class_obj: '', due_date: '', total_marks: '100' }); setCreateFile(null); setCreateError(null); setCreateFieldErrors({}); setShowCreateModal(true); }}
             className="btn-press inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition-colors hover:bg-amber-50">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            {language === 'ar' ? 'واجب جديد' : 'New Homework'}
+            {t('homework.newHomework')}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard title={language === 'ar' ? 'إجمالي' : 'Total'} value={stats.total} color="bg-amber-500" delay={0}
+        <StatCard title={t('homework.total')} value={stats.total} color="bg-amber-500" delay={0}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>}
         />
-        <StatCard title={language === 'ar' ? 'نشط' : 'Active'} value={stats.active} color="bg-green-500" delay={50}
+        <StatCard title={t('fields.active')} value={stats.active} color="bg-green-500" delay={50}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
         />
-        <StatCard title={language === 'ar' ? 'متأخر' : 'Overdue'} value={stats.overdue} color="bg-red-500" delay={100}
+        <StatCard title={t('homework.overdue')} value={stats.overdue} color="bg-red-500" delay={100}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
         />
-        <StatCard title={language === 'ar' ? 'التسليمات' : 'Submissions'} value={stats.totalSubs} color="bg-blue-500" delay={150}
+        <StatCard title={t('homework.submissions')} value={stats.totalSubs} color="bg-blue-500" delay={150}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>}
         />
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[160px]">
-          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.subject')}</label>
           <select value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setPage(1); }} className={selectCls}>
-            <option value="">{language === 'ar' ? 'جميع المواد' : 'All Subjects'}</option>
+            <option value="">{t('filters.allSubjects')}</option>
             {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div className="w-full sm:w-auto sm:min-w-[160px]">
-          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.class')}</label>
           <select value={classFilter} onChange={(e) => { setClassFilter(e.target.value); setPage(1); }} className={selectCls}>
-            <option value="">{language === 'ar' ? 'جميع الفصول' : 'All Classes'}</option>
+            <option value="">{t('filters.allClasses')}</option>
             {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
         <div className="w-full sm:w-auto sm:min-w-[140px]">
-          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الحالة' : 'Status'}</label>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.status')}</label>
           <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className={selectCls}>
-            <option value="">{language === 'ar' ? 'جميع الحالات' : 'All Statuses'}</option>
-            <option value="active">{language === 'ar' ? 'نشط' : 'Active'}</option>
-            <option value="overdue">{language === 'ar' ? 'متأخر' : 'Overdue'}</option>
-            <option value="closed">{language === 'ar' ? 'مغلق' : 'Closed'}</option>
+            <option value="">{t('homework.allStatuses')}</option>
+            <option value="active">{t('homework.status.active')}</option>
+            <option value="overdue">{t('homework.status.overdue')}</option>
+            <option value="closed">{t('homework.status.closed')}</option>
           </select>
         </div>
         {(subjectFilter || classFilter || statusFilter) && (
           <button onClick={clearFilters}
             className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2.5 text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            {language === 'ar' ? 'مسح' : 'Clear'}
+            {t('common.clearFilter')}
           </button>
         )}
       </div>
@@ -307,8 +307,8 @@ export default function HomeworkPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
             <svg className="h-8 w-8 text-[var(--color-text-muted)] dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
           </div>
-          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'لا توجد واجبات' : 'No homework assignments yet'}</p>
-          <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ابدأ بإنشاء واجب' : 'Start by creating homework'}</p>
+          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{t('homework.noHomework')}</p>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('homework.startCreating')}</p>
         </div>
       ) : (
         <div className="card-hover rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
@@ -316,13 +316,13 @@ export default function HomeworkPage() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 text-end text-xs font-medium uppercase text-[var(--color-text-muted)] dark:text-gray-400">
-                  <th className="px-4 py-3">{language === 'ar' ? 'العنوان' : 'Title'}</th>
-                  <th className="px-4 py-3">{language === 'ar' ? 'المادة' : 'Subject'}</th>
-                  <th className="px-4 py-3">{language === 'ar' ? 'الفصل' : 'Class'}</th>
-                  <th className="px-4 py-3">{language === 'ar' ? 'تاريخ التسليم' : 'Due Date'}</th>
-                  <th className="px-4 py-3">{language === 'ar' ? 'التسليمات' : 'Submissions'}</th>
-                  <th className="px-4 py-3">{language === 'ar' ? 'الحالة' : 'Status'}</th>
-                  <th className="px-4 py-3 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                  <th className="px-4 py-3">{t('fields.title')}</th>
+                  <th className="px-4 py-3">{t('fields.subject')}</th>
+                  <th className="px-4 py-3">{t('fields.class')}</th>
+                  <th className="px-4 py-3">{t('homework.dueDate')}</th>
+                  <th className="px-4 py-3">{t('homework.submissions')}</th>
+                  <th className="px-4 py-3">{t('fields.status')}</th>
+                  <th className="px-4 py-3 text-center">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
@@ -330,7 +330,7 @@ export default function HomeworkPage() {
                   <tr key={hw.id} className="transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
                     <td className="whitespace-nowrap px-4 py-3">
                       <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.title}</span>
-                      {hw.total_marks && <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mt-0.5">{hw.total_marks} {language === 'ar' ? 'درجة' : 'marks'}</p>}
+                      {hw.total_marks && <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mt-0.5">{hw.total_marks} {t('homework.marks')}</p>}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)] dark:text-gray-400">{hw.subject_name}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-[var(--color-text-muted)] dark:text-gray-400">{hw.class_name}</td>
@@ -342,7 +342,7 @@ export default function HomeworkPage() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[hw.status] || ''}`}>
-                        {hw.status.charAt(0).toUpperCase() + hw.status.slice(1)}
+                        {t('homework.status.' + hw.status)}
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -350,7 +350,7 @@ export default function HomeworkPage() {
                         <button onClick={() => handleViewSubmissions(hw)}
                           className="btn-press inline-flex items-center gap-1 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-2.5 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/40">
                           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                          {language === 'ar' ? 'تسليمات' : 'Submissions'}
+                          {t('homework.submissions')}
                         </button>
                         <button onClick={() => handleDelete(hw.id)}
                           className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-2.5 py-2 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40">
@@ -370,35 +370,35 @@ export default function HomeworkPage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.title}</span>
                   <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[hw.status] || ''}`}>
-                    {hw.status.charAt(0).toUpperCase() + hw.status.slice(1)}
+                    {t('homework.status.' + hw.status)}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.subject')}</p>
                     <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.subject_name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.class')}</p>
                     <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.class_name}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التسليمات' : 'Submissions'}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('homework.submissions')}</p>
                     <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{hw.submissions_count || 0}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'تاريخ التسليم' : 'Due'}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('homework.dueDate')}</p>
                     <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100 text-xs">{new Date(hw.due_date).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 border-t border-[var(--color-border-light)] dark:border-gray-700/50 pt-3">
                   <button onClick={() => handleViewSubmissions(hw)}
                     className="btn-press inline-flex items-center gap-1 rounded-lg bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/40">
-                    {language === 'ar' ? 'تسليمات' : 'Submissions'}
+                    {t('homework.submissions')}
                   </button>
                   <button onClick={() => handleDelete(hw.id)}
                     className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-3 py-2 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/40">
-                    {language === 'ar' ? 'حذف' : 'Delete'}
+                    {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -407,12 +407,12 @@ export default function HomeworkPage() {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-[var(--color-border-light)] dark:border-gray-700/50 px-4 py-3">
-              <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{filteredHomeworks.length} {language === 'ar' ? 'إجمالي' : 'total'}</p>
+              <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{filteredHomeworks.length} {t('homework.total')}</p>
               <div className="flex items-center gap-1">
                 <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                   className="btn-press inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 disabled:opacity-40">
                   <svg className={`h-3.5 w-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                  {language === 'ar' ? 'السابق' : 'Prev'}
+                  {t('common.previous')}
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
@@ -427,7 +427,7 @@ export default function HomeworkPage() {
                   ))}
                 <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                   className="btn-press inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 disabled:opacity-40">
-                  {language === 'ar' ? 'التالي' : 'Next'}
+                  {t('common.next')}
                   <svg className={`h-3.5 w-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </button>
               </div>
@@ -440,7 +440,7 @@ export default function HomeworkPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowCreateModal(false)}>
           <div className="w-full max-w-lg rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'واجب جديد' : 'New Homework'}</h3>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{t('homework.newHomework')}</h3>
               <button onClick={() => setShowCreateModal(false)} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -453,43 +453,43 @@ export default function HomeworkPage() {
             )}
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'العنوان' : 'Title'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.title')}</label>
                 <input required type="text" value={createForm.title} onChange={(e) => { setCreateForm({ ...createForm, title: e.target.value }); setCreateFieldErrors(fe => { const n = { ...fe }; delete n.title; return n; }); }}
                   className={`${inputCls} ${createFieldErrors.title ? 'border-red-300 dark:border-red-700' : ''}`} />
                 {createFieldErrors.title && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{createFieldErrors.title}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الوصف' : 'Description'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.description')}</label>
                 <textarea value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} className={inputCls} rows={3} />
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'المادة' : 'Subject'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.subject')}</label>
                   <select required value={createForm.subject} onChange={(e) => setCreateForm({ ...createForm, subject: e.target.value })} className={selectCls}>
-                    <option value="">{language === 'ar' ? 'اختر مادة' : 'Select subject'}</option>
+                    <option value="">{t('filters.chooseSubject')}</option>
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الفصل' : 'Class'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.class')}</label>
                   <select required value={createForm.class_obj} onChange={(e) => setCreateForm({ ...createForm, class_obj: e.target.value })} className={selectCls}>
-                    <option value="">{language === 'ar' ? 'اختر فصل' : 'Select class'}</option>
+                    <option value="">{t('filters.chooseClass')}</option>
                     {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'تاريخ التسليم' : 'Due Date'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('homework.dueDate')}</label>
                   <input required type="date" value={createForm.due_date} onChange={(e) => setCreateForm({ ...createForm, due_date: e.target.value })} className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إجمالي الدرجات' : 'Total Marks'}</label>
+                  <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.totalMarks')}</label>
                   <input required type="number" min="1" value={createForm.total_marks} onChange={(e) => setCreateForm({ ...createForm, total_marks: e.target.value })} className={inputCls} />
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ملف مرفق (اختياري)' : 'Attachment (optional)'}</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('homework.attachmentOptional')}</label>
                 <input type="file" onChange={(e) => setCreateFile(e.target.files?.[0] || null)} className={`${inputCls} file:me-2 file:rounded file:border-0 file:bg-primary-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-700 hover:file:bg-primary-100`} />
                 {createFile && <p className="mt-1 text-xs text-[var(--color-text-muted)] dark:text-gray-400">{createFile.name}</p>}
               </div>
@@ -512,30 +512,30 @@ export default function HomeworkPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => { setViewingHomework(null); setSubmissions([]); }}>
           <div className="w-full max-w-2xl rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.title} - {language === 'ar' ? 'التسليمات' : 'Submissions'}</h3>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.title} - {t('homework.submissions')}</h3>
               <button onClick={() => { setViewingHomework(null); setSubmissions([]); }} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <div className="mb-3 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3 text-sm">
-              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'المادة' : 'Subject'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.subject_name}</span></p>
-              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'الفصل' : 'Class'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.class_name}</span></p>
-              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'تاريخ التسليم' : 'Due'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{new Date(viewingHomework.due_date).toLocaleDateString()}</span></p>
-              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{language === 'ar' ? 'إجمالي الدرجات' : 'Total Marks'}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.total_marks}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{t('fields.subject')}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.subject_name}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{t('fields.class')}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.class_name}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{t('homework.dueDate')}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{new Date(viewingHomework.due_date).toLocaleDateString()}</span></p>
+              <p className="text-[var(--color-text-secondary)] dark:text-gray-300">{t('fields.totalMarks')}: <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{viewingHomework.total_marks}</span></p>
             </div>
             {submissionsLoading ? (
               <SkeletonTable rows={3} />
             ) : submissions.length === 0 ? (
-              <p className="text-center text-sm text-[var(--color-text-muted)] dark:text-gray-400 py-8">{language === 'ar' ? 'لا توجد تسليمات بعد' : 'No submissions yet'}</p>
+              <p className="text-center text-sm text-[var(--color-text-muted)] dark:text-gray-400 py-8">{t('homework.noSubmissions')}</p>
             ) : (
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-[var(--color-border-light)] dark:border-gray-700/50 text-end text-xs font-medium uppercase text-[var(--color-text-muted)] dark:text-gray-400">
-                    <th className="pb-2 ps-4">{language === 'ar' ? 'الطالب' : 'Student'}</th>
-                    <th className="pb-2 ps-4">{language === 'ar' ? 'التاريخ' : 'Submitted'}</th>
-                    <th className="pb-2 ps-4">{language === 'ar' ? 'ملف' : 'File'}</th>
-                    <th className="pb-2 ps-4">{language === 'ar' ? 'الدرجة' : 'Score'}</th>
-                    <th className="pb-2 ps-4 text-center">{language === 'ar' ? 'إجراءات' : 'Actions'}</th>
+                    <th className="pb-2 ps-4">{t('fields.student')}</th>
+                    <th className="pb-2 ps-4">{t('homework.submittedDate')}</th>
+                    <th className="pb-2 ps-4">{t('homework.file')}</th>
+                    <th className="pb-2 ps-4">{t('fields.score')}</th>
+                    <th className="pb-2 ps-4 text-center">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
@@ -547,7 +547,7 @@ export default function HomeworkPage() {
                         {sub.file ? (
                           <a href={sub.file} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">
                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            {language === 'ar' ? 'عرض' : 'View'}
+                            {t('common.view')}
                           </a>
                         ) : (
                           <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">—</span>
@@ -557,7 +557,7 @@ export default function HomeworkPage() {
                         {sub.is_graded ? (
                           <span className="font-semibold text-green-600 dark:text-green-400">{sub.score}/{viewingHomework.total_marks}</span>
                         ) : (
-                          <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'لم يُقيَّم' : 'Not graded'}</span>
+                          <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{t('student.noScore')}</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
@@ -571,7 +571,7 @@ export default function HomeworkPage() {
                             className="btn-press inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2 text-xs font-medium text-amber-700 dark:text-amber-400 transition-colors hover:bg-amber-100 dark:hover:bg-amber-900/40"
                           >
                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            {sub.is_graded ? (language === 'ar' ? 'تعديل' : 'Edit') : (language === 'ar' ? 'تقييم' : 'Grade')}
+                            {sub.is_graded ? t('common.edit') : t('homework.grade')}
                           </button>
                         </div>
                       </td>
@@ -588,38 +588,38 @@ export default function HomeworkPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowGradeModal(false)}>
           <div className="w-full max-w-md rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'تقييم' : 'Grade'} - {gradingSubmission.student_name}</h3>
+              <h3 className="text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{t('homework.grade')} - {gradingSubmission.student_name}</h3>
               <button onClick={() => setShowGradeModal(false)} className="rounded-lg p-1 text-[var(--color-text-muted)] dark:text-gray-400 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             {gradingSubmission.answer_text && (
               <div className="mb-4 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3">
-                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mb-1">{language === 'ar' ? 'إجابة الطالب' : 'Student Answer'}</p>
+                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mb-1">{t('homework.studentAnswer')}</p>
                 <p className="text-sm text-[var(--color-text-secondary)] dark:text-gray-300">{gradingSubmission.answer_text}</p>
               </div>
             )}
             {gradingSubmission.file && (
               <div className="mb-4 rounded-lg bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 p-3">
-                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mb-1">{language === 'ar' ? 'الملف المرفق' : 'Attached File'}</p>
-                <a href={gradingSubmission.file} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">{language === 'ar' ? 'عرض الملف' : 'View File'}</a>
+                <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400 mb-1">{t('homework.attachedFile')}</p>
+                <a href={gradingSubmission.file} target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">{t('homework.viewFile')}</a>
               </div>
             )}
             <form onSubmit={handleGrade} className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة' : 'Score'} (/{viewingHomework?.total_marks})</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.score')} (/{viewingHomework?.total_marks})</label>
                 <input required type="number" min="0" max={viewingHomework?.total_marks} value={gradeForm.score} onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })} className={inputCls} />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ملاحظات' : 'Feedback'}</label>
-                <textarea value={gradeForm.feedback} onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })} className={inputCls} rows={4} placeholder={language === 'ar' ? 'أضف ملاحظات...' : 'Add feedback...'} />
+                <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('homework.feedback')}</label>
+                <textarea value={gradeForm.feedback} onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })} className={inputCls} rows={4} placeholder={t('homework.feedbackPlaceholder')} />
               </div>
               <div className="flex items-center gap-3 pt-2">
                 <button type="submit" disabled={gradeSaving} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
                   {gradeSaving ? (
                     <><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>{t('common.saving')}</>
                   ) : (
-                    <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{language === 'ar' ? 'حفظ التقييم' : 'Save Grade'}</>
+                    <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t('homework.saveGrade')}</>
                   )}
                 </button>
                 <button type="button" onClick={() => setShowGradeModal(false)} className="btn-press rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300 transition-colors hover:bg-[var(--color-border)] dark:hover:bg-gray-600">{t('common.cancel')}</button>

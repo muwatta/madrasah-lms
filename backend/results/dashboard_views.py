@@ -88,6 +88,7 @@ class TeacherStudentPerformanceView(APIView):
         performance_data = []
         for attempt in attempts:
             performance_data.append({
+                'id': attempt.id,
                 'quiz_title': attempt.quiz.title,
                 'subject': attempt.quiz.subject.name_ar,
                 'score': float(attempt.score) if attempt.score is not None else None,
@@ -103,6 +104,7 @@ class TeacherStudentPerformanceView(APIView):
         exam_data = []
         for result in exam_results:
             exam_data.append({
+                'id': result.id,
                 'exam_title': result.exam.title,
                 'subject': result.exam.subject.name_ar,
                 'score': float(result.score),

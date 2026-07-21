@@ -36,65 +36,65 @@ export const authAPI = {
 };
 
 export const subjectAPI = {
-  list: () => api.get('/subjects/'),
-  get: (id: number) => api.get(`/subjects/${id}/`),
-  create: (data: any) => api.post('/subjects/', data),
-  update: (id: number, data: any) => api.put(`/subjects/${id}/`, data),
-  delete: (id: number) => api.delete(`/subjects/${id}/`),
-  getTopics: (subjectId: number) => api.get(`/subjects/${subjectId}/topics/`),
-  createTopic: (subjectId: number, data: any) =>
-    api.post(`/subjects/${subjectId}/topics/`, data),
+  list: () => api.get('/curriculum/'),
+  get: (id: number | string) => api.get(`/curriculum/${id}/`),
+  create: (data: any) => api.post('/curriculum/', data),
+  update: (id: number | string, data: any) => api.put(`/curriculum/${id}/`, data),
+  delete: (id: number | string) => api.delete(`/curriculum/${id}/`),
+  getTopics: (subjectId: number | string) => api.get(`/curriculum/${subjectId}/topics/`),
+  createTopic: (subjectId: number | string, data: any) =>
+    api.post(`/curriculum/${subjectId}/topics/`, data),
 };
 
 export const schoolClassAPI = {
-  list: () => api.get('/subjects/classes/'),
+  list: () => api.get('/curriculum/classes/'),
 };
 
 export const questionAPI = {
-  list: (params?: any) => api.get('/questions/', { params }),
-  get: (id: number) => api.get(`/questions/${id}/`),
-  create: (data: any) => api.post('/questions/', data),
-  update: (id: number, data: any) => api.put(`/questions/${id}/`, data),
-  delete: (id: number) => api.delete(`/questions/${id}/`),
+  list: (params?: any) => api.get('/assessments/questions/', { params }),
+  get: (id: number) => api.get(`/assessments/questions/${id}/`),
+  create: (data: any) => api.post('/assessments/questions/', data),
+  update: (id: number, data: any) => api.put(`/assessments/questions/${id}/`, data),
+  delete: (id: number) => api.delete(`/assessments/questions/${id}/`),
   bulkUpload: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post('/questions/bulk-upload/', formData, {
+    return api.post('/assessments/questions/bulk-upload/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
 };
 
 export const quizAPI = {
-  list: (params?: any) => api.get('/quizzes/', { params }),
-  get: (id: number) => api.get(`/quizzes/${id}/`),
-  create: (data: any) => api.post('/quizzes/', data),
-  update: (id: number, data: any) => api.put(`/quizzes/${id}/`, data),
-  delete: (id: number) => api.delete(`/quizzes/${id}/`),
-  publish: (id: number) => api.post(`/quizzes/${id}/publish/`),
-  analytics: (id: number) => api.get(`/quizzes/${id}/analytics/`),
+  list: (params?: any) => api.get('/assessments/quizzes/', { params }),
+  get: (id: number) => api.get(`/assessments/quizzes/${id}/`),
+  create: (data: any) => api.post('/assessments/quizzes/', data),
+  update: (id: number, data: any) => api.put(`/assessments/quizzes/${id}/`, data),
+  delete: (id: number) => api.delete(`/assessments/quizzes/${id}/`),
+  publish: (id: number) => api.post(`/assessments/quizzes/${id}/publish/`),
+  analytics: (id: number) => api.get(`/assessments/quizzes/${id}/analytics/`),
 };
 
 export const attemptAPI = {
-  start: (quizId: number) => api.post('/quiz-attempts/', { quiz: quizId }),
+  start: (quizId: number) => api.post('/assessments/quiz-attempts/', { quiz: quizId }),
   submit: (attemptId: number, answers: Record<string, string>) =>
-    api.put(`/quiz-attempts/${attemptId}/submit/`, { answers }),
-  get: (attemptId: number) => api.get(`/quiz-attempts/${attemptId}/`),
-  myAttempts: () => api.get('/my-attempts/'),
+    api.put(`/assessments/quiz-attempts/${attemptId}/submit/`, { answers }),
+  get: (attemptId: number) => api.get(`/assessments/quiz-attempts/${attemptId}/`),
+  myAttempts: () => api.get('/assessments/my-attempts/'),
 };
 
 export const examAPI = {
-  list: (params?: any) => api.get('/exams/', { params }),
-  get: (id: number) => api.get(`/exams/${id}/`),
-  create: (data: any) => api.post('/exams/', data),
-  update: (id: number, data: any) => api.put(`/exams/${id}/`, data),
-  delete: (id: number) => api.delete(`/exams/${id}/`),
-  getResults: (examId: number) => api.get(`/exams/${examId}/results/`),
+  list: (params?: any) => api.get('/results/exams/', { params }),
+  get: (id: number) => api.get(`/results/exams/${id}/`),
+  create: (data: any) => api.post('/results/exams/', data),
+  update: (id: number, data: any) => api.put(`/results/exams/${id}/`, data),
+  delete: (id: number) => api.delete(`/results/exams/${id}/`),
+  getResults: (examId: number) => api.get(`/results/exams/${examId}/results/`),
   recordResult: (examId: number, data: any) =>
-    api.post(`/exams/${examId}/results/`, data),
+    api.post(`/results/exams/${examId}/results/`, data),
   bulkUpload: (examId: number, results: any[]) =>
-    api.post(`/exams/${examId}/results/bulk/`, { results }),
-  myResults: () => api.get('/student/exams/'),
+    api.post(`/results/exams/${examId}/results/bulk/`, { results }),
+  myResults: () => api.get('/results/my-exams/'),
 };
 
 export const enrollmentAPI = {
@@ -105,43 +105,43 @@ export const enrollmentAPI = {
 };
 
 export const dashboardAPI = {
-  student: () => api.get('/student/dashboard/'),
-  studentProgress: () => api.get('/student/progress/'),
-  teacher: () => api.get('/teacher/dashboard/'),
+  student: () => api.get('/dashboard/student/'),
+  studentProgress: () => api.get('/assessments/progress/'),
+  teacher: () => api.get('/dashboard/teacher/'),
   teacherStudentPerformance: (studentId: number) =>
-    api.get(`/teacher/student/${studentId}/performance/`),
-  parent: () => api.get('/parent/dashboard/'),
-  admin: () => api.get('/admin/dashboard/'),
-  board: () => api.get('/board/dashboard/'),
+    api.get(`/dashboard/teacher/student/${studentId}/performance/`),
+  parent: () => api.get('/dashboard/parent/'),
+  admin: () => api.get('/dashboard/admin/'),
+  board: () => api.get('/dashboard/board/'),
 };
 
 export const userAPI = {
-  list: (params?: any) => api.get('/auth/', { params }),
-  get: (id: number) => api.get(`/auth/${id}/`),
+  list: (params?: any) => api.get('/users/', { params }),
+  get: (id: number) => api.get(`/users/${id}/`),
   create: (data: any) => api.post('/auth/register/', data),
-  update: (id: number, data: any) => api.put(`/auth/${id}/`, data),
-  delete: (id: number) => api.delete(`/auth/${id}/`),
+  update: (id: number, data: any) => api.put(`/users/${id}/`, data),
+  delete: (id: number) => api.delete(`/users/${id}/`),
   bulkImport: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return api.post('/auth/bulk-import/', formData, {
+    return api.post('/users/bulk-import/', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
 };
 
 export const messageAPI = {
-  list: (params?: any) => api.get('/auth/messages/', { params }),
-  get: (id: number) => api.get(`/auth/messages/${id}/`),
-  create: (data: any) => api.post('/auth/messages/', data),
-  unreadCount: () => api.get('/auth/messages/unread-count/'),
-  parentStudents: () => api.get('/auth/parent-students/'),
-  teacherParents: () => api.get('/auth/teacher-parents/'),
+  list: (params?: any) => api.get('/users/messages/', { params }),
+  get: (id: number) => api.get(`/users/messages/${id}/`),
+  create: (data: any) => api.post('/users/messages/', data),
+  unreadCount: () => api.get('/users/messages/unread-count/'),
+  parentStudents: () => api.get('/users/parent-students/'),
+  teacherParents: () => api.get('/users/teacher-parents/'),
 };
 
 export const interventionAPI = {
-  alerts: () => api.get('/auth/intervention-alerts/'),
-  engagement: () => api.get('/auth/admin-engagement/'),
+  alerts: () => api.get('/users/intervention-alerts/'),
+  engagement: () => api.get('/users/admin-engagement/'),
 };
 
 export const schoolAPI = {

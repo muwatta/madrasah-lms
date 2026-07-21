@@ -5,7 +5,7 @@ from rest_framework import status
 @pytest.mark.django_db
 class TestTeacherDashboard:
     def test_teacher_dashboard(self, teacher_client):
-        response = teacher_client.get('/api/teacher/dashboard/')
+        response = teacher_client.get('/api/v1/dashboard/teacher/')
         assert response.status_code == status.HTTP_200_OK
         assert 'total_students' in response.data
         assert 'total_quizzes' in response.data
@@ -15,7 +15,7 @@ class TestTeacherDashboard:
 @pytest.mark.django_db
 class TestAdminDashboard:
     def test_admin_dashboard(self, auth_client):
-        response = auth_client.get('/api/admin/dashboard/')
+        response = auth_client.get('/api/v1/dashboard/admin/')
         assert response.status_code == status.HTTP_200_OK
         assert 'total_users' in response.data
         assert 'total_students' in response.data
@@ -24,7 +24,7 @@ class TestAdminDashboard:
 @pytest.mark.django_db
 class TestParentDashboard:
     def test_parent_dashboard(self, parent_client):
-        response = parent_client.get('/api/parent/dashboard/')
+        response = parent_client.get('/api/v1/dashboard/parent/')
         assert response.status_code == status.HTTP_200_OK
         assert 'children' in response.data
 
@@ -33,7 +33,7 @@ class TestParentDashboard:
 class TestBoardDashboard:
     def test_board_dashboard(self, client, board_user):
         client.force_authenticate(user=board_user)
-        response = client.get('/api/board/dashboard/')
+        response = client.get('/api/v1/dashboard/board/')
         assert response.status_code == status.HTTP_200_OK
         assert 'total_students' in response.data
         assert 'teacher_effectiveness' in response.data

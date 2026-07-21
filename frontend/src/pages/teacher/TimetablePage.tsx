@@ -16,10 +16,9 @@ interface TimetableSlot {
 }
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-const DAYS_AR = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
 
 export default function TimetablePage() {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const [slots, setSlots] = useState<TimetableSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,7 +26,7 @@ export default function TimetablePage() {
   useEffect(() => {
     academicAPI.teacherTimetable()
       .then((res) => setSlots(res.data))
-      .catch(() => setError('Failed to load timetable'))
+      .catch(() => setError(t('timetable.loadFailed')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -53,9 +52,9 @@ export default function TimetablePage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'جدول الحصص' : 'My Timetable'}</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('nav.timetable')}</h1>
       </div>
-      <p className="mb-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'جدول الحصص الدراسية' : 'Your weekly class schedule'}</p>
+      <p className="mb-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('timetable.subtitle')}</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{error}</div>
@@ -63,7 +62,7 @@ export default function TimetablePage() {
 
       {slots.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 py-16 text-center">
-          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'لا توجد حصص مجدولة' : 'No classes scheduled'}</p>
+          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{t('calendar.noClasses')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-[var(--color-border)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm">
@@ -71,7 +70,7 @@ export default function TimetablePage() {
             <thead>
               <tr className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50">
                 <th className="sticky end-0 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-4 py-3 text-end text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400 w-24">
-                  {language === 'ar' ? 'اليوم' : 'Day'}
+                  {t('timetable.day')}
                 </th>
                 {Array.from({ length: 9 }, (_, i) => (
                   <th key={i} className="px-3 py-3 text-center text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400 min-w-[110px]">
@@ -84,7 +83,7 @@ export default function TimetablePage() {
               {groupedSlots.map((daySlots, dayIdx) => (
                 <tr key={dayIdx} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
                   <td className="sticky end-0 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-4 py-3 text-xs font-semibold text-[var(--color-text-secondary)] dark:text-gray-300 whitespace-nowrap">
-                    {language === 'ar' ? DAYS_AR[dayIdx] : DAYS[dayIdx]}
+                    {t('timetable.' + DAYS[dayIdx])}
                   </td>
                   {Array.from({ length: 9 }, (_, periodIdx) => {
                     const hour = 8 + periodIdx;

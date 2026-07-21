@@ -71,7 +71,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function QuranPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<number | null>(null);
   const [records, setRecords] = useState<MemorizationRecord[]>([]);
@@ -171,9 +171,9 @@ export default function QuranPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-2">
-        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'القرآن الكريم' : 'Quran Memorization'}</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('quranSection.title')}</h1>
       </div>
-      <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mb-6">{language === 'ar' ? 'تتبع تحفيظ الطلاب وتقييم التجويد' : 'Track student memorization and tajweed assessment'}</p>
+      <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mb-6">{t('guides.quran')}</p>
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
@@ -183,13 +183,13 @@ export default function QuranPage() {
       )}
 
       <div className="mb-6">
-        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'اختر الطالب' : 'Select Student'}</label>
+        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('filters.chooseStudent')}</label>
         <select
           value={selectedStudent ?? ''}
           onChange={(e) => setSelectedStudent(Number(e.target.value) || null)}
           className={`${inputCls} sm:max-w-xs`}
         >
-          <option value="">{language === 'ar' ? '-- اختر طالب --' : '-- Select a student --'}</option>
+          <option value="">-- {t('filters.chooseStudent')} --</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>{s.name}</option>
           ))}
@@ -208,15 +208,15 @@ export default function QuranPage() {
           {progress && (
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
-                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إجمالي السور' : 'Total Surahs'}</p>
+                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.totalSurahs')}</p>
                 <p className="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{progress.total_surahs}</p>
               </div>
               <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
-                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إجمالي الآيات' : 'Total Ayahs'}</p>
+                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.totalAyahs')}</p>
                 <p className="mt-1 text-2xl font-bold text-blue-600 dark:text-blue-400">{progress.total_ayahs}</p>
               </div>
               <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
-                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'متوسط الدرجات' : 'Average Score'}</p>
+                <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('student.averageScore')}</p>
                 <p className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{progress.average_score.toFixed(1)}%</p>
               </div>
             </div>
@@ -231,7 +231,7 @@ export default function QuranPage() {
                   activeTab === tab ? 'bg-[var(--color-bg-primary)] dark:bg-gray-800 text-[var(--color-text-primary)] dark:text-gray-100 shadow-sm' : 'text-[var(--color-text-muted)] dark:text-gray-400 hover:text-[var(--color-text-secondary)] dark:hover:text-gray-300'
                 }`}
               >
-                {tab === 'records' ? (language === 'ar' ? 'التحفيظ' : 'Memorization') : tab === 'revisions' ? (language === 'ar' ? 'المراجعات' : 'Revisions') : (language === 'ar' ? 'التجويد' : 'Tajwid')}
+                {tab === 'records' ? t('quranSection.memorisation') : tab === 'revisions' ? t('quranSection.revision') : t('quranSection.tajweed')}
               </button>
             ))}
           </div>
@@ -239,13 +239,13 @@ export default function QuranPage() {
           {activeTab === 'records' && (
             <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3">
-                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'سجلات التحفيظ' : 'Memorization Records'}</h2>
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{t('quranSection.memorisationRecords')}</h2>
                 <button
                   onClick={() => setShowForm(!showForm)}
                   className="btn-press inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700"
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                  {language === 'ar' ? 'إضافة سجل' : 'Add Record'}
+                  {t('quranSection.addRecord')}
                 </button>
               </div>
 
@@ -253,7 +253,7 @@ export default function QuranPage() {
                 <div className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-primary-50/30 dark:bg-primary-900/10 px-6 py-4">
                   <form onSubmit={handleCreateRecord} className="grid grid-cols-1 gap-3 sm:grid-cols-6">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'السورة' : 'Surah'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.surah')}</label>
                       <select value={form.surah} onChange={(e) => setForm({ ...form, surah: Number(e.target.value) })}
                         className={`${inputCls} w-full`}>
                         {SURAH_NAMES.map((name, i) => (
@@ -262,22 +262,22 @@ export default function QuranPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'من آية' : 'From Ayah'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.fromAyah')}</label>
                       <input type="number" min={1} value={form.ayah_start} onChange={(e) => setForm({ ...form, ayah_start: Number(e.target.value) })}
                         className={`${inputCls} w-full`} />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'إلى آية' : 'To Ayah'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.toAyah')}</label>
                       <input type="number" min={1} value={form.ayah_end} onChange={(e) => setForm({ ...form, ayah_end: Number(e.target.value) })}
                         className={`${inputCls} w-full`} />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.date')}</label>
                       <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })}
                         className={`${inputCls} w-full`} />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة' : 'Score'}</label>
+                      <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.score')}</label>
                       <input type="number" min={0} max={100} value={form.score} onChange={(e) => setForm({ ...form, score: Number(e.target.value) })}
                         className={`${inputCls} w-full`} />
                     </div>
@@ -289,7 +289,7 @@ export default function QuranPage() {
                     </div>
                   </form>
                   <div className="mt-2">
-                    <input type="text" placeholder={language === 'ar' ? 'ملاحظات...' : 'Notes...'} value={form.notes}
+                    <input type="text" placeholder={t('common.remarks')} value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
                       className={inputCls} />
                   </div>
@@ -297,17 +297,17 @@ export default function QuranPage() {
               )}
 
               {records.length === 0 ? (
-                <p className="p-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد سجلات بعد' : 'No records yet'}</p>
+                <p className="p-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400 text-center">{t('quranSection.noRecords')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                     <thead>
                       <tr>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'السورة' : 'Surah'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الآيات' : 'Ayah Range'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة' : 'Score'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'ملاحظات' : 'Notes'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.surah')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.ayahRange')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.date')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.score')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.notes')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
@@ -336,19 +336,19 @@ export default function QuranPage() {
           {activeTab === 'revisions' && (
             <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
               <div className="border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3">
-                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'المراجعات القادمة' : 'Upcoming Revisions'}</h2>
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{t('quranSection.upcomingRevisions')}</h2>
               </div>
               {revisions.length === 0 ? (
-                <p className="p-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400 text-center">{language === 'ar' ? 'لا توجد مراجعات قادمة' : 'No upcoming revisions'}</p>
+                <p className="p-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400 text-center">{t('quranSection.noRevisions')}</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
                     <thead>
                       <tr>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'السورة' : 'Surah'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الآيات' : 'Ayah Range'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ المجدول' : 'Scheduled Date'}</th>
-                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الإجراء' : 'Action'}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.surah')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.ayahRange')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.scheduledDate')}</th>
+                        <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:text-gray-400">{t('common.actions')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700/50">
@@ -363,7 +363,7 @@ export default function QuranPage() {
                               className="btn-press inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
                             >
                               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                              {language === 'ar' ? 'مكتمل' : 'Complete'}
+                              {t('quranSection.complete')}
                             </button>
                           </td>
                         </tr>
@@ -378,13 +378,13 @@ export default function QuranPage() {
           {activeTab === 'tajwid' && (
             <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between border-b border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-secondary)] dark:bg-gray-700/50 px-6 py-3">
-                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'تقييم التجويد' : 'Tajwid Assessment'}</h2>
+                <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{t('quranSection.tajweed')}</h2>
                 <button
                   onClick={() => setShowTajwidForm(!showTajwidForm)}
                   className="btn-press inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-700"
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                  {language === 'ar' ? 'تقييم جديد' : 'New Assessment'}
+                  {t('quranSection.newAssessment')}
                 </button>
               </div>
 
@@ -393,12 +393,12 @@ export default function QuranPage() {
                   <form onSubmit={handleCreateTajwid} className="space-y-3">
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'التاريخ' : 'Date'}</label>
+                        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.date')}</label>
                         <input type="date" value={tajwidForm.date} onChange={(e) => setTajwidForm({ ...tajwidForm, date: e.target.value })}
                           className={`${inputCls} w-full`} />
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'الدرجة الكلية' : 'Overall Score'}</label>
+                        <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('character.overallScore')}</label>
                         <input type="number" min={0} max={100} value={tajwidForm.overall_score}
                           onChange={(e) => setTajwidForm({ ...tajwidForm, overall_score: Number(e.target.value) })}
                           className={`${inputCls} w-full`} />
@@ -412,10 +412,10 @@ export default function QuranPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                       {[
-                        { key: 'makharij_score', label: language === 'ar' ? 'المخارج' : 'Makharij' },
-                        { key: 'sifaat_score', label: language === 'ar' ? 'الصفات' : 'Sifaat' },
-                        { key: 'ghunnah_score', label: language === 'ar' ? 'الغنة' : 'Ghunnah' },
-                        { key: 'qalqalah_score', label: language === 'ar' ? 'القلقلة' : 'Qalqalah' },
+                        { key: 'makharij_score', label: t('quranSection.makharij') },
+                        { key: 'sifaat_score', label: t('quranSection.sifaat') },
+                        { key: 'ghunnah_score', label: t('quranSection.ghunnah') },
+                        { key: 'qalqalah_score', label: t('quranSection.qalqalah') },
                       ].map(({ key, label }) => (
                         <div key={key}>
                           <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{label}</label>
@@ -427,7 +427,7 @@ export default function QuranPage() {
                       ))}
                     </div>
                     <div>
-                      <input type="text" placeholder={language === 'ar' ? 'ملاحظات...' : 'Notes...'} value={tajwidForm.notes}
+                      <input type="text" placeholder={t('common.remarks')} value={tajwidForm.notes}
                         onChange={(e) => setTajwidForm({ ...tajwidForm, notes: e.target.value })}
                         className={inputCls} />
                     </div>
@@ -436,7 +436,7 @@ export default function QuranPage() {
               )}
 
               <div className="p-6 text-center">
-                <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{language === 'ar' ? 'بيانات التقييم ستظهر هنا بعد الإنشاء' : 'Assessment data will appear here once created'}</p>
+                <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('quranSection.assessmentPlaceholder')}</p>
               </div>
             </div>
           )}
@@ -448,7 +448,7 @@ export default function QuranPage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg-secondary)] dark:bg-gray-700">
             <svg className="h-8 w-8 text-[var(--color-text-muted)] dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
           </div>
-          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{language === 'ar' ? 'اختر طالبًا لعرض التفاصيل' : 'Select a student to view details'}</p>
+          <p className="text-sm font-medium text-[var(--color-text-primary)] dark:text-gray-100">{t('teacher.selectStudent')}</p>
         </div>
       )}
     </div>

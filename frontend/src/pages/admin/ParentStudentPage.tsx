@@ -34,7 +34,7 @@ export default function ParentStudentPage() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      api.get('/auth/student-parents/').then((r) => setLinks(unwrapPaginated<StudentParentLink>(r.data))),
+      api.get('/users/student-parents/').then((r) => setLinks(unwrapPaginated<StudentParentLink>(r.data))),
       userAPI.list({ role: 'student' }).then((r) => setStudents(unwrapPaginated<User>(r.data))),
       userAPI.list({ role: 'parent' }).then((r) => setParents(unwrapPaginated<User>(r.data))),
     ])
@@ -49,7 +49,7 @@ export default function ParentStudentPage() {
     setFormError(null);
     setSaving(true);
     try {
-      await api.post('/auth/student-parents/', {
+      await api.post('/users/student-parents/', {
         student: Number(form.student),
         parent: Number(form.parent),
         relationship: form.relationship,
@@ -72,7 +72,7 @@ export default function ParentStudentPage() {
     if (confirmDeleteLinkId === null) return;
     setDeleteError(null);
     try {
-      await api.delete(`/auth/student-parents/${confirmDeleteLinkId}/`);
+      await api.delete(`/users/student-parents/${confirmDeleteLinkId}/`);
       setConfirmDeleteLinkId(null);
       loadData();
     } catch {
