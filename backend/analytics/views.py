@@ -79,12 +79,12 @@ class TeacherWorkloadListView(generics.ListAPIView):
         data = []
         for teacher in teachers:
             data.append({
-                'teacher': teacher.id,
+                'teacher': teacher.id,  # type: ignore[attr-defined]
                 'teacher_name': teacher.get_full_name(),
-                'lesson_plans_count': hw_count_map.get(teacher.id, 0),
-                'homework_count': hw_count_map.get(teacher.id, 0),
-                'ungraded_submissions_count': ungraded_map.get(teacher.id, 0),
-                'upcoming_lessons': upcoming_map.get(teacher.id, 0),
+                'lesson_plans_count': hw_count_map.get(teacher.id, 0),  # type: ignore[attr-defined]
+                'homework_count': hw_count_map.get(teacher.id, 0),  # type: ignore[attr-defined]
+                'ungraded_submissions_count': ungraded_map.get(teacher.id, 0),  # type: ignore[attr-defined]
+                'upcoming_lessons': upcoming_map.get(teacher.id, 0),  # type: ignore[attr-defined]
             })
 
         return Response(data)
@@ -119,7 +119,7 @@ class TeacherWorkloadMeView(APIView):
         ).count()
 
         return Response({
-            'teacher': user.id,
+            'teacher': user.id,  # type: ignore[attr-defined]
             'teacher_name': user.get_full_name(),
             'lesson_plans_count': lesson_plans,
             'homework_count': homework_count,
@@ -296,7 +296,7 @@ class AdminDashboardView(APIView):
             madrasah=madrasah,
         ).select_related('recipient')[:5]
         notifications_data = [{
-            'id': n.id,
+            'id': n.id,  # type: ignore[attr-defined]
             'title': n.title,
             'message': n.message,
             'type': n.notification_type,
