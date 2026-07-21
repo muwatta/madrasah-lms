@@ -315,6 +315,26 @@ input, select, textarea {
   @apply border border-[var(--color-border)];
 }
 
+select {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+select option {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+.dark select {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+.dark select option {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
 /* TipTap editor styles */
 .ProseMirror {
   min-height: 120px;
