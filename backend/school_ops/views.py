@@ -357,13 +357,21 @@ class AttendanceAnalyticsView(APIView):
             student_attendance = Attendance.objects.filter(student=user, date__gte=week_ago)
             total = student_attendance.count()
             present = student_attendance.filter(status='present').count()
+            absent = student_attendance.filter(status='absent').count()
             late = student_attendance.filter(status='late').count()
+            excused = student_attendance.filter(status='excused').count()
+            recent = student_attendance.order_by('-date')[:10].values('id', 'date', 'status')
             return Response({
                 'total_days': total,
-                'present': present,
-                'late': late,
-                'absent': total - present - late,
-                'attendance_rate': round((present / total) * 100, 1) if total > 0 else 0,
+                'days_present': present,
+                'days_absent': absent,
+                'days_late': late,
+                'days_excused': excused,
+                'weekly_rate': round((present / total) * 100, 1) if total > 0 else 0,
+                'recent_records': [
+                    {'id': r['id'], 'date': r['date'].isoformat(), 'status': r['status']}
+                    for r in recent
+                ],
             })
 
         if user.role == 'parent':
