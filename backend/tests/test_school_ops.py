@@ -6,6 +6,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 from users.models import User, Madrasah, StudentParent
+from users.authentication import generate_tokens
 from curriculum.models import Subject, Topic, Enrollment, SchoolClass
 from school_ops.models import (
     FeeStructure, Fee, FeePayment, Attendance, Announcement, Notification, AttendanceQRScan,
@@ -21,11 +22,8 @@ def api_client():
 @pytest.fixture
 def auth_client(api_client):
     def _auth(user):
-        response = api_client.post('/api/auth/login/', {
-            'email': user.email,
-            'password': 'testpass123',
-        })
-        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + response.data['tokens']['access'])
+        tokens = generate_tokens(user)
+        api_client.credentials(HTTP_AUTHORIZATION='Bearer ' + tokens['access'])
         return api_client
     return _auth
 

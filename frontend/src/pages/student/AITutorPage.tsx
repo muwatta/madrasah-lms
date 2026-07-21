@@ -49,9 +49,87 @@ export default function AITutorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editText, setEditText] = useState('');
+  const [speakingId, setSpeakingId] = useState<number | null>(null);
+  const [listening, setListening] = useState(false);
+  const [voiceLang, setVoiceLang] = useState<'ar' | 'en'>('ar');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const speak = (id: number, text: string) => {
+    if (speakingId === id) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]*>/g, ''));
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.onend = () => setSpeakingId(null);
+    utterance.onerror = () => setSpeakingId(null);
+    window.speechSynthesis.speak(utterance);
+    setSpeakingId(id);
+  };
+
+  const toggleListening = async () => {
+    if (listening) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      setError('Microphone access denied. Allow microphone permissions and try again.');
+      return;
+    }
+
+    audioChunksRef.current = [];
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunksRef.current.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach((t) => t.stop());
+      const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      if (blob.size < 100) return;
+
+      setListening(false);
+      setSending(true);
+      const fd = new FormData();
+      fd.append('audio', blob, 'recording.webm');
+      try {
+        const res = await guidanceAPI.tutor.transcribe(fd);
+        setInput((prev) => prev + (prev ? ' ' : '') + res.data.text);
+      } catch {
+        setError('Transcription failed. Try again.');
+      } finally {
+        setSending(false);
+      }
+    };
+
+    mediaRecorder.start();
+    setListening(true);
+  };
+
+  const clearChat = async () => {
+    try {
+      await guidanceAPI.tutor.clearHistory();
+    } catch {}
+    setSessions([]);
+    setSessionId(null);
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const editInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -147,7 +225,78 @@ export default function AITutorPage() {
       setError(err.response?.data?.detail || err.response?.data?.error || 'Failed to get response');
     } finally {
       setSending(false);
+      setEditIndex(null);
+      setEditText('');
       inputRef.current?.focus();
+    }
+  };
+
+  const handleEditSend = async (index: number) => {
+    const text = editText.trim();
+    if (!text || sending || editIndex === null) return;
+
+    setSending(true);
+    setError('');
+
+    const session = sessions[index];
+    const originalSessions = sessions.slice();
+
+    setSessions((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], question: text };
+      return next.slice(0, index + 1);
+    });
+
+    const payload: { question: string; subject_id?: number; session_id?: string; files?: File[] } = {
+      question: text,
+    };
+    if (subjectId) payload.subject_id = subjectId;
+    if (session.session_id) payload.session_id = session.session_id;
+
+    try {
+      const res = await guidanceAPI.tutor.ask(payload);
+      const newSession: TutorSession = res.data;
+      setSessions((prev) => {
+        const next = [...prev];
+        const idx = next.findIndex((s) => s.id === session.id);
+        if (idx !== -1) {
+          next[idx] = { ...newSession, question: text };
+          return next.slice(0, idx + 1);
+        }
+        return next;
+      });
+    } catch (err: any) {
+      setSessions(originalSessions);
+      setError(err.response?.data?.detail || err.response?.data?.error || 'Failed to get response');
+    } finally {
+      setSending(false);
+      setEditIndex(null);
+      setEditText('');
+      inputRef.current?.focus();
+    }
+  };
+
+  const startEdit = (index: number) => {
+    setEditIndex(index);
+    setEditText(sessions[index].question);
+    setTimeout(() => {
+      editInputRef.current?.focus();
+      editInputRef.current?.setSelectionRange(editInputRef.current.value.length, editInputRef.current.value.length);
+    }, 50);
+  };
+
+  const cancelEdit = () => {
+    setEditIndex(null);
+    setEditText('');
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleEditSend(index);
+    }
+    if (e.key === 'Escape') {
+      cancelEdit();
     }
   };
 
@@ -178,11 +327,25 @@ export default function AITutorPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-5rem)] max-w-4xl mx-auto px-4">
       {/* Header */}
-      <div className="py-4 shrink-0">
-        <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">AI Tutor</h1>
-        <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mt-0.5">
-          Ask questions, upload files (images, docs, PDFs), and get AI-powered explanations
-        </p>
+      <div className="py-4 shrink-0 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">AI Tutor</h1>
+          <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400 mt-0.5">
+            Ask questions, upload files (images, docs, PDFs), and get AI-powered explanations
+          </p>
+        </div>
+        {sessions.length > 0 && (
+          <button
+            onClick={clearChat}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[var(--color-border)] dark:border-gray-600 text-xs text-[var(--color-text-muted)] dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-400 transition-colors shrink-0 mt-1"
+            title="Clear all messages"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            </svg>
+            Clear
+          </button>
+        )}
       </div>
 
       {/* Chat area */}
@@ -204,7 +367,10 @@ export default function AITutorPage() {
               </p>
             </div>
           ) : (
-            [...sessions].reverse().map((session) => (
+            [...sessions].reverse().map((session, idx) => {
+              const realIdx = sessions.length - 1 - idx;
+              const isEditing = editIndex === realIdx;
+              return (
               <div key={session.id} className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700/50 overflow-hidden">
                 {/* Question */}
                 <div className="bg-[var(--color-bg-secondary)] dark:bg-gray-700/30 px-4 py-3 border-b border-[var(--color-border-light)] dark:border-gray-700/50">
@@ -215,7 +381,7 @@ export default function AITutorPage() {
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap group">
                         <span className="text-xs font-semibold text-[var(--color-text-primary)] dark:text-gray-100">You</span>
                         <span className="text-[10px] text-[var(--color-text-muted)] dark:text-gray-500">{formatTime(session.created_at)}</span>
                         {session.subject_name && (
@@ -223,8 +389,57 @@ export default function AITutorPage() {
                             {session.subject_name}
                           </span>
                         )}
+                        <button
+                          onClick={() => startEdit(realIdx)}
+                          className="ml-auto text-[var(--color-text-muted)] dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Edit message"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                          </svg>
+                        </button>
                       </div>
-                      <p className="text-sm text-[var(--color-text-primary)] dark:text-gray-100 mt-1">{session.question}</p>
+                      {isEditing ? (
+                        <div className="mt-2">
+                          <textarea
+                            ref={editInputRef}
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            onKeyDown={(e) => handleEditKeyDown(e, realIdx)}
+                            className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent resize-none"
+                            rows={3}
+                            disabled={sending}
+                          />
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              onClick={() => handleEditSend(realIdx)}
+                              disabled={!editText.trim() || sending}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-medium hover:bg-emerald-600 disabled:opacity-40 transition-colors"
+                            >
+                              {sending ? (
+                                <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                              ) : (
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                                </svg>
+                              )}
+                              Save & Resend
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              className="px-3 py-1.5 rounded-lg border border-[var(--color-border)] dark:border-gray-600 text-xs text-[var(--color-text-muted)] dark:text-gray-400 hover:text-[var(--color-text-primary)] dark:hover:text-gray-100 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <span className="text-[10px] text-[var(--color-text-muted)] dark:text-gray-500 ml-auto">Ctrl+Enter to send</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-[var(--color-text-primary)] dark:text-gray-100 mt-1">{session.question}</p>
+                      )}
                       {session.attachments && session.attachments.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           {session.attachments.map((att) => (
@@ -254,7 +469,25 @@ export default function AITutorPage() {
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">AI Tutor</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">AI Tutor</span>
+                        <button
+                          onClick={() => speak(session.id, session.response)}
+                          className="text-[var(--color-text-muted)] dark:text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                          title={speakingId === session.id ? 'Stop' : 'Read aloud'}
+                        >
+                          {speakingId === session.id ? (
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563h-.874A.562.562 0 019 14.437V9.563zM12 9.563C12 9.252 12.252 9 12.563 9h.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563h-.874A.562.562 0 0112 14.437V9.563z" />
+                            </svg>
+                          ) : (
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
                       <div className="prose prose-sm dark:prose-invert max-w-none mt-1 text-[var(--color-text-secondary)] dark:text-gray-300 leading-relaxed [&_strong]:text-[var(--color-text-primary)] [&_strong]:dark:text-gray-100 [&_h3]:text-[var(--color-text-primary)] [&_h3]:dark:text-gray-100 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-0.5 [&_code]:bg-gray-200/70 [&_code]:dark:bg-gray-600 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_p]:mb-1.5 [&_p:last-child]:mb-0 [&_a]:text-emerald-600 [&_a]:dark:text-emerald-400">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{session.response}</ReactMarkdown>
                       </div>
@@ -262,7 +495,8 @@ export default function AITutorPage() {
                   </div>
                 </div>
               </div>
-            ))
+            );
+            })
           )}
 
           <div ref={messagesEndRef} />
@@ -363,6 +597,33 @@ export default function AITutorPage() {
               onChange={handleFileSelect}
               className="hidden"
             />
+
+            {/* Voice input button */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={toggleListening}
+                disabled={sending}
+                className={`flex items-center justify-center rounded-xl border p-2.5 transition-colors ${
+                  listening
+                    ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 animate-pulse'
+                    : 'border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 text-[var(--color-text-muted)] dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:border-emerald-400'
+                } disabled:opacity-40`}
+                title={listening ? `Recording... tap to stop` : `Voice input (${voiceLang === 'ar' ? 'العربية' : 'English'})`}
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVoiceLang((v) => (v === 'ar' ? 'en' : 'ar'))}
+                className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 text-[9px] font-bold text-[var(--color-text-muted)] dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                title={voiceLang === 'ar' ? 'Switch to English' : 'Switch to Arabic'}
+              >
+                {voiceLang === 'ar' ? 'EN' : 'ع'}
+              </button>
+            </div>
 
             <div className="relative flex-1">
               <input

@@ -461,3 +461,28 @@ class AITutorSessionListView(APIView):
 
         serializer = AITutorSessionSerializer(qs, many=True)
         return Response(serializer.data)
+
+    def delete(self, request):
+        user = request.user
+        qs = AITutorSession.objects.filter(madrasah=user.madrasah)
+        if user.role == 'student':
+            qs = qs.filter(student=user)
+        count, _ = qs.delete()
+        return Response({'deleted': count})
+
+
+class TranscribeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        audio_file = request.FILES.get('audio')
+        if not audio_file:
+            return Response({'error': 'No audio file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        svc = AIService()
+        try:
+            transcript = svc.transcribe_audio(audio_file)
+            return Response({'text': transcript})
+        except Exception as e:
+            logger.error("[Transcribe] Error: %s", e)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

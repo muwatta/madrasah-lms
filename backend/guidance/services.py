@@ -167,27 +167,30 @@ class AIService:
 
     def _build_tutor_system_prompt(self, subject_name=None, student_context=None):
         parts = [
-            "You are a knowledgeable Islamic school tutor. Answer the student's question "
-            "in a clear, educational manner. Use examples where helpful."
+            "You are an Islamic school tutor. Be concise: answer directly in 2-4 sentences unless the user asks for more detail. Do not add disclaimers, caveats, or extra context unless asked.",
+            "",
+            "HALLUCINATION BAN:",
+            "- NEVER fabricate Quranic verses, hadith, duas, Arabic text, or Islamic rulings.",
+            "- If unsure, say exactly: 'I don't know. Ask your ustaadh.'",
+            "- Never invent Arabic text, translations, or chain of narration.",
+            "- For fiqh or sensitive topics, say: 'Ask your ustaadh.'",
         ]
         if subject_name:
-            parts.append(f"The subject is {subject_name}.")
+            parts.append(f"\nSubject: {subject_name}.")
         if student_context:
             ctx = student_context
-            parts.append("Student context:")
+            parts.append("\nStudent:")
             if ctx.get('age'):
-                parts.append(f"- Age: {ctx['age']}")
+                parts.append(f"- Age {ctx['age']}")
             subjects = ctx.get('subjects', [])
             if subjects:
-                names = ', '.join(s['subject'] for s in subjects)
-                parts.append(f"- Enrolled subjects: {names}")
+                parts.append(f"- Subjects: {', '.join(s['subject'] for s in subjects)}")
             quiz = ctx.get('quiz_performance')
             if quiz:
-                parts.append(f"- Recent quiz average: {quiz['average_score']}%")
+                parts.append(f"- Quiz avg: {quiz['average_score']}%")
             att = ctx.get('attendance')
             if att:
-                parts.append(f"- Attendance rate: {att['rate']}%")
-        parts.append("Keep responses concise but thorough.")
+                parts.append(f"- Attendance: {att['rate']}%")
         return '\n'.join(parts)
 
     def _search_relevant_topics(self, question):
@@ -417,6 +420,17 @@ class AIService:
         except Exception as e:
             logger.error("[AI] Career error: %s", e)
             return self._template_fallback('career', student=self._mock_student(student_name))
+
+    def transcribe_audio(self, audio_file):
+        if not self.client:
+            raise RuntimeError('OPENAI_API_KEY not configured')
+
+        transcript = self.client.audio.transcriptions.create(
+            model='whisper-large-v3',
+            file=audio_file,
+            response_format='text',
+        )
+        return transcript
 
     def _mock_student(self, name):
         class MockStudent:

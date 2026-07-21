@@ -8,4 +8,5 @@ urlpatterns = [
     path('tutor/history/', views.AITutorSessionListView.as_view(), name='tutor-history'),
     path('student-summary/', views.StudentSummaryView.as_view(), name='student-summary'),
     path('student-summary/<int:student_id>/', views.StudentSummaryView.as_view(), name='student-summary-detail'),
+    path('transcribe/', views.TranscribeView.as_view(), name='transcribe'),
 ]

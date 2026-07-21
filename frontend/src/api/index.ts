@@ -380,6 +380,8 @@ export const guidanceAPI = {
       return api.post('/guidance/tutor/ask/', data);
     },
     history: () => api.get('/guidance/tutor/history/'),
+    clearHistory: () => api.delete('/guidance/tutor/history/'),
+    transcribe: (fd: FormData) => api.post('/guidance/transcribe/', fd, { headers: { 'Content-Type': 'multipart/form-data' } }),
   },
 };
 
