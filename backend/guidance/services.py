@@ -427,7 +427,7 @@ class AIService:
 
         transcript = self.client.audio.transcriptions.create(
             model='whisper-large-v3',
-            file=audio_file,
+            file=('audio.webm', audio_file.read(), audio_file.content_type),
             response_format='text',
         )
         return transcript
