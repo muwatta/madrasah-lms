@@ -106,8 +106,8 @@ export const resultsAPI = {
     createComponent: (data: any) => api.post('/results/components/', data),
     updateComponent: (id: number, data: any) => api.put(`/results/components/${id}/`, data),
     deleteComponent: (id: number) => api.delete(`/results/components/${id}/`),
-    scores: (params?: any) => api.get('/results/scores/', { params }),
-    bulkScores: (componentId: number, data: any) => api.post(`/results/scores/bulk/${componentId}/`, data),
+    scores: (params?: any) => api.get('/results/legacy-scores/', { params }),
+    bulkScores: (componentId: number, data: any) => api.post(`/results/legacy-scores/bulk/${componentId}/`, data),
     submit: (data: any) => api.post('/results/teacher/submit/', data),
   },
   admin: {

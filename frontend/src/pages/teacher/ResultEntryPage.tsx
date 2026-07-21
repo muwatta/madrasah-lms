@@ -87,12 +87,14 @@ export default function ResultEntryPage() {
   const [saving, setSaving] = useState<Record<number, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
+  const [loadErrors, setLoadErrors] = useState<string[]>([])
 
   useEffect(() => {
+    const errors: string[] = []
     Promise.allSettled([
-      academicAPI.sessions.list(),
-      isTeacher ? enrollmentAPI.teacherClasses() : schoolClassAPI.list(),
-      resultsAPI.teacher.subjects(),
+      academicAPI.sessions.list().catch(e => { errors.push(`Sessions: ${e.response?.statusText || e.message}`); throw e }),
+      isTeacher ? enrollmentAPI.teacherClasses().catch(e => { errors.push(`Classes: ${e.response?.statusText || e.message}`); throw e }) : schoolClassAPI.list().catch(e => { errors.push(`Classes: ${e.response?.statusText || e.message}`); throw e }),
+      resultsAPI.teacher.subjects().catch(e => { errors.push(`Subjects: ${e.response?.statusText || e.message}`); throw e }),
     ]).then(([sessionsRes, classesRes, subjectsRes]) => {
       if (sessionsRes.status === 'fulfilled') {
         const allSessions = unwrapPaginated<Session>(sessionsRes.value.data)
@@ -107,6 +109,7 @@ export default function ResultEntryPage() {
       if (subjectsRes.status === 'fulfilled') {
         setSubjects(unwrapPaginated(subjectsRes.value.data))
       }
+      if (errors.length > 0) setLoadErrors(errors)
     })
   }, [isTeacher])
 
@@ -265,6 +268,13 @@ export default function ResultEntryPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="mb-2 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('results.resultEntry')}</h1>
       <p className="mb-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('guides.resultEntry')}</p>
+
+      {loadErrors.length > 0 && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <p className="font-medium mb-1">Failed to load data:</p>
+          <ul className="list-disc list-inside">{loadErrors.map((e, i) => <li key={i}>{e}</li>)}</ul>
+        </div>
+      )}
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <select

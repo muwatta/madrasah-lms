@@ -53,7 +53,7 @@ class TeacherWorkloadListView(generics.ListAPIView):
         from users.models import User
         from lessons.models import Homework, HomeworkSubmission
 
-        madrasah = request.user.madrasah  # pyright: ignore[reportAttributeAccessIssue]
+        madrasah = request.user.madrasah
         today = date.today()
         week_end = today + timedelta(days=(6 - today.weekday()))
 
