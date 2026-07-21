@@ -1,10 +1,5 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from rest_framework import generics, status, permissions
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import AtRiskPrediction, SkillAssessment, DigitalPortfolio
@@ -13,21 +8,16 @@ from .serializers import (
 )
 from config.permissions import IsMudeer, IsStaff
 
-if TYPE_CHECKING:
-    from users.models import User
-
-
 
 class AtRiskPredictionListView(generics.ListAPIView):
     serializer_class = AtRiskPredictionSerializer
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
 
     def get_queryset(self):
-        user: User = self.request.user  # type: ignore[assignment]
         qs = AtRiskPrediction.objects.filter(
-            madrasah=user.madrasah, is_active=True,
+            madrasah=self.request.user.madrasah, is_active=True,  # type: ignore[attr-defined]
         ).select_related('student')
-        risk_level = self.request.query_params.get('risk_level')
+        risk_level = self.request.query_params.get('risk_level')  # type: ignore[attr-defined]
         if risk_level:
             qs = qs.filter(risk_level=risk_level)
         return qs
@@ -38,17 +28,15 @@ class AtRiskPredictionDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
 
     def get_queryset(self):
-        user: User = self.request.user  # type: ignore[assignment]
-        return AtRiskPrediction.objects.filter(madrasah=user.madrasah).select_related('student')
+        return AtRiskPrediction.objects.filter(madrasah=self.request.user.madrasah).select_related('student')  # type: ignore[attr-defined]
 
 
 class GenerateAtRiskPredictionsView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
 
-    def post(self, request: Request) -> Response:
-        user: User = request.user  # type: ignore[assignment]
+    def post(self, request):
         from .tasks import generate_at_risk_predictions
-        generate_at_risk_predictions.delay(madrasah_id=user.madrasah_id)
+        generate_at_risk_predictions.delay(madrasah_id=request.user.madrasah_id)  # type: ignore[attr-defined]
         return Response({
             'message': 'At-risk prediction generation started',
         }, status=status.HTTP_202_ACCEPTED)
@@ -57,16 +45,15 @@ class GenerateAtRiskPredictionsView(APIView):
 
 class TeacherWorkloadListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
-    serializer_class = AtRiskPredictionSerializer  
+    serializer_class = AtRiskPredictionSerializer
 
-    def list(self, request: Request, *args, **kwargs) -> Response:
+    def list(self, request, *args, **kwargs):
         from datetime import date, timedelta
         from django.db.models import Count
-        from users.models import User as UserModel
+        from users.models import User
         from lessons.models import Homework, HomeworkSubmission
 
-        user: User = request.user  # type: ignore[assignment]
-        madrasah = user.madrasah
+        madrasah = request.user.madrasah  # type: ignore[attr-defined]
         today = date.today()
         week_end = today + timedelta(days=(6 - today.weekday()))
 
@@ -106,15 +93,15 @@ class TeacherWorkloadListView(generics.ListAPIView):
 class TeacherWorkloadMeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request: Request) -> Response:
-        user: User = request.user  # type: ignore[assignment]
-        if user.role not in ('ustaadh', 'mudeer', 'idaarah'):
+    def get(self, request):
+        user = request.user
+        if user.role not in ('ustaadh', 'mudeer', 'idaarah'):  # type: ignore[attr-defined]
             return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
         from datetime import date, timedelta
         from lessons.models import Homework, HomeworkSubmission
 
-        madrasah = user.madrasah
+        madrasah = user.madrasah  # type: ignore[attr-defined]
         today = date.today()
         week_end = today + timedelta(days=(6 - today.weekday()))
 
@@ -146,21 +133,21 @@ class SkillAssessmentListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user: User = self.request.user  # type: ignore[assignment]
-        qs = SkillAssessment.objects.filter(madrasah=user.madrasah).select_related('student', 'teacher')
-        if user.role == 'student':
+        user = self.request.user
+        qs = SkillAssessment.objects.filter(madrasah=user.madrasah).select_related('student', 'teacher')  # type: ignore[attr-defined]
+        if user.role == 'student':  # type: ignore[attr-defined]
             qs = qs.filter(student=user)
-        student_id = self.request.query_params.get('student')
+        student_id = self.request.query_params.get('student')  # type: ignore[attr-defined]
         if student_id:
             qs = qs.filter(student_id=student_id)
         return qs
 
     def perform_create(self, serializer):
-        user: User = self.request.user  # type: ignore[assignment]
-        if user.role not in ('mudeer', 'ustaadh', 'idaarah'):
+        user = self.request.user
+        if user.role not in ('mudeer', 'ustaadh', 'idaarah'):  # type: ignore[attr-defined]
             raise PermissionDenied()
-        teacher = user if user.role == 'ustaadh' else None
-        serializer.save(madrasah=user.madrasah, teacher=teacher)
+        teacher = user if user.role == 'ustaadh' else None  # type: ignore[attr-defined]
+        serializer.save(madrasah=user.madrasah, teacher=teacher)  # type: ignore[attr-defined]
 
 
 class SkillAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -168,15 +155,14 @@ class SkillAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user: User = self.request.user  # type: ignore[assignment]
-        qs = SkillAssessment.objects.filter(madrasah=user.madrasah)
-        if user.role == 'student':
+        user = self.request.user
+        qs = SkillAssessment.objects.filter(madrasah=user.madrasah)  # type: ignore[attr-defined]
+        if user.role == 'student':  # type: ignore[attr-defined]
             qs = qs.filter(student=user)
         return qs
 
     def perform_destroy(self, instance):
-        user: User = self.request.user  # type: ignore[assignment]
-        if user.role not in ('mudeer', 'ustaadh', 'idaarah'):
+        if self.request.user.role not in ('mudeer', 'ustaadh', 'idaarah'):  # type: ignore[attr-defined]
             raise PermissionDenied()
         instance.delete()
 
@@ -187,21 +173,21 @@ class DigitalPortfolioListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user: User = self.request.user  # type: ignore[assignment]
-        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah).select_related('student')
-        if user.role == 'student':
+        user = self.request.user
+        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah).select_related('student')  # type: ignore[attr-defined]
+        if user.role == 'student':  # type: ignore[attr-defined]
             qs = qs.filter(student=user)
-        student_id = self.request.query_params.get('student')
+        student_id = self.request.query_params.get('student')  # type: ignore[attr-defined]
         if student_id:
             qs = qs.filter(student_id=student_id)
         return qs
 
     def perform_create(self, serializer):
-        user: User = self.request.user  # type: ignore[assignment]
-        if user.role == 'student':
-            serializer.save(madrasah=user.madrasah, student=user)
-        elif user.role in ('mudeer', 'idaarah'):
-            serializer.save(madrasah=user.madrasah)
+        user = self.request.user
+        if user.role == 'student':  # type: ignore[attr-defined]
+            serializer.save(madrasah=user.madrasah, student=user)  # type: ignore[attr-defined]
+        elif user.role in ('mudeer', 'idaarah'):  # type: ignore[attr-defined]
+            serializer.save(madrasah=user.madrasah)  # type: ignore[attr-defined]
         else:
             raise PermissionDenied()
 
@@ -211,15 +197,14 @@ class DigitalPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user: User = self.request.user  # type: ignore[assignment]
-        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah)
-        if user.role == 'student':
+        user = self.request.user
+        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah)  # type: ignore[attr-defined]
+        if user.role == 'student':  # type: ignore[attr-defined]
             qs = qs.filter(student=user)
         return qs
 
     def perform_destroy(self, instance):
-        user: User = self.request.user  # type: ignore[assignment]
-        if user.role not in ('mudeer', 'idaarah') and instance.student != user:
+        if self.request.user.role not in ('mudeer', 'idaarah') and instance.student != self.request.user:  # type: ignore[attr-defined]
             raise PermissionDenied()
         instance.delete()
 
@@ -229,20 +214,19 @@ class DigitalPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
 class AdminDashboardView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
 
-    def get(self, request: Request) -> Response:
+    def get(self, request):
         from datetime import date, timedelta
         from django.utils import timezone
         from django.db.models import Sum, F, Avg
         from django.db.models.functions import Coalesce
         from decimal import Decimal
-        from users.models import User as UserModel
+        from users.models import User
         from school_ops.models import Attendance, Fee, FeePayment, Notification
         from lessons.models import HomeworkSubmission
         from assessments.models import QuizAttempt
         from results.models import Exam
 
-        user: User = request.user  # type: ignore[assignment]
-        madrasah = user.madrasah
+        madrasah = request.user.madrasah  # type: ignore[attr-defined]
         today = date.today()
         now = timezone.now()
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
