@@ -78,7 +78,7 @@ export default function CharacterPage() {
   };
 
   const getCategoryLabel = (category: string) => {
-    const key = `character.categories.${category}` as any;
+    const key = `character.categories.${category}`;
     const label = t(key);
     return label === key ? category : label;
   };

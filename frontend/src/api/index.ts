@@ -133,6 +133,7 @@ export const enrollmentAPI = {
   create: (data: any) => api.post('/enrollments/', data),
   myEnrollments: () => api.get('/enrollments/my/'),
   teacherStudents: () => api.get('/enrollments/teacher/students/'),
+  teacherClasses: () => api.get('/enrollments/teacher/classes/'),
 };
 
 export const dashboardAPI = {

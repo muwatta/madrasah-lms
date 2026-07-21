@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
-import { attendanceAPI, enrollmentAPI } from '../../api';
+import { attendanceAPI, enrollmentAPI, userAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import { Skeleton, SkeletonTable } from '../../components/Skeleton';
 
 type Status = 'present' | 'absent' | 'late' | 'excused';
@@ -36,6 +37,8 @@ function getToday() {
 
 export default function AttendancePage() {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const isTeacher = user?.role === 'ustaadh';
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,17 +50,36 @@ export default function AttendancePage() {
 
   const loadStudents = useCallback(() => {
     setLoading(true);
-    enrollmentAPI.teacherStudents()
+    const promise = isTeacher
+      ? enrollmentAPI.teacherStudents()
+      : userAPI.list({ role: 'student' });
+
+    promise
       .then((res) => {
-        const list = unwrapPaginated<Student>(res.data);
+        const raw = unwrapPaginated<any>(res.data);
+        const list = (isTeacher ? raw : raw.map((u: any) => ({
+              id: u.id,
+              student_id: u.id,
+              student_name: u.full_name,
+              student_email: u.email || '',
+              subject: 0,
+              subject_name: '',
+            }))).map((s: any) => ({
+              id: s.id ?? s.student,
+              student_id: s.student_id ?? s.student,
+              student_name: s.student_name,
+              student_email: s.student_email,
+              subject: s.subject ?? 0,
+              subject_name: s.subject_name ?? '',
+            }));
         setStudents(list);
         const initial: Record<number, Status> = {};
-        list.forEach((s) => { initial[s.student_id] = 'present'; });
+        list.forEach((s: Student) => { initial[s.student_id] = 'present'; });
         setMarks(initial);
       })
       .catch(() => setError(t('attendance.loadStudentsFailed')))
       .finally(() => setLoading(false));
-  }, [t]);
+  }, [t, isTeacher]);
 
   const loadExistingAttendance = useCallback(() => {
     attendanceAPI.list({ date })
@@ -175,7 +197,7 @@ export default function AttendancePage() {
 
           {students.map((student, idx) => (
             <div
-              key={student.student_id}
+              key={student.student_id ?? student.id}
               className="opacity-0 animate-slide-up flex flex-col gap-3 border-b border-[var(--color-border-light)] dark:border-gray-700/50 px-6 py-4 sm:grid sm:grid-cols-[1fr_auto_auto_auto_auto] sm:items-center sm:gap-0 last:border-b-0 hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30"
               style={{ animationDelay: `${idx * 40}ms` }}
             >

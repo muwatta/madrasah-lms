@@ -35,7 +35,7 @@ api.interceptors.response.use(
           sessionStorage.setItem('access_token', access);
           originalRequest.headers.Authorization = `Bearer ${access}`;
           return api(originalRequest);
-        } catch (refreshError) {
+        } catch {
           sessionStorage.removeItem('access_token');
           sessionStorage.removeItem('refresh_token');
           window.location.href = '/login';

@@ -4,6 +4,15 @@ import { unwrapPaginated } from '../../api/client';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useLanguage } from '../../context/LanguageContext';
 
+declare global {
+  interface Window {
+    Html5Qrcode: new (elementId: string) => {
+      start: (config: { facingMode: string }, options: { fps: number; qrbox: { width: number; height: number } }, onScan: (text: string) => void, onError: () => void) => Promise<void>;
+      stop: () => Promise<void>;
+    };
+  }
+}
+
 interface SchoolClass {
   id: number;
   name_ar: string;
@@ -73,7 +82,7 @@ export default function QRScannerPage() {
 
   // Dynamic script load
   useEffect(() => {
-    if (typeof (window as any).Html5Qrcode !== 'undefined') {
+    if (typeof window.Html5Qrcode !== 'undefined') {
       setLibLoaded(true);
       return;
     }
@@ -133,7 +142,7 @@ export default function QRScannerPage() {
         await scannerRef.current.stop().catch(() => {});
       }
 
-      const Html5QrcodeClass = (window as any).Html5Qrcode;
+      const Html5QrcodeClass = window.Html5Qrcode;
       const html5QrCode = new Html5QrcodeClass('qr-reader');
       scannerRef.current = html5QrCode;
       setScannerActive(true);

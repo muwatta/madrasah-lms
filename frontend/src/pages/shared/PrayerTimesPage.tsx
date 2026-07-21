@@ -53,7 +53,7 @@ function toInputDate(d: Date) {
 export default function PrayerTimesPage() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
-  const isAdmin = user?.role === 'mudeer';
+  const canManage = user?.role === 'mudeer' || user?.role === 'idaarah';
 
   const [today, setToday] = useState<PrayerTime | null>(null);
   const [yesterday, setYesterday] = useState<PrayerTime | null>(null);
@@ -74,13 +74,13 @@ export default function PrayerTimesPage() {
 
     Promise.all([
       quranAPI.prayerTimes.today().catch(() => ({ data: null as PrayerTime | null })),
-      quranAPI.prayerTimes.list({ date: todayStr }).catch(() => ({ data: [] as any })),
-      quranAPI.prayerTimes.list({ date: yesterdayStr }).catch(() => ({ data: [] as any })),
+      quranAPI.prayerTimes.list({ date: todayStr }).catch(() => ({ data: [] as PrayerTime[] })),
+      quranAPI.prayerTimes.list({ date: yesterdayStr }).catch(() => ({ data: [] as PrayerTime[] })),
     ])
       .then(([todayRes, todayListRes, yesterdayListRes]) => {
-        const today = todayRes as unknown as { data: PrayerTime | null };
-        const todayList = todayListRes as unknown as { data: any };
-        const yesterdayList = yesterdayListRes as unknown as { data: any };
+        const today = todayRes as { data: PrayerTime | null };
+        const todayList = todayListRes as { data: PrayerTime[] };
+        const yesterdayList = yesterdayListRes as { data: PrayerTime[] };
         if (today.data) {
           setToday(today.data);
         } else {
@@ -120,8 +120,9 @@ export default function PrayerTimesPage() {
       const todayStr = toInputDate(new Date());
       if (formDate === todayStr) {
         const res = await quranAPI.prayerTimes.today().catch(() => quranAPI.prayerTimes.list({ date: todayStr }));
-        const data = (res as any).data;
-        setToday(data.results ? data.results[0] : data);
+        const data = res.data as PrayerTime | PrayerTime[];
+        const pt = Array.isArray(data) ? data[0] : data;
+        setToday(pt);
       }
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1;
@@ -162,7 +163,7 @@ export default function PrayerTimesPage() {
         </div>
       )}
 
-      {isAdmin && (
+      {canManage && (
         <div className="mb-6">
           <button
             onClick={() => setShowForm(!showForm)}
@@ -219,7 +220,7 @@ export default function PrayerTimesPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={PRAYER_ICONS[key]} />
                   </svg>
                   <p className="text-xs font-medium">{PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}</p>
-                  <p className="mt-1 text-lg font-bold">{(today as any)[key]}</p>
+                  <p className="mt-1 text-lg font-bold">{today[key]}</p>
                 </div>
               ))}
             </div>
@@ -238,7 +239,7 @@ export default function PrayerTimesPage() {
               {PRAYER_KEYS.map((key) => (
                 <div key={key} className="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-3 text-center">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{PRAYER_LABELS[key][language === 'ar' ? 'ar' : 'en']}</p>
-                  <p className="mt-1 text-lg font-bold text-gray-700 dark:text-gray-300">{(yesterday as any)[key]}</p>
+                  <p className="mt-1 text-lg font-bold text-gray-700 dark:text-gray-300">{yesterday[key]}</p>
                 </div>
               ))}
             </div>
@@ -288,7 +289,7 @@ export default function PrayerTimesPage() {
                         {isToday && <span className="ms-2 inline-block rounded-full bg-primary-100 dark:bg-primary-900/30 px-2 py-0.5 text-[10px] font-semibold text-primary-700 dark:text-primary-400">{language === 'ar' ? 'اليوم' : 'Today'}</span>}
                       </td>
                       {PRAYER_KEYS.map((key) => (
-                        <td key={key} className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{(pt as any)[key]}</td>
+                        <td key={key} className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{pt[key]}</td>
                       ))}
                     </tr>
                   );

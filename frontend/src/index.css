@@ -310,6 +310,11 @@ input, select, textarea {
   @apply transition-shadow duration-200 ease-out;
 }
 
+/* Ensure select text is readable across colour schemes */
+.input-field {
+  @apply border border-[var(--color-border)];
+}
+
 /* TipTap editor styles */
 .ProseMirror {
   min-height: 120px;

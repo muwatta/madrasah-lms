@@ -44,6 +44,11 @@ export const translations = {
     atRisk: { ar: 'في خطر', en: 'At Risk' },
     teacherWorkload: { ar: 'عبء المعلم', en: 'Teacher Workload' },
     alerts: { ar: 'تنبيهات', en: 'Alerts' },
+    qrScanner: { ar: 'الماسح الضوئي', en: 'QR Scanner' },
+    resultsEntry: { ar: 'إدخال النتائج', en: 'Results Entry' },
+    childResults: { ar: 'نتائج أبنائي', en: 'Child Results' },
+    publishResults: { ar: 'نشر النتائج', en: 'Publish Results' },
+    myExamResults: { ar: 'نتائج الامتحانات', en: 'My Exam Results' },
   },
   // Roles
   roles: {
@@ -595,6 +600,7 @@ export const translations = {
     progress: { ar: 'تابع رحلة تعلمك: إحصائيات شاملة، اتجاهات الأداء، والتقدم في كل مادة.', en: 'Track your learning journey: comprehensive stats, performance trends, and subject progress.' },
     portfolio: { ar: 'اعرض إنجازاتك وأعمالك. وثّق مسيرتك التعليمية.', en: 'Showcase your achievements and work. Document your educational journey.' },
     quran: { ar: 'تتبع حفظ القرآن الكريم والمراجعة. سجل التقدم في الحفظ والتجويد.', en: 'Track Quran memorisation and revision. Record hifdh and tajweed progress.' },
+    resultEntry: { ar: 'أدخل نتائج الطلاب في كل مكون. سجل الدرجات والملاحظات.', en: 'Enter student scores for each component. Record grades and remarks.' },
     character: { ar: 'قيّم وطوّر الجوانب الشخصية والخلقية للطلاب.', en: 'Assess and develop students\' character and personal qualities.' },
   },
   // Bulk upload
@@ -1107,6 +1113,12 @@ export const translations = {
     generateComponents: { ar: 'توليد المكونات', en: 'Generate Components' },
     noComponents: { ar: 'لم يتم إنشاء مكونات بعد. انقر فوق توليد المكونات.', en: 'No components yet. Click Generate Components.' },
     weight: { ar: 'الوزن', en: 'Weight' },
+    maxScore: { ar: 'الدرجة القصوى', en: 'Max Score' },
+    scoresEntered: { ar: 'درجات مدخلة', en: 'Scores Entered' },
+    noStudents: { ar: 'لا يوجد طلاب مسجلون في هذه المادة', en: 'No students enrolled in this subject' },
+    noStudentsForClass: { ar: 'لا يوجد طلاب في هذا الفصل', en: 'No students in this class' },
+    selectYear: { ar: 'اختر السنة الدراسية', en: 'Select Academic Year' },
+    selectClass: { ar: 'اختر الفصل', en: 'Select Class' },
     student: { ar: 'الطالب', en: 'Student' },
     score: { ar: 'الدرجة', en: 'Score' },
     remarks: { ar: 'ملاحظات', en: 'Remarks' },

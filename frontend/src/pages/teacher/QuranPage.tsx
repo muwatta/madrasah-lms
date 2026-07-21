@@ -217,7 +217,7 @@ export default function QuranPage() {
               </div>
               <div className="rounded-xl border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
                 <p className="text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('student.averageScore')}</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{progress.average_score.toFixed(1)}%</p>
+                <p className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{(progress.average_score ?? 0).toFixed(1)}%</p>
               </div>
             </div>
           )}
@@ -412,15 +412,15 @@ export default function QuranPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                       {[
-                        { key: 'makharij_score', label: t('quranSection.makharij') },
-                        { key: 'sifaat_score', label: t('quranSection.sifaat') },
-                        { key: 'ghunnah_score', label: t('quranSection.ghunnah') },
-                        { key: 'qalqalah_score', label: t('quranSection.qalqalah') },
+                        { key: 'makharij_score' as const, label: t('quranSection.makharij') },
+                        { key: 'sifaat_score' as const, label: t('quranSection.sifaat') },
+                        { key: 'ghunnah_score' as const, label: t('quranSection.ghunnah') },
+                        { key: 'qalqalah_score' as const, label: t('quranSection.qalqalah') },
                       ].map(({ key, label }) => (
                         <div key={key}>
                           <label className="mb-1 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{label}</label>
                           <input type="number" min={0} max={100}
-                            value={(tajwidForm as any)[key]}
+                            value={tajwidForm[key]}
                             onChange={(e) => setTajwidForm({ ...tajwidForm, [key]: Number(e.target.value) })}
                             className={`${inputCls} w-full`} />
                         </div>

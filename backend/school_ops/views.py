@@ -463,12 +463,14 @@ class AnnouncementListView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         role = user.role
+        qs = Announcement.objects.filter(madrasah=user.madrasah)
+
+        if role in ('mudeer', 'idaarah'):
+            return qs.select_related('created_by')
+
         role_map = {'ustaadh': 'teachers', 'student': 'students', 'parent': 'parents'}
         audience_key = role_map.get(role, 'all')
-
-        return Announcement.objects.filter(
-            madrasah=user.madrasah,
-        ).filter(
+        return qs.filter(
             Q(audience='all') | Q(audience=audience_key)
         ).select_related('created_by')
 

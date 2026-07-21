@@ -1,53 +1,196 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
-import { resultsAPI } from '../../api'
+import { useAuth } from '../../context/AuthContext'
+import { resultsAPI, enrollmentAPI, academicAPI, schoolClassAPI } from '../../api'
+import { unwrapPaginated } from '../../api/client'
 import toast from 'react-hot-toast'
+
+interface Subject {
+  id: number
+  name_ar: string
+  name_en: string
+  code?: string
+}
+
+interface Term {
+  id: number
+  name: string
+  hijri_start?: string
+  hijri_end?: string
+}
+
+interface Session {
+  id: number
+  name: string
+  hijri_year?: number
+  is_current: boolean
+}
+
+interface SchoolClass {
+  id: number
+  name_ar: string
+  name_en: string
+  order?: number
+}
+
+interface Component {
+  id: number
+  name: string
+  component_type: string
+  max_score: number
+  weight: number
+  score_count: number
+  subject: number
+  term: number
+  school_class: number
+}
+
+interface EnrolledStudent {
+  id: number
+  student: number
+  student_name: string
+  student_email: string
+  school_class: number
+  school_class_name: string
+}
+
+interface StudentScore {
+  student: number
+  score: string
+  remarks: string
+}
 
 export default function ResultEntryPage() {
   const { t } = useLanguage()
+  const { user } = useAuth()
+  const isTeacher = user?.role === 'ustaadh'
 
-  const [subjects, setSubjects] = useState<any[]>([])
-  const [terms, setTerms] = useState<any[]>([])
-  const [selectedSubject, setSelectedSubject] = useState('')
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [selectedSession, setSelectedSession] = useState('')
+
+  const [terms, setTerms] = useState<Term[]>([])
   const [selectedTerm, setSelectedTerm] = useState('')
-  const [components, setComponents] = useState<any[]>([])
-  const [scores, setScores] = useState<Record<string, Record<number, string>>>({})
+
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [selectedSubject, setSelectedSubject] = useState('')
+
+  const [classes, setClasses] = useState<SchoolClass[]>([])
+  const [selectedClass, setSelectedClass] = useState('')
+
+  const [components, setComponents] = useState<Component[]>([])
+  const [students, setStudents] = useState<EnrolledStudent[]>([])
+  const [existingScores, setExistingScores] = useState<Record<number, StudentScore[]>>({})
+  const [scores, setScores] = useState<Record<number, Record<number, string>>>({})
+  const [remarks, setRemarks] = useState<Record<number, Record<number, string>>>({})
   const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [loadingStudents, setLoadingStudents] = useState(false)
+  const [saving, setSaving] = useState<Record<number, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
 
   useEffect(() => {
-    setLoading(true)
-    Promise.all([
-      resultsAPI.teacher.subjects().then(r => setSubjects(r.data)),
-      resultsAPI.teacher.terms().then(r => setTerms(r.data)),
-    ]).finally(() => setLoading(false))
-  }, [])
-
-  const loadComponents = () => {
-    if (!selectedSubject || !selectedTerm) return
-    setLoading(true)
-    resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm })
-      .then(r => setComponents(r.data))
-      .finally(() => setLoading(false))
-  }
+    Promise.allSettled([
+      academicAPI.sessions.list(),
+      isTeacher ? enrollmentAPI.teacherClasses() : schoolClassAPI.list(),
+      resultsAPI.teacher.subjects(),
+    ]).then(([sessionsRes, classesRes, subjectsRes]) => {
+      if (sessionsRes.status === 'fulfilled') {
+        const allSessions = unwrapPaginated<Session>(sessionsRes.value.data)
+        setSessions(allSessions)
+        const current = allSessions.find(s => s.is_current)
+        if (current) setSelectedSession(String(current.id))
+      }
+      if (classesRes.status === 'fulfilled') {
+        const allClasses = unwrapPaginated<SchoolClass>(classesRes.value.data)
+        setClasses(allClasses)
+      }
+      if (subjectsRes.status === 'fulfilled') {
+        setSubjects(unwrapPaginated(subjectsRes.value.data))
+      }
+    })
+  }, [isTeacher])
 
   useEffect(() => {
-    if (selectedSubject && selectedTerm) loadComponents()
-  }, [selectedSubject, selectedTerm])
+    if (!selectedSession) return
+    academicAPI.terms.list({ session: selectedSession })
+      .then(res => setTerms(unwrapPaginated<Term>(res.data)))
+      .catch(() => setTerms([]))
+  }, [selectedSession])
+
+  const loadStudents = useCallback(async () => {
+    if (!selectedSubject || !selectedClass) {
+      setStudents([])
+      return
+    }
+    setLoadingStudents(true)
+    try {
+      const params: Record<string, string> = {
+        subject: selectedSubject,
+        school_class: selectedClass,
+      }
+      if (isTeacher) params.ustaadh = String(user!.id)
+      const res = await enrollmentAPI.list(params)
+      setStudents(unwrapPaginated<any>(res.data))
+    } catch {
+      setStudents([])
+    } finally {
+      setLoadingStudents(false)
+    }
+  }, [selectedSubject, selectedClass, isTeacher, user])
+
+  useEffect(() => {
+    loadStudents()
+  }, [loadStudents])
+
+  const loadComponents = useCallback(() => {
+    if (!selectedSubject || !selectedTerm || !selectedClass) return
+    setLoading(true)
+    resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass })
+      .then(r => setComponents(unwrapPaginated(r.data)))
+      .finally(() => setLoading(false))
+  }, [selectedSubject, selectedTerm, selectedClass])
+
+  useEffect(() => {
+    if (selectedSubject && selectedTerm && selectedClass) loadComponents()
+    else setComponents([])
+  }, [selectedSubject, selectedTerm, selectedClass, loadComponents])
+
+  const loadExistingScores = useCallback(async (componentId: number) => {
+    try {
+      const res = await resultsAPI.teacher.scores({ component: componentId })
+      const scoreList: StudentScore[] = unwrapPaginated(res.data).map((sr: any) => ({
+        student: sr.student,
+        score: String(sr.score),
+        remarks: sr.remarks || '',
+      }))
+      setExistingScores(prev => ({ ...prev, [componentId]: scoreList }))
+
+      const compScores: Record<number, string> = {}
+      const compRemarks: Record<number, string> = {}
+      scoreList.forEach(s => {
+        compScores[s.student] = s.score
+        compRemarks[s.student] = s.remarks
+      })
+      setScores(prev => ({ ...prev, [componentId]: compScores }))
+      setRemarks(prev => ({ ...prev, [componentId]: compRemarks }))
+    } catch {
+      setExistingScores(prev => ({ ...prev, [componentId]: [] }))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (components.length > 0) {
+      components.forEach(c => loadExistingScores(c.id))
+    }
+  }, [components, loadExistingScores])
 
   const handleGenerate = async () => {
-    if (!selectedSubject || !selectedTerm) return
-    const subject = subjects.find(s => String(s.id) === selectedSubject)
-    if (!subject) return
-    const term = terms.find(t => String(t.id) === selectedTerm)
-    if (!term) return
+    if (!selectedSubject || !selectedTerm || !selectedClass) return
     try {
       await resultsAPI.teacher.generateComponents({
         subject: Number(selectedSubject),
         term: Number(selectedTerm),
-        school_class: 1,
+        school_class: Number(selectedClass),
       })
       toast.success(t('results.componentsGenerated'))
       loadComponents()
@@ -63,23 +206,32 @@ export default function ResultEntryPage() {
     }))
   }
 
+  const handleRemarksChange = (componentId: number, studentId: number, value: string) => {
+    setRemarks(prev => ({
+      ...prev,
+      [componentId]: { ...(prev[componentId] || {}), [studentId]: value }
+    }))
+  }
+
   const handleSaveScores = async (componentId: number) => {
     const componentScores = scores[componentId]
+    const componentRemarks = remarks[componentId] || {}
     if (!componentScores) return
-    setSaving(true)
+    setSaving(prev => ({ ...prev, [componentId]: true }))
     try {
-      const payload = {
+      await resultsAPI.teacher.bulkScores(componentId, {
         scores: Object.entries(componentScores).map(([student, score]) => ({
           student,
           score,
+          remarks: componentRemarks[Number(student)] || '',
         }))
-      }
-      await resultsAPI.teacher.bulkScores(componentId, payload)
+      })
       toast.success(t('results.scoresSaved'))
+      loadExistingScores(componentId)
     } catch (e: any) {
       toast.error(e.response?.data?.error || t('results.saveFailed'))
     } finally {
-      setSaving(false)
+      setSaving(prev => ({ ...prev, [componentId]: false }))
     }
   }
 
@@ -99,132 +251,209 @@ export default function ResultEntryPage() {
 
   const getStatus = () => {
     if (components.length === 0) return null
-    const hasScores = components.some(c => c.score_count > 0)
+    const hasScores = components.some(c => (existingScores[c.id]?.length || 0) > 0)
     if (status === 'submitted') return 'submitted'
     if (hasScores) return 'in_progress'
     return 'draft'
   }
 
-  return (
-    <div className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">{t('results.resultEntry')}</h1>
+  const allSelected = selectedSubject && selectedTerm && selectedClass
 
-      <div className="flex gap-4 mb-6">
+  const dropdownCls = 'input-field rounded-lg border px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] dark:bg-gray-800 dark:text-gray-100'
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <h1 className="mb-2 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('results.resultEntry')}</h1>
+      <p className="mb-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('guides.resultEntry')}</p>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <select
-          className="select select-bordered w-full max-w-xs"
+          className={dropdownCls}
+          value={selectedSession}
+          onChange={e => { setSelectedSession(e.target.value); setStatus(null) }}
+        >
+          <option value="">{t('results.selectYear')}</option>
+          {(sessions || []).map(s => (
+            <option key={s.id} value={s.id}>
+              {s.name} {s.is_current ? `(${t('common.current')})` : ''}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className={dropdownCls}
+          value={selectedTerm}
+          onChange={e => { setSelectedTerm(e.target.value); setStatus(null) }}
+        >
+          <option value="">{t('results.selectTerm')}</option>
+          {(terms || []).map(tm => (
+            <option key={tm.id} value={tm.id}>
+              {tm.name} {tm.hijri_start ? `(${tm.hijri_start} - ${tm.hijri_end})` : ''}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className={dropdownCls}
           value={selectedSubject}
-          onChange={e => { setSelectedSubject(e.target.value); setStatus(null); }}
+          onChange={e => { setSelectedSubject(e.target.value); setStatus(null) }}
         >
           <option value="">{t('results.selectSubject')}</option>
-          {subjects.map(s => (
+          {(subjects || []).map(s => (
             <option key={s.id} value={s.id}>{s.name_ar} - {s.name_en}</option>
           ))}
         </select>
 
         <select
-          className="select select-bordered w-full max-w-xs"
-          value={selectedTerm}
-          onChange={e => { setSelectedTerm(e.target.value); setStatus(null); }}
+          className={dropdownCls}
+          value={selectedClass}
+          onChange={e => { setSelectedClass(e.target.value); setStatus(null) }}
         >
-          <option value="">{t('results.selectTerm')}</option>
-          {terms.map(t => (
-            <option key={t.id} value={t.id}>
-              {t.name} {t.hijri_start ? `(${t.hijri_start} - ${t.hijri_end})` : ''}
-            </option>
+          <option value="">{t('results.selectClass')}</option>
+          {(classes || []).map(c => (
+            <option key={c.id} value={c.id}>{c.name_ar} - {c.name_en}</option>
           ))}
         </select>
-
-        {selectedSubject && selectedTerm && (
-          <button className="btn btn-outline btn-sm" onClick={handleGenerate} disabled={loading}>
-            {t('results.generateComponents')}
-          </button>
-        )}
       </div>
 
-      {loading && <div className="text-center py-8"><span className="loading loading-spinner loading-lg"></span></div>}
-
-      {!loading && components.length === 0 && selectedSubject && selectedTerm && (
-        <div className="alert alert-info">{t('results.noComponents')}</div>
+      {allSelected && (
+        <div className="mb-4 flex gap-3">
+          <button
+            onClick={handleGenerate}
+            disabled={loading || students.length === 0}
+            className="btn-press rounded-lg border border-primary-300 px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50"
+          >
+            {t('results.generateComponents')}
+          </button>
+        </div>
       )}
 
-      {components.map(comp => (
-        <div key={comp.id} className="card bg-base-100 shadow-md mb-4">
-          <div className="card-body">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="card-title text-lg">
-                <span className={`badge ${comp.component_type === 'assignment' ? 'badge-info' : comp.component_type === 'test' ? 'badge-warning' : 'badge-error'} mr-2`}>
-                  {comp.component_type}
-                </span>
-                {comp.name}
-                <span className="text-sm font-normal text-base-content/60 ml-2">
-                  ({t('results.weight')}: {comp.weight}%)
-                </span>
-              </h3>
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => handleSaveScores(comp.id)}
-                disabled={saving}
-              >
-                {saving ? <span className="loading loading-spinner loading-xs"></span> : t('common.save')}
-              </button>
-            </div>
+      {loadingStudents && (
+        <div className="mb-4 text-sm text-[var(--color-text-muted)] dark:text-gray-400">
+          {t('common.loading')}...
+        </div>
+      )}
 
-            <div className="overflow-x-auto">
-              <table className="table table-zebra table-sm">
-                <thead>
-                  <tr>
-                    <th className="w-12">#</th>
-                    <th>{t('results.student')}</th>
-                    <th className="w-32">{t('results.score')} / {comp.max_score}</th>
-                    <th className="w-48">{t('results.remarks')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <tr key={i}>
-                      <td>{i + 1}</td>
-                      <td>{t('results.studentPlaceholder')} {i + 1}</td>
-                      <td>
-                        <input
-                          type="number"
-                          className="input input-bordered input-sm w-full"
-                          min="0"
-                          max={comp.max_score}
-                          placeholder="0"
-                          value={scores[comp.id]?.[i] || ''}
-                          onChange={e => handleScoreChange(comp.id, i, e.target.value)}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="text"
-                          className="input input-bordered input-sm w-full"
-                          placeholder={t('results.remarksPlaceholder')}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {loading && (
+        <div className="py-12 text-center text-[var(--color-text-muted)] dark:text-gray-400">
+          <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+          {t('common.loading')}...
+        </div>
+      )}
+
+      {!loading && allSelected && components.length === 0 && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+          {t('results.noComponents')}
+        </div>
+      )}
+
+      {(components || []).map(comp => (
+        <div key={comp.id} className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border-light)] px-6 py-4 dark:border-gray-700">
+            <div className="flex items-center gap-3">
+              <span className="rounded-full px-3 py-0.5 text-xs font-semibold capitalize" style={{ backgroundColor: comp.component_type === 'assignment' ? '#dbeafe' : comp.component_type === 'test' ? '#fef3c7' : '#fee2e2', color: comp.component_type === 'assignment' ? '#1d4ed8' : comp.component_type === 'test' ? '#92400e' : '#991b1b' }}>
+                {comp.component_type}
+              </span>
+              <h3 className="text-base font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{comp.name}</h3>
+              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">
+                ({t('results.weight')}: {comp.weight}%, {t('results.maxScore')}: {comp.max_score})
+              </span>
+              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">
+                ({existingScores[comp.id]?.length || 0}/{students.length} {t('results.scoresEntered')})
+              </span>
             </div>
+            <button
+              onClick={() => handleSaveScores(comp.id)}
+              disabled={saving[comp.id]}
+              className="btn-press rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+            >
+              {saving[comp.id] ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  {t('common.saving')}
+                </span>
+              ) : t('common.save')}
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
+                  <th className="px-4 py-3 text-end">#</th>
+                  <th className="px-4 py-3 text-end">{t('results.student')}</th>
+                  <th className="w-40 px-4 py-3 text-end">{t('results.score')}</th>
+                  <th className="w-56 px-4 py-3 text-end">{t('results.remarks')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
+                {students.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-8 text-center text-[var(--color-text-muted)] dark:text-gray-400">
+                      {t('results.noStudents')}
+                    </td>
+                  </tr>
+                ) : (students || []).map((student, idx) => (
+                  <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                    <td className="px-4 py-2 text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
+                    <td className="px-4 py-2 font-medium text-[var(--color-text-primary)] dark:text-gray-100">
+                      {student.student_name}
+                      <span className="block text-xs text-[var(--color-text-muted)] dark:text-gray-400">{student.student_email}</span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max={comp.max_score}
+                        step="0.5"
+                        value={scores[comp.id]?.[student.student] ?? ''}
+                        onChange={e => handleScoreChange(comp.id, student.student, e.target.value)}
+                        placeholder="0"
+                        className="input-field w-full rounded-lg border px-3 py-1.5 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] dark:bg-gray-800 dark:text-gray-100"
+                      />
+                    </td>
+                    <td className="px-4 py-2">
+                      <input
+                        type="text"
+                        value={remarks[comp.id]?.[student.student] ?? ''}
+                        onChange={e => handleRemarksChange(comp.id, student.student, e.target.value)}
+                        placeholder={t('results.remarksPlaceholder')}
+                        className="input-field w-full rounded-lg border px-3 py-1.5 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] dark:bg-gray-800 dark:text-gray-100"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       ))}
 
       {components.length > 0 && (
-        <div className="flex justify-between items-center mt-6 p-4 bg-base-200 rounded-lg">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{t('results.status')}:</span>
-            <span className={`badge ${getStatus() === 'submitted' ? 'badge-success' : getStatus() === 'in_progress' ? 'badge-info' : 'badge-ghost'}`}>
-              {getStatus() === 'submitted' ? t('results.submitted') : getStatus() === 'in_progress' ? t('results.inProgress') : t('results.draft')}
+            <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('results.status')}:</span>
+            <span className={`rounded-full px-3 py-0.5 text-xs font-semibold ${
+              getStatus() === 'submitted' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+              : getStatus() === 'in_progress' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+            }`}>
+              {getStatus() === 'submitted' ? t('results.submitted')
+                : getStatus() === 'in_progress' ? t('results.inProgress')
+                : t('results.draft')}
             </span>
           </div>
           <button
-            className="btn btn-accent"
             onClick={handleSubmit}
             disabled={submitting || getStatus() === 'submitted'}
+            className="btn-press rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
-            {submitting ? <span className="loading loading-spinner loading-xs"></span> : t('results.submitForReview')}
+            {submitting ? (
+              <span className="flex items-center gap-1.5">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {t('common.saving')}
+              </span>
+            ) : t('results.submitForReview')}
           </button>
         </div>
       )}

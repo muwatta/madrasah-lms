@@ -1,36 +1,77 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
 from . import export_views
 from . import result_views
 
+router = DefaultRouter()
+
+# ── New Workflow ViewSets ─────────────────────────────────────────
+router.register(r'grade-scales', views.GradeScaleViewSet, basename='grade-scale')
+router.register(r'blueprints', views.AssessmentBlueprintViewSet, basename='blueprint')
+router.register(r'assessments', views.AssessmentViewSet, basename='assessment')
+router.register(r'assessment-scores', views.AssessmentScoreViewSet, basename='assessment-score')
+router.register(r'subject-results', views.SubjectResultViewSet, basename='subject-result')
+router.register(r'term-results', views.TermResultViewSet, basename='term-result')
+router.register(r'annual-results', views.AnnualResultViewSet, basename='annual-result')
+router.register(r'ranks', views.StudentRankViewSet, basename='student-rank')
+router.register(r'publications', views.ResultPublicationViewSet, basename='publication')
+router.register(r'report-cards', views.ReportCardViewSet, basename='report-card')
+router.register(r'audit-logs', views.ResultAuditLogViewSet, basename='audit-log')
+
 urlpatterns = [
-    path('exams/', views.ExamListView.as_view(), name='exam-list'),
-    path('exams/<int:pk>/', views.ExamDetailView.as_view(), name='exam-detail'),
-    path('exams/<int:pk>/results/', views.ExamResultListView.as_view(), name='exam-results'),
-    path('exams/<int:pk>/results/bulk/', views.ExamResultsBulkUploadView.as_view(), name='exam-results-bulk'),
-    path('my-exams/', views.StudentExamResultsView.as_view(), name='student-exam-results'),
-    path('export/students/', export_views.ExportStudentPerformanceView.as_view(), name='export-students'),
-    path('export/quizzes/<int:quiz_id>/', export_views.ExportQuizResultsView.as_view(), name='export-quiz-results'),
-    path('export/exams/<int:exam_id>/', export_views.ExportExamResultsView.as_view(), name='export-exam-results'),
+    # ── Explicit paths FIRST to avoid router conflicts ─────────────
 
-    # Teacher result management
-    path('teacher/subjects/', result_views.TeacherSubjectsView.as_view(), name='teacher-subjects'),
-    path('teacher/terms/', result_views.TeacherTermsView.as_view(), name='teacher-terms'),
-    path('components/', result_views.ResultComponentListCreateView.as_view(), name='component-list'),
-    path('components/generate/', result_views.ResultComponentGenerateView.as_view(), name='component-generate'),
-    path('components/<int:pk>/', result_views.ResultComponentDetailView.as_view(), name='component-detail'),
-    path('scores/', result_views.ScoreListView.as_view(), name='score-list'),
-    path('scores/bulk/<int:component_id>/', result_views.ScoreBulkUpdateView.as_view(), name='score-bulk'),
-    path('teacher/submit/', result_views.TeacherTermSubmitView.as_view(), name='teacher-submit'),
+    # ── Bulk operations ────────────────────────────────────────────
+    path('bulk-scores/<int:assessment_id>/',
+         views.BulkScoreUploadView.as_view(), name='bulk-score-upload'),
 
-    # Admin result management
-    path('templates/', result_views.ResultTemplateView.as_view(), name='template-list'),
-    path('templates/<int:pk>/', result_views.ResultTemplateDetailView.as_view(), name='template-detail'),
-    path('templates/<int:template_id>/items/', result_views.ResultTemplateItemBulkView.as_view(), name='template-items'),
-    path('admin/pending/', result_views.PendingResultsView.as_view(), name='admin-pending'),
-    path('admin/publish/', result_views.PublishResultsView.as_view(), name='admin-publish'),
+    # ── Legacy teacher endpoints (backward compatible) ─────────────
+    path('teacher/subjects/',
+         views.TeacherSubjectsView.as_view(), name='teacher-subjects'),
+    path('teacher/terms/',
+         views.TeacherTermsView.as_view(), name='teacher-terms'),
+    path('teacher/submit/',
+         result_views.TeacherTermSubmitView.as_view(), name='teacher-submit'),
 
-    # Student / Parent results
-    path('my-results/', result_views.MyTermResultsView.as_view(), name='my-results'),
-    path('child-results/', result_views.ChildTermResultsView.as_view(), name='child-results'),
+    # ── Legacy template/component endpoints ────────────────────────
+    path('templates/',
+         result_views.ResultTemplateView.as_view(), name='template-list'),
+    path('templates/<int:pk>/',
+         result_views.ResultTemplateDetailView.as_view(), name='template-detail'),
+    path('templates/<int:template_id>/items/',
+         result_views.ResultTemplateItemBulkView.as_view(), name='template-items'),
+    path('components/',
+         result_views.ResultComponentListCreateView.as_view(), name='component-list'),
+    path('components/generate/',
+         result_views.ResultComponentGenerateView.as_view(), name='component-generate'),
+    path('components/<int:pk>/',
+         result_views.ResultComponentDetailView.as_view(), name='component-detail'),
+    path('legacy-scores/',
+         result_views.ScoreListView.as_view(), name='legacy-score-list'),
+    path('legacy-scores/bulk/<int:component_id>/',
+         result_views.ScoreBulkUpdateView.as_view(), name='legacy-score-bulk'),
+
+    # ── Admin result management ────────────────────────────────────
+    path('admin/pending/',
+         result_views.PendingResultsView.as_view(), name='admin-pending'),
+    path('admin/publish/',
+         result_views.PublishResultsView.as_view(), name='admin-publish'),
+
+    # ── Student / Parent results (backward compatible) ─────────────
+    path('my-results/',
+         views.MyTermResultsView.as_view(), name='my-results'),
+    path('child-results/',
+         views.ChildTermResultsView.as_view(), name='child-results'),
+
+    # ── Exports ────────────────────────────────────────────────────
+    path('export/students/',
+         export_views.ExportStudentPerformanceView.as_view(), name='export-students'),
+    path('export/quizzes/<int:quiz_id>/',
+         export_views.ExportQuizResultsView.as_view(), name='export-quiz-results'),
+    path('export/exams/<int:exam_id>/',
+         export_views.ExportExamResultsView.as_view(), name='export-exam-results'),
+
+    # ── Router MUST come after explicit paths ──────────────────────
+    path('', include(router.urls)),
 ]

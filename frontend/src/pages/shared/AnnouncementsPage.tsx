@@ -25,7 +25,7 @@ const audienceColors: Record<string, string> = {
 export default function AnnouncementsPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
-  const isAdmin = user?.role === 'mudeer';
+  const canManage = user?.role === 'mudeer' || user?.role === 'idaarah';
 
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +83,7 @@ export default function AnnouncementsPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('announcements.title')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">{t('announcements.subtitle')}</p>
         </div>
-        {isAdmin && (
+        {canManage && (
           <button
             onClick={() => setShowForm(!showForm)}
             className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
@@ -189,7 +189,7 @@ export default function AnnouncementsPage() {
                   </div>
                   <p className="whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{announcement.message}</p>
                 </div>
-                {isAdmin && (
+                {canManage && (
                   <button onClick={() => handleDelete(announcement.id)}
                     className="shrink-0 rounded-lg p-1.5 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 transition-colors"
                     title={t('announcements.delete')}>

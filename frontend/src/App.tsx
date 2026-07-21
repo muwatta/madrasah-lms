@@ -65,6 +65,7 @@ const CertificatesPage = lazy(() => import('./pages/student/CertificatesPage'));
 const CalendarPage = lazy(() => import('./pages/student/CalendarPage'));
 const TeacherTimetablePage = lazy(() => import('./pages/teacher/TimetablePage'));
 const ResultEntryPage = lazy(() => import('./pages/teacher/ResultEntryPage'));
+const QRScannerPage = lazy(() => import('./pages/teacher/QRScannerPage'));
 const ResultsPublishPage = lazy(() => import('./pages/admin/ResultsPublishPage'));
 const MyResultsPage = lazy(() => import('./pages/student/MyResultsPage'));
 const PricingPage = lazy(() => import('./pages/public/PricingPage'));
@@ -151,6 +152,7 @@ function App() {
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="timetable" element={<TeacherTimetablePage />} />
               <Route path="results" element={<ResultEntryPage />} />
+              <Route path="qr-scanner" element={<QRScannerPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -222,6 +224,8 @@ function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="lesson-planner" element={<LessonPlannerPage />} />
               <Route path="homework" element={<HomeworkPage />} />
+              <Route path="reports" element={<StudentReportPage />} />
+              <Route path="engagement" element={<AdminEngagementPage />} />
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>

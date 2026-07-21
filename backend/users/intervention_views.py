@@ -103,7 +103,7 @@ class StudentInterventionAlertsView(APIView):
 
 class AdminEngagementView(APIView):
     def get(self, request):
-        if request.user.role != 'mudeer':
+        if request.user.role not in ('mudeer', 'idaarah'):
             return Response({'error': 'Access denied'}, status=403)
 
         madrasah = request.user.madrasah

@@ -82,6 +82,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.learningPath', path: '/path', icon: navIcons.learningPath },
     { labelKey: 'nav.flashcards', path: '/flashcards', icon: navIcons.flashcards },
     { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
+    { labelKey: 'nav.myExamResults', path: '/my-results', icon: navIcons.exams },
   ],
   ustaadh: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
@@ -97,6 +98,8 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
     { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
+    { labelKey: 'nav.resultsEntry', path: '/results', icon: navIcons.reports },
+    { labelKey: 'nav.qrScanner', path: '/qr-scanner', icon: navIcons.attendance },
   ],
   parent: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
@@ -106,6 +109,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
     { labelKey: 'nav.whatsapp', path: '/whatsapp', icon: navIcons.whatsapp },
+    { labelKey: 'nav.childResults', path: '/child-results', icon: navIcons.reports },
   ],
   mudeer: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
@@ -127,6 +131,8 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
     { labelKey: 'nav.whatsapp', path: '/whatsapp', icon: navIcons.whatsapp },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
+    { labelKey: 'nav.publishResults', path: '/results', icon: navIcons.reports },
+    { labelKey: 'nav.parentLinks', path: '/parent-students', icon: navIcons.parentLinks },
   ],
   idaarah: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
@@ -135,6 +141,9 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
     { labelKey: 'nav.reports', path: '/reports', icon: navIcons.reports },
     { labelKey: 'nav.engagement', path: '/engagement', icon: navIcons.engagement },
+    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
+    { labelKey: 'nav.lessonPlanner', path: '/lesson-planner', icon: navIcons.lessonPlanner },
+    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
   ],
 };
