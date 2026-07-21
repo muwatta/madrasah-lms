@@ -546,6 +546,7 @@ export const translations = {
   },
   // Page guides — intentional, purposeful descriptions
   guides: {
+    studentAttendance: { ar: 'عرض سجل الحضور الخاص بك ونسبة الحضور الأسبوعية', en: 'View your attendance record and weekly attendance rate' },
     quizList: { ar: 'اختر اختباراً من موادك المتاحة وابدأ بالإجابة. كل اختبار يصقل فهمك ويقيس تقدمك.', en: 'Choose a quiz from your enrolled subjects. Each one sharpens your understanding and measures your progress.' },
     quizResults: { ar: 'راجع أداءك في كل اختبار. حلل نقاط قوتك وحدد المجالات التي تحتاج تحسيناً.', en: 'Review your performance in every quiz. Analyse strengths and identify areas for improvement.' },
     examResults: { ar: 'اطلع على نتائج امتحاناتك. تابع تطور درجاتك واكتشف أين تتفوق.', en: 'View your exam results. Track your grade trends and discover where you excel.' },
@@ -733,6 +734,7 @@ export const translations = {
     daysAbsent: { ar: 'أيام الغياب', en: 'Days Absent' },
     daysLate: { ar: 'أيام التأخير', en: 'Days Late' },
     totalDays: { ar: 'إجمالي الأيام', en: 'Total Days' },
+    recentRecords: { ar: 'سجلات الحضور الحديثة', en: 'Recent Attendance Records' },
     noRecords: { ar: 'لا توجد سجلات حضور', en: 'No attendance records' },
     existingRecords: { ar: 'توجد سجلات سابقة لهذا اليوم', en: 'Existing records for this date' },
     loadFailed: { ar: 'فشل تحميل الحضور', en: 'Failed to load attendance' },
