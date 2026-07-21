@@ -8,10 +8,12 @@ ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
 ALLOWED_DOCUMENT_EXTENSIONS = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv'}
 ALLOWED_AUDIO_EXTENSIONS = {'.mp3', '.wav', '.ogg', '.m4a'}
 ALLOWED_GENERIC_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS | ALLOWED_DOCUMENT_EXTENSIONS | ALLOWED_AUDIO_EXTENSIONS
+ALLOWED_TUTOR_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.csv'}
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 MAX_IMAGE_SIZE = 5 * 1024 * 1024   # 5 MB
 MAX_AUDIO_SIZE = 20 * 1024 * 1024  # 20 MB
+MAX_TUTOR_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
 
 
 def validate_file_extension(allowed_extensions):
@@ -51,3 +53,8 @@ def validate_audio(value):
 def validate_generic_file(value):
     validate_file_extension(ALLOWED_GENERIC_EXTENSIONS)(value)
     validate_file_size(MAX_FILE_SIZE)(value)
+
+
+def validate_tutor_file(value):
+    validate_file_extension(ALLOWED_TUTOR_EXTENSIONS)(value)
+    validate_file_size(MAX_TUTOR_FILE_SIZE)(value)

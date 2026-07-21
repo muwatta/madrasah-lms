@@ -1,4 +1,5 @@
 import re
+import base64
 import logging
 from rest_framework import status, permissions
 from rest_framework.response import Response
@@ -317,18 +318,54 @@ class AITutorSessionView(APIView):
                     {'q': s.question, 'a': s.response} for s in history
                 ]
 
-        enriched_question = question
+        uploaded_files = []
+        file_context = ''
+        for key in request.FILES:
+            f = request.FILES[key]
+            uploaded_files.append({
+                'name': f.name,
+                'type': f.content_type or '',
+                'size': f.size,
+                'file_obj': f,
+            })
+        if uploaded_files:
+            names = ', '.join(u['name'] for u in uploaded_files)
+            file_context = f'\n\nThe student also uploaded the following files: {names}. Acknowledge them and incorporate their content if relevant.'
+
+        enriched_question = question + file_context
         if session_history:
             enriched_question = "Previous conversation:\n"
             for turn in session_history[-3:]:
                 enriched_question += f"Student: {turn['q']}\nTutor: {turn['a']}\n"
             enriched_question += f"\nNew question: {question}"
+            if file_context:
+                enriched_question += file_context
+
+        image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+        image_data = []
+        for uf in uploaded_files:
+            ext = (uf['name'].rsplit('.', 1)[-1] if '.' in uf['name'] else '').lower()
+            mime = uf['type'] or ''
+            is_image = mime.startswith('image/') or f'.{ext}' in image_extensions
+            if is_image:
+                try:
+                    content = uf['file_obj'].read()
+                    actual_mime = mime if mime.startswith('image/') else f'image/{ext}'
+                    image_data.append({
+                        'mime': actual_mime,
+                        'data': base64.b64encode(content).decode(),
+                    })
+                    uf['file_obj'].seek(0)
+                    logger.info("[Tutor] Image prepared: %s (%s, %d bytes)", uf['name'], actual_mime, len(content))
+                except Exception as e:
+                    logger.error("[Tutor] Failed to read image %s: %s", uf['name'], e)
 
         ai = AIService()
         response_text = ai.contextual_tutor_response(
             enriched_question,
             subject_name=subject_name,
             student_context=student_context,
+            images=image_data if image_data else None,
         )
 
         create_kwargs = {
@@ -342,7 +379,20 @@ class AITutorSessionView(APIView):
             create_kwargs['session_id'] = session_id
         session = AITutorSession.objects.create(**create_kwargs)
 
-        logger.info("AI tutor session created for user %s (subject=%s)", request.user.id, subject_name or "general")
+        from .models import SessionAttachment
+        for uf in uploaded_files:
+            SessionAttachment.objects.create(
+                session=session,
+                file=uf['file_obj'],
+                filename=uf['name'],
+                file_type=uf['type'],
+                file_size=uf['size'],
+            )
+
+        logger.info(
+            "AI tutor session created for user %s (subject=%s, files=%d)",
+            request.user.id, subject_name or "general", len(uploaded_files),
+        )
         return Response(
             AITutorSessionSerializer(session).data,
             status=status.HTTP_201_CREATED,

@@ -112,6 +112,7 @@ class StudentContextService:
 class AIService:
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
+        self.base_url = settings.OPENAI_BASE_URL or None
         self.model = settings.OPENAI_MODEL
         self.max_tokens = settings.OPENAI_MAX_TOKENS
         self.temperature = settings.OPENAI_TEMPERATURE
@@ -121,7 +122,10 @@ class AIService:
     def client(self):
         if self._client is None and self.api_key:
             from openai import OpenAI
-            self._client = OpenAI(api_key=self.api_key)
+            kwargs = {'api_key': self.api_key}
+            if self.base_url:
+                kwargs['base_url'] = self.base_url
+            self._client = OpenAI(**kwargs)
         return self._client
 
     def _template_fallback(self, prompt_type, **kwargs):
@@ -198,7 +202,9 @@ class AIService:
             'name', 'description', 'subject__name_en',
         )[:5])
 
-    def contextual_tutor_response(self, question, subject_name=None, student_context=None):
+    VISION_MODELS = ['qwen/qwen3.6-27b']
+
+    def contextual_tutor_response(self, question, subject_name=None, student_context=None, images=None):
         if not self.client:
             logger.info("[AI] No API key; using template fallback for tutor")
             return self._template_fallback('tutor', question=question)
@@ -212,6 +218,36 @@ class AIService:
                 f"{t['name']} ({t['subject__name_en']})" for t in relevant_topics
             )
             enriched_question += f"\n\nRelevant curriculum topics: {topic_summary}"
+
+        has_images = images and len(images) > 0
+
+        if has_images:
+            content_parts = [{"type": "text", "text": enriched_question}]
+            for img in images:
+                content_parts.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:{img['mime']};base64,{img['data']}"},
+                })
+
+            last_err = None
+            for vision_model in self.VISION_MODELS:
+                try:
+                    logger.info("[AI] Trying vision model: %s", vision_model)
+                    response = self.client.chat.completions.create(
+                        model=vision_model,
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": content_parts},
+                        ],
+                        max_tokens=self.max_tokens,
+                        temperature=self.temperature,
+                    )
+                    return response.choices[0].message.content
+                except Exception as e:
+                    logger.warning("[AI] Vision model %s failed: %s", vision_model, e)
+                    last_err = e
+
+            logger.error("[AI] All vision models failed, falling back to text model: %s", last_err)
 
         try:
             response = self.client.chat.completions.create(

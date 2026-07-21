@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from config.validators import validate_tutor_file
 from users.models import User, Madrasah
 from curriculum.models import Subject
 
@@ -34,3 +35,15 @@ class AITutorSession(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class SessionAttachment(models.Model):
+    session = models.ForeignKey(AITutorSession, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='tutor_attachments/', validators=[validate_tutor_file])
+    filename = models.CharField(max_length=255)
+    file_type = models.CharField(max_length=100)
+    file_size = models.PositiveIntegerField()
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.filename

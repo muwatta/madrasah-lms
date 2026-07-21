@@ -195,8 +195,9 @@ RESEND_API_KEY = config('RESEND_API_KEY', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@madrasahlms.com')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
-# ── OpenAI ──────────────────────────────────────────────────────────────────
+# ── AI Provider (OpenAI / Groq / etc.) ─────────────────────────────────────
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+OPENAI_BASE_URL = config('OPENAI_BASE_URL', default='')
 OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')
 OPENAI_MAX_TOKENS = config('OPENAI_MAX_TOKENS', default=1024, cast=int)
 OPENAI_TEMPERATURE = config('OPENAI_TEMPERATURE', default=0.7, cast=float)

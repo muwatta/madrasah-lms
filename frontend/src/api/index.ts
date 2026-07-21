@@ -368,7 +368,17 @@ export const guidanceAPI = {
     list: (params?: any) => api.get('/guidance/career/', { params }),
   },
   tutor: {
-    ask: (data: { question: string; subject_id?: number }) => api.post('/guidance/tutor/ask/', data),
+    ask: (data: { question: string; subject_id?: number; session_id?: string; files?: File[] }) => {
+      if (data.files && data.files.length > 0) {
+        const fd = new FormData();
+        fd.append('question', data.question);
+        if (data.subject_id) fd.append('subject_id', String(data.subject_id));
+        if (data.session_id) fd.append('session_id', data.session_id);
+        data.files.forEach((f, i) => fd.append(`file_${i}`, f));
+        return api.post('/guidance/tutor/ask/', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
+      return api.post('/guidance/tutor/ask/', data);
+    },
     history: () => api.get('/guidance/tutor/history/'),
   },
 };
