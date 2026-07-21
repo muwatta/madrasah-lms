@@ -134,6 +134,10 @@ export const enrollmentAPI = {
   myEnrollments: () => api.get('/enrollments/my/'),
   teacherStudents: () => api.get('/enrollments/teacher/students/'),
   teacherClasses: () => api.get('/enrollments/teacher/classes/'),
+  availableSubjects: () => api.get('/enrollments/available-subjects/'),
+  subjectTeachers: (subjectId: number) => api.get('/enrollments/subject-teachers/', { params: { subject: subjectId } }),
+  selfEnroll: (data: { subject: number; ustaadh?: number; school_class?: number }) =>
+    api.post('/enrollments/self-enroll/', data),
 };
 
 export const dashboardAPI = {

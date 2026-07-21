@@ -100,6 +100,8 @@ class BaseLessonTestCase(TestCase):
 
 class SchemeOfWorkServiceTest(BaseLessonTestCase):
     def test_create_scheme(self):
+        # Delete setUp scheme to test creation from scratch
+        self.scheme.delete()
         scheme = SchemeOfWorkService.create_scheme(
             madrasah=self.madrasah, teacher=self.ustaadh,
             term=self.term, subject=self.subject,
@@ -110,6 +112,7 @@ class SchemeOfWorkServiceTest(BaseLessonTestCase):
         self.assertEqual(scheme.teacher, self.ustaadh)
 
     def test_create_duplicate_scheme_raises(self):
+        # setUp already creates one scheme — trying same combo should raise
         with self.assertRaises(ValueError):
             SchemeOfWorkService.create_scheme(
                 madrasah=self.madrasah, teacher=self.ustaadh,

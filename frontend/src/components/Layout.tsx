@@ -83,6 +83,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.flashcards', path: '/flashcards', icon: navIcons.flashcards },
     { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
     { labelKey: 'nav.myExamResults', path: '/my-results', icon: navIcons.exams },
+    { labelKey: 'nav.chooseSubjects', path: '/choose-subjects', icon: navIcons.enrollments },
   ],
   ustaadh: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },

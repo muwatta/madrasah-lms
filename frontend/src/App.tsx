@@ -68,6 +68,7 @@ const ResultEntryPage = lazy(() => import('./pages/teacher/ResultEntryPage'));
 const QRScannerPage = lazy(() => import('./pages/teacher/QRScannerPage'));
 const ResultsPublishPage = lazy(() => import('./pages/admin/ResultsPublishPage'));
 const MyResultsPage = lazy(() => import('./pages/student/MyResultsPage'));
+const ChooseSubjectsPage = lazy(() => import('./pages/student/ChooseSubjectsPage'));
 const PricingPage = lazy(() => import('./pages/public/PricingPage'));
 const DocsPage = lazy(() => import('./pages/public/DocsPage'));
 const ContactPage = lazy(() => import('./pages/public/ContactPage'));
@@ -125,6 +126,7 @@ function App() {
               <Route path="flashcards" element={<FlashCardPage />} />
               <Route path="character" element={<StudentCharacterPage />} />
               <Route path="my-results" element={<MyResultsPage />} />
+              <Route path="choose-subjects" element={<ChooseSubjectsPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 

@@ -302,7 +302,7 @@ class HomeworkSerializer(serializers.ModelSerializer):
             'submission_count', 'submissions_count', 'status',
             'created_at', 'updated_at',
         ]
-        read_only_fields = ['id', 'madrasah', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'madrasah', 'teacher', 'created_at', 'updated_at']
 
     def get_status(self, obj):
         if not obj.is_published:
@@ -331,12 +331,13 @@ class HomeworkSubmissionSerializer(serializers.ModelSerializer):
             'status', 'is_graded',
         ]
         read_only_fields = [
-            'id', 'madrasah', 'student', 'submitted_at', 'is_late',
+            'id', 'madrasah', 'homework', 'student', 'submitted_at', 'is_late',
             'score', 'feedback', 'graded_by', 'graded_at', 'status',
         ]
 
     def get_is_graded(self, obj):
-        return obj.score is not None
+        score = obj.get('score') if isinstance(obj, dict) else getattr(obj, 'score', None)
+        return score is not None
 
 
 class HomeworkSubmissionGradeSerializer(serializers.ModelSerializer):
@@ -378,3 +379,48 @@ class LessonAnalyticsSerializer(serializers.ModelSerializer):
 class LessonPlanApprovalSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=['approved', 'rejected'])
     notes = serializers.CharField(required=False, default='')
+
+
+# ──────────────────────────────────────────────────────
+#  AI Generation
+# ──────────────────────────────────────────────────────
+
+
+class LessonPlanAIGenerateSerializer(serializers.Serializer):
+    subject = serializers.IntegerField(help_text="Subject ID")
+    school_class = serializers.IntegerField(help_text="School class ID")
+    topic = serializers.CharField(max_length=500, help_text="Topic to teach")
+    duration_minutes = serializers.IntegerField(default=45, min_value=15, max_value=180)
+    teaching_methods = serializers.ListField(
+        child=serializers.CharField(), required=False, default=[],
+        help_text="Preferred teaching methods")
+    language = serializers.ChoiceField(choices=['ar', 'en'], default='ar')
+
+
+class SchemeAIGenerateSerializer(serializers.Serializer):
+    subject = serializers.IntegerField(help_text="Subject ID")
+    school_class = serializers.IntegerField(help_text="School class ID")
+    term_weeks = serializers.IntegerField(default=12, min_value=4, max_value=24)
+    topic_areas = serializers.ListField(
+        child=serializers.CharField(), required=False, default=[],
+        help_text="Optional topic focus areas")
+    language = serializers.ChoiceField(choices=['ar', 'en'], default='ar')
+
+
+class HomeworkAIGenerateSerializer(serializers.Serializer):
+    lesson_plan = serializers.IntegerField(required=False, allow_null=True,
+                                            help_text="Lesson plan ID (optional)")
+    lesson_title = serializers.CharField(max_length=300)
+    subject = serializers.IntegerField(help_text="Subject ID")
+    topic_content = serializers.CharField(max_length=1000,
+                                           help_text="What was covered in the lesson")
+    total_marks = serializers.IntegerField(default=20, min_value=5, max_value=100)
+    difficulty = serializers.ChoiceField(
+        choices=['easy', 'medium', 'hard'], default='medium')
+    language = serializers.ChoiceField(choices=['ar', 'en'], default='ar')
+
+
+class LessonPlanAIRefineSerializer(serializers.Serializer):
+    feedback = serializers.CharField(max_length=2000,
+                                      help_text="What to improve or change")
+    language = serializers.ChoiceField(choices=['ar', 'en'], default='ar')

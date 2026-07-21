@@ -24,10 +24,12 @@ from .serializers import (
     LessonReflectionSerializer, LessonAuditLogSerializer,
     HomeworkSerializer, HomeworkSubmissionSerializer,
     HomeworkSubmissionGradeSerializer, LessonAnalyticsSerializer,
+    LessonPlanAIGenerateSerializer, SchemeAIGenerateSerializer,
+    HomeworkAIGenerateSerializer, LessonPlanAIRefineSerializer,
 )
 from .services import (
     SchemeOfWorkService, LessonPlanService, HomeworkService, AnalyticsService,
-    AuditService,
+    AuditService, AIGenerationService,
 )
 from .selectors import (
     get_schemes_for_teacher, get_schemes_for_madrasah, get_scheme_by_id,
@@ -591,3 +593,202 @@ class TeacherSubjectsView(APIView):
             for s in subjects
         ]
         return Response(result)
+
+
+# ──────────────────────────────────────────────────────
+#  AI Generation
+# ──────────────────────────────────────────────────────
+
+
+class LessonPlanAIGenerateView(APIView):
+    """Generate a full lesson plan using AI. Returns structured data for the teacher to review."""
+    permission_classes = [IsAuthenticated, CanManageLessonPlans]
+
+    def post(self, request):
+        serializer = LessonPlanAIGenerateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        from curriculum.models import Subject, SchoolClass
+        try:
+            subject = Subject.objects.get(pk=data['subject'])
+            school_class = SchoolClass.objects.get(pk=data['school_class'])
+        except (Subject.DoesNotExist, SchoolClass.DoesNotExist):
+            return Response(
+                {'error': 'Invalid subject or school class ID'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        subject_name = subject.name_ar if data['language'] == 'ar' else subject.name_en
+        class_name = school_class.name_ar if data['language'] == 'ar' else school_class.name_en
+
+        ai = AIGenerationService()
+        result = ai.generate_lesson_plan(
+            subject_name=subject_name,
+            topic=data['topic'],
+            school_class_name=class_name,
+            duration_minutes=data['duration_minutes'],
+            teaching_methods=data.get('teaching_methods', []),
+            language=data['language'],
+        )
+
+        if not result:
+            return Response(
+                {'error': 'AI generation failed. Please try again or fill in manually.',
+                 'fallback': True},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        result['subject'] = data['subject']
+        result['school_class'] = data['school_class']
+        result['ai_generated'] = True
+        result['ai_prompt'] = data['topic']
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class SchemeAIGenerateView(APIView):
+    """Generate a full scheme of work using AI. Returns structured data with weekly breakdown."""
+    permission_classes = [IsAuthenticated, CanManageSchemes]
+
+    def post(self, request):
+        serializer = SchemeAIGenerateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        from curriculum.models import Subject, SchoolClass
+        try:
+            subject = Subject.objects.get(pk=data['subject'])
+            school_class = SchoolClass.objects.get(pk=data['school_class'])
+        except (Subject.DoesNotExist, SchoolClass.DoesNotExist):
+            return Response(
+                {'error': 'Invalid subject or school class ID'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        subject_name = subject.name_ar if data['language'] == 'ar' else subject.name_en
+        class_name = school_class.name_ar if data['language'] == 'ar' else school_class.name_en
+
+        ai = AIGenerationService()
+        result = ai.generate_scheme_of_work(
+            subject_name=subject_name,
+            school_class_name=class_name,
+            term_weeks=data['term_weeks'],
+            topic_areas=data.get('topic_areas', []),
+            language=data['language'],
+        )
+
+        if not result:
+            return Response(
+                {'error': 'AI generation failed. Please try again or fill in manually.',
+                 'fallback': True},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        result['subject'] = data['subject']
+        result['school_class'] = data['school_class']
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class HomeworkAIGenerateView(APIView):
+    """Generate a homework assignment using AI. Returns structured task list."""
+    permission_classes = [IsAuthenticated, CanManageHomework]
+
+    def post(self, request):
+        serializer = HomeworkAIGenerateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        from curriculum.models import Subject
+        try:
+            subject = Subject.objects.get(pk=data['subject'])
+        except Subject.DoesNotExist:
+            return Response(
+                {'error': 'Invalid subject ID'},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        subject_name = subject.name_ar if data['language'] == 'ar' else subject.name_en
+
+        lesson_title = data['lesson_title']
+        if data.get('lesson_plan'):
+            try:
+                plan = LessonPlan.objects.get(
+                    pk=data['lesson_plan'],
+                    madrasah=request.user.madrasah)
+                lesson_title = plan.title
+            except LessonPlan.DoesNotExist:
+                pass
+
+        ai = AIGenerationService()
+        result = ai.generate_homework(
+            lesson_title=lesson_title,
+            subject_name=subject_name,
+            topic_content=data['topic_content'],
+            total_marks=data['total_marks'],
+            difficulty=data['difficulty'],
+            language=data['language'],
+        )
+
+        if not result:
+            return Response(
+                {'error': 'AI generation failed. Please try again or fill in manually.',
+                 'fallback': True},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        result['subject'] = data['subject']
+        if data.get('lesson_plan'):
+            result['lesson_plan'] = data['lesson_plan']
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class LessonPlanAIRefineView(APIView):
+    """Refine an existing lesson plan based on teacher feedback."""
+    permission_classes = [IsAuthenticated, CanManageLessonPlans]
+
+    def post(self, request, pk):
+        try:
+            plan = LessonPlan.objects.get(pk=pk, madrasah=request.user.madrasah)
+        except LessonPlan.DoesNotExist:
+            return Response(
+                {'error': 'Lesson plan not found'},
+                status=status.HTTP_404_NOT_FOUND)
+
+        if plan.teacher != request.user and request.user.role not in ('mudeer', 'idaarah'):
+            return Response(
+                {'error': 'Only the assigned teacher or admin can refine this plan'},
+                status=status.HTTP_403_FORBIDDEN)
+
+        serializer = LessonPlanAIRefineSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        existing_data = {
+            'title': plan.title,
+            'learning_objectives': plan.learning_objectives or [],
+            'success_criteria': plan.success_criteria or [],
+            'keywords': plan.keywords or [],
+            'prior_knowledge': plan.prior_knowledge or '',
+            'teaching_materials': plan.teaching_materials or [],
+            'references': plan.references or [],
+            'teaching_methods': plan.teaching_methods or [],
+            'introduction': plan.introduction or '',
+            'lesson_development': plan.lesson_development or '',
+            'student_activities': plan.student_activities or [],
+            'differentiation': plan.differentiation or '',
+            'assessment': plan.assessment or '',
+            'homework': plan.homework or '',
+            'resources': plan.resources or '',
+        }
+
+        ai = AIGenerationService()
+        result = ai.refine_lesson_plan(
+            existing_plan_data=existing_data,
+            feedback=data['feedback'],
+            language=data.get('language', 'ar'),
+        )
+
+        if not result:
+            return Response(
+                {'error': 'AI refinement failed. Please try again.',
+                 'fallback': True},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response(result, status=status.HTTP_200_OK)

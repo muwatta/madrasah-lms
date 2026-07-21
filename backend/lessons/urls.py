@@ -47,4 +47,10 @@ urlpatterns = [
     # ── Teacher Info ──
     path('teacher-classes/', views.TeacherClassesView.as_view(), name='lesson-teacher-classes'),
     path('teacher-subjects/', views.TeacherSubjectsView.as_view(), name='lesson-teacher-subjects'),
+
+    # ── AI Generation ──
+    path('ai/generate-lesson-plan/', views.LessonPlanAIGenerateView.as_view(), name='ai-generate-lesson-plan'),
+    path('ai/generate-scheme/', views.SchemeAIGenerateView.as_view(), name='ai-generate-scheme'),
+    path('ai/generate-homework/', views.HomeworkAIGenerateView.as_view(), name='ai-generate-homework'),
+    path('ai/refine/<int:pk>/', views.LessonPlanAIRefineView.as_view(), name='ai-refine-lesson-plan'),
 ]

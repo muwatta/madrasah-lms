@@ -48,6 +48,7 @@ export const translations = {
     resultsEntry: { ar: 'إدخال النتائج', en: 'Results Entry' },
     childResults: { ar: 'نتائج أبنائي', en: 'Child Results' },
     publishResults: { ar: 'نشر النتائج', en: 'Publish Results' },
+    chooseSubjects: { ar: 'اختر موادك', en: 'Choose Subjects' },
     myExamResults: { ar: 'نتائج الامتحانات', en: 'My Exam Results' },
   },
   // Roles

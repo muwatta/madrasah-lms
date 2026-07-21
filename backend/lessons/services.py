@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 import logging
 from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Count, Q, Avg, F
 from django.utils.timezone import now
@@ -133,8 +135,17 @@ class LessonPlanService:
 
     @staticmethod
     @transaction.atomic
-    def create_plan(*, madrasah, teacher, subject, school_class,
-                    title, lesson_date, status='draft', **kwargs):
+    def create_plan(*, madrasah, teacher, title, lesson_date,
+                    subject=None, school_class=None,
+                    subject_id=None, school_class_id=None,
+                    status='draft', **kwargs):
+        from curriculum.models import Subject, SchoolClass
+
+        if subject is None and subject_id:
+            subject = Subject.objects.get(pk=subject_id)
+        if school_class is None and school_class_id:
+            school_class = SchoolClass.objects.get(pk=school_class_id)
+
         plan = LessonPlan(
             madrasah=madrasah,
             teacher=teacher,
@@ -291,7 +302,7 @@ class HomeworkService:
     @transaction.atomic
     def submit_homework(*, homework, student, madrasah, content='',
                         file=None, attachments=None):
-        if homework.is_late_submission_allowed is False and homework.due_date < now():
+        if homework.late_submission_allowed is False and homework.due_date < now():
             raise ValueError("Late submissions are not allowed for this homework.")
 
         is_late = now() > homework.due_date
@@ -357,15 +368,16 @@ class AnalyticsService:
             lesson__school_class=school_class,
         )
 
-        avg_duration = delivered_qs.aggregate(
-            avg=Avg('actual_duration_minutes'))['avg'] or 0
+        avg_duration = Decimal(str(delivered_qs.aggregate(
+            avg=Avg('actual_duration_minutes'))['avg'] or 0))
 
         reflections = LessonReflection.objects.filter(
             lesson__teacher=teacher,
             lesson__subject=subject,
             lesson__school_class=school_class,
         )
-        avg_rating = reflections.aggregate(avg=Avg('self_rating'))['avg'] or 0
+        avg_rating = Decimal(str(reflections.aggregate(
+            avg=Avg('self_rating'))['avg'] or 0))
 
         completion_rate = (
             Decimal(total_delivered) / Decimal(total_planned) * 100
@@ -390,3 +402,262 @@ class AnalyticsService:
             },
         )
         return snapshot
+
+
+# ──────────────────────────────────────────────────────
+#  AI Generation Service
+# ──────────────────────────────────────────────────────
+
+
+LESSON_PLAN_SYSTEM_PROMPT = """\
+You are an expert Islamic school lesson planner. Generate detailed, structured lesson plans \
+that align with Islamic educational values. Always respond with valid JSON only — no markdown, \
+no commentary outside the JSON.
+
+Return a JSON object with these keys:
+{
+  "title": "string - lesson title",
+  "learning_objectives": ["string"],
+  "success_criteria": ["string"],
+  "keywords": ["string"],
+  "prior_knowledge": "string - what students should already know",
+  "teaching_materials": ["string"],
+  "references": ["string"],
+  "teaching_methods": ["string"],
+  "introduction": "string - lesson opener (5-10 min)",
+  "lesson_development": "string - main teaching phase with clear stages",
+  "student_activities": ["string"],
+  "differentiation": "string - support for struggling students and extension for advanced",
+  "assessment": "string - how to check understanding",
+  "homework": "string - suggested homework task",
+  "resources": "string - additional resources"
+}
+"""
+
+SCHEME_OF_WORK_SYSTEM_PROMPT = """\
+You are an expert Islamic school curriculum planner. Generate a comprehensive scheme of work. \
+Always respond with valid JSON only — no markdown.
+
+Return a JSON object:
+{
+  "title": "string - scheme title",
+  "description": "string - overview",
+  "weeks": [
+    {
+      "week_number": 1,
+      "topic": "string",
+      "subtopic": "string",
+      "learning_outcomes": ["string"],
+      "reference_materials": ["string"],
+      "lesson_count": 2
+    }
+  ]
+}
+"""
+
+HOMEWORK_SYSTEM_PROMPT = """\
+You are an expert Islamic school teacher. Generate homework assignments that are \
+educational, age-appropriate, and reinforce lesson learning. Respond with valid JSON only.
+
+Return a JSON object:
+{
+  "title": "string",
+  "description": "string - clear instructions for students",
+  "total_marks": 20,
+  "tasks": [
+    {"task_number": 1, "instruction": "string", "marks": 5},
+    {"task_number": 2, "instruction": "string", "marks": 10},
+    {"task_number": 3, "instruction": "string", "marks": 5}
+  ]
+}
+"""
+
+
+class AIGenerationService:
+    """AI-powered content generation for lesson plans, schemes of work, and homework."""
+
+    def __init__(self):
+        self.api_key = getattr(settings, 'OPENAI_API_KEY', '')
+        self.base_url = getattr(settings, 'OPENAI_BASE_URL', None)
+        self.model = getattr(settings, 'OPENAI_MODEL', 'gpt-3.5-turbo')
+        self.max_tokens = getattr(settings, 'OPENAI_MAX_TOKENS', 2048)
+        self.temperature = getattr(settings, 'OPENAI_TEMPERATURE', 0.7)
+        self._client = None
+
+    @property
+    def client(self):
+        if self._client is None and self.api_key:
+            from openai import OpenAI
+            kwargs = {'api_key': self.api_key}
+            if self.base_url:
+                kwargs['base_url'] = self.base_url
+            self._client = OpenAI(**kwargs)
+        return self._client
+
+    def _call_ai(self, system_prompt, user_prompt):
+        if not self.client:
+            return None
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+            content = response.choices[0].message.content.strip()
+            if content.startswith('```'):
+                content = content.split('\n', 1)[1].rsplit('```', 1)[0].strip()
+            return json.loads(content)
+        except json.JSONDecodeError:
+            logger.warning("AI response was not valid JSON")
+            return None
+        except Exception as e:
+            logger.error("AI generation failed: %s", e)
+            return None
+
+    def generate_lesson_plan(self, *, subject_name, topic, school_class_name,
+                              term_name=None, duration_minutes=45,
+                              teaching_methods=None, language='ar'):
+        method_hint = ''
+        if teaching_methods:
+            method_hint = f"Preferred teaching methods: {', '.join(teaching_methods)}."
+
+        lang_note = 'Respond in Arabic.' if language == 'ar' else 'Respond in English.'
+
+        user_prompt = f"""\
+Generate a detailed lesson plan for:
+- Subject: {subject_name}
+- Topic: {topic}
+- Class: {school_class_name}
+- Duration: {duration_minutes} minutes
+{method_hint}
+{lang_note}
+
+Include an engaging introduction, structured development with 2-3 phases, student activities, \
+formative assessment, differentiation strategies, and a homework suggestion."""
+
+        result = self._call_ai(LESSON_PLAN_SYSTEM_PROMPT, user_prompt)
+        if not result:
+            return None
+
+        return {
+            'title': result.get('title', topic),
+            'learning_objectives': result.get('learning_objectives', []),
+            'success_criteria': result.get('success_criteria', []),
+            'keywords': result.get('keywords', []),
+            'prior_knowledge': result.get('prior_knowledge', ''),
+            'teaching_materials': result.get('teaching_materials', []),
+            'references': result.get('references', []),
+            'teaching_methods': result.get('teaching_methods', []),
+            'introduction': result.get('introduction', ''),
+            'lesson_development': result.get('lesson_development', ''),
+            'student_activities': result.get('student_activities', []),
+            'differentiation': result.get('differentiation', ''),
+            'assessment': result.get('assessment', ''),
+            'homework': result.get('homework', ''),
+            'resources': result.get('resources', ''),
+        }
+
+    def generate_scheme_of_work(self, *, subject_name, school_class_name,
+                                 term_weeks=12, topic_areas=None,
+                                 language='ar'):
+        topics_hint = ''
+        if topic_areas:
+            topics_hint = f"Focus areas: {', '.join(topic_areas)}."
+
+        lang_note = 'Respond in Arabic.' if language == 'ar' else 'Respond in English.'
+
+        user_prompt = f"""\
+Generate a {term_weeks}-week scheme of work for:
+- Subject: {subject_name}
+- Class: {school_class_name}
+- Term duration: {term_weeks} weeks
+{topics_hint}
+{lang_note}
+
+Include a clear title, description, and weekly breakdown with topics, subtopics, \
+learning outcomes, reference materials, and lesson count per week."""
+
+        result = self._call_ai(SCHEME_OF_WORK_SYSTEM_PROMPT, user_prompt)
+        if not result:
+            return None
+
+        weeks = result.get('weeks', [])
+        for i, week in enumerate(weeks):
+            week.setdefault('week_number', i + 1)
+            week.setdefault('lesson_count', 2)
+
+        return {
+            'title': result.get('title', f"{subject_name} - {school_class_name}"),
+            'description': result.get('description', ''),
+            'weeks': weeks,
+        }
+
+    def generate_homework(self, *, lesson_title, subject_name, topic_content,
+                           total_marks=20, difficulty='medium',
+                           language='ar'):
+        lang_note = 'Respond in Arabic.' if language == 'ar' else 'Respond in English.'
+
+        user_prompt = f"""\
+Generate a homework assignment for:
+- Lesson: {lesson_title}
+- Subject: {subject_name}
+- Topic covered: {topic_content}
+- Total marks: {total_marks}
+- Difficulty level: {difficulty}
+{lang_note}
+
+Include 3-5 tasks mixing recall, application, and creative thinking. \
+Total marks should equal {total_marks}."""
+
+        result = self._call_ai(HOMEWORK_SYSTEM_PROMPT, user_prompt)
+        if not result:
+            return None
+
+        return {
+            'title': result.get('title', f"HW - {lesson_title}"),
+            'description': result.get('description', ''),
+            'total_marks': result.get('total_marks', total_marks),
+            'tasks': result.get('tasks', []),
+        }
+
+    def refine_lesson_plan(self, *, existing_plan_data, feedback,
+                            language='ar'):
+        lang_note = 'Respond in Arabic.' if language == 'ar' else 'Respond in English.'
+
+        plan_text = json.dumps(existing_plan_data, ensure_ascii=False, indent=2)
+        user_prompt = f"""\
+Here is an existing lesson plan:
+{plan_text}
+
+Refinement instructions: {feedback}
+
+{lang_note}
+
+Return the improved lesson plan as JSON with the same structure. \
+Apply the requested changes while keeping the good parts."""
+
+        result = self._call_ai(LESSON_PLAN_SYSTEM_PROMPT, user_prompt)
+        if not result:
+            return None
+
+        return {
+            'title': result.get('title', existing_plan_data.get('title', '')),
+            'learning_objectives': result.get('learning_objectives', existing_plan_data.get('learning_objectives', [])),
+            'success_criteria': result.get('success_criteria', existing_plan_data.get('success_criteria', [])),
+            'keywords': result.get('keywords', existing_plan_data.get('keywords', [])),
+            'prior_knowledge': result.get('prior_knowledge', existing_plan_data.get('prior_knowledge', '')),
+            'teaching_materials': result.get('teaching_materials', existing_plan_data.get('teaching_materials', [])),
+            'references': result.get('references', existing_plan_data.get('references', [])),
+            'teaching_methods': result.get('teaching_methods', existing_plan_data.get('teaching_methods', [])),
+            'introduction': result.get('introduction', existing_plan_data.get('introduction', '')),
+            'lesson_development': result.get('lesson_development', existing_plan_data.get('lesson_development', '')),
+            'student_activities': result.get('student_activities', existing_plan_data.get('student_activities', [])),
+            'differentiation': result.get('differentiation', existing_plan_data.get('differentiation', '')),
+            'assessment': result.get('assessment', existing_plan_data.get('assessment', '')),
+            'homework': result.get('homework', existing_plan_data.get('homework', '')),
+            'resources': result.get('resources', existing_plan_data.get('resources', '')),
+        }

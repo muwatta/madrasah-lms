@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { enrollmentAPI, userAPI, subjectAPI } from '../../api';
+import { enrollmentAPI, userAPI, subjectAPI, schoolClassAPI } from '../../api';
 import type { Enrollment, User, Subject } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonCard } from '../../components/Skeleton';
@@ -28,13 +28,14 @@ export default function EnrollmentManagementPage() {
   const [students, setStudents] = useState<User[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
+  const [schoolClasses, setSchoolClasses] = useState<any[]>([]);
 
   const [studentFilter, setStudentFilter] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('');
   const [teacherFilter, setTeacherFilter] = useState('');
 
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ student: '', subject: '', ustaadh: '' });
+  const [form, setForm] = useState({ student: '', subject: '', ustaadh: '', school_class: '' });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -56,6 +57,7 @@ export default function EnrollmentManagementPage() {
       userAPI.list({ role: 'student' }).then((r) => setStudents(r.data.results ?? r.data)),
       subjectAPI.list().then((r) => setSubjects(r.data.results ?? r.data)),
       userAPI.list({ role: 'ustaadh' }).then((r) => setTeachers(r.data.results ?? r.data)),
+      schoolClassAPI.list().then((r) => setSchoolClasses(r.data.results ?? r.data)),
     ]).catch(() => {});
   }, []);
 
@@ -71,6 +73,7 @@ export default function EnrollmentManagementPage() {
         student: Number(form.student),
         subject: Number(form.subject),
         ustaadh: form.ustaadh ? Number(form.ustaadh) : null,
+        school_class: form.school_class ? Number(form.school_class) : null,
       });
       setShowForm(false);
       loadEnrollments();
@@ -119,7 +122,7 @@ export default function EnrollmentManagementPage() {
             <p className="mt-1 text-sm text-primary-100 dark:text-primary-200">{t('guides.enrollmentManagement')}</p>
           </div>
           <button
-            onClick={() => { setForm({ student: '', subject: '', ustaadh: '' }); setFormError(null); setFieldErrors({}); setShowForm(true); }}
+            onClick={() => { setForm({ student: '', subject: '', ustaadh: '', school_class: '' }); setFormError(null); setFieldErrors({}); setShowForm(true); }}
             className="btn-press inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -196,7 +199,7 @@ export default function EnrollmentManagementPage() {
               {formError}
             </div>
           )}
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.student')}</label>
               <select required value={form.student} onChange={(e) => { setForm({ ...form, student: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.student; return n; }); }} className={`${selectCls} ${fieldErrors.student ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
@@ -204,6 +207,14 @@ export default function EnrollmentManagementPage() {
                 {students.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
               </select>
               {fieldErrors.student && <p className="mt-1 text-xs text-red-500">{fieldErrors.student}</p>}
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الصف' : 'Class'}</label>
+              <select required value={form.school_class} onChange={(e) => { setForm({ ...form, school_class: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.school_class; return n; }); }} className={`${selectCls} ${fieldErrors.school_class ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
+                <option value="">{language === 'ar' ? 'اختر الصف' : 'Choose Class'}</option>
+                {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</option>)}
+              </select>
+              {fieldErrors.school_class && <p className="mt-1 text-xs text-red-500">{fieldErrors.school_class}</p>}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.subject')}</label>
@@ -221,7 +232,7 @@ export default function EnrollmentManagementPage() {
               </select>
               {fieldErrors.ustaadh && <p className="mt-1 text-xs text-red-500">{fieldErrors.ustaadh}</p>}
             </div>
-            <div className="flex items-end gap-3 sm:col-span-3">
+            <div className="flex items-end gap-3 sm:col-span-2 lg:col-span-4">
               <button type="submit" disabled={saving} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
                 {saving ? (
                   <><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>{t('common.saving')}</>
