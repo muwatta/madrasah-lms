@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from .models import CareerRecommendation, AITutorSession
 from .serializers import CareerRecommendationSerializer, AITutorSessionSerializer
-from .services import AIService
+from .services import AIService, StudentContextService
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -256,11 +256,11 @@ class CareerGuidanceView(APIView):
         profile_key = get_profile_key(student)
         profile = CAREER_PROFILES[profile_key]
 
+        context_service = StudentContextService(student, request.user.madrasah)
+        student_context = context_service.get_full_context()
+
         ai = AIService()
-        ai_response = ai.career_recommendation(
-            student,
-            subject_scores=None,
-        )
+        ai_response = ai.contextual_career_recommendation(student_context)
 
         CareerRecommendation.objects.filter(
             student=student, is_current=True,
@@ -287,6 +287,7 @@ class AITutorSessionView(APIView):
     def post(self, request):
         question = request.data.get('question', '').strip()
         subject_id = request.data.get('subject_id')
+        session_id = request.data.get('session_id')
 
         if not question:
             return Response({'error': 'question is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -301,26 +302,79 @@ class AITutorSessionView(APIView):
             except Subject.DoesNotExist:
                 pass
 
+        student_context = None
+        if request.user.role == 'student':
+            context_service = StudentContextService(request.user, request.user.madrasah)
+            student_context = context_service.get_full_context()
+
+        session_history = None
+        if session_id:
+            history = AITutorSession.objects.filter(
+                session_id=session_id, student=request.user, madrasah=request.user.madrasah,
+            ).order_by('created_at')
+            if history.exists():
+                session_history = [
+                    {'q': s.question, 'a': s.response} for s in history
+                ]
+
+        enriched_question = question
+        if session_history:
+            enriched_question = "Previous conversation:\n"
+            for turn in session_history[-3:]:
+                enriched_question += f"Student: {turn['q']}\nTutor: {turn['a']}\n"
+            enriched_question += f"\nNew question: {question}"
+
         ai = AIService()
-        response_text = ai.tutor_response(
-            question,
+        response_text = ai.contextual_tutor_response(
+            enriched_question,
             subject_name=subject_name,
-            student_name=request.user.get_full_name(),
+            student_context=student_context,
         )
 
-        session = AITutorSession.objects.create(
-            madrasah=request.user.madrasah,
-            student=request.user,
-            subject=subject,
-            question=question,
-            response=response_text,
-        )
+        create_kwargs = {
+            'madrasah': request.user.madrasah,
+            'student': request.user,
+            'subject': subject,
+            'question': question,
+            'response': response_text,
+        }
+        if session_id:
+            create_kwargs['session_id'] = session_id
+        session = AITutorSession.objects.create(**create_kwargs)
 
         logger.info("AI tutor session created for user %s (subject=%s)", request.user.id, subject_name or "general")
         return Response(
             AITutorSessionSerializer(session).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+class StudentSummaryView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, student_id=None):
+        target = request.user
+        if student_id and request.user.role in ('mudeer', 'idaarah', 'ustaadh'):
+            try:
+                target = User.objects.get(id=student_id, madrasah=request.user.madrasah)
+            except User.DoesNotExist:
+                return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if target.role != 'student':
+            return Response({'error': 'Not a student'}, status=status.HTTP_400_BAD_REQUEST)
+
+        context_service = StudentContextService(target, request.user.madrasah)
+        student_context = context_service.get_full_context()
+
+        ai = AIService()
+        summary = ai.contextual_summary(student_context)
+
+        return Response({
+            'student_id': target.id,
+            'student_name': target.get_full_name(),
+            'context': student_context,
+            'summary': summary,
+        })
 
 
 class CareerRecommendationListView(APIView):
@@ -350,6 +404,10 @@ class AITutorSessionListView(APIView):
 
         if user.role == 'student':
             qs = qs.filter(student=user)
+
+        session_id = request.query_params.get('session_id')
+        if session_id:
+            qs = qs.filter(session_id=session_id)
 
         serializer = AITutorSessionSerializer(qs, many=True)
         return Response(serializer.data)

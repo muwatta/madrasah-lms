@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from users.models import User, Madrasah
 from curriculum.models import Subject
@@ -23,6 +24,7 @@ class AITutorSession(models.Model):
     madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='ai_tutor_sessions')
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ai_tutor_sessions')
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True, related_name='ai_tutor_sessions')
+    session_id = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
     question = models.TextField()
     response = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

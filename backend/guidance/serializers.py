@@ -23,6 +23,6 @@ class AITutorSessionSerializer(serializers.ModelSerializer):
         model = AITutorSession
         fields = [
             'id', 'madrasah', 'student', 'student_name', 'subject', 'subject_name',
-            'question', 'response', 'created_at',
+            'session_id', 'question', 'response', 'created_at',
         ]
-        read_only_fields = ['madrasah']
+        read_only_fields = ['madrasah', 'session_id']

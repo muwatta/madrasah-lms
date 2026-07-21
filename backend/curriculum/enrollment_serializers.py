@@ -8,12 +8,15 @@ class EnrollmentSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(source='subject.name_ar', read_only=True)
     subject_name_en = serializers.CharField(source='subject.name_en', read_only=True)
     ustaadh_name = serializers.CharField(source='ustaadh.get_full_name', read_only=True, default=None)
+    school_class_name = serializers.CharField(source='school_class.name_en', read_only=True, default=None)
 
     class Meta:
         model = Enrollment
         fields = [
             'id', 'madrasah', 'student', 'student_email', 'student_name',
-            'subject', 'subject_name', 'subject_name_en', 'ustaadh', 'ustaadh_name', 'enrolled_at'
+            'subject', 'subject_name', 'subject_name_en',
+            'school_class', 'school_class_name',
+            'ustaadh', 'ustaadh_name', 'enrolled_at'
         ]
         read_only_fields = ['madrasah', 'enrolled_at']
 
