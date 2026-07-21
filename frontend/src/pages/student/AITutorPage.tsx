@@ -176,6 +176,8 @@ export default function AITutorPage() {
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const hasArabic = (text: string) => /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
+
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes}B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`;
@@ -406,7 +408,8 @@ export default function AITutorPage() {
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             onKeyDown={(e) => handleEditKeyDown(e, realIdx)}
-                            className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent resize-none"
+                            dir={hasArabic(editText) ? 'rtl' : 'ltr'}
+                            className="w-full rounded-lg border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-primary)] dark:bg-gray-800 px-3 py-2 text-sm text-[var(--color-text-primary)] dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent resize-none font-semibold"
                             rows={3}
                             disabled={sending}
                           />
@@ -438,7 +441,7 @@ export default function AITutorPage() {
                           </div>
                         </div>
                       ) : (
-                        <p className="text-sm text-[var(--color-text-primary)] dark:text-gray-100 mt-1">{session.question}</p>
+                        <p dir={hasArabic(session.question) ? 'rtl' : 'ltr'} className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100 mt-1 leading-relaxed">{session.question}</p>
                       )}
                       {session.attachments && session.attachments.length > 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
@@ -488,7 +491,7 @@ export default function AITutorPage() {
                           )}
                         </button>
                       </div>
-                      <div className="prose prose-sm dark:prose-invert max-w-none mt-1 text-[var(--color-text-secondary)] dark:text-gray-300 leading-relaxed [&_strong]:text-[var(--color-text-primary)] [&_strong]:dark:text-gray-100 [&_h3]:text-[var(--color-text-primary)] [&_h3]:dark:text-gray-100 [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-0.5 [&_code]:bg-gray-200/70 [&_code]:dark:bg-gray-600 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_p]:mb-1.5 [&_p:last-child]:mb-0 [&_a]:text-emerald-600 [&_a]:dark:text-emerald-400">
+                      <div dir={hasArabic(session.response) ? 'rtl' : 'ltr'} className="prose prose-sm dark:prose-invert max-w-none mt-1 text-[var(--color-text-primary)] dark:text-gray-100 leading-relaxed font-medium [&_strong]:text-[var(--color-text-primary)] [&_strong]:dark:text-gray-100 [&_strong]:font-bold [&_h3]:text-[var(--color-text-primary)] [&_h3]:dark:text-gray-100 [&_h3]:text-base [&_h3]:font-bold [&_h3]:mt-3 [&_h3]:mb-1.5 [&_ul]:list-disc [&_ul]:pr-5 [&_ol]:list-decimal [&_ol]:pr-5 [&_li]:mb-0.5 [&_code]:bg-gray-200/70 [&_code]:dark:bg-gray-600 [&_code]:px-1.5 [&_py]:0.5 [&_code]:rounded [&_code]:text-sm [&_p]:mb-1.5 [&_p:last-child]:mb-0 [&_a]:text-emerald-600 [&_a]:dark:text-emerald-400 [&_a]:font-semibold">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{session.response}</ReactMarkdown>
                       </div>
                     </div>
@@ -632,8 +635,9 @@ export default function AITutorPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                dir={hasArabic(input) ? 'rtl' : 'ltr'}
                 placeholder="Ask a question... (Enter to send)"
-                className="w-full rounded-xl border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-4 py-2.5 pr-12 text-sm text-[var(--color-text-primary)] dark:text-gray-100 placeholder-[var(--color-text-muted)] dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent"
+                className="w-full rounded-xl border border-[var(--color-border)] dark:border-gray-600 bg-[var(--color-bg-secondary)] dark:bg-gray-700 px-4 py-2.5 pr-12 text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100 placeholder-[var(--color-text-muted)] dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent"
                 disabled={sending}
               />
             </div>
