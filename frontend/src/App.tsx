@@ -72,6 +72,9 @@ const DocsPage = lazy(() => import('./pages/public/DocsPage'));
 const ContactPage = lazy(() => import('./pages/public/ContactPage'));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/public/TermsPage'));
+const AboutPage = lazy(() => import('./pages/public/AboutPage'));
+const FAQPage = lazy(() => import('./pages/public/FAQPage'));
+const BlogPage = lazy(() => import('./pages/public/BlogPage'));
 
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -229,6 +232,9 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/blog" element={<BlogPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
           </Suspense>
