@@ -104,7 +104,7 @@ def get_pending_review_attempts(*, madrasah, teacher=None):
         # Filter to attempts in classes taught by this teacher
         from curriculum.models import Enrollment
         teacher_class_ids = Enrollment.objects.filter(
-            ustaadh=teacher, madrasah=madrasah, is_active=True
+            ustaadh=teacher, madrasah=madrasah
         ).values_list('school_class_id', flat=True)
         qs = qs.filter(
             Q(mission__assignments__target_class_id__in=teacher_class_ids) |
@@ -354,19 +354,19 @@ def get_teacher_dashboard_data(*, teacher, madrasah):
 
     # Get classes taught by this teacher
     class_ids = Enrollment.objects.filter(
-        ustaadh=teacher, madrasah=madrasah, is_active=True
+        ustaadh=teacher, madrasah=madrasah,
     ).values_list('school_class_id', flat=True).distinct()
 
     pending_reviews = get_pending_review_attempts(madrasah=madrasah, teacher=teacher)
 
     total_students = Enrollment.objects.filter(
-        school_class_id__in=class_ids, madrasah=madrasah, is_active=True,
+        school_class_id__in=class_ids, madrasah=madrasah,
     ).values('student_id').distinct().count()
 
     # Class-wide stats
     attempts = SpeakingAttempt.objects.filter(
         madrasah=madrasah,
-        student__school_class_enrollments__school_class_id__in=class_ids,
+        student__enrollments__school_class_id__in=class_ids,
         status__in=('completed', 'reviewed'),
     )
 
