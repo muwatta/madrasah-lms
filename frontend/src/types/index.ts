@@ -247,89 +247,97 @@ export interface BoardDashboard {
 // ── Fasaaha (Arabic Speaking Intelligence) ──
 export interface SpeakingLevel {
   id: number;
+  number: number;
   name: string;
-  name_en: string;
+  name_ar: string;
   description: string;
-  description_en: string;
-  order: number;
-  min_score_to_pass: number;
+  target_vocabulary_count: number;
+  difficulty: number;
   is_active: boolean;
+  sort_order: number;
+  total_missions: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MissionCategory {
   id: number;
   name: string;
-  name_en: string;
+  name_ar: string;
   icon: string;
   description: string;
+  sort_order: number;
   is_active: boolean;
+  created_at: string;
 }
 
 export interface Mission {
   id: number;
   level: number;
+  level_number: number;
   level_name: string;
   category: number | null;
   category_name: string | null;
   title: string;
-  title_en: string;
-  description: string;
-  description_en: string;
-  arabic_text: string;
-  translation_text: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  points: number;
-  time_limit_seconds: number | null;
-  audio_url: string | null;
+  title_ar: string;
+  prompt_ar: string;
+  prompt_transliteration: string;
+  prompt_translation: string;
+  expected_phrases: string[];
+  hints: string[];
+  difficulty: number;
+  max_time_seconds: number;
+  example_audio: string | null;
   is_active: boolean;
+  sort_order: number;
+  created_by: number;
   created_by_name: string;
   attempt_count: number;
-  avg_score: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface SpeakingAttempt {
   id: number;
+  uuid: string;
   student: number;
   student_name: string;
   mission: number;
   mission_title: string;
-  mission_level_name: string;
-  audio_url: string;
+  mission_title_ar: string;
+  level_number: number;
   audio_file: string;
-  attempt_number: number;
-  status: 'pending' | 'processing' | 'scored' | 'reviewed' | 'needs_review';
-  ai_score: number | null;
-  ai_fluency_score: number | null;
-  ai_pronunciation_score: number | null;
-  ai_grammar_score: number | null;
-  ai_feedback: string | null;
-  teacher_score: number | null;
-  teacher_feedback: string | null;
-  teacher_name: string | null;
-  final_score: number | null;
-  points_earned: number;
-  completed: boolean;
-  duration_seconds: number | null;
+  audio_url: string | null;
+  audio_duration_ms: number | null;
+  audio_size_bytes: number | null;
   notes: string;
+  status: 'pending' | 'processing' | 'scored' | 'reviewed' | 'needs_review';
+  attempt_number: number;
+  is_best_attempt: boolean;
+  ai_analysis: AIAnalysis | null;
+  teacher_review: TeacherReview | null;
+  final_score: number | null;
   created_at: string;
+  completed_at: string | null;
 }
 
 export interface AIAnalysis {
   id: number;
   attempt: number;
-  transcription: string;
+  transcribed_text: string;
+  transcription_provider: string;
+  transcription_confidence: number;
   pronunciation_score: number;
   grammar_score: number;
   fluency_score: number;
+  vocabulary_score: number;
   overall_score: number;
-  feedback: string;
   pronunciation_feedback: string;
   grammar_feedback: string;
   fluency_feedback: string;
+  word_scores: Record<string, unknown>;
+  scoring_provider: string;
   processing_time_ms: number;
-  model_used: string;
-  raw_response: Record<string, unknown>;
   created_at: string;
 }
 
@@ -338,21 +346,23 @@ export interface TeacherReview {
   attempt: number;
   teacher: number;
   teacher_name: string;
-  score: number;
-  pronunciation_score: number | null;
-  grammar_score: number | null;
-  fluency_score: number | null;
+  student_name: string;
+  mission_title: string;
+  overall_score: number | null;
   feedback: string;
-  pronunciation_feedback: string;
-  grammar_feedback: string;
-  fluency_feedback: string;
+  pronunciation_notes: string;
+  grammar_notes: string;
+  is_approved: boolean | null;
   created_at: string;
+  updated_at: string;
 }
 
 export interface MissionAssignment {
   id: number;
   mission: number;
   mission_title: string;
+  mission_title_ar: string;
+  assigned_by: number;
   assigned_by_name: string;
   target_student: number | null;
   target_student_name: string | null;
@@ -369,14 +379,18 @@ export interface StudentLevelProgress {
   student: number;
   student_name: string;
   level: number;
+  level_number: number;
   level_name: string;
+  level_name_ar: string;
+  status: string;
+  missions_attempted: number;
   missions_completed: number;
-  total_missions_available: number;
   average_score: number;
   best_score: number;
-  total_points: number;
-  is_completed: boolean;
+  total_time_seconds: number;
+  started_at: string | null;
   completed_at: string | null;
+  updated_at: string;
 }
 
 export interface StudentStreak {
@@ -385,20 +399,23 @@ export interface StudentStreak {
   student_name: string;
   current_streak: number;
   longest_streak: number;
-  last_attempt_date: string | null;
-  total_speaking_days: number;
+  last_practice_date: string | null;
+  total_practice_days: number;
+  total_points: number;
+  updated_at: string;
 }
 
 export interface Badge {
   id: number;
   name: string;
-  name_en: string;
+  name_ar: string;
   description: string;
-  description_en: string;
   icon: string;
-  badge_type: 'streak' | 'score' | 'missions' | 'level' | 'special';
-  criteria_value: number;
+  category: string;
+  criteria: Record<string, unknown>;
+  points: number;
   is_active: boolean;
+  created_at: string;
 }
 
 export interface StudentBadge {
@@ -407,9 +424,12 @@ export interface StudentBadge {
   student_name: string;
   badge: number;
   badge_name: string;
+  badge_name_ar: string;
   badge_icon: string;
-  badge_type: string;
-  earned_at: string;
+  badge_category: string;
+  awarded_at: string;
+  awarded_by: number | null;
+  awarded_by_name: string | null;
 }
 
 export interface FasaahaStudentDashboard {
@@ -420,11 +440,10 @@ export interface FasaahaStudentDashboard {
   longest_streak: number;
   total_points: number;
   badge_count: number;
-  progress: StudentLevelProgress[];
 }
 
 export interface FasaahaTeacherDashboard {
-  classes_taught: number;
+  classes_taught: number[];
   total_students: number;
   pending_reviews_count: number;
   total_attempts: number;

@@ -15,8 +15,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from config.mixins import TenantAwareMixin
-
 from .models import (
     SpeakingLevel, MissionCategory, Mission, SpeakingAttempt,
     AIAnalysis, TeacherReview, MissionAssignment,
@@ -73,12 +71,12 @@ class SpeakingLevelListCreateView(generics.ListCreateAPIView):
         return SpeakingLevelSerializer
 
     def get_queryset(self):
-        return get_levels(madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_levels(madrasah=self.request.user.madrasah)  
 
     def perform_create(self, serializer):
         data = serializer.validated_data
         SpeakingLevel.objects.create(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             **data,
         )
 
@@ -88,7 +86,7 @@ class SpeakingLevelDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, CanManageLevels]
 
     def get_queryset(self):
-        return get_levels(madrasah=self.request.user.madrasah, active_only=False)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_levels(madrasah=self.request.user.madrasah, active_only=False)  
 
     def perform_update(self, serializer):
         level = self.get_object()
@@ -113,12 +111,12 @@ class MissionCategoryListCreateView(generics.ListCreateAPIView):
         return MissionCategorySerializer
 
     def get_queryset(self):
-        return get_categories(madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_categories(madrasah=self.request.user.madrasah)  
 
     def perform_create(self, serializer):
         data = serializer.validated_data
         MissionCategory.objects.create(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             **data,
         )
 
@@ -143,11 +141,11 @@ class MissionListCreateView(generics.ListCreateAPIView):
         return MissionSerializer
 
     def get_queryset(self):
-        qs = get_missions(madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        qs = get_missions(madrasah=self.request.user.madrasah)  
 
-        level_id = self.request.query_params.get('level')  # pyright: ignore[reportAttributeAccessIssue]
-        category_id = self.request.query_params.get('category')  # pyright: ignore[reportAttributeAccessIssue]
-        difficulty = self.request.query_params.get('difficulty')  # pyright: ignore[reportAttributeAccessIssue]
+        level_id = self.request.query_params.get('level')  
+        category_id = self.request.query_params.get('category')  
+        difficulty = self.request.query_params.get('difficulty')  
 
         if level_id:
             qs = qs.filter(level_id=level_id)
@@ -164,13 +162,13 @@ class MissionListCreateView(generics.ListCreateAPIView):
         category_id = data.pop('category', None)
 
         from .selectors import get_level_by_id, get_category_by_id
-        level = get_level_by_id(level_id=level_id, madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        level = get_level_by_id(level_id=level_id, madrasah=self.request.user.madrasah)  
         category = None
         if category_id:
-            category = get_category_by_id(category_id=category_id, madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+            category = get_category_by_id(category_id=category_id, madrasah=self.request.user.madrasah)  
 
         MissionService.create_mission(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             level=level,
             category=category,
             created_by=self.request.user,
@@ -183,7 +181,7 @@ class MissionDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, CanViewMissions]
 
     def get_queryset(self):
-        return get_missions(madrasah=self.request.user.madrasah, active_only=False)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_missions(madrasah=self.request.user.madrasah, active_only=False)  
 
     def perform_update(self, serializer):
         mission = self.get_object()
@@ -191,11 +189,11 @@ class MissionDetailView(generics.RetrieveUpdateDestroyAPIView):
 
         if 'level' in data:
             from .selectors import get_level_by_id
-            data['level'] = get_level_by_id(level_id=data['level'], madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+            data['level'] = get_level_by_id(level_id=data['level'], madrasah=self.request.user.madrasah)  
         if 'category' in data:
             from .selectors import get_category_by_id
             if data['category']:
-                data['category'] = get_category_by_id(category_id=data['category'], madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+                data['category'] = get_category_by_id(category_id=data['category'], madrasah=self.request.user.madrasah)  
 
         MissionService.update_mission(mission=mission, **data)
 
@@ -210,7 +208,7 @@ class LevelMissionsView(generics.ListAPIView):
 
     def get_queryset(self):
         level_id = self.kwargs['level_id']
-        return get_missions_for_level(level_id=level_id, madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_missions_for_level(level_id=level_id, madrasah=self.request.user.madrasah)  
 
 
 #  Attempts
@@ -226,26 +224,26 @@ class AttemptListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            return get_attempts_for_student(student=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
+            return get_attempts_for_student(student=user, madrasah=user.madrasah)  
         return SpeakingAttempt.objects.filter(
-            madrasah=user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=user.madrasah,  
         ).select_related('student', 'mission', 'mission__level', 'mission__category')
 
     def perform_create(self, serializer):
         data = serializer.validated_data
-        mission = get_mission_by_id(mission_id=data['mission'], madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        mission = get_mission_by_id(mission_id=data['mission'], madrasah=self.request.user.madrasah)  
 
         attempt = AttemptService.submit_attempt(
             student=self.request.user,
             mission=mission,
             audio_file=data['audio'],
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             notes=data.get('notes', ''),
         )
 
         from .tasks import process_speaking_attempt
-        process_speaking_attempt.delay(attempt.id)  # pyright: ignore[reportAttributeAccessIssue]
+        process_speaking_attempt.delay(attempt.id)  
 
         self._created_attempt = attempt
 
@@ -264,10 +262,10 @@ class AttemptDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            return get_attempts_for_student(student=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
+            return get_attempts_for_student(student=user, madrasah=user.madrasah)  
         return SpeakingAttempt.objects.filter(
-            madrasah=user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=user.madrasah,  
         ).select_related('student', 'mission', 'mission__level', 'mission__category')
 
 
@@ -277,7 +275,7 @@ class AttemptRetryView(APIView):
 
     def post(self, request, pk):
         try:
-            original = get_attempt_by_id(attempt_id=pk, madrasah=request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+            original = get_attempt_by_id(attempt_id=pk, madrasah=request.user.madrasah)  
         except SpeakingAttempt.DoesNotExist:
             return Response(
                 {'error': 'Attempt not found'},
@@ -290,12 +288,12 @@ class AttemptRetryView(APIView):
             student=request.user,
             mission=original.mission,
             audio_file=serializer.validated_data['audio'],
-            madrasah=request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=request.user.madrasah,  
             notes=serializer.validated_data.get('notes', ''),
         )
 
         from .tasks import process_speaking_attempt
-        process_speaking_attempt.delay(attempt.id)  # pyright: ignore[reportAttributeAccessIssue]
+        process_speaking_attempt.delay(attempt.id)  
 
         return Response(
             SpeakingAttemptSerializer(attempt, context={'request': request}).data,
@@ -328,8 +326,8 @@ class PendingReviewListView(generics.ListAPIView):
 
     def get_queryset(self):
         return get_pending_review_attempts(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
-            teacher=self.request.user if self.request.user.role == 'ustaadh' else None,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
+            teacher=self.request.user if self.request.user.role == 'ustaadh' else None,  
         )
 
 
@@ -342,22 +340,22 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         return TeacherReviewSerializer
 
     def get_queryset(self):
-        attempt_id = self.request.query_params.get('attempt')  # pyright: ignore[reportAttributeAccessIssue]
+        attempt_id = self.request.query_params.get('attempt')  
         if attempt_id:
             return get_reviews_for_attempt(attempt_id=attempt_id)
         return TeacherReview.objects.filter(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
         ).select_related('teacher', 'attempt', 'attempt__student', 'attempt__mission')
 
     def perform_create(self, serializer):
         data = serializer.validated_data
         attempt = get_attempt_by_id(
-            attempt_id=data.pop('attempt'), madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+            attempt_id=data.pop('attempt'), madrasah=self.request.user.madrasah)  
 
         ReviewService.create_review(
             attempt=attempt,
             teacher=self.request.user,
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             **data,
         )
 
@@ -368,7 +366,7 @@ class ReviewDetailView(generics.RetrieveUpdateAPIView):
 
     def get_queryset(self):
         return TeacherReview.objects.filter(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
         ).select_related('teacher', 'attempt')
 
     def perform_update(self, serializer):
@@ -389,13 +387,13 @@ class AssignmentListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            return get_assignments(madrasah=user.madrasah, student=user)  # pyright: ignore[reportAttributeAccessIssue]
-        return get_assignments(madrasah=user.madrasah, teacher=user)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
+            return get_assignments(madrasah=user.madrasah, student=user)  
+        return get_assignments(madrasah=user.madrasah, teacher=user)  
 
     def perform_create(self, serializer):
         data = serializer.validated_data
-        mission = get_mission_by_id(mission_id=data['mission'], madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        mission = get_mission_by_id(mission_id=data['mission'], madrasah=self.request.user.madrasah)  
 
         target_student = None
         target_class = None
@@ -417,7 +415,7 @@ class AssignmentListCreateView(generics.ListCreateAPIView):
         AssignmentService.assign_mission(
             mission=mission,
             assigned_by=self.request.user,
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             target_student=target_student,
             target_class=target_class,
             due_date=data.get('due_date'),
@@ -431,7 +429,7 @@ class AssignmentDetailView(generics.RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticated, CanManageAssignments]
 
     def get_queryset(self):
-        return get_assignments(madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_assignments(madrasah=self.request.user.madrasah)  
 
     def perform_destroy(self, instance):
         AssignmentService.remove_assignment(assignment=instance)
@@ -443,15 +441,15 @@ class StudentProgressListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            return get_student_progress(student=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
+            return get_student_progress(student=user, madrasah=user.madrasah)  
 
-        student_id = self.request.query_params.get('student')  # pyright: ignore[reportAttributeAccessIssue]
+        student_id = self.request.query_params.get('student')  
         if student_id:
             from users.models import User
             try:
                 student = User.objects.get(pk=student_id, role='student')
-                return get_student_progress(student=student, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+                return get_student_progress(student=student, madrasah=user.madrasah)  
             except User.DoesNotExist:
                 pass
 
@@ -466,10 +464,10 @@ class LevelProgressView(generics.RetrieveAPIView):
         level_id = self.kwargs['level_id']
         user = self.request.user
 
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
             progress = get_progress_for_level(student=user, level_id=level_id)
         else:
-            student_id = self.request.query_params.get('student')  # pyright: ignore[reportAttributeAccessIssue]
+            student_id = self.request.query_params.get('student')  
             if not student_id:
                 from rest_framework.exceptions import NotFound
                 raise NotFound("student query parameter required")
@@ -489,16 +487,16 @@ class StudentStreakView(generics.RetrieveAPIView):
 
     def get_object(self):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            streak = get_student_streak(student=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
+            streak = get_student_streak(student=user, madrasah=user.madrasah)  
         else:
-            student_id = self.request.query_params.get('student')  # pyright: ignore[reportAttributeAccessIssue]
+            student_id = self.request.query_params.get('student')  
             if not student_id:
                 from rest_framework.exceptions import NotFound
                 raise NotFound("student query parameter required")
             from users.models import User
             student = User.objects.get(pk=student_id, role='student')
-            streak = get_student_streak(student=student, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+            streak = get_student_streak(student=student, madrasah=user.madrasah)  
 
         if not streak:
             from rest_framework.exceptions import NotFound
@@ -514,7 +512,7 @@ class BadgeListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return get_badges(madrasah=self.request.user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_badges(madrasah=self.request.user.madrasah)  
 
 
 class BadgeCreateView(generics.CreateAPIView):
@@ -523,7 +521,7 @@ class BadgeCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         Badge.objects.create(
-            madrasah=self.request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah,  
             **serializer.validated_data,
         )
 
@@ -534,15 +532,15 @@ class MyBadgesView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            return get_student_badges(student=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student':  
+            return get_student_badges(student=user, madrasah=user.madrasah)  
 
-        student_id = self.request.query_params.get('student')  # pyright: ignore[reportAttributeAccessIssue]
+        student_id = self.request.query_params.get('student')  
         if student_id:
             from users.models import User
             try:
                 student = User.objects.get(pk=student_id, role='student')
-                return get_student_badges(student=student, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+                return get_student_badges(student=student, madrasah=user.madrasah)  
             except User.DoesNotExist:
                 pass
 
@@ -556,8 +554,8 @@ class ClassAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, CanViewAnalytics]
 
     def get(self, request):
-        school_class_id = request.query_params.get('school_class')  # pyright: ignore[reportAttributeAccessIssue]
-        level_id = request.query_params.get('level')  # pyright: ignore[reportAttributeAccessIssue]
+        school_class_id = request.query_params.get('school_class')  
+        level_id = request.query_params.get('level')  
 
         if not school_class_id:
             return Response(
@@ -565,7 +563,7 @@ class ClassAnalyticsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
         data = get_class_analytics(
-            madrasah=request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=request.user.madrasah,  
             school_class_id=school_class_id,
             level_id=level_id,
         )
@@ -576,7 +574,7 @@ class StudentAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, CanViewAnalytics]
 
     def get(self, request, student_id):
-        level_id = request.query_params.get('level')  # pyright: ignore[reportAttributeAccessIssue]
+        level_id = request.query_params.get('level')  
 
         from users.models import User
         try:
@@ -588,7 +586,7 @@ class StudentAnalyticsView(APIView):
 
         data = get_student_analytics(
             student=student,
-            madrasah=request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=request.user.madrasah,  
             level_id=level_id,
         )
         return Response(data)
@@ -598,10 +596,10 @@ class SchoolAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, CanViewSchoolAnalytics]
 
     def get(self, request):
-        level_id = request.query_params.get('level')  # pyright: ignore[reportAttributeAccessIssue]
+        level_id = request.query_params.get('level')  
 
         data = get_school_analytics(
-            madrasah=request.user.madrasah,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=request.user.madrasah,  
             level_id=level_id,
         )
         return Response(data)
@@ -615,12 +613,12 @@ class StudentDashboardView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.role != 'student':  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role != 'student':  
             return Response(
                 {'error': 'Student role required'},
                 status=status.HTTP_403_FORBIDDEN)
 
-        data = get_student_dashboard_data(student=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        data = get_student_dashboard_data(student=user, madrasah=user.madrasah)  
 
         progress_data = StudentLevelProgressSerializer(data['progress'], many=True).data
         level_data = SpeakingLevelSerializer(data['current_level']).data if data['current_level'] else None
@@ -642,12 +640,12 @@ class TeacherDashboardView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.role not in ('ustaadh', 'mudeer', 'idaarah'):  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role not in ('ustaadh', 'mudeer', 'idaarah'):  
             return Response(
                 {'error': 'Teacher or admin role required'},
                 status=status.HTTP_403_FORBIDDEN)
 
-        data = get_teacher_dashboard_data(teacher=user, madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        data = get_teacher_dashboard_data(teacher=user, madrasah=user.madrasah)  
 
         return Response({
             'classes_taught': data['classes_taught'],

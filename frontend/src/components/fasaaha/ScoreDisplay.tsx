@@ -46,7 +46,7 @@ export default function ScoreDisplay({ aiScore, pronunciationScore, grammarScore
     <div className="rounded-xl border p-6 space-y-6" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
       <div className="flex items-center gap-3">
         <div className="flex items-center justify-center w-16 h-16 rounded-full" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-          <span className={`text-2xl font-bold ${getScoreTextColor(overall)}`}>{overall}</span>
+          <span className={`text-2xl font-bold ${getScoreTextColor(overall)}`}>{overall > 0 ? Math.round(overall) : '-'}</span>
         </div>
         <div>
           <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.overall')}</p>
@@ -55,16 +55,16 @@ export default function ScoreDisplay({ aiScore, pronunciationScore, grammarScore
       </div>
 
       <div className="space-y-3">
-        {pronunciationScore !== null && <ScoreBar label={t('fasaaha.pronunciation')} score={pronunciationScore} />}
-        {grammarScore !== null && <ScoreBar label={t('fasaaha.grammar')} score={grammarScore} />}
-        {fluencyScore !== null && <ScoreBar label={t('fasaaha.fluency')} score={fluencyScore} />}
+        {pronunciationScore !== null && pronunciationScore !== undefined && <ScoreBar label={t('fasaaha.pronunciation')} score={Math.round(pronunciationScore)} />}
+        {grammarScore !== null && grammarScore !== undefined && <ScoreBar label={t('fasaaha.grammar')} score={Math.round(grammarScore)} />}
+        {fluencyScore !== null && fluencyScore !== undefined && <ScoreBar label={t('fasaaha.fluency')} score={Math.round(fluencyScore)} />}
       </div>
 
-      {teacherScore !== null && (
+      {teacherScore !== null && teacherScore !== undefined && (
         <div className="border-t pt-4" style={{ borderColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.teacherFeedback')} — {teacherScore}%</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.teacherFeedback')} — {Math.round(teacherScore)}%</p>
           </div>
           {teacherFeedback && (
             <p className="text-sm p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>{teacherFeedback}</p>

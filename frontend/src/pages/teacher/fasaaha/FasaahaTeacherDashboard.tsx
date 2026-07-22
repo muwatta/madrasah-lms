@@ -23,7 +23,7 @@ export default function FasaahaTeacherDashboard() {
   if (!data) return null;
 
   const stats = [
-    { label: t('fasaaha.classesTaught'), value: data.classes_taught, color: 'bg-blue-500' },
+    { label: t('fasaaha.classesTaught'), value: Array.isArray(data.classes_taught) ? data.classes_taught.length : 0, color: 'bg-blue-500' },
     { label: t('fasaaha.totalStudents'), value: data.total_students, color: 'bg-green-500' },
     { label: t('fasaaha.pendingReviews'), value: data.pending_reviews_count, color: 'bg-orange-500' },
     { label: t('fasaaha.totalAttempts'), value: data.total_attempts, color: 'bg-purple-500' },

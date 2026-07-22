@@ -13,20 +13,16 @@ export default function FasaahaMyProgress() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fasaahaAPI.progress.list(), fasaahaAPI.attempts.list(), fasaahaAPI.streaks.get()])
-      .then(([p, a, s]) => {
-        setProgress(unwrapPaginated(p.data));
-        setAttempts(unwrapPaginated(a.data).slice(0, 10));
-        const streaks = unwrapPaginated(s.data);
-        if (streaks.length > 0) setStreak(streaks[0]);
-      })
-      .finally(() => setLoading(false));
+    Promise.all([
+      fasaahaAPI.progress.list().then(r => setProgress(unwrapPaginated(r.data))),
+      fasaahaAPI.attempts.list().then(r => setAttempts(unwrapPaginated(r.data).slice(0, 10))),
+      fasaahaAPI.streaks.get().then(r => { const s = unwrapPaginated(r.data); if (s.length > 0) setStreak(s[0]); }),
+    ]).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <SkeletonStatsGrid />;
 
-  const totalAttempts = attempts.length;
-  const avgScore = attempts.length > 0 ? Math.round(attempts.reduce((sum, a) => sum + (a.final_score ?? a.ai_score ?? 0), 0) / attempts.length) : 0;
+  const avgScore = attempts.length > 0 ? Math.round(attempts.reduce((sum, a) => sum + (a.final_score ?? a.ai_analysis?.overall_score ?? 0), 0) / attempts.length) : 0;
 
   return (
     <div className="space-y-6">
@@ -34,7 +30,7 @@ export default function FasaahaMyProgress() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: t('fasaaha.totalAttempts'), value: totalAttempts },
+          { label: t('fasaaha.totalAttempts'), value: attempts.length },
           { label: t('fasaaha.avgScore'), value: `${avgScore}%` },
           { label: t('fasaaha.currentStreak'), value: `${streak?.current_streak ?? 0} 🔥` },
           { label: t('fasaaha.longestStreak'), value: streak?.longest_streak ?? 0 },
@@ -51,22 +47,23 @@ export default function FasaahaMyProgress() {
           <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.levelsTitle')}</h2>
           <div className="space-y-3">
             {progress.map(p => {
-              const pct = p.total_missions_available > 0 ? Math.round((p.missions_completed / p.total_missions_available) * 100) : 0;
+              const pct = p.missions_attempted > 0 ? Math.round((p.missions_completed / p.missions_attempted) * 100) : 0;
+              const completed = p.status === 'completed';
               return (
                 <div key={p.id} className="flex items-center gap-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${p.is_completed ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'}`}>
-                    {p.level_name}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${completed ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'}`}>
+                    {p.level_number}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{p.missions_completed}/{p.total_missions_available} {t('fasaaha.missionsDone')}</span>
+                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{language === 'ar' ? p.level_name_ar : p.level_name} — {p.missions_completed}/{p.missions_attempted}</span>
                       <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{p.average_score > 0 ? `${Math.round(p.average_score)}% avg` : ''}</span>
                     </div>
                     <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-border-light)' }}>
-                      <div className={`h-full rounded-full ${p.is_completed ? 'bg-green-500' : 'bg-primary-500'}`} style={{ width: `${pct}%` }} />
+                      <div className={`h-full rounded-full ${completed ? 'bg-green-500' : 'bg-primary-500'}`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
-                  {p.is_completed && <span className="text-xs text-green-600 dark:text-green-400 shrink-0">{t('fasaaha.completed')}</span>}
+                  {completed && <span className="text-xs text-green-600 dark:text-green-400 shrink-0">{t('fasaaha.completed')}</span>}
                 </div>
               );
             })}
@@ -84,8 +81,8 @@ export default function FasaahaMyProgress() {
                   <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{a.mission_title}</p>
                   <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{new Date(a.created_at).toLocaleDateString()}</p>
                 </div>
-                <span className={`text-sm font-bold shrink-0 ${(a.final_score ?? a.ai_score ?? 0) >= 70 ? 'text-green-600 dark:text-green-400' : 'text-orange-500'}`}>
-                  {a.final_score ?? a.ai_score ?? '-'}%
+                <span className={`text-sm font-bold shrink-0 ${(a.final_score ?? 0) >= 70 ? 'text-green-600 dark:text-green-400' : 'text-orange-500'}`}>
+                  {a.final_score ? `${Math.round(a.final_score)}%` : a.ai_analysis ? `${Math.round(a.ai_analysis.overall_score)}%` : '-'}
                 </span>
               </div>
             ))}

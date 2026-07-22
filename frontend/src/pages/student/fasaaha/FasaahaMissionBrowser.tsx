@@ -51,13 +51,13 @@ export default function FasaahaMissionBrowser() {
         </button>
         {levels.map(l => (
           <button key={l.id} onClick={() => setSelectedLevel(l.id)} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${selectedLevel === l.id ? 'bg-primary-600 text-white' : 'border'}`} style={selectedLevel === l.id ? undefined : { borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
-            {language === 'ar' ? l.name : l.name_en || l.name}
+            {language === 'ar' ? l.name_ar : l.name}
           </button>
         ))}
 
         <select value={selectedCategory ?? ''} onChange={e => setSelectedCategory(e.target.value ? Number(e.target.value) : null)} className="rounded-lg border px-3 py-1.5 text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)', backgroundColor: '#ffffff' }}>
           <option value="">{t('fasaaha.allCategories')}</option>
-          {categories.map(c => <option key={c.id} value={c.id}>{language === 'ar' ? c.name : c.name_en || c.name}</option>)}
+          {categories.map(c => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name}</option>)}
         </select>
       </div>
 

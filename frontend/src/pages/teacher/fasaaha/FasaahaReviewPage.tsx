@@ -27,7 +27,7 @@ export default function FasaahaReviewPage() {
     if (!selected) return;
     setSubmitting(true);
     try {
-      await fasaahaAPI.reviews.create({ attempt: selected.id, score, feedback });
+      await fasaahaAPI.reviews.create({ attempt: selected.id, overall_score: score, feedback });
       const remaining = pending.filter(p => p.id !== selected.id);
       setPending(remaining);
       setReviewed(prev => prev + 1);
@@ -74,7 +74,15 @@ export default function FasaahaReviewPage() {
               {selected.audio_url && <audio src={selected.audio_url} controls className="w-full mt-3" />}
             </div>
 
-            <ScoreDisplay aiScore={selected.ai_score} pronunciationScore={selected.ai_pronunciation_score} grammarScore={selected.ai_grammar_score} fluencyScore={selected.ai_fluency_score} teacherScore={selected.teacher_score} aiFeedback={selected.ai_feedback} />
+            <ScoreDisplay
+              aiScore={selected.ai_analysis?.overall_score ?? null}
+              pronunciationScore={selected.ai_analysis?.pronunciation_score ?? null}
+              grammarScore={selected.ai_analysis?.grammar_score ?? null}
+              fluencyScore={selected.ai_analysis?.fluency_score ?? null}
+              teacherScore={selected.teacher_review?.overall_score ?? null}
+              aiFeedback={selected.ai_analysis?.pronunciation_feedback ? `${selected.ai_analysis.pronunciation_feedback} ${selected.ai_analysis.grammar_feedback} ${selected.ai_analysis.fluency_feedback}` : null}
+              teacherFeedback={selected.teacher_review?.feedback ?? null}
+            />
 
             <div className="rounded-xl border p-4 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
               <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.teacherFeedback')}</h3>

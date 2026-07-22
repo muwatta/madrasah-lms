@@ -104,12 +104,7 @@ class AttemptService:
         madrasah,
         notes='',
     ):
-        """
-        Submit a new speaking attempt.
-
-        Creates the attempt with status='processing' and returns it.
-        AI processing is done asynchronously via Celery.
-        """
+        
         # Determine attempt number
         last_attempt = SpeakingAttempt.objects.filter(
             student=student, mission=mission,

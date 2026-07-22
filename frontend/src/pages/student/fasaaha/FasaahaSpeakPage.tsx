@@ -53,17 +53,24 @@ export default function FasaahaSpeakPage() {
     );
   }
 
-  const title = language === 'ar' ? mission.title : mission.title_en || mission.title;
-
   if (result) {
+    const analysis = result.ai_analysis;
+    const review = result.teacher_review;
     return (
       <div className="space-y-6 max-w-xl mx-auto">
         <div className="text-center py-4">
           <span className="text-3xl">🎉</span>
           <h2 className="text-xl font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.missionComplete')}</h2>
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>+{result.points_earned} {t('fasaaha.points')}</p>
         </div>
-        <ScoreDisplay aiScore={result.ai_score} pronunciationScore={result.ai_pronunciation_score} grammarScore={result.ai_grammar_score} fluencyScore={result.ai_fluency_score} teacherScore={result.teacher_score} aiFeedback={result.ai_feedback} teacherFeedback={result.teacher_feedback} />
+        <ScoreDisplay
+          aiScore={analysis?.overall_score ?? null}
+          pronunciationScore={analysis?.pronunciation_score ?? null}
+          grammarScore={analysis?.grammar_score ?? null}
+          fluencyScore={analysis?.fluency_score ?? null}
+          teacherScore={review?.overall_score ?? null}
+          aiFeedback={analysis?.pronunciation_feedback ? `${analysis.pronunciation_feedback} ${analysis.grammar_feedback} ${analysis.fluency_feedback}` : null}
+          teacherFeedback={review?.feedback ?? null}
+        />
         <div className="flex gap-3 justify-center">
           <button onClick={() => { setResult(null); setRecordingBlob(null); }} className="btn-press px-4 py-2 rounded-lg border text-sm font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{t('fasaaha.tryAgain')}</button>
           <Link to="/student/fasaaha/missions" className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium">{t('fasaaha.viewMissions')}</Link>
@@ -77,22 +84,22 @@ export default function FasaahaSpeakPage() {
       <Link to="/student/fasaaha/missions" className="text-sm text-primary-600 hover:underline">{t('fasaaha.backToMissions')}</Link>
 
       <div className="text-center rounded-xl border p-6" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-        <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>{title}</p>
+        <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>{mission.title}</p>
         <p className="text-3xl leading-relaxed py-4" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-arabic, serif)' }}>
-          {mission.arabic_text}
+          {mission.prompt_ar}
         </p>
-        {mission.translation_text && (
+        {mission.prompt_translation && (
           <div>
             <button onClick={() => setShowTranslation(!showTranslation)} className="text-xs text-primary-600 hover:underline">
               {showTranslation ? t('fasaaha.hideTranslation') : t('fasaaha.showTranslation')}
             </button>
-            {showTranslation && <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>{mission.translation_text}</p>}
+            {showTranslation && <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>{mission.prompt_translation}</p>}
           </div>
         )}
       </div>
 
       <div className="rounded-xl border p-6" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-        <AudioRecorder onRecordingComplete={setRecordingBlob} disabled={submitting} maxDurationSeconds={mission.time_limit_seconds ?? 120} />
+        <AudioRecorder onRecordingComplete={setRecordingBlob} disabled={submitting} maxDurationSeconds={mission.max_time_seconds ?? 120} />
       </div>
 
       {error && <p className="text-sm text-red-500 text-center">{error}</p>}

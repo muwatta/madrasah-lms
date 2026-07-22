@@ -2,20 +2,22 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { fasaahaAPI } from '../../../api';
-import type { FasaahaStudentDashboard as DashboardType } from '../../../types';
+import type { FasaahaStudentDashboard as DashboardType, StudentLevelProgress } from '../../../types';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
+import { unwrapPaginated } from '../../../api/client';
 
 export default function FasaahaStudentDashboard() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [data, setData] = useState<DashboardType | null>(null);
+  const [progress, setProgress] = useState<StudentLevelProgress[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fasaahaAPI.dashboards.student()
-      .then(res => setData(res.data))
-      .catch(() => setError(t('common.loadError')))
-      .finally(() => setLoading(false));
+    Promise.all([
+      fasaahaAPI.dashboards.student().then(r => setData(r.data)),
+      fasaahaAPI.progress.list().then(r => setProgress(unwrapPaginated(r.data))),
+    ]).catch(() => setError(t('common.loadError'))).finally(() => setLoading(false));
   }, [t]);
 
   if (loading) return <SkeletonStatsGrid />;
@@ -23,7 +25,7 @@ export default function FasaahaStudentDashboard() {
   if (!data) return null;
 
   const stats = [
-    { label: t('fasaaha.currentLevel'), value: data.current_level?.name_en || '-', color: 'bg-primary-500' },
+    { label: t('fasaaha.currentLevel'), value: data.current_level ? (language === 'ar' ? data.current_level.name_ar : data.current_level.name) : '-', color: 'bg-primary-500' },
     { label: t('fasaaha.totalPoints'), value: data.total_points, color: 'bg-amber-500' },
     { label: t('fasaaha.completedMissions'), value: data.completed_missions, color: 'bg-green-500' },
     { label: t('fasaaha.currentStreak'), value: `${data.current_streak} 🔥`, color: 'bg-orange-500' },
@@ -62,21 +64,23 @@ export default function FasaahaStudentDashboard() {
         ))}
       </div>
 
-      {data.progress.length > 0 && (
+      {progress.length > 0 && (
         <div className="rounded-xl border p-5" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
           <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.levelsTitle')}</h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
-            {data.progress.map(p => {
-              const pct = p.total_missions_available > 0 ? Math.round((p.missions_completed / p.total_missions_available) * 100) : 0;
+            {progress.map(p => {
+              const pct = p.missions_attempted > 0 ? Math.round((p.missions_completed / p.missions_attempted) * 100) : 0;
+              const completed = p.status === 'completed';
               return (
-                <div key={p.id} className={`shrink-0 w-36 rounded-xl border p-3 text-center ${p.is_completed ? 'border-green-400' : ''}`}
-                  style={{ borderColor: p.is_completed ? undefined : 'var(--color-border-light)' }}>
-                  <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold ${p.is_completed ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'}`}>
-                    {p.level_name}
+                <div key={p.id} className={`shrink-0 w-36 rounded-xl border p-3 text-center ${completed ? 'border-green-400' : ''}`}
+                  style={{ borderColor: completed ? undefined : 'var(--color-border-light)' }}>
+                  <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold ${completed ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'}`}>
+                    {p.level_number}
                   </div>
-                  <p className="text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>{p.missions_completed}/{p.total_missions_available}</p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>{language === 'ar' ? p.level_name_ar : p.level_name}</p>
+                  <p className="text-[10px] mt-1" style={{ color: 'var(--color-text-muted)' }}>{p.missions_completed}/{p.missions_attempted}</p>
                   <div className="h-1.5 rounded-full mt-2 overflow-hidden" style={{ backgroundColor: 'var(--color-border-light)' }}>
-                    <div className={`h-full rounded-full ${p.is_completed ? 'bg-green-500' : 'bg-primary-500'}`} style={{ width: `${pct}%` }} />
+                    <div className={`h-full rounded-full ${completed ? 'bg-green-500' : 'bg-primary-500'}`} style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );

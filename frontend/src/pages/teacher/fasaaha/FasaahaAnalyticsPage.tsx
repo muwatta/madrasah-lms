@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { fasaahaAPI } from '../../../api';
-import { unwrapPaginated } from '../../../api/client';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
 
 export default function FasaahaAnalyticsPage() {
@@ -52,13 +51,17 @@ export default function FasaahaAnalyticsPage() {
             <div className="rounded-xl border p-5" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
               <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.scoreDistribution')}</h3>
               <div className="flex items-end gap-2 h-32">
-                {Object.entries(classData.score_distribution).map(([range, count]: [string, any]) => (
-                  <div key={range} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>{count}</span>
-                    <div className="w-full bg-primary-500 rounded-t" style={{ height: `${Math.min((count / Math.max(...Object.values(classData.score_distribution as Record<string, number>), 1)) * 100, 100)}%` }} />
-                    <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{range}</span>
-                  </div>
-                ))}
+                {Object.entries(classData.score_distribution).map(([range, count]: [string, any]) => {
+                  const vals = Object.values(classData.score_distribution as Record<string, number>) as number[];
+                  const max = Math.max(...vals, 1);
+                  return (
+                    <div key={range} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>{count}</span>
+                      <div className="w-full bg-primary-500 rounded-t" style={{ height: `${(count / max) * 100}%` }} />
+                      <span className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>{range}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

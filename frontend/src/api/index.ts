@@ -489,7 +489,7 @@ export const fasaahaAPI = {
     create: (data: any) => api.post('/fasaaha/missions/', data),
     update: (id: number, data: any) => api.put(`/fasaaha/missions/${id}/`, data),
     delete: (id: number) => api.delete(`/fasaaha/missions/${id}/`),
-    forLevel: (levelId: number) => api.get(`/fasaaha/missions/for-level/${levelId}/`),
+    forLevel: (levelId: number) => api.get(`/fasaaha/levels/${levelId}/missions/`),
   },
   // Attempts
   attempts: {
@@ -519,17 +519,17 @@ export const fasaahaAPI = {
   // Progress
   progress: {
     list: (params?: any) => api.get('/fasaaha/progress/', { params }),
-    level: (levelId: number, params?: any) => api.get(`/fasaaha/progress/level/${levelId}/`, { params }),
+    level: (levelId: number, params?: any) => api.get(`/fasaaha/progress/${levelId}/`, { params }),
   },
   // Streaks
   streaks: {
-    get: (params?: any) => api.get('/fasaaha/streaks/', { params }),
+    get: (params?: any) => api.get('/fasaaha/progress/streak/', { params }),
   },
   // Badges
   badges: {
     list: (params?: any) => api.get('/fasaaha/badges/', { params }),
-    create: (data: any) => api.post('/fasaaha/badges/', data),
-    myBadges: (params?: any) => api.get('/fasaaha/my-badges/', { params }),
+    create: (data: any) => api.post('/fasaaha/badges/create/', data),
+    myBadges: (params?: any) => api.get('/fasaaha/badges/my/', { params }),
   },
   // Analytics
   analytics: {
