@@ -28,7 +28,16 @@ logger = logging.getLogger(__name__)
 
 
 class AIProcessingPipeline:
-    """Orchestrates the full AI analysis pipeline for a speaking attempt."""
+    """
+    Orchestrates the full AI analysis pipeline for a speaking attempt.
+
+    Pipeline flow:
+      1. Speech-to-Text (Whisper)
+      2. Pronunciation Scoring (Azure or fallback)
+      3. Grammar Analysis (LLM)
+      4. Fluency Assessment (Azure or timestamp estimate)
+      5. Composite Scoring
+    """
 
     DEFAULT_WEIGHTS = {
         'pronunciation': 0.35,
@@ -50,6 +59,44 @@ class AIProcessingPipeline:
         self.grammar = grammar_provider
         self.fluency = fluency_provider
         self.weights = weights or self.DEFAULT_WEIGHTS
+
+    @classmethod
+    def build_default(cls) -> 'AIProcessingPipeline':
+        """
+        Build a pipeline with all available providers auto-detected.
+        Providers with missing credentials are silently skipped.
+        """
+        from .whisper_stt import WhisperSTTProvider
+        from .grammar_llm import LLMGrammarAnalyzer
+
+        stt = WhisperSTTProvider()
+        grammar = LLMGrammarAnalyzer()
+
+        pronunciation = None
+        fluency = None
+
+        try:
+            from .azure_pronunciation import AzurePronunciationScorer
+            ap = AzurePronunciationScorer()
+            if ap.is_available():
+                pronunciation = ap
+        except Exception:
+            pass
+
+        try:
+            from .azure_fluency import AzureFluencyAssessor
+            af = AzureFluencyAssessor()
+            if af.is_available():
+                fluency = af
+        except Exception:
+            pass
+
+        return cls(
+            stt_provider=stt,
+            pronunciation_provider=pronunciation,
+            grammar_provider=grammar,
+            fluency_provider=fluency,
+        )
 
     def run(
         self,
@@ -81,6 +128,10 @@ class AIProcessingPipeline:
             'grammar_feedback': {},
             'fluency_feedback': {},
             'word_scores': [],
+            'confidence_score': None,
+            'topic_relevance_score': None,
+            'fluency_words_per_minute': None,
+            'fluency_pause_ratio': None,
             'scoring_provider': 'pipeline',
             'processing_time_ms': 0,
             'raw_response': {},
@@ -120,6 +171,12 @@ class AIProcessingPipeline:
         if fluency_result:
             result['fluency_score'] = fluency_result.score
             result['fluency_feedback'] = fluency_result.feedback
+            # Extract extended fluency metrics
+            fb = fluency_result.feedback
+            if 'estimated_wpm' in fb:
+                result['fluency_words_per_minute'] = int(fb['estimated_wpm'])
+            if 'pause_ratio' in fb:
+                result['fluency_pause_ratio'] = float(fb['pause_ratio'])
 
         # ── Step 5: Composite Score ──
         # Vocabulary score defaults to pronunciation score if not separately computed

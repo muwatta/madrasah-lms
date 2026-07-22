@@ -1,27 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
+import { useFasaahaClassAnalytics, useFasaahaStudentAnalytics } from '../../../hooks/useFasaaha';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
 
 export default function FasaahaAnalyticsPage() {
   const { t } = useLanguage();
   const [tab, setTab] = useState<'class' | 'student'>('class');
-  const [classData, setClassData] = useState<any>(null);
-  const [studentData, setStudentData] = useState<any>(null);
-  const [studentId, setStudentId] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [studentId, setStudentId] = useState<number | null>(null);
+  const [studentIdInput, setStudentIdInput] = useState('');
 
-  useEffect(() => {
-    fasaahaAPI.analytics.class().then(res => setClassData(res.data)).finally(() => setLoading(false));
-  }, []);
+  const { data: classData, isLoading: loadingClass } = useFasaahaClassAnalytics(tab === 'class' ? 1 : null);
+  const { data: studentData, isLoading: loadingStudent } = useFasaahaStudentAnalytics(studentId);
+
+  const loading = tab === 'class' ? loadingClass : loadingStudent;
 
   const loadStudent = () => {
-    if (!studentId) return;
-    setLoading(true);
-    fasaahaAPI.analytics.student(Number(studentId)).then(res => setStudentData(res.data)).finally(() => setLoading(false));
+    const id = Number(studentIdInput);
+    if (id > 0) setStudentId(id);
   };
 
-  if (loading && !classData) return <SkeletonStatsGrid />;
+  if (loading && !classData && !studentData) return <SkeletonStatsGrid />;
 
   return (
     <div className="space-y-6">
@@ -71,8 +69,8 @@ export default function FasaahaAnalyticsPage() {
       {tab === 'student' && (
         <div className="space-y-4">
           <div className="flex gap-3">
-            <input type="number" placeholder={t('fasaaha.selectStudent')} value={studentId} onChange={e => setStudentId(e.target.value)} className="rounded-lg border px-3 py-2 text-sm w-48" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)', backgroundColor: '#ffffff' }} />
-            <button onClick={loadStudent} disabled={!studentId} className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium disabled:opacity-50">{t('fasaaha.studentDetails')}</button>
+            <input type="number" placeholder={t('fasaaha.selectStudent')} value={studentIdInput} onChange={e => setStudentIdInput(e.target.value)} className="rounded-lg border px-3 py-2 text-sm w-48" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)', backgroundColor: '#ffffff' }} />
+            <button onClick={loadStudent} disabled={!studentIdInput} className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium disabled:opacity-50">{t('fasaaha.studentDetails')}</button>
           </div>
 
           {studentData && (

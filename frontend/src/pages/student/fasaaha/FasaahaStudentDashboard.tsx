@@ -1,27 +1,15 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
-import type { FasaahaStudentDashboard as DashboardType, StudentLevelProgress } from '../../../types';
+import { useFasaahaDashboard, useFasaahaProgress } from '../../../hooks/useFasaaha';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
-import { unwrapPaginated } from '../../../api/client';
 
 export default function FasaahaStudentDashboard() {
   const { t, language } = useLanguage();
-  const [data, setData] = useState<DashboardType | null>(null);
-  const [progress, setProgress] = useState<StudentLevelProgress[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    Promise.all([
-      fasaahaAPI.dashboards.student().then(r => setData(r.data)),
-      fasaahaAPI.progress.list().then(r => setProgress(unwrapPaginated(r.data))),
-    ]).catch(() => setError(t('common.loadError'))).finally(() => setLoading(false));
-  }, [t]);
+  const { data, isLoading: loading, error } = useFasaahaDashboard();
+  const { data: progress = [] } = useFasaahaProgress();
 
   if (loading) return <SkeletonStatsGrid />;
-  if (error) return <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">{error}</div>;
+  if (error) return <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">{t('common.loadError')}</div>;
   if (!data) return null;
 
   const stats = [

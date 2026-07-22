@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
+import QueryProvider from './providers/QueryProvider';
 import Layout from './components/Layout';
 import LoadingSpinner from './components/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -94,6 +95,7 @@ function App() {
   return (
       <LanguageProvider>
       <ThemeProvider>
+      <QueryProvider>
       <AuthProvider>
         <Router>
           <ErrorBoundary>
@@ -265,6 +267,7 @@ function App() {
           </ErrorBoundary>
         </Router>
       </AuthProvider>
+      </QueryProvider>
       </ThemeProvider>
       </LanguageProvider>
   );

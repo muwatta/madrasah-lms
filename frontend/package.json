@@ -13,6 +13,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.4",
     "@tiptap/extension-placeholder": "^3.28.0",
     "@tiptap/extension-text-align": "^3.28.0",
     "@tiptap/extension-underline": "^3.28.0",

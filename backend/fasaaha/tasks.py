@@ -31,8 +31,6 @@ def process_speaking_attempt(self, attempt_id: int):
     from .models import SpeakingAttempt
     from .services import AttemptService
     from .ai.pipeline import AIProcessingPipeline
-    from .ai.whisper_stt import WhisperSTTProvider
-    from .ai.grammar_llm import LLMGrammarAnalyzer
 
     try:
         attempt = SpeakingAttempt.objects.select_related(
@@ -50,14 +48,8 @@ def process_speaking_attempt(self, attempt_id: int):
     start_time = time.time()
 
     try:
-        # Initialize AI providers
-        stt = WhisperSTTProvider()
-        grammar = LLMGrammarAnalyzer()
-
-        pipeline = AIProcessingPipeline(
-            stt_provider=stt,
-            grammar_provider=grammar,
-        )
+        # Build pipeline with all available providers
+        pipeline = AIProcessingPipeline.build_default()
 
         # Run pipeline
         audio_path = attempt.audio_file.path

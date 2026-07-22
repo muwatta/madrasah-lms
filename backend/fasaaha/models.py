@@ -79,6 +79,19 @@ class Mission(models.Model):
         (5, 'Master'),
     ]
 
+    MISSION_TYPE_CHOICES = [
+        ('reading', 'Reading'),
+        ('pronunciation', 'Pronunciation'),
+        ('repeat_after_me', 'Repeat After Me'),
+        ('free_speaking', 'Free Speaking'),
+        ('storytelling', 'Storytelling'),
+        ('picture_description', 'Picture Description'),
+        ('conversation', 'Conversation'),
+        ('role_play', 'Role Play'),
+        ('debate', 'Debate'),
+        ('presentation', 'Presentation'),
+    ]
+
     madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='fasaaha_missions')
     level = models.ForeignKey(SpeakingLevel, on_delete=models.CASCADE, related_name='missions')
     category = models.ForeignKey(
@@ -93,6 +106,9 @@ class Mission(models.Model):
     hints = models.JSONField(default=list, blank=True)
     difficulty = models.PositiveSmallIntegerField(
         choices=DIFFICULTY_CHOICES, default=2)
+    mission_type = models.CharField(
+        max_length=30, choices=MISSION_TYPE_CHOICES, default='pronunciation',
+        help_text='Type of speaking activity')
     max_time_seconds = models.PositiveIntegerField(default=60, help_text='Max recording time in seconds')
     example_audio = models.FileField(
         upload_to='fasaaha/examples/', null=True, blank=True,
@@ -146,6 +162,9 @@ class SpeakingAttempt(models.Model):
     audio_size_bytes = models.PositiveIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True, help_text='Optional student notes')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing')
+    activity_type = models.CharField(
+        max_length=30, choices=Mission.MISSION_TYPE_CHOICES, default='pronunciation',
+        help_text='Activity type at time of submission')
     attempt_number = models.PositiveSmallIntegerField(default=1)
     is_best_attempt = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -218,6 +237,20 @@ class AIAnalysis(models.Model):
 
     # Word-level analysis
     word_scores = models.JSONField(default=list, blank=True, help_text='[{word, score, issues}]')
+
+    # Extended scoring dimensions
+    confidence_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        help_text='Voice confidence (0-100)')
+    topic_relevance_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        help_text='Topic relevance (0-100)')
+    fluency_words_per_minute = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='Speech rate in words per minute')
+    fluency_pause_ratio = models.DecimalField(
+        max_digits=5, decimal_places=4, null=True, blank=True,
+        help_text='Ratio of pause time to total time')
 
     # Provider metadata
     scoring_provider = models.CharField(max_length=30, blank=True)

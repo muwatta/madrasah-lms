@@ -1411,6 +1411,15 @@ export const translations = {
     selectStudent: { ar: 'اختر طالباً', en: 'Select Student' },
     timeLimit: { ar: 'الوقت المحدد', en: 'Time Limit' },
     seconds: { ar: 'ثانية', en: 'seconds' },
+    missionType: { ar: 'نوع المهمة', en: 'Mission Type' },
+    typePronunciation: { ar: 'نطق', en: 'Pronunciation' },
+    typeRecitation: { ar: 'تلاوة', en: 'Recitation' },
+    typeConversation: { ar: 'محادثة', en: 'Conversation' },
+    typeTranslation: { ar: 'ترجمة', en: 'Translation' },
+    typeVocabulary: { ar: 'مفردات', en: 'Vocabulary' },
+    typeGrammar: { ar: 'نحو', en: 'Grammar' },
+    typeListening: { ar: 'استماع', en: 'Listening' },
+    typeAllTypes: { ar: 'جميع الأنواع', en: 'All Types' },
   },
 } as const;
 

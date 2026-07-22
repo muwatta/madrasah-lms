@@ -81,7 +81,7 @@ class MissionSerializer(serializers.ModelSerializer):
             'category', 'category_name',
             'title', 'title_ar', 'prompt_ar', 'prompt_transliteration',
             'prompt_translation', 'expected_phrases', 'hints',
-            'difficulty', 'max_time_seconds', 'example_audio',
+            'difficulty', 'mission_type', 'max_time_seconds', 'example_audio',
             'is_active', 'sort_order',
             'created_by', 'created_by_name', 'attempt_count',
             'created_at', 'updated_at',
@@ -100,6 +100,7 @@ class MissionWriteSerializer(serializers.Serializer):
     expected_phrases = serializers.ListField(child=serializers.CharField(), required=False, default=[])
     hints = serializers.ListField(child=serializers.CharField(), required=False, default=[])
     difficulty = serializers.IntegerField(default=2, min_value=1, max_value=5)
+    mission_type = serializers.ChoiceField(choices=Mission.MISSION_TYPE_CHOICES, default='pronunciation')
     max_time_seconds = serializers.IntegerField(default=60, min_value=10, max_value=300)
     sort_order = serializers.IntegerField(default=0)
     is_active = serializers.BooleanField(default=True)
@@ -126,7 +127,7 @@ class SpeakingAttemptSerializer(serializers.ModelSerializer):
             'audio_file', 'audio_url',
             'audio_duration_ms', 'audio_size_bytes', 'notes',
             'status', 'attempt_number', 'is_best_attempt',
-            'ai_analysis', 'teacher_review', 'final_score',
+            'activity_type', 'ai_analysis', 'teacher_review', 'final_score',
             'created_at', 'completed_at',
         ]
         read_only_fields = [
@@ -179,6 +180,8 @@ class AIAnalysisSerializer(serializers.ModelSerializer):
             'vocabulary_score', 'overall_score',
             'pronunciation_feedback', 'grammar_feedback', 'fluency_feedback',
             'word_scores', 'scoring_provider', 'processing_time_ms',
+            'confidence_score', 'topic_relevance_score',
+            'fluency_words_per_minute', 'fluency_pause_ratio',
             'created_at',
         ]
         read_only_fields = fields

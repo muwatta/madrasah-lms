@@ -156,6 +156,10 @@ class AttemptService:
                 'grammar_feedback': analysis_data.get('grammar_feedback', {}),
                 'fluency_feedback': analysis_data.get('fluency_feedback', {}),
                 'word_scores': analysis_data.get('word_scores', []),
+                'confidence_score': analysis_data.get('confidence_score'),
+                'topic_relevance_score': analysis_data.get('topic_relevance_score'),
+                'fluency_words_per_minute': analysis_data.get('fluency_words_per_minute'),
+                'fluency_pause_ratio': analysis_data.get('fluency_pause_ratio'),
                 'scoring_provider': analysis_data.get('scoring_provider', 'pipeline'),
                 'processing_time_ms': analysis_data.get('processing_time_ms'),
                 'raw_response': analysis_data.get('raw_response', {}),
@@ -329,7 +333,7 @@ class ProgressService:
 
         # Update stats
         from .selectors import get_attempts_for_student
-        attempts = get_attempts_for_student(student=student, mission__level=level, madrasah=madrasah)
+        attempts = get_attempts_for_student(student=student, level=level, madrasah=madrasah)
 
         total_attempts = attempts.count()
         completed_attempts = attempts.filter(status__in=('completed', 'reviewed'))

@@ -1,40 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
-import type { SpeakingAttempt } from '../../../types';
+import { useFasaahaPendingReviews, useFasaahaSubmitReview } from '../../../hooks/useFasaaha';
 import ScoreDisplay from '../../../components/fasaaha/ScoreDisplay';
-import { unwrapPaginated } from '../../../api/client';
 
 export default function FasaahaReviewPage() {
   const { t } = useLanguage();
-  const [pending, setPending] = useState<SpeakingAttempt[]>([]);
-  const [selected, setSelected] = useState<SpeakingAttempt | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: pending = [], isLoading: loading } = useFasaahaPendingReviews();
+  const submitReview = useFasaahaSubmitReview();
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [score, setScore] = useState(75);
   const [feedback, setFeedback] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [reviewed, setReviewed] = useState(0);
 
+  const selected = pending.find(a => a.id === selectedId) ?? pending[0] ?? null;
+
   useEffect(() => {
-    fasaahaAPI.reviews.pending().then(res => {
-      const items = unwrapPaginated(res.data);
-      setPending(items);
-      if (items.length > 0) setSelected(items[0]);
-    }).finally(() => setLoading(false));
-  }, []);
+    if (pending.length > 0 && !selectedId) setSelectedId(pending[0].id);
+  }, [pending, selectedId]);
 
   const handleSubmit = async () => {
     if (!selected) return;
-    setSubmitting(true);
-    try {
-      await fasaahaAPI.reviews.create({ attempt: selected.id, overall_score: score, feedback });
-      const remaining = pending.filter(p => p.id !== selected.id);
-      setPending(remaining);
-      setReviewed(prev => prev + 1);
-      setSelected(remaining[0] ?? null);
-      setScore(75);
-      setFeedback('');
-    } finally { setSubmitting(false); }
+    submitReview.mutate({ attempt: selected.id, overall_score: score, feedback }, {
+      onSuccess: () => {
+        setReviewed(prev => prev + 1);
+        setScore(75);
+        setFeedback('');
+        const remaining = pending.filter(p => p.id !== selected.id);
+        setSelectedId(remaining[0]?.id ?? null);
+      },
+    });
   };
 
   if (loading) return <div className="py-12 text-center" style={{ color: 'var(--color-text-muted)' }}>{t('common.loading')}</div>;
@@ -59,7 +53,7 @@ export default function FasaahaReviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-2">
           {pending.map(a => (
-            <button key={a.id} onClick={() => setSelected(a)} className={`w-full text-start rounded-xl border p-3 transition-all ${selected?.id === a.id ? 'border-primary-500 ring-2 ring-primary-200 dark:ring-primary-800' : ''}`}
+            <button key={a.id} onClick={() => { setSelectedId(a.id); setScore(75); setFeedback(''); }} className={`w-full text-start rounded-xl border p-3 transition-all ${selected?.id === a.id ? 'border-primary-500 ring-2 ring-primary-200 dark:ring-primary-800' : ''}`}
               style={{ borderColor: selected?.id === a.id ? undefined : 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
               <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{a.student_name}</p>
               <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>{a.mission_title}</p>
@@ -82,6 +76,10 @@ export default function FasaahaReviewPage() {
               teacherScore={selected.teacher_review?.overall_score ?? null}
               aiFeedback={selected.ai_analysis?.pronunciation_feedback ? `${selected.ai_analysis.pronunciation_feedback} ${selected.ai_analysis.grammar_feedback} ${selected.ai_analysis.fluency_feedback}` : null}
               teacherFeedback={selected.teacher_review?.feedback ?? null}
+              wordScores={selected.ai_analysis?.word_scores as any}
+              transcribedText={selected.ai_analysis?.transcribed_text}
+              confidenceScore={selected.ai_analysis?.confidence_score}
+              fluencyWPM={selected.ai_analysis?.fluency_words_per_minute}
             />
 
             <div className="rounded-xl border p-4 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
@@ -94,8 +92,8 @@ export default function FasaahaReviewPage() {
                 <label className="text-xs block mb-1" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.feedback')}</label>
                 <textarea value={feedback} onChange={e => setFeedback(e.target.value)} rows={3} className="w-full rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)', backgroundColor: '#ffffff' }} />
               </div>
-              <button onClick={handleSubmit} disabled={submitting} className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium disabled:opacity-50">
-                {submitting ? '...' : t('fasaaha.submitReview')}
+              <button onClick={handleSubmit} disabled={submitReview.isPending} className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium disabled:opacity-50">
+                {submitReview.isPending ? '...' : t('fasaaha.submitReview')}
               </button>
             </div>
           </div>

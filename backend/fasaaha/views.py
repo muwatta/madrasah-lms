@@ -83,7 +83,11 @@ class SpeakingLevelListCreateView(generics.ListCreateAPIView):
 
 class SpeakingLevelDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SpeakingLevelSerializer
-    permission_classes = [IsAuthenticated, CanManageLevels]
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsAuthenticated(), CanManageLevels()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         return get_levels(madrasah=self.request.user.madrasah, active_only=False)  
@@ -123,7 +127,11 @@ class MissionCategoryListCreateView(generics.ListCreateAPIView):
 
 class MissionCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MissionCategorySerializer
-    permission_classes = [IsAuthenticated, CanManageCategories]
+
+    def get_permissions(self):
+        if self.request.method in ('PUT', 'PATCH', 'DELETE'):
+            return [IsAuthenticated(), CanManageCategories()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         return get_categories(madrasah=self.request.user.madrasah, active_only=False) 
@@ -242,8 +250,11 @@ class AttemptListCreateView(generics.ListCreateAPIView):
             notes=data.get('notes', ''),
         )
 
-        from .tasks import process_speaking_attempt
-        process_speaking_attempt.delay(attempt.id)  
+        try:
+            from .tasks import process_speaking_attempt
+            process_speaking_attempt.delay(attempt.id)  # pyright: ignore[reportAttributeAccessIssue]
+        except Exception:
+            logger.warning("Celery unavailable — attempt %s saved but not queued for AI processing", attempt.id)
 
         self._created_attempt = attempt
 
@@ -292,8 +303,11 @@ class AttemptRetryView(APIView):
             notes=serializer.validated_data.get('notes', ''),
         )
 
-        from .tasks import process_speaking_attempt
-        process_speaking_attempt.delay(attempt.id)  
+        try:
+            from .tasks import process_speaking_attempt
+            process_speaking_attempt.delay(attempt.id)  # pyright: ignore[reportAttributeAccessIssue]
+        except Exception:
+            logger.warning("Celery unavailable — attempt %s saved but not queued", attempt.id)
 
         return Response(
             SpeakingAttemptSerializer(attempt, context={'request': request}).data,

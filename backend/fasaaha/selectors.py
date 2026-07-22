@@ -75,12 +75,14 @@ def get_missions_for_level(*, level_id, madrasah):
 #  Attempts
 
 
-def get_attempts_for_student(*, student, mission=None, madrasah=None):
+def get_attempts_for_student(*, student, mission=None, madrasah=None, level=None):
     qs = SpeakingAttempt.objects.filter(student=student)
     if madrasah:
         qs = qs.filter(madrasah=madrasah)
     if mission:
         qs = qs.filter(mission=mission)
+    if level:
+        qs = qs.filter(mission__level=level)
     return qs.select_related('mission', 'mission__level', 'mission__category').order_by('-created_at')
 
 
@@ -220,7 +222,7 @@ def get_class_analytics(*, madrasah, school_class_id, level_id=None):
     """Get class-wide analytics for a given class."""
     attempts = SpeakingAttempt.objects.filter(
         madrasah=madrasah,
-        student__school_class_enrollments__school_class_id=school_class_id,
+        student__enrollments__school_class_id=school_class_id,
         status__in=('completed', 'reviewed'),
     ).select_related('ai_analysis')
 

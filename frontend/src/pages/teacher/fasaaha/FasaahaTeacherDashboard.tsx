@@ -1,25 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
-import type { FasaahaTeacherDashboard as DashType, SpeakingAttempt } from '../../../types';
+import { useFasaahaTeacherDashboard } from '../../../hooks/useFasaaha';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
 
 export default function FasaahaTeacherDashboard() {
   const { t } = useLanguage();
-  const [data, setData] = useState<DashType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fasaahaAPI.dashboards.teacher()
-      .then(res => setData(res.data))
-      .catch(() => setError(t('common.loadError')))
-      .finally(() => setLoading(false));
-  }, [t]);
+  const { data, isLoading: loading, error } = useFasaahaTeacherDashboard();
 
   if (loading) return <SkeletonStatsGrid />;
-  if (error) return <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">{error}</div>;
+  if (error) return <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">{t('common.loadError')}</div>;
   if (!data) return null;
 
   const stats = [
@@ -53,7 +42,7 @@ export default function FasaahaTeacherDashboard() {
         <div className="rounded-xl border p-5" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
           <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.pendingReviews')}</h2>
           <div className="space-y-2">
-            {data.pending_reviews.map((a: SpeakingAttempt) => (
+            {data.pending_reviews.map((a: any) => (
               <div key={a.id} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: 'var(--color-border-light)' }}>
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{a.student_name} — {a.mission_title}</p>

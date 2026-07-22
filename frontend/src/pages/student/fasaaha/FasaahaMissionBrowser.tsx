@@ -1,43 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
-import type { Mission, SpeakingLevel, MissionCategory } from '../../../types';
+import { useFasaahaMissions, useFasaahaLevels, useFasaahaCategories } from '../../../hooks/useFasaaha';
+import type { MissionType } from '../../../types';
+import { MISSION_TYPE_LABELS, MISSION_TYPE_ICONS } from '../../../types';
 import MissionCard from '../../../components/fasaaha/MissionCard';
-import { unwrapPaginated } from '../../../api/client';
 import { SkeletonCard } from '../../../components/Skeleton';
+
+const missionTypes: MissionType[] = ['pronunciation', 'recitation', 'conversation', 'translation', 'vocabulary', 'grammar', 'listening'];
 
 export default function FasaahaMissionBrowser() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  const [missions, setMissions] = useState<Mission[]>([]);
-  const [levels, setLevels] = useState<SpeakingLevel[]>([]);
-  const [categories, setCategories] = useState<MissionCategory[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState<MissionType | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fasaahaAPI.levels.list(),
-      fasaahaAPI.categories.list(),
-      fasaahaAPI.missions.list(),
-    ]).then(([l, c, m]) => {
-      setLevels(unwrapPaginated(l.data));
-      setCategories(unwrapPaginated(c.data));
-      setMissions(unwrapPaginated(m.data));
-    }).finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const params: any = {};
-    if (selectedLevel) params.level = selectedLevel;
-    if (selectedCategory) params.category = selectedCategory;
-    fasaahaAPI.missions.list(params).then(res => {
-      setMissions(unwrapPaginated(res.data));
-    }).finally(() => setLoading(false));
-  }, [selectedLevel, selectedCategory]);
+  const { data: levels = [] } = useFasaahaLevels();
+  const { data: categories = [] } = useFasaahaCategories();
+  const { data: missions = [], isLoading: loading } = useFasaahaMissions({
+    level: selectedLevel ?? undefined,
+    category: selectedCategory ?? undefined,
+    mission_type: selectedType ?? undefined,
+  });
 
   if (loading && missions.length === 0) return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div>;
 
@@ -58,6 +43,13 @@ export default function FasaahaMissionBrowser() {
         <select value={selectedCategory ?? ''} onChange={e => setSelectedCategory(e.target.value ? Number(e.target.value) : null)} className="rounded-lg border px-3 py-1.5 text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)', backgroundColor: '#ffffff' }}>
           <option value="">{t('fasaaha.allCategories')}</option>
           {categories.map(c => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name}</option>)}
+        </select>
+
+        <select value={selectedType ?? ''} onChange={e => setSelectedType(e.target.value as MissionType || null)} className="rounded-lg border px-3 py-1.5 text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)', backgroundColor: '#ffffff' }}>
+          <option value="">{t('fasaaha.typeAllTypes')}</option>
+          {missionTypes.map(mt => (
+            <option key={mt} value={mt}>{MISSION_TYPE_ICONS[mt]} {MISSION_TYPE_LABELS[mt]}</option>
+          ))}
         </select>
       </div>
 

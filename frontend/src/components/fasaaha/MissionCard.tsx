@@ -1,5 +1,6 @@
 import { useLanguage } from '../../context/LanguageContext';
-import type { Mission } from '../../types';
+import type { Mission, MissionType } from '../../types';
+import { MISSION_TYPE_LABELS, MISSION_TYPE_ICONS } from '../../types';
 
 interface MissionCardProps {
   mission: Mission;
@@ -17,7 +18,8 @@ const diffColors: Record<number, string> = {
 const diffLabels: Record<number, string> = { 1: 'fasaaha.beginner', 2: 'fasaaha.intermediate', 3: 'fasaaha.advanced', 4: 'fasaaha.expert', 5: 'fasaaha.expert' };
 
 export default function MissionCard({ mission, onStart }: MissionCardProps) {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
+  const mType = (mission.mission_type || 'pronunciation') as MissionType;
 
   return (
     <div className="rounded-xl border p-5 flex flex-col gap-3 card-hover" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
@@ -28,9 +30,14 @@ export default function MissionCard({ mission, onStart }: MissionCardProps) {
         </span>
       </div>
 
-      {mission.category_name && (
-        <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{mission.category_name}</span>
-      )}
+      <div className="flex items-center gap-2">
+        {mission.category_name && (
+          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{mission.category_name}</span>
+        )}
+        <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-muted)' }}>
+          {MISSION_TYPE_ICONS[mType] ?? '🗣️'} {MISSION_TYPE_LABELS[mType] ?? mType}
+        </span>
+      </div>
 
       {mission.prompt_ar && (
         <p className="text-lg leading-relaxed text-center py-2" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-arabic, serif)' }}>

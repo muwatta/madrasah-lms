@@ -167,7 +167,6 @@ export default function AudioRecorder({
               ? "var(--color-bg-secondary)"
               : "var(--color-bg-secondary)",
             color: "var(--color-text-primary)",
-            focusRingColor: "var(--color-border)",
           }}
           aria-label={isRecording ? t("stop_recording") : t("start_recording")}
         >

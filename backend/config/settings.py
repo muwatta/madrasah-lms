@@ -202,3 +202,10 @@ OPENAI_BASE_URL = config('OPENAI_BASE_URL', default='')
 OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')
 OPENAI_MAX_TOKENS = config('OPENAI_MAX_TOKENS', default=1024, cast=int)
 OPENAI_TEMPERATURE = config('OPENAI_TEMPERATURE', default=0.7, cast=float)
+
+# ── Azure Speech Services ──────────────────────────────────────────────────
+AZURE_SPEECH_KEY = config('AZURE_SPEECH_KEY', default='')
+AZURE_SPEECH_REGION = config('AZURE_SPEECH_REGION', default='')
+
+# ── Celery eager mode (dev convenience) ───────────────────────────────────
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default=False, cast=bool)

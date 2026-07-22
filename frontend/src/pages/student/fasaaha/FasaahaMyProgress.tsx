@@ -1,24 +1,16 @@
-import { useEffect, useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
-import type { StudentLevelProgress, SpeakingAttempt, StudentStreak } from '../../../types';
-import { unwrapPaginated } from '../../../api/client';
+import { useFasaahaProgress, useFasaahaAttempts, useFasaahaStreak } from '../../../hooks/useFasaaha';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
 
 export default function FasaahaMyProgress() {
   const { t, language } = useLanguage();
-  const [progress, setProgress] = useState<StudentLevelProgress[]>([]);
-  const [attempts, setAttempts] = useState<SpeakingAttempt[]>([]);
-  const [streak, setStreak] = useState<StudentStreak | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: progress = [], isLoading: loadingProgress } = useFasaahaProgress();
+  const { data: attemptsRaw = [], isLoading: loadingAttempts } = useFasaahaAttempts({ page_size: 10 });
+  const { data: streakData = [] } = useFasaahaStreak();
 
-  useEffect(() => {
-    Promise.all([
-      fasaahaAPI.progress.list().then(r => setProgress(unwrapPaginated(r.data))),
-      fasaahaAPI.attempts.list().then(r => setAttempts(unwrapPaginated(r.data).slice(0, 10))),
-      fasaahaAPI.streaks.get().then(r => { const s = unwrapPaginated(r.data); if (s.length > 0) setStreak(s[0]); }),
-    ]).finally(() => setLoading(false));
-  }, []);
+  const loading = loadingProgress || loadingAttempts;
+  const attempts = attemptsRaw.slice(0, 10);
+  const streak = streakData[0] ?? null;
 
   if (loading) return <SkeletonStatsGrid />;
 

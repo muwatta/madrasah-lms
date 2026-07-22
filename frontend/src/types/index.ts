@@ -286,6 +286,7 @@ export interface Mission {
   expected_phrases: string[];
   hints: string[];
   difficulty: number;
+  mission_type: string;
   max_time_seconds: number;
   example_audio: string | null;
   is_active: boolean;
@@ -296,6 +297,37 @@ export interface Mission {
   created_at: string;
   updated_at: string;
 }
+
+export type MissionType =
+  | 'reading' | 'pronunciation' | 'repeat_after_me' | 'free_speaking'
+  | 'storytelling' | 'picture_description' | 'conversation'
+  | 'role_play' | 'debate' | 'presentation';
+
+export const MISSION_TYPE_LABELS: Record<MissionType, string> = {
+  reading: 'Reading',
+  pronunciation: 'Pronunciation',
+  repeat_after_me: 'Repeat After Me',
+  free_speaking: 'Free Speaking',
+  storytelling: 'Storytelling',
+  picture_description: 'Picture Description',
+  conversation: 'Conversation',
+  role_play: 'Role Play',
+  debate: 'Debate',
+  presentation: 'Presentation',
+};
+
+export const MISSION_TYPE_ICONS: Record<MissionType, string> = {
+  reading: '📖',
+  pronunciation: '🗣️',
+  repeat_after_me: '🔁',
+  free_speaking: '💬',
+  storytelling: '📖',
+  picture_description: '🖼️',
+  conversation: '💭',
+  role_play: '🎭',
+  debate: '⚖️',
+  presentation: '🎤',
+};
 
 export interface SpeakingAttempt {
   id: number;
@@ -311,7 +343,8 @@ export interface SpeakingAttempt {
   audio_duration_ms: number | null;
   audio_size_bytes: number | null;
   notes: string;
-  status: 'pending' | 'processing' | 'scored' | 'reviewed' | 'needs_review';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'reviewed';
+  activity_type: string;
   attempt_number: number;
   is_best_attempt: boolean;
   ai_analysis: AIAnalysis | null;
@@ -332,10 +365,19 @@ export interface AIAnalysis {
   fluency_score: number;
   vocabulary_score: number;
   overall_score: number;
-  pronunciation_feedback: string;
-  grammar_feedback: string;
-  fluency_feedback: string;
-  word_scores: Record<string, unknown>;
+  pronunciation_feedback: Record<string, unknown>;
+  grammar_feedback: Record<string, unknown>;
+  fluency_feedback: Record<string, unknown>;
+  word_scores: Array<{
+    word: string;
+    score: number;
+    phonemes?: Array<{ phoneme: string; score: number }>;
+    issues?: Array<{ type: string; severity: string; suggestion: string }>;
+  }>;
+  confidence_score: number | null;
+  topic_relevance_score: number | null;
+  fluency_words_per_minute: number | null;
+  fluency_pause_ratio: number | null;
   scoring_provider: string;
   processing_time_ms: number;
   created_at: string;

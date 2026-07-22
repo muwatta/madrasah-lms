@@ -1,25 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { fasaahaAPI } from '../../../api';
-import type { StudentBadge, Badge } from '../../../types';
-import { unwrapPaginated } from '../../../api/client';
+import { useFasaahaMyBadges, useFasaahaAllBadges } from '../../../hooks/useFasaaha';
 import { SkeletonCard } from '../../../components/Skeleton';
 
 export default function FasaahaMyBadges() {
   const { t, language } = useLanguage();
-  const [earned, setEarned] = useState<StudentBadge[]>([]);
-  const [allBadges, setAllBadges] = useState<Badge[]>([]);
+  const { data: earned = [], isLoading: loadingEarned } = useFasaahaMyBadges();
+  const { data: allBadges = [], isLoading: loadingAll } = useFasaahaAllBadges();
   const [filter, setFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    Promise.all([fasaahaAPI.badges.myBadges(), fasaahaAPI.badges.list()])
-      .then(([e, b]) => {
-        setEarned(unwrapPaginated(e.data));
-        setAllBadges(unwrapPaginated(b.data));
-      }).finally(() => setLoading(false));
-  }, []);
-
+  const loading = loadingEarned || loadingAll;
   if (loading) return <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div>;
 
   const earnedIds = new Set(earned.map(e => e.badge));
