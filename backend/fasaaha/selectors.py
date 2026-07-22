@@ -92,7 +92,7 @@ def get_attempt_by_id(*, attempt_id, madrasah):
 
 
 def get_pending_review_attempts(*, madrasah, teacher=None):
-    """Get attempts that need teacher review."""
+    """Get attempts that need teacher review — Fasaaha-native, no curriculum dependency."""
     qs = SpeakingAttempt.objects.filter(
         madrasah=madrasah,
         status='completed',
@@ -101,14 +101,10 @@ def get_pending_review_attempts(*, madrasah, teacher=None):
     ).select_related('student', 'mission', 'mission__level')
 
     if teacher:
-        # Filter to attempts in classes taught by this teacher
-        from curriculum.models import Enrollment
-        teacher_class_ids = Enrollment.objects.filter(
-            ustaadh=teacher, madrasah=madrasah
-        ).values_list('school_class_id', flat=True)
+        # Show attempts for missions this teacher created, or attempts without a specific target
         qs = qs.filter(
-            Q(mission__assignments__target_class_id__in=teacher_class_ids) |
-            Q(mission__assignments__target_student__isnull=False)
+            Q(mission__created_by=teacher) |
+            Q(mission__assignments__assigned_by=teacher)
         ).distinct()
 
     return qs.order_by('-created_at')
@@ -349,24 +345,19 @@ def get_student_dashboard_data(*, student, madrasah):
 
 
 def get_teacher_dashboard_data(*, teacher, madrasah):
-    """Get dashboard summary data for a teacher."""
-    from curriculum.models import Enrollment
-
-    # Get classes taught by this teacher
-    class_ids = Enrollment.objects.filter(
-        ustaadh=teacher, madrasah=madrasah,
-    ).values_list('school_class_id', flat=True).distinct()
-
+    """Get dashboard summary data for a teacher — Fasaaha-native, no curriculum dependency."""
     pending_reviews = get_pending_review_attempts(madrasah=madrasah, teacher=teacher)
 
-    total_students = Enrollment.objects.filter(
-        school_class_id__in=class_ids, madrasah=madrasah,
-    ).values('student_id').distinct().count()
+    # Students who have Fasaaha attempts in this madrasah
+    student_ids = SpeakingAttempt.objects.filter(
+        madrasah=madrasah,
+    ).values_list('student_id', flat=True).distinct()
 
-    # Class-wide stats
+    total_students = len(student_ids)
+
+    # All attempts for stats
     attempts = SpeakingAttempt.objects.filter(
         madrasah=madrasah,
-        student__enrollments__school_class_id__in=class_ids,
         status__in=('completed', 'reviewed'),
     )
 
@@ -375,8 +366,13 @@ def get_teacher_dashboard_data(*, teacher, madrasah):
         avg_score=Avg('ai_analysis__overall_score'),
     )
 
+    # How many missions this teacher created
+    missions_created = Mission.objects.filter(
+        created_by=teacher, madrasah=madrasah,
+    ).count()
+
     return {
-        'classes_taught': list(class_ids),
+        'classes_taught': [missions_created],  # reuse as "missions created" count
         'total_students': total_students,
         'pending_reviews_count': pending_reviews.count(),
         'total_attempts': stats['total_attempts'] or 0,
