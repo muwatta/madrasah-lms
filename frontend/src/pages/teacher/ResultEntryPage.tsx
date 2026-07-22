@@ -50,6 +50,9 @@ interface EnrolledStudent {
   student: number
   student_name: string
   student_email: string
+  subject?: number
+  subject_name?: string
+  subject_name_en?: string
   school_class: number
   school_class_name: string
 }
@@ -260,87 +263,199 @@ export default function ResultEntryPage() {
     return 'draft'
   }
 
-  const allSelected = selectedSubject && selectedTerm && selectedClass
+  const hasClassSelected = !!selectedClass
+  const hasSubjectSelected = !!selectedSubject
+  const hasTermSelected = !!selectedTerm
+  const hasSessionSelected = !!selectedSession
+  const allSelected = hasSubjectSelected && hasTermSelected && hasClassSelected
 
-  const dropdownCls = 'input-field rounded-lg border px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] dark:bg-gray-800 dark:text-gray-100'
+  const selectCls = 'w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2.5 text-sm text-[var(--color-text-primary)] transition-colors focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/30'
+
+  const DropdownLabel = ({ icon, label }: { icon: string; label: string }) => (
+    <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-400">
+      <span className="text-sm">{icon}</span>
+      {label}
+    </label>
+  )
+
+  const selectedSubjectObj = subjects.find(s => String(s.id) === selectedSubject)
+  const selectedClassObj = classes.find(c => String(c.id) === selectedClass)
+  const selectedTermObj = terms.find(tm => String(tm.id) === selectedTerm)
+  const selectedSessionObj = sessions.find(s => String(s.id) === selectedSession)
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-2 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('results.resultEntry')}</h1>
-      <p className="mb-6 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('guides.resultEntry')}</p>
+      <div className="mb-6">
+        <h1 className="mb-1 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">{t('results.resultEntry')}</h1>
+        <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('guides.resultEntry')}</p>
+      </div>
 
       {loadErrors.length > 0 && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          <p className="font-medium mb-1">Failed to load data:</p>
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+          <p className="font-medium mb-1">{t('results.loadFailed')}:</p>
           <ul className="list-disc list-inside">{loadErrors.map((e, i) => <li key={i}>{e}</li>)}</ul>
         </div>
       )}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <select
-          className={dropdownCls}
-          value={selectedSession}
-          onChange={e => { setSelectedSession(e.target.value); setStatus(null) }}
-        >
-          <option value="">{t('results.selectYear')}</option>
-          {(sessions || []).map(s => (
-            <option key={s.id} value={s.id}>
-              {s.name} {s.is_current ? `(${t('common.current')})` : ''}
-            </option>
-          ))}
-        </select>
+      <div className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <DropdownLabel icon="📅" label={t('results.selectYear')} />
+            <select
+              className={selectCls}
+              value={selectedSession}
+              onChange={e => {
+                setSelectedSession(e.target.value)
+                setSelectedTerm('')
+                setStatus(null)
+              }}
+            >
+              <option value="">{t('results.selectYear')}</option>
+              {(sessions || []).map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name} {s.is_current ? `(${t('common.current')})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <select
-          className={dropdownCls}
-          value={selectedTerm}
-          onChange={e => { setSelectedTerm(e.target.value); setStatus(null) }}
-        >
-          <option value="">{t('results.selectTerm')}</option>
-          {(terms || []).map(tm => (
-            <option key={tm.id} value={tm.id}>
-              {tm.name} {tm.hijri_start ? `(${tm.hijri_start} - ${tm.hijri_end})` : ''}
-            </option>
-          ))}
-        </select>
+          <div>
+            <DropdownLabel icon="🗓️" label={t('results.term')} />
+            <select
+              className={selectCls}
+              value={selectedTerm}
+              onChange={e => { setSelectedTerm(e.target.value); setStatus(null) }}
+              disabled={!hasSessionSelected}
+            >
+              <option value="">{t('results.selectTerm')}</option>
+              {(terms || []).map(tm => (
+                <option key={tm.id} value={tm.id}>{tm.name}</option>
+              ))}
+            </select>
+          </div>
 
-        <select
-          className={dropdownCls}
-          value={selectedSubject}
-          onChange={e => { setSelectedSubject(e.target.value); setStatus(null) }}
-        >
-          <option value="">{t('results.selectSubject')}</option>
-          {(subjects || []).map(s => (
-            <option key={s.id} value={s.id}>{s.name_ar} - {s.name_en}</option>
-          ))}
-        </select>
+          <div>
+            <DropdownLabel icon="📖" label={t('results.subject')} />
+            <select
+              className={selectCls}
+              value={selectedSubject}
+              onChange={e => { setSelectedSubject(e.target.value); setStatus(null) }}
+            >
+              <option value="">{t('results.selectSubject')}</option>
+              {(subjects || []).map(s => (
+                <option key={s.id} value={s.id}>{s.name_ar} - {s.name_en}</option>
+              ))}
+            </select>
+          </div>
 
-        <select
-          className={dropdownCls}
-          value={selectedClass}
-          onChange={e => { setSelectedClass(e.target.value); setStatus(null) }}
-        >
-          <option value="">{t('results.selectClass')}</option>
-          {(classes || []).map(c => (
-            <option key={c.id} value={c.id}>{c.name_ar} - {c.name_en}</option>
-          ))}
-        </select>
+          <div>
+            <DropdownLabel icon="🏫" label={t('results.selectClass')} />
+            <select
+              className={selectCls}
+              value={selectedClass}
+              onChange={e => { setSelectedClass(e.target.value); setStatus(null) }}
+            >
+              <option value="">{t('results.selectClass')}</option>
+              {(classes || []).map(c => (
+                <option key={c.id} value={c.id}>{c.name_ar} - {c.name_en}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {(hasSessionSelected || hasTermSelected || hasSubjectSelected || hasClassSelected) && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)] dark:text-gray-500">
+            <span className="font-medium">{t('common.filter')}:</span>
+            {selectedSessionObj && <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2.5 py-0.5 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">{selectedSessionObj.name}</span>}
+            {selectedTermObj && <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">{selectedTermObj.name}</span>}
+            {selectedSubjectObj && <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">{selectedSubjectObj.name_en}</span>}
+            {selectedClassObj && <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2.5 py-0.5 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400">{selectedClassObj.name_en}</span>}
+            <button
+              onClick={() => { setSelectedSession(''); setSelectedTerm(''); setSelectedSubject(''); setSelectedClass(''); setComponents([]); setStudents([]) }}
+              className="ml-1 text-xs text-red-500 hover:text-red-700 underline dark:text-red-400"
+            >
+              {t('common.clear')}
+            </button>
+          </div>
+        )}
       </div>
+
+      {hasSubjectSelected && hasClassSelected && (
+        <div className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-5 py-3 dark:border-gray-700">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">👥</span>
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
+                {t('results.studentsCount')}
+              </h2>
+              {loadingStudents && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
+              )}
+            </div>
+            {!loadingStudents && (
+              <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                {students.length}
+              </span>
+            )}
+          </div>
+
+          {loadingStudents ? (
+            <div className="px-5 py-8 text-center text-sm text-[var(--color-text-muted)] dark:text-gray-400">
+              {t('common.loading')}...
+            </div>
+          ) : students.length === 0 ? (
+            <div className="px-5 py-8 text-center">
+              <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('results.noStudents')}</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
+                    <th className="w-12 px-4 py-2.5 text-center">#</th>
+                    <th className="px-4 py-2.5 text-start">{t('results.student')}</th>
+                    <th className="hidden px-4 py-2.5 text-start sm:table-cell">{t('results.subject')}</th>
+                    <th className="hidden px-4 py-2.5 text-start sm:table-cell">{t('results.selectClass')}</th>
+                    <th className="hidden px-4 py-2.5 text-start md:table-cell">Email</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
+                  {students.map((student, idx) => (
+                    <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                      <td className="px-4 py-2 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                            {student.student_name?.charAt(0) || '?'}
+                          </div>
+                          <div>
+                            <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</p>
+                            <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-500 sm:hidden">{student.student_email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="hidden px-4 py-2 text-[var(--color-text-secondary)] sm:table-cell dark:text-gray-300">{student.subject_name_en || student.subject_name}</td>
+                      <td className="hidden px-4 py-2 text-[var(--color-text-secondary)] sm:table-cell dark:text-gray-300">{student.school_class_name}</td>
+                      <td className="hidden px-4 py-2 text-xs text-[var(--color-text-muted)] md:table-cell dark:text-gray-500">{student.student_email}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {allSelected && (
         <div className="mb-4 flex gap-3">
           <button
             onClick={handleGenerate}
             disabled={loading || students.length === 0}
-            className="btn-press rounded-lg border border-primary-300 px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50"
+            className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
           >
+            <span>⚡</span>
             {t('results.generateComponents')}
           </button>
-        </div>
-      )}
-
-      {loadingStudents && (
-        <div className="mb-4 text-sm text-[var(--color-text-muted)] dark:text-gray-400">
-          {t('common.loading')}...
         </div>
       )}
 
@@ -352,48 +467,55 @@ export default function ResultEntryPage() {
       )}
 
       {!loading && allSelected && components.length === 0 && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
-          {t('results.noComponents')}
+        <div className="rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 text-center dark:border-gray-600 dark:bg-gray-800/50">
+          <p className="mb-1 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('results.noComponents')}</p>
+          {students.length > 0 && (
+            <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
+              {t('results.studentsCount')}: {students.length}
+            </p>
+          )}
         </div>
       )}
 
       {(components || []).map(comp => (
         <div key={comp.id} className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border-light)] px-6 py-4 dark:border-gray-700">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-border-light)] px-5 py-4 dark:border-gray-700">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full px-3 py-0.5 text-xs font-semibold capitalize" style={{ backgroundColor: comp.component_type === 'assignment' ? '#dbeafe' : comp.component_type === 'test' ? '#fef3c7' : '#fee2e2', color: comp.component_type === 'assignment' ? '#1d4ed8' : comp.component_type === 'test' ? '#92400e' : '#991b1b' }}>
-                {comp.component_type}
+                {comp.component_type === 'assignment' ? t('results.assignment') : comp.component_type === 'test' ? t('results.test') : t('results.exam')}
               </span>
-              <h3 className="text-base font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{comp.name}</h3>
-              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">
-                ({t('results.weight')}: {comp.weight}%, {t('results.maxScore')}: {comp.max_score})
-              </span>
-              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">
-                ({existingScores[comp.id]?.length || 0}/{students.length} {t('results.scoresEntered')})
+              <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{comp.name}</h3>
+              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
+                {t('results.weight')}: {comp.weight}% · {t('results.maxScore')}: {comp.max_score}
               </span>
             </div>
-            <button
-              onClick={() => handleSaveScores(comp.id)}
-              disabled={saving[comp.id]}
-              className="btn-press rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
-            >
-              {saving[comp.id] ? (
-                <span className="flex items-center gap-1.5">
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  {t('common.saving')}
-                </span>
-              ) : t('common.save')}
-            </button>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
+                {existingScores[comp.id]?.length || 0}/{students.length} {t('results.scoresEntered')}
+              </span>
+              <button
+                onClick={() => handleSaveScores(comp.id)}
+                disabled={saving[comp.id]}
+                className="btn-press rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+              >
+                {saving[comp.id] ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {t('common.saving')}
+                  </span>
+                ) : t('common.save')}
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
-                  <th className="px-4 py-3 text-end">#</th>
-                  <th className="px-4 py-3 text-end">{t('results.student')}</th>
-                  <th className="w-40 px-4 py-3 text-end">{t('results.score')}</th>
-                  <th className="w-56 px-4 py-3 text-end">{t('results.remarks')}</th>
+                  <th className="w-12 px-4 py-2.5 text-center">#</th>
+                  <th className="px-4 py-2.5 text-start">{t('results.student')}</th>
+                  <th className="w-40 px-4 py-2.5 text-center">{t('results.score')}</th>
+                  <th className="w-56 px-4 py-2.5 text-start">{t('results.remarks')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
@@ -405,10 +527,14 @@ export default function ResultEntryPage() {
                   </tr>
                 ) : (students || []).map((student, idx) => (
                   <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
-                    <td className="px-4 py-2 text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
-                    <td className="px-4 py-2 font-medium text-[var(--color-text-primary)] dark:text-gray-100">
-                      {student.student_name}
-                      <span className="block text-xs text-[var(--color-text-muted)] dark:text-gray-400">{student.student_email}</span>
+                    <td className="px-4 py-2 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                          {student.student_name?.charAt(0) || '?'}
+                        </div>
+                        <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</span>
+                      </div>
                     </td>
                     <td className="px-4 py-2">
                       <input
@@ -419,7 +545,7 @@ export default function ResultEntryPage() {
                         value={scores[comp.id]?.[student.student] ?? ''}
                         onChange={e => handleScoreChange(comp.id, student.student, e.target.value)}
                         placeholder="0"
-                        className="input-field w-full rounded-lg border px-3 py-1.5 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] dark:bg-gray-800 dark:text-gray-100"
+                        className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-1.5 text-center text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500"
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -428,7 +554,7 @@ export default function ResultEntryPage() {
                         value={remarks[comp.id]?.[student.student] ?? ''}
                         onChange={e => handleRemarksChange(comp.id, student.student, e.target.value)}
                         placeholder={t('results.remarksPlaceholder')}
-                        className="input-field w-full rounded-lg border px-3 py-1.5 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] dark:bg-gray-800 dark:text-gray-100"
+                        className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-1.5 text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500"
                       />
                     </td>
                   </tr>
@@ -440,7 +566,7 @@ export default function ResultEntryPage() {
       ))}
 
       {components.length > 0 && (
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('results.status')}:</span>
             <span className={`rounded-full px-3 py-0.5 text-xs font-semibold ${
@@ -456,7 +582,7 @@ export default function ResultEntryPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting || getStatus() === 'submitted'}
-            className="btn-press rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="btn-press inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
           >
             {submitting ? (
               <span className="flex items-center gap-1.5">

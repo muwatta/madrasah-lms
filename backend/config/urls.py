@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/v1/learning/', include('learning.urls')),
     path('api/v1/whatsapp/', include('whatsapp.urls')),
     path('api/v1/certificates/', include('certificates.urls')),
+    path('api/v1/fasaaha/', include('fasaaha.urls')),
 ]
 
 if settings.DEBUG:

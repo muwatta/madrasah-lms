@@ -104,6 +104,7 @@ export const translations = {
     noNotifications: { ar: 'لا توجد إشعارات جديدة', en: 'No new notifications' },
     filter: { ar: 'تصفية', en: 'Filter' },
     clearFilter: { ar: 'مسح التصفية', en: 'Clear filter' },
+    clear: { ar: 'مسح', en: 'Clear' },
     refresh: { ar: 'تحديث', en: 'Refresh' },
     back: { ar: 'رجوع', en: 'Back' },
     print: { ar: 'طباعة', en: 'Print' },

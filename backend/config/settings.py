@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'whatsapp',
     'character',
     'certificates',
+    'fasaaha',
 ]
 
 MIDDLEWARE = [

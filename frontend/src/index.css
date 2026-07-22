@@ -315,21 +315,31 @@ input, select, textarea {
   @apply border border-[var(--color-border)];
 }
 
+select.input-field,
+select.input-field option,
 select {
   background-color: #ffffff !important;
   color: #1e293b !important;
+  -webkit-appearance: menulist !important;
+  -moz-appearance: menulist !important;
+  appearance: menulist !important;
 }
 
+select.input-field option,
 select option {
   background-color: #ffffff !important;
   color: #1e293b !important;
+  padding: 8px 12px;
 }
 
+.dark select.input-field,
+.dark select.input-field option,
 .dark select {
   background-color: #1e293b !important;
   color: #f1f5f9 !important;
 }
 
+.dark select.input-field option,
 .dark select option {
   background-color: #1e293b !important;
   color: #f1f5f9 !important;
