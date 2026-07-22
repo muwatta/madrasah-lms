@@ -464,3 +464,82 @@ export const certificateAPI = {
   generate: (data: any) => api.post('/certificates/generate/', data),
   download: (id: string) => api.get(`/certificates/${id}/download/`, { responseType: 'blob' }),
 };
+
+export const fasaahaAPI = {
+  // Levels
+  levels: {
+    list: (params?: any) => api.get('/fasaaha/levels/', { params }),
+    get: (id: number) => api.get(`/fasaaha/levels/${id}/`),
+    create: (data: any) => api.post('/fasaaha/levels/', data),
+    update: (id: number, data: any) => api.put(`/fasaaha/levels/${id}/`, data),
+    delete: (id: number) => api.delete(`/fasaaha/levels/${id}/`),
+  },
+  // Categories
+  categories: {
+    list: (params?: any) => api.get('/fasaaha/categories/', { params }),
+    get: (id: number) => api.get(`/fasaaha/categories/${id}/`),
+    create: (data: any) => api.post('/fasaaha/categories/', data),
+    update: (id: number, data: any) => api.put(`/fasaaha/categories/${id}/`, data),
+    delete: (id: number) => api.delete(`/fasaaha/categories/${id}/`),
+  },
+  // Missions
+  missions: {
+    list: (params?: any) => api.get('/fasaaha/missions/', { params }),
+    get: (id: number) => api.get(`/fasaaha/missions/${id}/`),
+    create: (data: any) => api.post('/fasaaha/missions/', data),
+    update: (id: number, data: any) => api.put(`/fasaaha/missions/${id}/`, data),
+    delete: (id: number) => api.delete(`/fasaaha/missions/${id}/`),
+    forLevel: (levelId: number) => api.get(`/fasaaha/missions/for-level/${levelId}/`),
+  },
+  // Attempts
+  attempts: {
+    list: (params?: any) => api.get('/fasaaha/attempts/', { params }),
+    get: (id: number) => api.get(`/fasaaha/attempts/${id}/`),
+    submit: (data: FormData) => api.post('/fasaaha/attempts/', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    retry: (id: number, data: FormData) => api.post(`/fasaaha/attempts/${id}/retry/`, data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  },
+  // AI Analysis
+  analysis: {
+    get: (attemptId: number) => api.get(`/fasaaha/attempts/${attemptId}/analysis/`),
+  },
+  // Reviews
+  reviews: {
+    list: (params?: any) => api.get('/fasaaha/reviews/', { params }),
+    pending: (params?: any) => api.get('/fasaaha/reviews/pending/', { params }),
+    create: (data: any) => api.post('/fasaaha/reviews/', data),
+    update: (id: number, data: any) => api.put(`/fasaaha/reviews/${id}/`, data),
+  },
+  // Assignments
+  assignments: {
+    list: (params?: any) => api.get('/fasaaha/assignments/', { params }),
+    get: (id: number) => api.get(`/fasaaha/assignments/${id}/`),
+    create: (data: any) => api.post('/fasaaha/assignments/', data),
+    delete: (id: number) => api.delete(`/fasaaha/assignments/${id}/`),
+  },
+  // Progress
+  progress: {
+    list: (params?: any) => api.get('/fasaaha/progress/', { params }),
+    level: (levelId: number, params?: any) => api.get(`/fasaaha/progress/level/${levelId}/`, { params }),
+  },
+  // Streaks
+  streaks: {
+    get: (params?: any) => api.get('/fasaaha/streaks/', { params }),
+  },
+  // Badges
+  badges: {
+    list: (params?: any) => api.get('/fasaaha/badges/', { params }),
+    create: (data: any) => api.post('/fasaaha/badges/', data),
+    myBadges: (params?: any) => api.get('/fasaaha/my-badges/', { params }),
+  },
+  // Analytics
+  analytics: {
+    class: (params?: any) => api.get('/fasaaha/analytics/class/', { params }),
+    student: (studentId: number, params?: any) => api.get(`/fasaaha/analytics/student/${studentId}/`, { params }),
+    school: (params?: any) => api.get('/fasaaha/analytics/school/', { params }),
+  },
+  // Dashboards
+  dashboards: {
+    student: () => api.get('/fasaaha/dashboard/student/'),
+    teacher: () => api.get('/fasaaha/dashboard/teacher/'),
+  },
+};

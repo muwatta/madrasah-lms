@@ -61,6 +61,15 @@ const WhatsAppOptInPage = lazy(() => import('./pages/parent/WhatsAppOptInPage'))
 
 const CharacterPage = lazy(() => import('./pages/teacher/CharacterPage'));
 const WhatsAppPage = lazy(() => import('./pages/admin/WhatsAppPage'));
+const FasaahaStudentDashboard = lazy(() => import('./pages/student/fasaaha/FasaahaStudentDashboard'));
+const FasaahaMissionBrowser = lazy(() => import('./pages/student/fasaaha/FasaahaMissionBrowser'));
+const FasaahaSpeakPage = lazy(() => import('./pages/student/fasaaha/FasaahaSpeakPage'));
+const FasaahaMyProgress = lazy(() => import('./pages/student/fasaaha/FasaahaMyProgress'));
+const FasaahaMyBadges = lazy(() => import('./pages/student/fasaaha/FasaahaMyBadges'));
+const FasaahaTeacherDashboard = lazy(() => import('./pages/teacher/fasaaha/FasaahaTeacherDashboard'));
+const FasaahaMissionManager = lazy(() => import('./pages/teacher/fasaaha/FasaahaMissionManager'));
+const FasaahaReviewPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaReviewPage'));
+const FasaahaAnalyticsPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaAnalyticsPage'));
 const CertificatesPage = lazy(() => import('./pages/student/CertificatesPage'));
 const CalendarPage = lazy(() => import('./pages/student/CalendarPage'));
 const TeacherTimetablePage = lazy(() => import('./pages/teacher/TimetablePage'));
@@ -127,6 +136,11 @@ function App() {
               <Route path="character" element={<StudentCharacterPage />} />
               <Route path="my-results" element={<MyResultsPage />} />
               <Route path="choose-subjects" element={<ChooseSubjectsPage />} />
+              <Route path="fasaaha" element={<FasaahaStudentDashboard />} />
+              <Route path="fasaaha/missions" element={<FasaahaMissionBrowser />} />
+              <Route path="fasaaha/speak/:missionId" element={<FasaahaSpeakPage />} />
+              <Route path="fasaaha/progress" element={<FasaahaMyProgress />} />
+              <Route path="fasaaha/badges" element={<FasaahaMyBadges />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -154,6 +168,10 @@ function App() {
               <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="timetable" element={<TeacherTimetablePage />} />
               <Route path="results" element={<ResultEntryPage />} />
+              <Route path="fasaaha" element={<FasaahaTeacherDashboard />} />
+              <Route path="fasaaha/missions" element={<FasaahaMissionManager />} />
+              <Route path="fasaaha/review" element={<FasaahaReviewPage />} />
+              <Route path="fasaaha/analytics" element={<FasaahaAnalyticsPage />} />
               <Route path="qr-scanner" element={<QRScannerPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>

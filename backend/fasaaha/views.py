@@ -128,7 +128,7 @@ class MissionCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, CanManageCategories]
 
     def get_queryset(self):
-        return get_categories(madrasah=self.request.user.madrasah, active_only=False)  # pyright: ignore[reportAttributeAccessIssue]
+        return get_categories(madrasah=self.request.user.madrasah, active_only=False) 
 
 
 #  Missions

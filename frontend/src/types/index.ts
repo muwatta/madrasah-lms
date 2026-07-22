@@ -243,3 +243,191 @@ export interface BoardDashboard {
     avg_score: number;
   }[];
 }
+
+// ── Fasaaha (Arabic Speaking Intelligence) ──
+export interface SpeakingLevel {
+  id: number;
+  name: string;
+  name_en: string;
+  description: string;
+  description_en: string;
+  order: number;
+  min_score_to_pass: number;
+  is_active: boolean;
+}
+
+export interface MissionCategory {
+  id: number;
+  name: string;
+  name_en: string;
+  icon: string;
+  description: string;
+  is_active: boolean;
+}
+
+export interface Mission {
+  id: number;
+  level: number;
+  level_name: string;
+  category: number | null;
+  category_name: string | null;
+  title: string;
+  title_en: string;
+  description: string;
+  description_en: string;
+  arabic_text: string;
+  translation_text: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  points: number;
+  time_limit_seconds: number | null;
+  audio_url: string | null;
+  is_active: boolean;
+  created_by_name: string;
+  attempt_count: number;
+  avg_score: number;
+  created_at: string;
+}
+
+export interface SpeakingAttempt {
+  id: number;
+  student: number;
+  student_name: string;
+  mission: number;
+  mission_title: string;
+  mission_level_name: string;
+  audio_url: string;
+  audio_file: string;
+  attempt_number: number;
+  status: 'pending' | 'processing' | 'scored' | 'reviewed' | 'needs_review';
+  ai_score: number | null;
+  ai_fluency_score: number | null;
+  ai_pronunciation_score: number | null;
+  ai_grammar_score: number | null;
+  ai_feedback: string | null;
+  teacher_score: number | null;
+  teacher_feedback: string | null;
+  teacher_name: string | null;
+  final_score: number | null;
+  points_earned: number;
+  completed: boolean;
+  duration_seconds: number | null;
+  notes: string;
+  created_at: string;
+}
+
+export interface AIAnalysis {
+  id: number;
+  attempt: number;
+  transcription: string;
+  pronunciation_score: number;
+  grammar_score: number;
+  fluency_score: number;
+  overall_score: number;
+  feedback: string;
+  pronunciation_feedback: string;
+  grammar_feedback: string;
+  fluency_feedback: string;
+  processing_time_ms: number;
+  model_used: string;
+  raw_response: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface TeacherReview {
+  id: number;
+  attempt: number;
+  teacher: number;
+  teacher_name: string;
+  score: number;
+  pronunciation_score: number | null;
+  grammar_score: number | null;
+  fluency_score: number | null;
+  feedback: string;
+  pronunciation_feedback: string;
+  grammar_feedback: string;
+  fluency_feedback: string;
+  created_at: string;
+}
+
+export interface MissionAssignment {
+  id: number;
+  mission: number;
+  mission_title: string;
+  assigned_by_name: string;
+  target_student: number | null;
+  target_student_name: string | null;
+  target_class: number | null;
+  target_class_name: string | null;
+  due_date: string | null;
+  is_required: boolean;
+  notes: string;
+  created_at: string;
+}
+
+export interface StudentLevelProgress {
+  id: number;
+  student: number;
+  student_name: string;
+  level: number;
+  level_name: string;
+  missions_completed: number;
+  total_missions_available: number;
+  average_score: number;
+  best_score: number;
+  total_points: number;
+  is_completed: boolean;
+  completed_at: string | null;
+}
+
+export interface StudentStreak {
+  id: number;
+  student: number;
+  student_name: string;
+  current_streak: number;
+  longest_streak: number;
+  last_attempt_date: string | null;
+  total_speaking_days: number;
+}
+
+export interface Badge {
+  id: number;
+  name: string;
+  name_en: string;
+  description: string;
+  description_en: string;
+  icon: string;
+  badge_type: 'streak' | 'score' | 'missions' | 'level' | 'special';
+  criteria_value: number;
+  is_active: boolean;
+}
+
+export interface StudentBadge {
+  id: number;
+  student: number;
+  student_name: string;
+  badge: number;
+  badge_name: string;
+  badge_icon: string;
+  badge_type: string;
+  earned_at: string;
+}
+
+export interface FasaahaStudentDashboard {
+  current_level: SpeakingLevel | null;
+  total_attempts: number;
+  completed_missions: number;
+  current_streak: number;
+  longest_streak: number;
+  total_points: number;
+  badge_count: number;
+  progress: StudentLevelProgress[];
+}
+
+export interface FasaahaTeacherDashboard {
+  classes_taught: number;
+  total_students: number;
+  pending_reviews_count: number;
+  total_attempts: number;
+  average_class_score: number;
+  pending_reviews: SpeakingAttempt[];
+}

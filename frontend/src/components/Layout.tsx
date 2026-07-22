@@ -38,6 +38,7 @@ const navIcons: Record<string, JSX.Element> = {
   calendar:        <S d="M6 2v2m12-2v2M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2zm0 8v6a1 1 0 001 1h14a1 1 0 001-1v-6H5z" />,
   aiTutor:         <S d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />,
   learningPath:    <S d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />,
+  fasaaha:         <S d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />,
   flashcards:      <S d="M4 6h16M4 10h16M4 14h16M4 18h16" />,
   character:       <S d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />,
   myQuizzes:       <S d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />,
@@ -84,6 +85,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
     { labelKey: 'nav.myExamResults', path: '/my-results', icon: navIcons.exams },
     { labelKey: 'nav.chooseSubjects', path: '/choose-subjects', icon: navIcons.enrollments },
+    { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha },
   ],
   ustaadh: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
@@ -101,6 +103,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
     { labelKey: 'nav.resultsEntry', path: '/results', icon: navIcons.reports },
     { labelKey: 'nav.qrScanner', path: '/qr-scanner', icon: navIcons.attendance },
+    { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha },
   ],
   parent: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
