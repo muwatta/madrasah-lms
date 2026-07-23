@@ -358,10 +358,12 @@ class TeacherDashboardSerializer(serializers.Serializer):
 
 
 class DialogueSessionSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+
     class Meta:
         model = DialogueSession
         fields = [
-            'id', 'uuid', 'madrasah', 'student', 'mission', 'topic',
+            'id', 'uuid', 'madrasah', 'student', 'student_name', 'mission', 'topic',
             'level_number', 'status', 'turn_count', 'total_score',
             'duration_seconds', 'created_at', 'completed_at',
         ]
@@ -412,11 +414,19 @@ class DailyGoalSerializer(serializers.ModelSerializer):
 
 class LeaderboardEntrySerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+    current_streak = serializers.SerializerMethodField()
 
     class Meta:
         model = LeaderboardEntry
         fields = [
             'id', 'rank', 'student', 'student_name', 'period',
-            'points', 'missions_completed', 'average_score',
+            'points', 'missions_completed', 'average_score', 'current_streak',
         ]
         read_only_fields = fields
+
+    def get_current_streak(self, obj):
+        from .models import StudentStreak
+        streak = StudentStreak.objects.filter(
+            student=obj.student, madrasah=obj.madrasah,
+        ).first()
+        return streak.current_streak if streak else 0

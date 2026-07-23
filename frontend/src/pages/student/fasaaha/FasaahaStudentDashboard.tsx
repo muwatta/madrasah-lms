@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaDashboard, useFasaahaProgress } from '../../../hooks/useFasaaha';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
+import DailyGoalsWidget from '../../../components/fasaaha/DailyGoalsWidget';
 
 export default function FasaahaStudentDashboard() {
   const { t, language } = useLanguage();
@@ -42,14 +43,30 @@ export default function FasaahaStudentDashboard() {
         {[
           { to: '/student/fasaaha/speak/0', label: t('fasaaha.speak'), icon: '🎙️' },
           { to: '/student/fasaaha/missions', label: t('fasaaha.viewMissions'), icon: '📋' },
-          { to: '/student/fasaaha/progress', label: t('fasaaha.myProgress'), icon: '📈' },
+          { to: '/student/fasaaha/conversation', label: t('fasaaha.conversation'), icon: '💬' },
+          { to: '/student/fasaaha/trends', label: t('fasaaha.scoreTrends'), icon: '📈' },
+          { to: '/student/fasaaha/progress', label: t('fasaaha.myProgress'), icon: '📊' },
           { to: '/student/fasaaha/badges', label: t('fasaaha.myBadgesLink'), icon: '🏅' },
+          { to: '/student/fasaaha/leaderboard', label: t('fasaaha.leaderboard'), icon: '🏆' },
+          { to: '/student/fasaaha/goals', label: t('fasaaha.dailyGoals'), icon: '🎯' },
         ].map(a => (
           <Link key={a.to} to={a.to} className="rounded-xl border p-4 text-center card-hover btn-press" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
             <span className="text-2xl block mb-1">{a.icon}</span>
             <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{a.label}</span>
           </Link>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <DailyGoalsWidget />
+        <div className="rounded-xl border p-4" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-card)' }}>
+          <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            {t('fasaaha.quickTip')}
+          </h3>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+            {t('fasaaha.quickTipText')}
+          </p>
+        </div>
       </div>
 
       {progress.length > 0 && (

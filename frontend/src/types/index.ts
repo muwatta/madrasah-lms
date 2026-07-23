@@ -559,6 +559,7 @@ export interface LeaderboardEntry {
   points: number;
   missions_completed: number;
   average_score: number;
+  current_streak: number;
   period: 'weekly' | 'monthly' | 'all_time';
   updated_at: string;
 }

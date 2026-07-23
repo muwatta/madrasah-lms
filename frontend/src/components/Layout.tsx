@@ -92,6 +92,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.dialogue', path: '/fasaaha/conversation', icon: navIcons.dialogue },
     { labelKey: 'nav.leaderboard', path: '/fasaaha/leaderboard', icon: navIcons.leaderboard },
     { labelKey: 'nav.dailyGoals', path: '/fasaaha/goals', icon: navIcons.dailyGoals },
+    { labelKey: 'nav.scoreTrends', path: '/fasaaha/trends', icon: navIcons.reports },
   ],
   ustaadh: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },

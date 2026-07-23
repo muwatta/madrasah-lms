@@ -90,6 +90,7 @@ export default function FasaahaLeaderboard() {
                   <div className="flex gap-3 mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
                     <span>{entry.missions_completed} {t('fasaaha.missionsDone')}</span>
                     <span>{Math.round(entry.average_score)}% {t('fasaaha.avgScore')}</span>
+                    {entry.current_streak > 0 && <span>🔥 {entry.current_streak}d</span>}
                   </div>
                 </div>
 

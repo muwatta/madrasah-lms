@@ -176,6 +176,16 @@ class AttemptService:
         # Update streak
         StreakService.update_streak(student=attempt.student, madrasah=attempt.madrasah)
 
+        # Update daily goal
+        DailyGoalService.update_after_attempt(
+            student=attempt.student, madrasah=attempt.madrasah, attempt=attempt,
+        )
+
+        # Auto-award badges
+        BadgeService.check_and_award_badges(
+            student=attempt.student, madrasah=attempt.madrasah,
+        )
+
         return attempt
 
     @staticmethod
