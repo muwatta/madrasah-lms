@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/v1/analytics/', include('analytics.urls')),
     path('api/v1/learning/', include('learning.urls')),
     path('api/v1/whatsapp/', include('whatsapp.urls')),
+    path('api/webhooks/whatsapp/', include('whatsapp.webhook_urls')),
     path('api/v1/certificates/', include('certificates.urls')),
     path('api/v1/fasaaha/', include('fasaaha.urls')),
 ]

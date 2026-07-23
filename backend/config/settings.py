@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver').split(',')
+ALLOWED_HOSTS = ['*'] if DEBUG else config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -133,7 +133,7 @@ REST_FRAMEWORK = {
         'user': '200/hour',
     },
 }
-# ── Security hardening ───────────────────────────────────────────────────────
+# Security hardening 
 if not DEBUG:
     SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
     SESSION_COOKIE_SECURE = True
@@ -145,8 +145,7 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ── File upload limits ──────────────────────────────────────────────────────
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+# File upload limits FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 FILE_UPLOAD_PERMISSIONS = 0o644
 
@@ -162,7 +161,7 @@ JWT_SECRET = config('JWT_SECRET', default='jwt-secret-key-change')
 JWT_EXPIRATION_HOURS = config('JWT_EXPIRATION_HOURS', default=24, cast=int)
 QR_SECRET_KEY = config('QR_SECRET_KEY', default='change-me-in-production')
 
-# ── Celery ──────────────────────────────────────────────────────────────────
+# Celery 
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
@@ -184,28 +183,29 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-# ── WhatsApp Cloud API ──────────────────────────────────────────────────────
-WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
+# WhatsApp Cloud API WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
 WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')
 WHATSAPP_API_VERSION = config('WHATSAPP_API_VERSION', default='v22.0')
-WHATSAPP_WEBHOOK_VERIFY_TOKEN = config('WHATSAPP_WEBHOOK_VERIFY_TOKEN', default='madrasah-webhook-token')
+WHATSAPP_WEBHOOK_VERIFY_TOKEN = config('WHATSAPP_VERIFY_TOKEN', default='madrasah_lms_verify_token')
+WHATSAPP_VERIFY_TOKEN = WHATSAPP_WEBHOOK_VERIFY_TOKEN
+WHATSAPP_BUSINESS_ACCOUNT_ID = config('WHATSAPP_BUSINESS_ACCOUNT_ID', default='')
+WHATSAPP_APP_SECRET = config('WHATSAPP_APP_SECRET', default='')
 WHATSAPP_BASE_URL = 'https://graph.facebook.com'
 
-# ── Email (Resend) ──────────────────────────────────────────────────────────
+# Email (Resend) 
 RESEND_API_KEY = config('RESEND_API_KEY', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@madrasahlms.com')
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
-# ── AI Provider (OpenAI / Groq / etc.) ─────────────────────────────────────
+# AI Provider (OpenAI / Groq / etc.) 
 OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 OPENAI_BASE_URL = config('OPENAI_BASE_URL', default='')
 OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')
 OPENAI_MAX_TOKENS = config('OPENAI_MAX_TOKENS', default=1024, cast=int)
 OPENAI_TEMPERATURE = config('OPENAI_TEMPERATURE', default=0.7, cast=float)
 
-# ── Azure Speech Services ──────────────────────────────────────────────────
-AZURE_SPEECH_KEY = config('AZURE_SPEECH_KEY', default='')
+# Azure Speech Services AZURE_SPEECH_KEY = config('AZURE_SPEECH_KEY', default='')
 AZURE_SPEECH_REGION = config('AZURE_SPEECH_REGION', default='')
 
-# ── Celery eager mode (dev convenience) ───────────────────────────────────
+# Celery eager mode (dev convenience) 
 CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default=False, cast=bool)

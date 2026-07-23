@@ -1,5 +1,5 @@
-import { useLanguage } from '../../../context/LanguageContext';
-import { useFasaahaDailyGoal } from '../../../hooks/useFasaaha';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFasaahaDailyGoal } from '../../hooks/useFasaaha';
 
 export default function DailyGoalsWidget() {
   const { t } = useLanguage();

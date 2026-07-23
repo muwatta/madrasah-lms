@@ -194,7 +194,7 @@ def whatsapp_webhook(request):
     if request.method == 'POST':
         # Verify signature when access token is configured
         signature = request.META.get('HTTP_X_HUB_SIGNATURE_256', '')
-        app_secret = settings.WHATSAPP_ACCESS_TOKEN
+        app_secret = settings.WHATSAPP_APP_SECRET
         if app_secret and not _verify_webhook_signature(request.body, signature, app_secret):
             logger.warning("[WHATSAPP] Invalid webhook signature")
             return HttpResponse('invalid signature', status=403)
