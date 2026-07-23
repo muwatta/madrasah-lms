@@ -12,6 +12,7 @@ from .models import (
     SpeakingLevel, MissionCategory, Mission, SpeakingAttempt,
     AIAnalysis, TeacherReview, MissionAssignment,
     StudentLevelProgress, StudentStreak, Badge, StudentBadge,
+    DialogueSession, DialogueTurn, DailyGoal, LeaderboardEntry,
 )
 
 
