@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .models import Quiz, Question, QuizAttempt, QuizAnswer, ViolationLog
+from curriculum.models import Subject
 from .serializers import (
     QuestionSerializer, QuestionWriteSerializer,
     QuizSerializer, QuizWriteSerializer, QuizQuestionSerializer,
@@ -47,12 +48,11 @@ class QuestionListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         data = serializer.validated_data
+        subject = get_object_or_404(Subject, pk=data['subject'], madrasah=self.request.user.madrasah)
         question = QuestionService.create_question(
             madrasah=self.request.user.madrasah,
             created_by=self.request.user,
-            subject_id=data['subject'],
-            topic_id=data.get('topic'),
-            school_class_id=data.get('school_class'),
+            subject=subject,
             question_type=data['question_type'],
             difficulty=data['difficulty'],
             marks=data['marks'],

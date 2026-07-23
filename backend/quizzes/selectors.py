@@ -55,14 +55,13 @@ def get_question_by_id(*, question_id: int, madrasah) -> Question | None:
 def get_student_quizzes(*, student, madrasah) -> QuerySet:
     assignment_class_ids = QuizAssignment.objects.filter(
         school_class__enrollments__student=student,
-        school_class__enrollments__is_active=True,
     ).values_list('quiz_id', flat=True).distinct()
 
     return Quiz.objects.filter(
         madrasah=madrasah,
         is_published=True,
     ).filter(
-        models.Q(quiz_assignments__school_class__enrollments__student=student) |
+        models.Q(assignments__school_class__enrollments__student=student) |
         models.Q(id__in=assignment_class_ids)
     ).select_related(
         'subject', 'school_class', 'created_by'
