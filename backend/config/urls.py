@@ -30,6 +30,7 @@ urlpatterns = [
     path('api/webhooks/whatsapp/', include('whatsapp.webhook_urls')),
     path('api/v1/certificates/', include('certificates.urls')),
     path('api/v1/fasaaha/', include('fasaaha.urls')),
+    path('api/v1/quizzes/', include('quizzes.urls')),
 ]
 
 if settings.DEBUG:

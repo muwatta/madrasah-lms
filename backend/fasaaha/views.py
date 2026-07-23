@@ -255,6 +255,7 @@ class AttemptListCreateView(generics.ListCreateAPIView):
             audio_file=data['audio'],
             madrasah=self.request.user.madrasah,  
             notes=data.get('notes', ''),
+            time_spent_seconds=data.get('time_spent_seconds'),
         )
 
         try:

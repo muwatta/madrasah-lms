@@ -65,7 +65,7 @@ export const questionAPI = {
   },
 };
 
-export const quizAPI = {
+export const legacyQuizAPI = {
   list: (params?: any) => api.get('/assessments/quizzes/', { params }),
   get: (id: number) => api.get(`/assessments/quizzes/${id}/`),
   create: (data: any) => api.post('/assessments/quizzes/', data),
@@ -75,7 +75,7 @@ export const quizAPI = {
   analytics: (id: number) => api.get(`/assessments/quizzes/${id}/analytics/`),
 };
 
-export const attemptAPI = {
+export const legacyAttemptAPI = {
   start: (quizId: number) => api.post('/assessments/quiz-attempts/', { quiz: quizId }),
   submit: (attemptId: number, answers: Record<string, string>) =>
     api.put(`/assessments/quiz-attempts/${attemptId}/submit/`, { answers }),
@@ -465,6 +465,45 @@ export const certificateAPI = {
   download: (id: string) => api.get(`/certificates/${id}/download/`, { responseType: 'blob' }),
 };
 
+export const quizzesAPI = {
+  questions: {
+    list: (params?: any) => api.get('/quizzes/questions/', { params }),
+    get: (id: number) => api.get(`/quizzes/questions/${id}/`),
+    create: (data: any) => api.post('/quizzes/questions/', data),
+    update: (id: number, data: any) => api.put(`/quizzes/questions/${id}/`, data),
+    delete: (id: number) => api.delete(`/quizzes/questions/${id}/`),
+    duplicate: (id: number) => api.post(`/quizzes/questions/${id}/duplicate/`),
+  },
+  quizzes: {
+    list: (params?: any) => api.get('/quizzes/', { params }),
+    get: (id: number) => api.get(`/quizzes/${id}/`),
+    create: (data: any) => api.post('/quizzes/', data),
+    update: (id: number, data: any) => api.put(`/quizzes/${id}/`, data),
+    delete: (id: number) => api.delete(`/quizzes/${id}/`),
+    publish: (id: number) => api.post(`/quizzes/${id}/publish/`),
+    archive: (id: number) => api.post(`/quizzes/${id}/archive/`),
+    questions: (id: number) => api.get(`/quizzes/${id}/questions/`),
+    addQuestion: (id: number, questionId: number) => api.post(`/quizzes/${id}/questions/add/`, { question_id: questionId }),
+    removeQuestion: (id: number, questionId: number) => api.delete(`/quizzes/${id}/questions/${questionId}/remove/`),
+    results: (id: number) => api.get(`/quizzes/${id}/results/`),
+    stats: (id: number) => api.get(`/quizzes/${id}/stats/`),
+    analysis: (id: number) => api.get(`/quizzes/${id}/analysis/`),
+    violations: (id: number) => api.get(`/quizzes/${id}/violations/`),
+  },
+  attempts: {
+    start: (quizId: number) => api.post('/quizzes/start/', { quiz_id: quizId }),
+    get: (attemptUuid: string) => api.get(`/quizzes/attempt/${attemptUuid}/`),
+    saveAnswer: (attemptUuid: string, data: { question_id: number; selected_answer: string }) =>
+      api.post(`/quizzes/attempt/${attemptUuid}/answer/`, data),
+    flag: (attemptUuid: string, questionId: number) =>
+      api.post(`/quizzes/attempt/${attemptUuid}/flag/`, { question_id: questionId }),
+    submit: (attemptUuid: string) => api.post(`/quizzes/attempt/${attemptUuid}/submit/`),
+    reportViolation: (attemptUuid: string, data: { violation_type: string; details?: any }) =>
+      api.post(`/quizzes/attempt/${attemptUuid}/violation/`, data),
+  },
+  overview: () => api.get('/quizzes/overview/'),
+};
+
 export const fasaahaAPI = {
   // Levels
   levels: {
@@ -571,4 +610,43 @@ export const fasaahaAPI = {
       return api.get(base, { params });
     },
   },
+};
+
+export const quizAPI = {
+  questions: {
+    list: (params?: Record<string, unknown>) => api.get('/quizzes/questions/', { params }),
+    get: (id: number) => api.get(`/quizzes/questions/${id}/`),
+    create: (data: Record<string, unknown>) => api.post('/quizzes/questions/', data),
+    update: (id: number, data: Record<string, unknown>) => api.put(`/quizzes/questions/${id}/`, data),
+    delete: (id: number) => api.delete(`/quizzes/questions/${id}/`),
+    duplicate: (id: number) => api.post(`/quizzes/questions/${id}/duplicate/`),
+  },
+  quizzes: {
+    list: (params?: Record<string, unknown>) => api.get('/quizzes/', { params }),
+    get: (id: number) => api.get(`/quizzes/${id}/`),
+    create: (data: Record<string, unknown>) => api.post('/quizzes/', data),
+    update: (id: number, data: Record<string, unknown>) => api.put(`/quizzes/${id}/`, data),
+    delete: (id: number) => api.delete(`/quizzes/${id}/`),
+    publish: (id: number) => api.post(`/quizzes/${id}/publish/`),
+    archive: (id: number) => api.post(`/quizzes/${id}/archive/`),
+    questions: (id: number) => api.get(`/quizzes/${id}/questions/`),
+    addQuestion: (id: number, questionId: number) => api.post(`/quizzes/${id}/questions/add/`, { question_id: questionId }),
+    removeQuestion: (id: number, questionId: number) => api.delete(`/quizzes/${id}/questions/${questionId}/remove/`),
+    results: (id: number) => api.get(`/quizzes/${id}/results/`),
+    stats: (id: number) => api.get(`/quizzes/${id}/stats/`),
+    analysis: (id: number) => api.get(`/quizzes/${id}/analysis/`),
+    violations: (id: number) => api.get(`/quizzes/${id}/violations/`),
+  },
+  attempts: {
+    start: (quizId: number) => api.post('/quizzes/start/', { quiz_id: quizId }),
+    get: (attemptUuid: string) => api.get(`/quizzes/attempt/${attemptUuid}/`),
+    saveAnswer: (attemptUuid: string, data: { question_id: number; selected_answer: string }) =>
+      api.post(`/quizzes/attempt/${attemptUuid}/answer/`, data),
+    flag: (attemptUuid: string, questionId: number) =>
+      api.post(`/quizzes/attempt/${attemptUuid}/flag/`, { question_id: questionId }),
+    submit: (attemptUuid: string) => api.post(`/quizzes/attempt/${attemptUuid}/submit/`),
+    reportViolation: (attemptUuid: string, data: { violation_type: string; details?: Record<string, unknown> }) =>
+      api.post(`/quizzes/attempt/${attemptUuid}/violation/`, data),
+  },
+  overview: () => api.get('/quizzes/overview/'),
 };

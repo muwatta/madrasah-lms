@@ -167,6 +167,9 @@ class SpeakingAttempt(models.Model):
         help_text='Activity type at time of submission')
     attempt_number = models.PositiveSmallIntegerField(default=1)
     is_best_attempt = models.BooleanField(default=False)
+    time_spent_seconds = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text='Time the student spent reading/speaking (seconds)')
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 

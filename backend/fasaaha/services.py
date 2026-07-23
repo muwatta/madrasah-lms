@@ -104,6 +104,7 @@ class AttemptService:
         audio_file,
         madrasah,
         notes='',
+        time_spent_seconds=None,
     ):
         
         # Determine attempt number
@@ -119,6 +120,7 @@ class AttemptService:
             audio_file=audio_file,
             audio_size_bytes=audio_file.size if hasattr(audio_file, 'size') else None,
             notes=notes,
+            time_spent_seconds=time_spent_seconds,
             status='processing',
             attempt_number=attempt_number,
             madrasah=madrasah,

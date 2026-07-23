@@ -16,13 +16,13 @@ const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
 const ChangePasswordPage = lazy(() => import('./pages/auth/ChangePasswordPage'));
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
-const QuizListPage = lazy(() => import('./pages/student/QuizListPage'));
-const QuizTakePage = lazy(() => import('./pages/student/QuizTakePage'));
-const QuizResultsPage = lazy(() => import('./pages/student/QuizResultsPage'));
+const QuizListPage = lazy(() => import('./pages/student/quiz/QuizListPage'));
+const QuizTakePage = lazy(() => import('./pages/student/quiz/QuizTakePage'));
+const QuizResultsPage = lazy(() => import('./pages/student/quiz/QuizResultsPage'));
 const ExamResultsPage = lazy(() => import('./pages/student/ExamResultsPage'));
 const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'));
-const QuizManagementPage = lazy(() => import('./pages/teacher/QuizManagementPage'));
-const QuestionBankPage = lazy(() => import('./pages/teacher/QuestionBankPage'));
+const QuizManagementPage = lazy(() => import('./pages/teacher/quiz/QuizManagerPage'));
+const QuestionBankPage = lazy(() => import('./pages/teacher/quiz/QuestionBankPage'));
 const StudentPerformancePage = lazy(() => import('./pages/teacher/StudentPerformancePage'));
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -32,7 +32,8 @@ const EnrollmentManagementPage = lazy(() => import('./pages/admin/EnrollmentMana
 const ExamManagementPage = lazy(() => import('./pages/admin/ExamManagementPage'));
 const ParentStudentPage = lazy(() => import('./pages/admin/ParentStudentPage'));
 const BoardDashboard = lazy(() => import('./pages/board/BoardDashboard'));
-const QuizAnalyticsPage = lazy(() => import('./pages/teacher/QuizAnalyticsPage'));
+const QuizAnalyticsPage = lazy(() => import('./pages/teacher/quiz/QuizAnalyticsPage'));
+const QuizBuilderPage = lazy(() => import('./pages/teacher/quiz/QuizBuilderPage'));
 const StudentProgressPage = lazy(() => import('./pages/student/StudentProgressPage'));
 const MessagesPage = lazy(() => import('./pages/shared/MessagesPage'));
 const InterventionAlertsPage = lazy(() => import('./pages/admin/InterventionAlertsPage'));
@@ -71,6 +72,7 @@ const FasaahaConversation = lazy(() => import('./pages/student/fasaaha/FasaahaCo
 const FasaahaLeaderboard = lazy(() => import('./pages/student/fasaaha/FasaahaLeaderboard'));
 const FasaahaDailyGoals = lazy(() => import('./pages/student/fasaaha/FasaahaDailyGoals'));
 const FasaahaScoreTrends = lazy(() => import('./pages/student/fasaaha/FasaahaScoreTrends'));
+const FasaahaReadingPage = lazy(() => import('./pages/student/fasaaha/FasaahaReadingPage'));
 const FasaahaTeacherDashboard = lazy(() => import('./pages/teacher/fasaaha/FasaahaTeacherDashboard'));
 const FasaahaMissionManager = lazy(() => import('./pages/teacher/fasaaha/FasaahaMissionManager'));
 const FasaahaReviewPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaReviewPage'));
@@ -145,6 +147,7 @@ function App() {
               <Route path="fasaaha" element={<FasaahaStudentDashboard />} />
               <Route path="fasaaha/missions" element={<FasaahaMissionBrowser />} />
               <Route path="fasaaha/speak/:missionId" element={<FasaahaSpeakPage />} />
+              <Route path="fasaaha/read/:missionId" element={<FasaahaReadingPage />} />
               <Route path="fasaaha/progress" element={<FasaahaMyProgress />} />
               <Route path="fasaaha/badges" element={<FasaahaMyBadges />} />
               <Route path="fasaaha/conversation" element={<FasaahaConversation />} />
@@ -165,6 +168,8 @@ function App() {
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<TeacherDashboard />} />
               <Route path="quizzes" element={<QuizManagementPage />} />
+              <Route path="quiz/builder" element={<QuizBuilderPage />} />
+              <Route path="quiz/builder/:quizId" element={<QuizBuilderPage />} />
               <Route path="quizzes/:id/analytics" element={<QuizAnalyticsPage />} />
               <Route path="questions" element={<QuestionBankPage />} />
               <Route path="students" element={<StudentPerformancePage />} />

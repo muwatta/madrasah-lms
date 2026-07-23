@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'users',
     'curriculum',
     'assessments',
+    'quizzes',
     'results',
     'school_ops',
     'academic',

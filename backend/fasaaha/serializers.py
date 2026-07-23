@@ -126,7 +126,7 @@ class SpeakingAttemptSerializer(serializers.ModelSerializer):
             'id', 'uuid', 'madrasah', 'student', 'student_name',
             'mission', 'mission_title', 'mission_title_ar', 'level_number',
             'audio_file', 'audio_url',
-            'audio_duration_ms', 'audio_size_bytes', 'notes',
+            'audio_duration_ms', 'audio_size_bytes', 'notes', 'time_spent_seconds',
             'status', 'attempt_number', 'is_best_attempt',
             'activity_type', 'ai_analysis', 'teacher_review', 'final_score',
             'created_at', 'completed_at',
@@ -161,6 +161,9 @@ class SpeakingAttemptWriteSerializer(serializers.Serializer):
     mission = serializers.IntegerField(help_text="Mission ID")
     audio = serializers.FileField(help_text="Audio recording (mp3, wav, ogg, m4a)")
     notes = serializers.CharField(required=False, default='', allow_blank=True)
+    time_spent_seconds = serializers.IntegerField(
+        required=False, default=None, allow_null=True,
+        help_text="Time spent reading/speaking in seconds")
 
 
 class AttemptRetrySerializer(serializers.Serializer):

@@ -1466,6 +1466,17 @@ export const translations = {
     viewMissions: { ar: 'المهمات', en: 'Missions' },
     myProgress: { ar: 'تقدمي', en: 'My Progress' },
     myBadgesLink: { ar: 'شاراتي', en: 'My Badges' },
+
+    // Reading mode
+    readingComplete: { ar: 'تمت القراءة!', en: 'Reading Complete!' },
+    timeSpent: { ar: 'الوقت المستغرق', en: 'Time Spent' },
+    maxTime: { ar: 'الحد الأقصى', en: 'Max' },
+    readingInstructions: { ar: 'اضغط للتسجيل وابدأ القراءة بصوت عالٍ وواضح', en: 'Press to start recording, then read aloud clearly' },
+    readingNow: { ar: 'جاري التسجيل... اقرأ بصوت عالٍ', en: 'Recording... Read aloud now' },
+    recordingPreview: { ar: 'معاينة التسجيل', en: 'Recording Preview' },
+    reRecord: { ar: 'إعادة التسجيل', en: 'Re-record' },
+    showTransliteration: { ar: 'عرض النطق', en: 'Show Transliteration' },
+    hideTransliteration: { ar: 'إخفاء النطق', en: 'Hide Transliteration' },
   },
 } as const;
 

@@ -7,7 +7,7 @@ import { MISSION_TYPE_LABELS, MISSION_TYPE_ICONS } from '../../../types';
 import MissionCard from '../../../components/fasaaha/MissionCard';
 import { SkeletonCard } from '../../../components/Skeleton';
 
-const missionTypes: MissionType[] = ['pronunciation', 'recitation', 'conversation', 'translation', 'vocabulary', 'grammar', 'listening'];
+const missionTypes: MissionType[] = ['reading', 'pronunciation', 'repeat_after_me', 'free_speaking', 'storytelling', 'conversation', 'role_play', 'debate', 'presentation'];
 
 export default function FasaahaMissionBrowser() {
   const { t, language } = useLanguage();
@@ -57,7 +57,10 @@ export default function FasaahaMissionBrowser() {
         <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.noMissions')}</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {missions.map(m => <MissionCard key={m.id} mission={m} onStart={(id) => navigate(`/student/fasaaha/speak/${id}`)} />)}
+          {missions.map(m => {
+            const isReading = m.mission_type === 'reading';
+            return <MissionCard key={m.id} mission={m} onStart={(id) => navigate(isReading ? `/student/fasaaha/read/${id}` : `/student/fasaaha/speak/${id}`)} />;
+          })}
         </div>
       )}
     </div>
