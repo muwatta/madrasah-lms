@@ -15,8 +15,13 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ['role', 'is_active', 'madrasah']
     search_fields = ['email', 'first_name', 'last_name']
     ordering = ['-date_joined']
+    readonly_fields = ['date_joined']
 
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login',)}),
         ('Madrasah Info', {'fields': ('role', 'madrasah')}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
