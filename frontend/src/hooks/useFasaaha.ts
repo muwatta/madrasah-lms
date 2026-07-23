@@ -12,6 +12,12 @@ import type {
   StudentBadge,
   FasaahaStudentDashboard,
   FasaahaTeacherDashboard,
+  DialogueSession,
+  DialogueTurn,
+  DialogueEvaluation,
+  DailyGoal,
+  LeaderboardEntry,
+  ScoreTrend,
 } from '../types';
 
 // ── Levels ────────────────────────────────────────────────────────────────
@@ -221,6 +227,127 @@ export function useStudentAnalytics(studentId: number | null) {
   });
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  Phase 3: Dialogue
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function useDialogueSessions() {
+  return useQuery<DialogueSession[]>({
+    queryKey: ['fasaaha', 'dialogues'],
+    queryFn: async () => {
+      const res = await fasaahaAPI.dialogue.list();
+      return unwrapPaginated<DialogueSession>(res.data);
+    },
+  });
+}
+
+export function useDialogueSession(uuid: string | null) {
+  return useQuery<DialogueSession & { turns: DialogueTurn[] }>({
+    queryKey: ['fasaaha', 'dialogue', uuid],
+    queryFn: async () => {
+      const res = await fasaahaAPI.dialogue.get(uuid!);
+      return res.data;
+    },
+    enabled: !!uuid,
+  });
+}
+
+export function useStartDialogue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { topic: string; level_number?: number; mission?: number }) =>
+      fasaahaAPI.dialogue.start(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'dialogues'] });
+    },
+  });
+}
+
+export function useDialogueTurn() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ uuid, text_ar }: { uuid: string; text_ar: string }) =>
+      fasaahaAPI.dialogue.turn(uuid, { text_ar }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'dialogue', variables.uuid] });
+    },
+  });
+}
+
+export function useCompleteDialogue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (uuid: string) => fasaahaAPI.dialogue.complete(uuid),
+    onSuccess: (_data, uuid) => {
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'dialogue', uuid] });
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'dialogues'] });
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'dashboard', 'student'] });
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Phase 3: Daily Goals
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function useDailyGoal() {
+  return useQuery<DailyGoal>({
+    queryKey: ['fasaaha', 'goals', 'today'],
+    queryFn: async () => {
+      const res = await fasaahaAPI.goals.today();
+      return res.data;
+    },
+  });
+}
+
+export function useWeeklyGoals() {
+  return useQuery<DailyGoal[]>({
+    queryKey: ['fasaaha', 'goals', 'weekly'],
+    queryFn: async () => {
+      const res = await fasaahaAPI.goals.weekly();
+      return unwrapPaginated<DailyGoal>(res.data);
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Phase 3: Leaderboard
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function useLeaderboard(period: string = 'weekly') {
+  return useQuery<LeaderboardEntry[]>({
+    queryKey: ['fasaaha', 'leaderboard', period],
+    queryFn: async () => {
+      const res = await fasaahaAPI.leaderboard.get({ period });
+      return unwrapPaginated<LeaderboardEntry>(res.data);
+    },
+  });
+}
+
+export function useRefreshLeaderboard() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (period?: string) => fasaahaAPI.leaderboard.refresh({ period }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'leaderboard'] });
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Phase 3: Score Trends
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function useScoreTrends(studentId?: number, days: number = 30) {
+  return useQuery<ScoreTrend[]>({
+    queryKey: ['fasaaha', 'trends', studentId, days],
+    queryFn: async () => {
+      const res = await fasaahaAPI.trends.get(studentId, { days });
+      return res.data;
+    },
+  });
+}
+
 // ── Prefixed re-exports (for useFasaaha.ts convention) ────────────────────
 
 export { useLevels as useFasaahaLevels };
@@ -240,3 +367,13 @@ export { useAllBadges as useFasaahaAllBadges };
 export { useMyBadges as useFasaahaMyBadges };
 export { useClassAnalytics as useFasaahaClassAnalytics };
 export { useStudentAnalytics as useFasaahaStudentAnalytics };
+export { useDialogueSessions as useFasaahaDialogueSessions };
+export { useDialogueSession as useFasaahaDialogueSession };
+export { useStartDialogue as useFasaahaStartDialogue };
+export { useDialogueTurn as useFasaahaDialogueTurn };
+export { useCompleteDialogue as useFasaahaCompleteDialogue };
+export { useDailyGoal as useFasaahaDailyGoal };
+export { useWeeklyGoals as useFasaahaWeeklyGoals };
+export { useLeaderboard as useFasaahaLeaderboard };
+export { useRefreshLeaderboard as useFasaahaRefreshLeaderboard };
+export { useScoreTrends as useFasaahaScoreTrends };

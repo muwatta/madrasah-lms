@@ -492,3 +492,82 @@ export interface FasaahaTeacherDashboard {
   average_class_score: number;
   pending_reviews: SpeakingAttempt[];
 }
+
+// ── Fasaaha Phase 3 ──
+
+export interface DialogueSession {
+  uuid: string;
+  student: number;
+  student_name: string;
+  topic: string;
+  level_number: number;
+  mission: number | null;
+  status: 'active' | 'completed' | 'abandoned';
+  total_score: number | null;
+  turn_count: number;
+  duration_seconds: number;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface DialogueTurn {
+  id: number;
+  session: number;
+  role: 'student' | 'ai';
+  text_ar: string;
+  text_en: string;
+  transliteration: string;
+  pronunciation_score: number | null;
+  fluency_score: number | null;
+  vocabulary_score: number | null;
+  turn_score: number | null;
+  correction: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface DialogueEvaluation {
+  pronunciation_score: number;
+  fluency_score: number;
+  vocabulary_score: number;
+  turn_score: number;
+  feedback: string;
+}
+
+export interface DailyGoal {
+  id: number;
+  student: number;
+  student_name?: string;
+  date: string;
+  missions_target: number;
+  missions_completed: number;
+  minutes_target: number;
+  minutes_practiced: number;
+  points_earned: number;
+  is_achieved: boolean;
+  progress_pct: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LeaderboardEntry {
+  id: number;
+  student: number;
+  student_name: string;
+  madrasah?: number;
+  rank: number;
+  points: number;
+  missions_completed: number;
+  average_score: number;
+  period: 'weekly' | 'monthly' | 'all_time';
+  updated_at: string;
+}
+
+export interface ScoreTrend {
+  date: string;
+  attempts: number;
+  avg_score: number;
+  avg_pronunciation: number;
+  avg_grammar: number;
+  avg_fluency: number;
+}

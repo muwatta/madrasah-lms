@@ -19,6 +19,7 @@ from .models import (
     SpeakingLevel, MissionCategory, Mission, SpeakingAttempt,
     AIAnalysis, TeacherReview, MissionAssignment,
     StudentLevelProgress, StudentStreak, Badge, StudentBadge,
+    DialogueSession, DialogueTurn, DailyGoal, LeaderboardEntry,
 )
 from .ai.scoring import compute_composite_score, is_passing
 
@@ -525,3 +526,323 @@ class BadgeService:
                     "Streak badge '%s' awarded to student %s (streak: %d)",
                     badge.name, student.pk, streak.longest_streak,
                 )
+
+
+#  Dialogue Service
+
+
+class DialogueService:
+    """Manages interactive AI conversation sessions."""
+
+    @staticmethod
+    @transaction.atomic
+    def start_session(
+        *,
+        student,
+        madrasah,
+        topic='free',
+        level_number=1,
+        mission=None,
+    ):
+        """Start a new dialogue session and return the AI's greeting."""
+        # Close any active sessions
+        DialogueSession.objects.filter(
+            student=student, madrasah=madrasah, status='active',
+        ).update(status='abandoned')
+
+        session = DialogueSession.objects.create(
+            student=student,
+            madrasah=madrasah,
+            mission=mission,
+            topic=topic,
+            level_number=level_number,
+            status='active',
+        )
+
+        # Generate AI greeting
+        from .ai.dialogue_llm import DialogueLLMProvider
+        llm = DialogueLLMProvider()
+        greeting = llm.generate_ai_turn(
+            topic=topic, level=level_number, greeting=True,
+        )
+
+        # Save AI greeting as first turn
+        DialogueTurn.objects.create(
+            session=session,
+            role='ai',
+            text_ar=greeting.text_ar,
+            text_en=greeting.text_en,
+            transliteration=greeting.transliteration,
+            ai_context=greeting.raw_response,
+            sort_order=0,
+        )
+        session.turn_count = 1
+        session.save(update_fields=['turn_count'])
+
+        return session
+
+    @staticmethod
+    @transaction.atomic
+    def submit_student_turn(
+        *,
+        session,
+        text_ar,
+        audio_file=None,
+    ):
+        """Process a student's turn and generate AI response."""
+        from .ai.dialogue_llm import DialogueLLMProvider
+
+        if session.status != 'active':
+            raise ValueError("Session is no longer active")
+
+        llm = DialogueLLMProvider()
+
+        # Build history
+        turns = session.turns.order_by('sort_order')
+        history = [
+            {'role': t.role, 'text_ar': t.text_ar}
+            for t in turns
+        ]
+
+        # Evaluate student turn
+        evaluation = llm.evaluate_student_turn(
+            student_text=text_ar,
+            expected_phrases=session.mission.expected_phrases if session.mission else None,
+            history=history,
+        )
+
+        # Save student turn
+        order = session.turn_count
+        student_turn = DialogueTurn.objects.create(
+            session=session,
+            role='student',
+            text_ar=text_ar,
+            audio_file=audio_file,
+            pronunciation_score=evaluation.pronunciation_score,
+            fluency_score=evaluation.fluency_score,
+            vocabulary_score=evaluation.vocabulary_score,
+            turn_score=evaluation.turn_score,
+            ai_context={'feedback': evaluation.feedback},
+            sort_order=order,
+        )
+
+        # Generate AI response
+        history.append({'role': 'student', 'text_ar': text_ar})
+        ai_response = llm.generate_ai_turn(
+            topic=session.topic,
+            level=session.level_number,
+            history=history,
+        )
+
+        # Save AI turn
+        ai_turn = DialogueTurn.objects.create(
+            session=session,
+            role='ai',
+            text_ar=ai_response.text_ar,
+            text_en=ai_response.text_en,
+            transliteration=ai_response.transliteration,
+            correction=ai_response.correction,
+            ai_context=ai_response.raw_response,
+            sort_order=order + 1,
+        )
+
+        session.turn_count += 2
+        session.save(update_fields=['turn_count'])
+
+        return {
+            'student_turn': student_turn,
+            'ai_turn': ai_turn,
+            'evaluation': evaluation,
+        }
+
+    @staticmethod
+    @transaction.atomic
+    def complete_session(*, session):
+        """Complete a dialogue session and calculate total score."""
+        turns = session.turns.filter(role='student')
+        scores = [float(t.turn_score) for t in turns if t.turn_score]
+        avg_score = sum(scores) / len(scores) if scores else 0
+
+        session.status = 'completed'
+        session.total_score = round(Decimal(str(avg_score)), 2)
+        session.completed_at = now()
+
+        # Calculate duration
+        if session.created_at:
+            delta = now() - session.created_at
+            session.duration_seconds = int(delta.total_seconds())
+
+        session.save(update_fields=[
+            'status', 'total_score', 'completed_at', 'duration_seconds',
+        ])
+
+        # Award points
+        streak, _ = StudentStreak.objects.get_or_create(
+            student=session.student,
+            madrasah=session.madrasah,
+            defaults={'total_points': 0},
+        )
+        points = max(int(avg_score / 10), 1)
+        streak.total_points += points
+        streak.save(update_fields=['total_points'])
+
+        return session
+
+
+#  Daily Goal Service
+
+
+class DailyGoalService:
+    """Manages daily practice goals."""
+
+    @staticmethod
+    def get_or_create_today(*, student, madrasah):
+        """Get or create today's goal for a student."""
+        today = date.today()
+        goal, created = DailyGoal.objects.get_or_create(
+            student=student,
+            madrasah=madrasah,
+            date=today,
+            defaults={
+                'missions_target': 3,
+                'minutes_target': 15,
+            },
+        )
+        return goal
+
+    @staticmethod
+    @transaction.atomic
+    def update_after_attempt(*, student, madrasah, attempt):
+        """Update daily goal after a speaking attempt is completed."""
+        goal = DailyGoalService.get_or_create_today(student=student, madrasah=madrasah)
+        goal.missions_completed += 1
+
+        # Estimate minutes from audio duration
+        if attempt.audio_duration_ms:
+            goal.minutes_practiced += max(int(attempt.audio_duration_ms / 60000), 1)
+
+        # Check if achieved
+        if (goal.missions_completed >= goal.missions_target and
+                goal.minutes_practiced >= goal.minutes_target):
+            if not goal.is_achieved:
+                goal.is_achieved = True
+                goal.points_earned = 20  # Bonus for completing daily goal
+
+                # Add points to streak
+                streak, _ = StudentStreak.objects.get_or_create(
+                    student=student, madrasah=madrasah,
+                    defaults={'total_points': 0},
+                )
+                streak.total_points += 20
+                streak.save(update_fields=['total_points'])
+
+        goal.save()
+        return goal
+
+    @staticmethod
+    def get_weekly_goals(*, student, madrasah):
+        """Get last 7 days of goals for a student."""
+        from datetime import timedelta
+        today = date.today()
+        start = today - timedelta(days=6)
+        return DailyGoal.objects.filter(
+            student=student, madrasah=madrasah,
+            date__gte=start, date__lte=today,
+        ).order_by('date')
+
+
+#  Leaderboard Service
+
+
+class LeaderboardService:
+    """Manages student leaderboards."""
+
+    @staticmethod
+    def update_leaderboard(*, madrasah, period='weekly'):
+        """Recompute leaderboard for a given period."""
+        from django.utils import timezone
+        today = date.today()
+
+        if period == 'weekly':
+            start = today - timedelta(days=today.weekday())
+        elif period == 'monthly':
+            start = today.replace(day=1)
+        else:
+            start = date.min
+
+        # Get students with attempts in this period
+        attempts = SpeakingAttempt.objects.filter(
+            madrasah=madrasah,
+            created_at__date__gte=start,
+            status__in=('completed', 'reviewed'),
+        )
+
+        student_stats = {}
+        for attempt in attempts:
+            sid = attempt.student_id
+            if sid not in student_stats:
+                student_stats[sid] = {
+                    'student_id': sid,
+                    'missions': 0,
+                    'total_score': 0,
+                    'score_count': 0,
+                }
+            student_stats[sid]['missions'] += 1
+            if attempt.ai_analysis and attempt.ai_analysis.overall_score:
+                student_stats[sid]['total_score'] += float(attempt.ai_analysis.overall_score)
+                student_stats[sid]['score_count'] += 1
+
+        # Get streak points
+        streaks = StudentStreak.objects.filter(
+            madrasah=madrasah, student_id__in=student_stats.keys(),
+        )
+        streak_map = {s.student_id: s.total_points for s in streaks}
+
+        # Clear old entries for this period
+        LeaderboardEntry.objects.filter(
+            madrasah=madrasah, period=period, period_start=start,
+        ).delete()
+
+        # Create new entries
+        entries = []
+        for sid, stats in student_stats.items():
+            avg = stats['total_score'] / max(stats['score_count'], 1)
+            points = streak_map.get(sid, 0) + (stats['missions'] * 5)
+            entries.append(LeaderboardEntry(
+                madrasah=madrasah,
+                student_id=sid,
+                period=period,
+                period_start=start,
+                points=points,
+                missions_completed=stats['missions'],
+                average_score=round(Decimal(str(avg)), 2),
+            ))
+
+        created = LeaderboardEntry.objects.bulk_create(entries)
+
+        # Assign ranks
+        for i, entry in enumerate(
+            LeaderboardEntry.objects.filter(
+                madrasah=madrasah, period=period, period_start=start,
+            ).order_by('-points', '-average_score'),
+            start=1,
+        ):
+            entry.rank = i
+            entry.save(update_fields=['rank'])
+
+        return created
+
+    @staticmethod
+    def get_leaderboard(*, madrasah, period='weekly', limit=20):
+        """Get the current leaderboard."""
+        today = date.today()
+        if period == 'weekly':
+            start = today - timedelta(days=today.weekday())
+        elif period == 'monthly':
+            start = today.replace(day=1)
+        else:
+            start = date.min
+
+        return LeaderboardEntry.objects.filter(
+            madrasah=madrasah, period=period, period_start=start,
+        ).select_related('student').order_by('-points', '-average_score')[:limit]

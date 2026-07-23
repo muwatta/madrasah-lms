@@ -50,6 +50,9 @@ export const translations = {
     publishResults: { ar: 'نشر النتائج', en: 'Publish Results' },
     chooseSubjects: { ar: 'اختر موادك', en: 'Choose Subjects' },
     fasaaha: { ar: 'فصاحه', en: 'Fasaaha' },
+    dialogue: { ar: 'محادثة', en: 'Conversation' },
+    leaderboard: { ar: 'المتصدرين', en: 'Leaderboard' },
+    dailyGoals: { ar: 'أهداف يومية', en: 'Daily Goals' },
     myExamResults: { ar: 'نتائج الامتحانات', en: 'My Exam Results' },
   },
   // Roles
@@ -1420,6 +1423,34 @@ export const translations = {
     typeGrammar: { ar: 'نحو', en: 'Grammar' },
     typeListening: { ar: 'استماع', en: 'Listening' },
     typeAllTypes: { ar: 'جميع الأنواع', en: 'All Types' },
+
+    // Phase 3: Dialogue
+    conversation: { ar: 'محادثة', en: 'Conversation' },
+    conversationDesc: { ar: 'تحدث بالعربية مع مساعد الذكاء الاصطناعي', en: 'Speak Arabic with the AI assistant' },
+    chooseTopic: { ar: 'اختر موضوعاً', en: 'Choose a topic' },
+    topicPlaceholder: { ar: 'مثال: التعريف بنفسي', en: 'e.g. Introducing myself' },
+    startConversation: { ar: 'ابدأ المحادثة', en: 'Start Conversation' },
+    suggestedTopics: { ar: 'موضوعات مقترحة', en: 'Suggested Topics' },
+    typeInArabic: { ar: 'اكتب بالعربية...', en: 'Type in Arabic...' },
+    send: { ar: 'إرسال', en: 'Send' },
+    endConversation: { ar: 'إنهاء', end: 'End' },
+
+    // Phase 3: Leaderboard
+    leaderboard: { ar: 'لوحة المتصدرين', en: 'Leaderboard' },
+    leaderboardDesc: { ar: 'تنافس مع زملائك', en: 'Compete with your peers' },
+    period_weekly: { ar: 'أسبوعي', en: 'Weekly' },
+    period_monthly: { ar: 'شهري', en: 'Monthly' },
+    period_all_time: { ar: 'كل الأوقات', en: 'All Time' },
+    noLeaderboardData: { ar: 'لا توجد بيانات بعد', en: 'No data yet' },
+
+    // Phase 3: Daily Goals
+    dailyGoals: { ar: 'الأهداف اليومية', en: 'Daily Goals' },
+    dailyGoalsDesc: { ar: 'حقق أهدافك اليومية في التحدث بالعربية', en: 'Hit your daily Arabic speaking goals' },
+    missionsToday: { ar: 'المهمات اليوم', en: 'Missions Today' },
+    minutesToday: { ar: 'الدقائق اليوم', en: 'Minutes Today' },
+    goalAchieved: { ar: 'تم تحقيق الهدف!', en: 'Goal achieved!' },
+    keepGoing: { ar: 'استمر في المحاولة', en: 'Keep going!' },
+    thisWeek: { ar: 'هذا الأسبوع', en: 'This Week' },
   },
 } as const;
 

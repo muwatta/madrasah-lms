@@ -45,4 +45,23 @@ urlpatterns = [
 
     path('dashboard/student/', views.StudentDashboardView.as_view(), name='student-dashboard'),
     path('dashboard/teacher/', views.TeacherDashboardView.as_view(), name='teacher-dashboard'),
+
+    # Phase 3: Dialogue
+    path('dialogues/', views.DialogueListView.as_view(), name='dialogue-list'),
+    path('dialogues/start/', views.DialogueStartView.as_view(), name='dialogue-start'),
+    path('dialogues/<uuid:uuid>/', views.DialogueSessionView.as_view(), name='dialogue-session'),
+    path('dialogues/<uuid:uuid>/turn/', views.DialogueTurnView.as_view(), name='dialogue-turn'),
+    path('dialogues/<uuid:uuid>/complete/', views.DialogueCompleteView.as_view(), name='dialogue-complete'),
+
+    # Phase 3: Daily Goals
+    path('goals/today/', views.DailyGoalView.as_view(), name='goal-today'),
+    path('goals/weekly/', views.DailyGoalWeeklyView.as_view(), name='goal-weekly'),
+
+    # Phase 3: Leaderboard
+    path('leaderboard/', views.LeaderboardView.as_view(), name='leaderboard'),
+    path('leaderboard/refresh/', views.LeaderboardRefreshView.as_view(), name='leaderboard-refresh'),
+
+    # Phase 3: Score Trends
+    path('trends/<int:student_id>/', views.ScoreTrendsView.as_view(), name='score-trends'),
+    path('trends/', views.ScoreTrendsView.as_view(), name='score-trends-self'),
 ]

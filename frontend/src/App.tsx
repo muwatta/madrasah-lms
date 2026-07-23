@@ -67,6 +67,9 @@ const FasaahaMissionBrowser = lazy(() => import('./pages/student/fasaaha/Fasaaha
 const FasaahaSpeakPage = lazy(() => import('./pages/student/fasaaha/FasaahaSpeakPage'));
 const FasaahaMyProgress = lazy(() => import('./pages/student/fasaaha/FasaahaMyProgress'));
 const FasaahaMyBadges = lazy(() => import('./pages/student/fasaaha/FasaahaMyBadges'));
+const FasaahaConversation = lazy(() => import('./pages/student/fasaaha/FasaahaConversation'));
+const FasaahaLeaderboard = lazy(() => import('./pages/student/fasaaha/FasaahaLeaderboard'));
+const FasaahaDailyGoals = lazy(() => import('./pages/student/fasaaha/FasaahaDailyGoals'));
 const FasaahaTeacherDashboard = lazy(() => import('./pages/teacher/fasaaha/FasaahaTeacherDashboard'));
 const FasaahaMissionManager = lazy(() => import('./pages/teacher/fasaaha/FasaahaMissionManager'));
 const FasaahaReviewPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaReviewPage'));
@@ -143,6 +146,9 @@ function App() {
               <Route path="fasaaha/speak/:missionId" element={<FasaahaSpeakPage />} />
               <Route path="fasaaha/progress" element={<FasaahaMyProgress />} />
               <Route path="fasaaha/badges" element={<FasaahaMyBadges />} />
+              <Route path="fasaaha/conversation" element={<FasaahaConversation />} />
+              <Route path="fasaaha/leaderboard" element={<FasaahaLeaderboard />} />
+              <Route path="fasaaha/goals" element={<FasaahaDailyGoals />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 

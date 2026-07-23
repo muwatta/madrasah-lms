@@ -7,6 +7,7 @@ from .models import (
     SpeakingLevel, MissionCategory, Mission, SpeakingAttempt,
     AIAnalysis, TeacherReview, MissionAssignment,
     StudentLevelProgress, StudentStreak, Badge, StudentBadge,
+    DialogueSession, DialogueTurn, DailyGoal, LeaderboardEntry,
 )
 
 
@@ -95,3 +96,35 @@ class StudentBadgeAdmin(admin.ModelAdmin):
     list_filter = ['madrasah']
     raw_id_fields = ['student', 'badge', 'awarded_by']
     readonly_fields = ['awarded_at']
+
+
+@admin.register(DialogueSession)
+class DialogueSessionAdmin(admin.ModelAdmin):
+    list_display = ['uuid', 'student', 'topic', 'status', 'turn_count', 'total_score', 'created_at']
+    list_filter = ['madrasah', 'status', 'topic']
+    raw_id_fields = ['student', 'mission']
+    readonly_fields = ['uuid', 'created_at', 'completed_at']
+
+
+@admin.register(DialogueTurn)
+class DialogueTurnAdmin(admin.ModelAdmin):
+    list_display = ['session', 'role', 'text_ar', 'turn_score', 'sort_order', 'created_at']
+    list_filter = ['role']
+    raw_id_fields = ['session']
+    readonly_fields = ['created_at']
+
+
+@admin.register(DailyGoal)
+class DailyGoalAdmin(admin.ModelAdmin):
+    list_display = ['student', 'date', 'missions_target', 'missions_completed', 'minutes_target', 'minutes_practiced', 'is_achieved']
+    list_filter = ['madrasah', 'is_achieved', 'date']
+    raw_id_fields = ['student']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(LeaderboardEntry)
+class LeaderboardEntryAdmin(admin.ModelAdmin):
+    list_display = ['rank', 'student', 'period', 'points', 'missions_completed', 'average_score', 'period_start']
+    list_filter = ['madrasah', 'period']
+    raw_id_fields = ['student']
+    readonly_fields = ['updated_at']

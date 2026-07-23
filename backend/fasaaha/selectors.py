@@ -14,6 +14,7 @@ from .models import (
     SpeakingLevel, MissionCategory, Mission, SpeakingAttempt,
     AIAnalysis, TeacherReview, MissionAssignment,
     StudentLevelProgress, StudentStreak, Badge, StudentBadge,
+    DialogueSession, DialogueTurn, DailyGoal, LeaderboardEntry,
 )
 
 
@@ -381,3 +382,77 @@ def get_teacher_dashboard_data(*, teacher, madrasah):
         'average_class_score': round(float(stats['avg_score'] or 0), 2),
         'pending_reviews': pending_reviews[:10],
     }
+
+
+#  Dialogue Sessions
+
+
+def get_dialogue_sessions(*, student, madrasah, status=None):
+    qs = DialogueSession.objects.filter(student=student, madrasah=madrasah)
+    if status:
+        qs = qs.filter(status=status)
+    return qs.order_by('-created_at')
+
+
+def get_dialogue_session_by_uuid(*, session_uuid, student):
+    return DialogueSession.objects.select_related('mission').get(
+        uuid=session_uuid, student=student)
+
+
+def get_dialogue_turns(*, session):
+    return DialogueTurn.objects.filter(session=session).order_by('sort_order')
+
+
+#  Daily Goals
+
+
+def get_daily_goal(*, student, madrasah, goal_date=None):
+    from datetime import date as _date
+    goal_date = goal_date or _date.today()
+    try:
+        return DailyGoal.objects.get(student=student, madrasah=madrasah, date=goal_date)
+    except DailyGoal.DoesNotExist:
+        return None
+
+
+#  Leaderboard
+
+
+def get_leaderboard(*, madrasah, period='weekly', limit=20):
+    from datetime import timedelta
+    today = date.today()
+    if period == 'weekly':
+        start = today - timedelta(days=today.weekday())
+    elif period == 'monthly':
+        start = today.replace(day=1)
+    else:
+        start = date.min
+    return LeaderboardEntry.objects.filter(
+        madrasah=madrasah, period=period, period_start=start,
+    ).select_related('student').order_by('-points', '-average_score')[:limit]
+
+
+#  Score Trends
+
+
+def get_score_trends(*, student, madrasah, days=30):
+    from datetime import timedelta
+    from django.db.models.functions import TruncDate
+    cutoff = date.today() - timedelta(days=days)
+    return (
+        SpeakingAttempt.objects.filter(
+            student=student, madrasah=madrasah,
+            status__in=('completed', 'reviewed'),
+            created_at__date__gte=cutoff,
+        )
+        .annotate(date=TruncDate('created_at'))
+        .values('date')
+        .annotate(
+            avg_score=Avg('ai_analysis__overall_score'),
+            avg_pronunciation=Avg('ai_analysis__pronunciation_score'),
+            avg_grammar=Avg('ai_analysis__grammar_score'),
+            avg_fluency=Avg('ai_analysis__fluency_score'),
+            count=Count('id'),
+        )
+        .order_by('date')
+    )

@@ -19,6 +19,7 @@ from .models import (
     SpeakingLevel, MissionCategory, Mission, SpeakingAttempt,
     AIAnalysis, TeacherReview, MissionAssignment,
     StudentLevelProgress, StudentStreak, Badge, StudentBadge,
+    DialogueSession, DialogueTurn, DailyGoal, LeaderboardEntry,
 )
 from .serializers import (
     SpeakingLevelSerializer, SpeakingLevelWriteSerializer,
@@ -31,10 +32,14 @@ from .serializers import (
     StudentLevelProgressSerializer, StudentStreakSerializer,
     BadgeSerializer, BadgeWriteSerializer, StudentBadgeSerializer,
     StudentDashboardSerializer, TeacherDashboardSerializer,
+    DialogueSessionSerializer, DialogueTurnSerializer,
+    DialogueStartSerializer, DialogueTurnWriteSerializer,
+    DailyGoalSerializer, LeaderboardEntrySerializer,
 )
 from .services import (
     MissionService, AttemptService, ReviewService, AssignmentService,
     ProgressService, StreakService, BadgeService,
+    DialogueService, DailyGoalService, LeaderboardService,
 )
 from .selectors import (
     get_levels, get_level_by_id,
@@ -48,6 +53,8 @@ from .selectors import (
     get_student_streak, get_badges, get_student_badges,
     get_class_analytics, get_student_analytics, get_school_analytics,
     get_student_dashboard_data, get_teacher_dashboard_data,
+    get_dialogue_sessions, get_dialogue_session_by_uuid, get_dialogue_turns,
+    get_daily_goal, get_leaderboard, get_score_trends,
 )
 from .permissions import (
     CanViewMissions, CanManageMissions, CanSubmitAttempt,
@@ -670,3 +677,165 @@ class TeacherDashboardView(APIView):
             'pending_reviews': SpeakingAttemptSerializer(
                 data['pending_reviews'], many=True, context={'request': request}).data,
         })
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Phase 3: Dialogue
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class DialogueStartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != 'student':
+            return Response({'error': 'Student role required'}, status=403)
+        ser = DialogueStartSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        mission = None
+        if ser.validated_data.get('mission'):
+            mission = Mission.objects.get(pk=ser.validated_data['mission'])
+
+        session = DialogueService.start_session(
+            student=request.user,
+            madrasah=request.user.madrasah,
+            topic=ser.validated_data['topic'],
+            level_number=ser.validated_data['level_number'],
+            mission=mission,
+        )
+        turns = DialogueTurnSerializer(session.turns.all(), many=True).data
+        return Response(DialogueSessionSerializer(session).data | {'turns': turns}, status=201)
+
+
+class DialogueSessionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, uuid):
+        session = get_dialogue_session_by_uuid(session_uuid=uuid, student=request.user)
+        turns = DialogueTurnSerializer(session.turns.all(), many=True).data
+        return Response(DialogueSessionSerializer(session).data | {'turns': turns})
+
+
+class DialogueTurnView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, uuid):
+        session = get_dialogue_session_by_uuid(session_uuid=uuid, student=request.user)
+        ser = DialogueTurnWriteSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        result = DialogueService.submit_student_turn(
+            session=session,
+            text_ar=ser.validated_data['text_ar'],
+        )
+        return Response({
+            'student_turn': DialogueTurnSerializer(result['student_turn']).data,
+            'ai_turn': DialogueTurnSerializer(result['ai_turn']).data,
+            'evaluation': {
+                'pronunciation_score': result['evaluation'].pronunciation_score,
+                'fluency_score': result['evaluation'].fluency_score,
+                'vocabulary_score': result['evaluation'].vocabulary_score,
+                'turn_score': result['evaluation'].turn_score,
+                'feedback': result['evaluation'].feedback,
+            },
+        })
+
+
+class DialogueCompleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, uuid):
+        session = get_dialogue_session_by_uuid(session_uuid=uuid, student=request.user)
+        session = DialogueService.complete_session(session=session)
+        return Response(DialogueSessionSerializer(session).data)
+
+
+class DialogueListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        sessions = get_dialogue_sessions(
+            student=request.user, madrasah=request.user.madrasah,
+        )
+        return Response(DialogueSessionSerializer(sessions, many=True).data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Phase 3: Daily Goals
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class DailyGoalView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != 'student':
+            return Response({'error': 'Student role required'}, status=403)
+        goal = DailyGoalService.get_or_create_today(
+            student=request.user, madrasah=request.user.madrasah,
+        )
+        return Response(DailyGoalSerializer(goal).data)
+
+    def get_weekly(self, request):
+        goals = DailyGoalService.get_weekly_goals(
+            student=request.user, madrasah=request.user.madrasah,
+        )
+        return Response(DailyGoalSerializer(goals, many=True).data)
+
+
+class DailyGoalWeeklyView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        goals = DailyGoalService.get_weekly_goals(
+            student=request.user, madrasah=request.user.madrasah,
+        )
+        return Response(DailyGoalSerializer(goals, many=True).data)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Phase 3: Leaderboard
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class LeaderboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        period = request.query_params.get('period', 'weekly')
+        entries = get_leaderboard(madrasah=request.user.madrasah, period=period)
+        return Response(LeaderboardEntrySerializer(entries, many=True).data)
+
+
+class LeaderboardRefreshView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role not in ('ustaadh', 'mudeer', 'idaarah'):
+            return Response({'error': 'Admin/teacher role required'}, status=403)
+        period = request.data.get('period', 'weekly')
+        LeaderboardService.update_leaderboard(madrasah=request.user.madrasah, period=period)
+        return Response({'status': 'ok'})
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Phase 3: Score Trends
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class ScoreTrendsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, student_id=None):
+        from users.models import User
+        sid = student_id or request.user.id
+        student = User.objects.get(pk=sid)
+        days = int(request.query_params.get('days', 30))
+        trends = get_score_trends(student=student, madrasah=request.user.madrasah, days=days)
+        data = list(trends)
+        for d in data:
+            d['date'] = str(d['date'])
+            for k in ('avg_score', 'avg_pronunciation', 'avg_grammar', 'avg_fluency'):
+                d[k] = round(float(d[k] or 0), 1)
+        return Response(data)

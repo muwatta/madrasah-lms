@@ -448,3 +448,176 @@ class StudentBadge(models.Model):
 
     def __str__(self):
         return f"{self.student.get_full_name()} earned {self.badge.name}"
+
+
+#  12. Dialogue Session
+
+
+class DialogueSession(models.Model):
+    """An interactive AI conversation session for speaking practice."""
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+        ('abandoned', 'Abandoned'),
+    ]
+    TOPIC_CHOICES = [
+        ('daily_life', 'Daily Life'),
+        ('greetings', 'Greetings'),
+        ('shopping', 'Shopping'),
+        ('family', 'Family'),
+        ('school', 'School'),
+        ('food', 'Food & Dining'),
+        ('travel', 'Travel'),
+        ('health', 'Health'),
+        ('free', 'Free Conversation'),
+    ]
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='fasaaha_dialogues')
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='fasaaha_dialogues',
+        limit_choices_to={'role': 'student'})
+    mission = models.ForeignKey(
+        Mission, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='dialogue_sessions',
+        help_text='Linked mission if conversation-based')
+    topic = models.CharField(max_length=30, choices=TOPIC_CHOICES, default='free')
+    level_number = models.PositiveSmallIntegerField(default=1, help_text='Difficulty level for AI responses')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    turn_count = models.PositiveIntegerField(default=0)
+    total_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    duration_seconds = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['madrasah', 'student'], name='idx_ds_m_s'),
+            models.Index(fields=['status'], name='idx_ds_status'),
+        ]
+
+    def __str__(self):
+        return f"Dialogue: {self.student.get_full_name()} ({self.topic})"
+
+
+#  13. Dialogue Turn
+
+
+class DialogueTurn(models.Model):
+    """A single turn in a dialogue session (student or AI message)."""
+    ROLE_CHOICES = [
+        ('student', 'Student'),
+        ('ai', 'AI'),
+    ]
+
+    session = models.ForeignKey(
+        DialogueSession, on_delete=models.CASCADE, related_name='turns')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    text_ar = models.TextField(help_text='Arabic text')
+    text_en = models.TextField(blank=True, help_text='English translation')
+    transliteration = models.TextField(blank=True)
+
+    # Student turn scoring
+    audio_file = models.FileField(
+        upload_to='fasaaha/dialogues/%Y/%m/', null=True, blank=True,
+        validators=[validate_audio])
+    pronunciation_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True)
+    fluency_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True)
+    vocabulary_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True)
+    turn_score = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        help_text='Composite score for this turn')
+
+    # AI context
+    ai_context = models.JSONField(
+        default=dict, blank=True,
+        help_text='AI response metadata, suggestions, corrections')
+    correction = models.TextField(
+        blank=True, help_text='AI correction of student response if applicable')
+
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['sort_order', 'created_at']
+        indexes = [
+            models.Index(fields=['session', 'role'], name='idx_dt_s_r'),
+        ]
+
+    def __str__(self):
+        return f"{self.role}: {self.text_ar[:40]}..."
+
+
+#  14. Daily Goal
+
+
+class DailyGoal(models.Model):
+    """Tracks daily practice goals for students."""
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='fasaaha_goals')
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='fasaaha_goals',
+        limit_choices_to={'role': 'student'})
+    date = models.DateField()
+    missions_target = models.PositiveIntegerField(default=3, help_text='Number of missions to complete')
+    missions_completed = models.PositiveIntegerField(default=0)
+    minutes_target = models.PositiveIntegerField(default=15, help_text='Minutes of practice')
+    minutes_practiced = models.PositiveIntegerField(default=0)
+    streak_target = models.PositiveIntegerField(default=1, help_text='Days of streak to maintain')
+    is_achieved = models.BooleanField(default=False)
+    points_earned = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['student', 'madrasah', 'date']
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.student.get_full_name()} - {self.date} ({'✓' if self.is_achieved else '○'})"
+
+    @property
+    def progress_pct(self):
+        mission_pct = min(self.missions_completed / max(self.missions_target, 1), 1.0)
+        minute_pct = min(self.minutes_practiced / max(self.minutes_target, 1), 1.0)
+        return round(((mission_pct + minute_pct) / 2) * 100)
+
+
+#  15. Leaderboard Entry
+
+
+class LeaderboardEntry(models.Model):
+    """Pre-computed leaderboard for fast queries."""
+    PERIOD_CHOICES = [
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+        ('all_time', 'All Time'),
+    ]
+
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='fasaaha_leaderboard')
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='fasaaha_leaderboard',
+        limit_choices_to={'role': 'student'})
+    period = models.CharField(max_length=10, choices=PERIOD_CHOICES)
+    period_start = models.DateField()
+    points = models.PositiveIntegerField(default=0)
+    missions_completed = models.PositiveIntegerField(default=0)
+    average_score = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    rank = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['student', 'madrasah', 'period', 'period_start']
+        ordering = ['-points', '-average_score']
+        indexes = [
+            models.Index(fields=['madrasah', 'period', 'period_start'], name='idx_lb_m_p_ps'),
+        ]
+
+    def __str__(self):
+        return f"#{self.rank} {self.student.get_full_name()} - {self.points} pts"

@@ -352,3 +352,71 @@ class TeacherDashboardSerializer(serializers.Serializer):
     total_attempts = serializers.IntegerField()
     average_class_score = serializers.FloatField()
     pending_reviews = SpeakingAttemptSerializer(many=True, read_only=True)
+
+
+#  Phase 3: Dialogue
+
+
+class DialogueSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DialogueSession
+        fields = [
+            'id', 'uuid', 'madrasah', 'student', 'mission', 'topic',
+            'level_number', 'status', 'turn_count', 'total_score',
+            'duration_seconds', 'created_at', 'completed_at',
+        ]
+        read_only_fields = ['id', 'uuid', 'madrasah', 'student', 'status', 'turn_count', 'total_score', 'created_at', 'completed_at']
+
+
+class DialogueTurnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DialogueTurn
+        fields = [
+            'id', 'session', 'role', 'text_ar', 'text_en', 'transliteration',
+            'audio_file', 'pronunciation_score', 'fluency_score',
+            'vocabulary_score', 'turn_score', 'correction', 'sort_order', 'created_at',
+        ]
+        read_only_fields = fields
+
+
+class DialogueStartSerializer(serializers.Serializer):
+    topic = serializers.CharField(max_length=30, default='free')
+    level_number = serializers.IntegerField(default=1, min_value=1, max_value=10)
+    mission = serializers.IntegerField(required=False, allow_null=True)
+
+
+class DialogueTurnWriteSerializer(serializers.Serializer):
+    text_ar = serializers.CharField(max_length=1000)
+
+
+#  Phase 3: Daily Goal
+
+
+class DailyGoalSerializer(serializers.ModelSerializer):
+    progress_pct = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = DailyGoal
+        fields = [
+            'id', 'madrasah', 'student', 'date',
+            'missions_target', 'missions_completed',
+            'minutes_target', 'minutes_practiced',
+            'is_achieved', 'points_earned', 'progress_pct',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'madrasah', 'student', 'missions_completed', 'minutes_practiced', 'is_achieved', 'points_earned', 'created_at', 'updated_at']
+
+
+#  Phase 3: Leaderboard
+
+
+class LeaderboardEntrySerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.get_full_name', read_only=True)
+
+    class Meta:
+        model = LeaderboardEntry
+        fields = [
+            'id', 'rank', 'student', 'student_name', 'period',
+            'points', 'missions_completed', 'average_score',
+        ]
+        read_only_fields = fields

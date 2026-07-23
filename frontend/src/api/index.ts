@@ -542,4 +542,33 @@ export const fasaahaAPI = {
     student: () => api.get('/fasaaha/dashboard/student/'),
     teacher: () => api.get('/fasaaha/dashboard/teacher/'),
   },
+  // Phase 3: Dialogue
+  dialogue: {
+    start: (data: { topic: string; level_number?: number; mission?: number }) =>
+      api.post('/fasaaha/dialogues/start/', data),
+    get: (uuid: string) => api.get(`/fasaaha/dialogues/${uuid}/`),
+    turn: (uuid: string, data: { text_ar: string }) =>
+      api.post(`/fasaaha/dialogues/${uuid}/turn/`, data),
+    complete: (uuid: string) => api.post(`/fasaaha/dialogues/${uuid}/complete/`),
+    list: () => api.get('/fasaaha/dialogues/'),
+  },
+  // Phase 3: Daily Goals
+  goals: {
+    today: () => api.get('/fasaaha/goals/today/'),
+    weekly: () => api.get('/fasaaha/goals/weekly/'),
+  },
+  // Phase 3: Leaderboard
+  leaderboard: {
+    get: (params?: { period?: string }) => api.get('/fasaaha/leaderboard/', { params }),
+    refresh: (data?: { period?: string }) => api.post('/fasaaha/leaderboard/refresh/', data ?? {}),
+  },
+  // Phase 3: Score Trends
+  trends: {
+    get: (studentId?: number, params?: { days?: number }) => {
+      const base = studentId
+        ? `/fasaaha/trends/${studentId}/`
+        : '/fasaaha/trends/';
+      return api.get(base, { params });
+    },
+  },
 };
