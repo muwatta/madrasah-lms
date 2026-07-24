@@ -71,6 +71,10 @@ urlpatterns = [
          export_views.ExportQuizResultsView.as_view(), name='export-quiz-results'),
     path('export/exams/<int:exam_id>/',
          export_views.ExportExamResultsView.as_view(), name='export-exam-results'),
+    path('export/subject-results/',
+         export_views.ExportSubjectResultsView.as_view(), name='export-subject-results'),
+    path('export/term-results/',
+         export_views.ExportTermResultsView.as_view(), name='export-term-results'),
 
     # ── Router MUST come after explicit paths ──────────────────────
     path('', include(router.urls)),

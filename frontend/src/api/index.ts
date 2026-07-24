@@ -126,6 +126,11 @@ export const resultsAPI = {
   parent: {
     childResults: (params?: any) => api.get('/results/child-results/', { params }),
   },
+  export: {
+    students: (params?: any) => api.get('/results/export/students/', { params, responseType: 'blob' }),
+    subjectResults: (params?: any) => api.get('/results/export/subject-results/', { params, responseType: 'blob' }),
+    termResults: (params?: any) => api.get('/results/export/term-results/', { params, responseType: 'blob' }),
+  },
 };
 
 export const enrollmentAPI = {
@@ -164,6 +169,7 @@ export const userAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  export: (params?: any) => api.get('/users/export/', { params, responseType: 'blob' }),
 };
 
 export const messageAPI = {
@@ -197,6 +203,8 @@ export const feeAPI = {
   bulkCreate: (data: any) => api.post('/school/fees/bulk-create/', data),
   pay: (feeId: number, data: any) => api.post(`/school/fees/${feeId}/pay/`, data),
   analytics: () => api.get('/school/fees/analytics/'),
+  export: (params?: any) => api.get('/school/fees/export/', { params, responseType: 'blob' }),
+  exportPayments: (params?: any) => api.get('/school/fees/payments/export/', { params, responseType: 'blob' }),
 };
 
 export const attendanceAPI = {
@@ -208,6 +216,7 @@ export const attendanceAPI = {
   scan: (data: { qr_data?: string; student_identifier?: string; scanner_location?: string }) =>
     api.post('/school/attendance/scan/', data),
   scans: (params?: any) => api.get('/school/attendance/scans/', { params }),
+  export: (params?: any) => api.get('/school/attendance/export/', { params, responseType: 'blob' }),
 };
 
 export const announcementAPI = {

@@ -3,6 +3,7 @@ from . import views
 from . import message_views
 from . import intervention_views
 from . import bulk_import_views
+from . import export_views
 from . import email_views
 
 auth_urlpatterns = [
@@ -31,4 +32,5 @@ user_urlpatterns = [
     path('intervention-alerts/', intervention_views.StudentInterventionAlertsView.as_view(), name='intervention-alerts'),
     path('admin-engagement/', intervention_views.AdminEngagementView.as_view(), name='admin-engagement'),
     path('bulk-import/', bulk_import_views.BulkUserImportView.as_view(), name='bulk-user-import'),
+    path('export/', export_views.ExportUsersView.as_view(), name='export-users'),
 ]

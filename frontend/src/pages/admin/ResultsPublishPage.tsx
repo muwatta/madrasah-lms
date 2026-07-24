@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
+import { useExport } from '../../hooks/useExport'
 import { resultsAPI } from '../../api'
 import toast from 'react-hot-toast'
 
 export default function ResultsPublishPage() {
   const { t } = useLanguage()
+  const { exporting, exportData } = useExport()
 
   const [pendingGroups, setPendingGroups] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -71,7 +73,27 @@ export default function ResultsPublishPage() {
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">{t('results.resultsManagement')}</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">{t('results.resultsManagement')}</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => exportData(() => resultsAPI.export.subjectResults(), 'subject_results.csv')}
+            disabled={exporting}
+            className="btn-press inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            {t('common.exportCsv')}
+          </button>
+          <button
+            onClick={() => exportData(() => resultsAPI.export.termResults(), 'term_results.csv')}
+            disabled={exporting}
+            className="btn-press inline-flex items-center gap-2 rounded-lg border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/30 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/50 disabled:opacity-50"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Term Results
+          </button>
+        </div>
+      </div>
 
       <div className="tabs tabs-box mb-6">
         <button className={`tab ${activeTab === 'pending' ? 'tab-active' : ''}`} onClick={() => setActiveTab('pending')}>
