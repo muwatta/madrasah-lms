@@ -32,4 +32,5 @@ urlpatterns = [
 
     # ── Dashboard ──
     path('overview/', views.QuizOverviewView.as_view(), name='quiz-overview'),
+    path('my-results/', views.MyQuizResultsView.as_view(), name='quiz-my-results'),
 ]

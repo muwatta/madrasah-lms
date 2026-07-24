@@ -397,11 +397,11 @@ export default function Layout() {
 
             {/* Notification bell */}
             <div className="relative" ref={notifRef}>
-              <button
-                onClick={toggleNotifMenu}
-                className="btn-press relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100"
-                title={t('common.notifications')}
-              >
+            <button
+              onClick={toggleNotifMenu}
+              className="btn-press relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+              title={t('common.notifications')}
+            >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -414,7 +414,7 @@ export default function Layout() {
               </button>
 
               {notifMenuOpen && (
-                <div className="absolute end-0 top-full z-50 mt-2 w-80 rounded-xl border shadow-lg animate-scale-in dark:border-gray-700 dark:bg-gray-800" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+                <div className="absolute end-0 top-full z-50 mt-2 w-80 rounded-xl border shadow-lg animate-scale-in" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
                   <div className="flex items-center justify-between border-b px-4 py-3" style={{ borderColor: 'var(--color-border-light)' }}>
                     <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('common.notifications')}</p>
                     {unreadCount > 0 && (
@@ -483,7 +483,7 @@ export default function Layout() {
               </button>
 
               {accountMenuOpen && (
-                <div className="absolute end-0 top-full z-50 mt-2 w-72 rounded-xl border py-2 shadow-lg animate-scale-in dark:border-gray-700 dark:bg-gray-800" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+                <div className="absolute end-0 top-full z-50 mt-2 w-72 rounded-xl border py-2 shadow-lg animate-scale-in" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
                   {/* Current account */}
                   {user && (
                     <div className="border-b px-4 py-3" style={{ borderColor: 'var(--color-border-light)' }}>

@@ -94,7 +94,7 @@ export const examAPI = {
     api.post(`/results/exams/${examId}/results/`, data),
   bulkUpload: (examId: number, results: any[]) =>
     api.post(`/results/exams/${examId}/results/bulk/`, { results }),
-  myResults: () => api.get('/results/my-exams/'),
+  myResults: () => api.get('/results/my-results/'),
 };
 
 export const resultsAPI = {
@@ -636,6 +636,7 @@ export const quizAPI = {
     stats: (id: number) => api.get(`/quizzes/${id}/stats/`),
     analysis: (id: number) => api.get(`/quizzes/${id}/analysis/`),
     violations: (id: number) => api.get(`/quizzes/${id}/violations/`),
+    myResults: () => api.get('/quizzes/my-results/'),
   },
   attempts: {
     start: (quizId: number) => api.post('/quizzes/start/', { quiz_id: quizId }),

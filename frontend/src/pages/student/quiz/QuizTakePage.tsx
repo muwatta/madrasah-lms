@@ -26,7 +26,6 @@ export default function QuizTakePage() {
 
   const { data: attempt } = useQuizAttempt(attemptUuid);
 
-  // Start attempt
   const handleStart = () => {
     if (!numId) return;
     startAttempt.mutate(numId, {
@@ -41,70 +40,45 @@ export default function QuizTakePage() {
     });
   };
 
-  // Timer
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress') return;
     const interval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft(prev => { if (prev <= 1) { handleSubmit(); return 0; } return prev - 1; });
     }, 1000);
     return () => clearInterval(interval);
   }, [attempt?.status]);
 
-  // Auto-save
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress' || !attemptUuid) return;
     autoSaveTimer.current = setInterval(() => {
       Object.entries(localAnswers).forEach(([qId, answer]) => {
-        if (answer) {
-          saveAnswer.mutate({ attemptUuid, questionId: Number(qId), selectedAnswer: answer });
-        }
+        if (answer) saveAnswer.mutate({ attemptUuid, questionId: Number(qId), selectedAnswer: answer });
       });
     }, 10000);
     return () => { if (autoSaveTimer.current) clearInterval(autoSaveTimer.current); };
   }, [attempt?.status, attemptUuid, localAnswers]);
 
-  // Anti-cheating: tab switch / window blur
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress' || !attemptUuid) return;
     const handleVisibility = () => {
-      if (document.hidden) {
-        violationCountRef.current++;
-        reportViolation.mutate({ attemptUuid, violationType: 'tab_switch', details: { count: violationCountRef.current } });
-      }
+      if (document.hidden) { violationCountRef.current++; reportViolation.mutate({ attemptUuid, violationType: 'tab_switch', details: { count: violationCountRef.current } }); }
     };
-    const handleBlur = () => {
-      violationCountRef.current++;
-      reportViolation.mutate({ attemptUuid, violationType: 'window_blur', details: { count: violationCountRef.current } });
-    };
+    const handleBlur = () => { violationCountRef.current++; reportViolation.mutate({ attemptUuid, violationType: 'window_blur', details: { count: violationCountRef.current } }); };
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('blur', handleBlur);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('blur', handleBlur);
-    };
+    return () => { document.removeEventListener('visibilitychange', handleVisibility); window.removeEventListener('blur', handleBlur); };
   }, [attempt?.status, attemptUuid]);
 
-  // Anti-cheating: keyboard shortcuts
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress' || !attemptUuid) return;
     const blocked = ['c', 'x', 'v', 'a', 'p', 's'];
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && blocked.includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        reportViolation.mutate({ attemptUuid, violationType: 'keyboard_shortcut', details: { key: e.key } });
-      }
+      if ((e.ctrlKey || e.metaKey) && blocked.includes(e.key.toLowerCase())) { e.preventDefault(); reportViolation.mutate({ attemptUuid, violationType: 'keyboard_shortcut', details: { key: e.key } }); }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [attempt?.status, attemptUuid]);
 
-  // Anti-cheating: right click + text selection + copy/paste
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress') return;
     const prevent = (e: Event) => e.preventDefault();
@@ -114,19 +88,12 @@ export default function QuizTakePage() {
     document.addEventListener('copy', preventCopy);
     document.addEventListener('paste', preventPaste);
     document.addEventListener('selectstart', prevent);
-    return () => {
-      document.removeEventListener('contextmenu', prevent);
-      document.removeEventListener('copy', preventCopy);
-      document.removeEventListener('paste', preventPaste);
-      document.removeEventListener('selectstart', prevent);
-    };
+    return () => { document.removeEventListener('contextmenu', prevent); document.removeEventListener('copy', preventCopy); document.removeEventListener('paste', preventPaste); document.removeEventListener('selectstart', prevent); };
   }, [attempt?.status, attemptUuid]);
 
   const handleAnswer = useCallback((questionId: number, answer: string) => {
     setLocalAnswers(prev => ({ ...prev, [questionId]: answer }));
-    if (attemptUuid) {
-      saveAnswer.mutate({ attemptUuid, questionId, selectedAnswer: answer });
-    }
+    if (attemptUuid) saveAnswer.mutate({ attemptUuid, questionId, selectedAnswer: answer });
   }, [attemptUuid]);
 
   const handleFlag = useCallback((questionId: number) => {
@@ -134,25 +101,20 @@ export default function QuizTakePage() {
   }, [attemptUuid]);
 
   const handleSubmit = () => {
-    if (attemptUuid && !submitQuiz.isPending) {
-      submitQuiz.mutate(attemptUuid, {
-        onSuccess: () => navigate('/student/quiz/results'),
-      });
-    }
+    if (attemptUuid && !submitQuiz.isPending) submitQuiz.mutate(attemptUuid, { onSuccess: () => navigate('/student/quiz/results') });
   };
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
-  // ── Not started yet ──
   if (!attempt) {
     return (
       <div className="max-w-xl mx-auto space-y-6">
         <button onClick={() => navigate('/student/quiz')} className="text-sm text-primary-600 hover:underline">{t('quiz.backToList') || 'Back to Quizzes'}</button>
         {quiz && (
-          <div className="rounded-xl border p-6 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{quiz.title}</h1>
-            {quiz.instructions && <p className="text-sm whitespace-pre-line" style={{ color: 'var(--color-text-muted)' }}>{quiz.instructions}</p>}
-            <div className="grid grid-cols-2 gap-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
+            <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
+            {quiz.instructions && <p className="text-sm text-gray-500 whitespace-pre-line">{quiz.instructions}</p>}
+            <div className="grid grid-cols-2 gap-3 text-sm text-gray-700">
               <div>{t('quiz.timeLimit') || 'Time Limit'}: {quiz.time_limit_minutes}min</div>
               <div>{t('quiz.questions') || 'Questions'}: {quiz.question_count}</div>
               <div>{t('quiz.totalMarks') || 'Total Marks'}: {quiz.total_marks}</div>
@@ -170,17 +132,16 @@ export default function QuizTakePage() {
     );
   }
 
-  // ── Results ──
   if (attempt.status !== 'in_progress') {
     const isReleased = attempt.status === 'released';
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('quiz.results') || 'Results'}</h1>
-        <div className="rounded-xl border p-6 text-center space-y-3" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-          <p className="text-4xl font-bold" style={{ color: attempt.is_pass ? '#16a34a' : '#dc2626' }}>
+        <h1 className="text-xl font-bold text-gray-900">{t('quiz.results') || 'Results'}</h1>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center space-y-3">
+          <p className={`text-4xl font-bold ${attempt.is_pass ? 'text-green-600' : 'text-red-500'}`}>
             {attempt.percentage !== null ? `${attempt.percentage}%` : '—'}
           </p>
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-sm text-gray-500">
             {attempt.score}/{attempt.total_marks} {t('quiz.marks') || 'marks'}
           </p>
           <p className={`text-sm font-medium ${attempt.is_pass ? 'text-green-600' : 'text-red-500'}`}>
@@ -191,25 +152,24 @@ export default function QuizTakePage() {
         {isReleased && (
           <div className="space-y-3">
             {attempt.answers.map((ans: QuizAnswerItem) => (
-              <div key={ans.id} className={`rounded-xl border p-4 ${ans.is_correct ? 'border-green-200 bg-green-50/50' : 'border-red-200 bg-red-50/50'}`}>
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{ans.question_text}</p>
-                <div className="mt-2 text-sm">
+              <div key={ans.id} className={`rounded-xl border p-4 ${ans.is_correct ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+                <p className="text-sm font-medium text-gray-900">{ans.question_text}</p>
+                <div className="mt-2 text-sm text-gray-700">
                   <p>Your answer: <span className={ans.is_correct ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>{ans.selected_answer || '—'}</span></p>
                   {!ans.is_correct && <p>Correct: <span className="text-green-600 font-medium">{ans.correct_answer}</span></p>}
-                  {ans.explanation && <p className="mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>{ans.explanation}</p>}
+                  {ans.explanation && <p className="mt-1 text-xs text-gray-500">{ans.explanation}</p>}
                 </div>
               </div>
             ))}
           </div>
         )}
-        <button onClick={() => navigate('/student/quiz')} className="w-full py-3 rounded-xl border font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>
+        <button onClick={() => navigate('/student/quiz')} className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-900 font-medium hover:bg-gray-50 transition-colors">
           {t('quiz.backToList') || 'Back to Quizzes'}
         </button>
       </div>
     );
   }
 
-  // ── Taking quiz ──
   const answers = attempt.answers || [];
   const current = answers[currentIndex];
   if (!current) return null;
@@ -218,13 +178,12 @@ export default function QuizTakePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      {/* Top bar */}
-      <div className="flex items-center justify-between rounded-xl border p-3" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-3">
         <div className="flex items-center gap-4">
-          <span className="text-sm font-semibold" style={{ color: timeLeft < 300 ? '#dc2626' : 'var(--color-text-primary)' }}>
+          <span className={`text-sm font-semibold ${timeLeft < 300 ? 'text-red-500' : 'text-gray-900'}`}>
             {formatTime(timeLeft)}
           </span>
-          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{answeredCount}/{answers.length}</span>
+          <span className="text-xs text-gray-500">{answeredCount}/{answers.length}</span>
           {flaggedCount > 0 && <span className="text-xs text-orange-500">🚩 {flaggedCount}</span>}
         </div>
         <button onClick={() => setShowConfirm(true)} className="btn-press px-4 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-semibold">
@@ -232,34 +191,31 @@ export default function QuizTakePage() {
         </button>
       </div>
 
-      {/* Progress dots */}
       <div className="flex flex-wrap gap-1.5">
         {answers.map((a: QuizAnswerItem, i: number) => (
           <button key={a.id} onClick={() => setCurrentIndex(i)}
             className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${
               i === currentIndex ? 'bg-primary-600 text-white' :
-              a.selected_answer ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+              a.selected_answer ? 'bg-green-100 text-green-700' :
               a.is_flagged ? 'bg-orange-100 text-orange-700' :
-              'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+              'bg-gray-100 text-gray-500'
             }`}>
             {i + 1}
           </button>
         ))}
       </div>
 
-      {/* Question */}
-      <div className="rounded-xl border p-6 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+      <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
         <div className="flex items-start justify-between">
-          <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs font-medium text-gray-500">
             {t('quiz.question') || 'Question'} {currentIndex + 1} / {answers.length}
           </p>
           <button onClick={() => handleFlag(current.question)} className="text-lg">
             {current.is_flagged ? '🚩' : '⚑'}
           </button>
         </div>
-        <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-primary)' }}>{current.question_text}</p>
+        <p className="text-base leading-relaxed text-gray-900">{current.question_text}</p>
 
-        {/* Options */}
         <div className="space-y-2">
           {current.question_type === 'true_false' ? (
             <>
@@ -267,9 +223,9 @@ export default function QuizTakePage() {
                 <button key={opt.key} onClick={() => handleAnswer(current.question, opt.key)}
                   className={`w-full text-left p-3 rounded-lg border text-sm font-medium transition-colors ${
                     localAnswers[current.question] === opt.key
-                      ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
-                      : 'border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                  }`} style={{ color: localAnswers[current.question] === opt.key ? undefined : 'var(--color-text-secondary)' }}>
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}>
                   ({opt.key}) {opt.text}
                 </button>
               ))}
@@ -279,9 +235,9 @@ export default function QuizTakePage() {
               <button key={opt.key} onClick={() => handleAnswer(current.question, opt.key)}
                 className={`w-full text-left p-3 rounded-lg border text-sm font-medium transition-colors ${
                   localAnswers[current.question] === opt.key
-                    ? 'border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-300'
-                    : 'border-[var(--color-border)] hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                }`} style={{ color: localAnswers[current.question] === opt.key ? undefined : 'var(--color-text-secondary)' }}>
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}>
                 ({opt.key}) {opt.text}
               </button>
             ))
@@ -289,12 +245,10 @@ export default function QuizTakePage() {
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="flex justify-between">
         {quiz?.allow_back_navigation ? (
           <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0}
-            className="btn-press px-4 py-2 rounded-lg border text-sm font-medium disabled:opacity-40"
-            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>
+            className="btn-press px-4 py-2 rounded-lg border border-gray-200 text-gray-900 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 transition-colors">
             {t('quiz.previous') || 'Previous'}
           </button>
         ) : <div />}
@@ -304,17 +258,15 @@ export default function QuizTakePage() {
         </button>
       </div>
 
-      {/* Submit confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
-          <div className="rounded-xl border p-6 max-w-sm w-full mx-4 space-y-4" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
-            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('quiz.confirmSubmit') || 'Submit Quiz?'}</h3>
-            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+          <div className="rounded-xl border border-gray-200 bg-white p-6 max-w-sm w-full mx-4 space-y-4">
+            <h3 className="text-lg font-bold text-gray-900">{t('quiz.confirmSubmit') || 'Submit Quiz?'}</h3>
+            <p className="text-sm text-gray-500">
               {t('quiz.submitWarning') || `You have answered ${answeredCount} of ${answers.length} questions. This cannot be undone.`}
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 rounded-lg border text-sm font-medium"
-                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>
+              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 rounded-lg border border-gray-200 text-gray-900 text-sm font-medium hover:bg-gray-50 transition-colors">
                 {t('quiz.cancel') || 'Cancel'}
               </button>
               <button onClick={handleSubmit} disabled={submitQuiz.isPending}

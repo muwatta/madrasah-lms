@@ -13,24 +13,24 @@ export default function QuizResultsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('quiz.myResults') || 'My Results'}</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{t('quiz.myResults') || 'My Results'}</h1>
 
       {results.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{t('quiz.noResults') || 'No quiz results yet'}</p>
+          <p className="text-sm text-gray-500">{t('quiz.noResults') || 'No quiz results yet'}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {results.map((r: QuizAttempt) => (
-            <div key={r.id} className="rounded-xl border p-4 flex items-center gap-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+            <div key={r.id} className="rounded-xl border border-gray-200 bg-white p-4 flex items-center gap-4">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold ${
                 r.is_pass ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'
               }`}>
                 {r.percentage !== null ? `${r.percentage}%` : '—'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{r.quiz_title}</p>
-                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                <p className="text-sm font-medium text-gray-900">{r.quiz_title}</p>
+                <p className="text-xs text-gray-500">
                   {r.score}/{r.total_marks} marks • Attempt #{r.attempt_number}
                   {r.submitted_at && ` • ${new Date(r.submitted_at).toLocaleDateString()}`}
                 </p>

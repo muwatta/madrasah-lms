@@ -1,29 +1,19 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
-import { useQuiz, useQuestions, useCreateQuiz, useUpdateQuiz, useCreateQuestion, useAttachQuestion, useDetachQuestion, useUpdateQuizQuestion, usePublishQuiz } from '../../../hooks/useQuiz';
+import { useQuiz, useQuestions, useCreateQuiz, useUpdateQuiz, useCreateQuestion, useAttachQuestion, useDetachQuestion, usePublishQuiz } from '../../../hooks/useQuiz';
 import type { Question, QuizQuestion } from '../../../types';
 
 interface QuizFormData {
-  title: string;
-  description: string;
-  instructions: string;
-  subject: number | '';
-  school_class: number | '';
-  time_limit_minutes: number;
-  grace_period_minutes: number;
-  passing_score: number;
-  total_marks: number;
-  shuffle_questions: boolean;
-  show_results_immediately: boolean;
-  show_correct_answers: boolean;
-  allow_back_navigation: boolean;
-  require_fullscreen: boolean;
-  difficulty: number;
-  max_attempts: number;
-  grading_mode: 'auto_immediate' | 'auto_release_later' | 'manual';
-  max_violations: number;
-  auto_submit_on_violations: boolean;
+  title: string; description: string; instructions: string;
+  subject: number | ''; school_class: number | '';
+  time_limit_minutes: number; grace_period_minutes: number;
+  passing_score: number; total_marks: number;
+  shuffle_questions: boolean; show_results_immediately: boolean;
+  show_correct_answers: boolean; allow_back_navigation: boolean;
+  require_fullscreen: boolean; difficulty: number;
+  max_attempts: number; grading_mode: 'auto_immediate' | 'auto_release_later' | 'manual';
+  max_violations: number; auto_submit_on_violations: boolean;
 }
 
 const defaultForm: QuizFormData = {
@@ -33,6 +23,9 @@ const defaultForm: QuizFormData = {
   allow_back_navigation: true, require_fullscreen: false, difficulty: 2,
   max_attempts: 1, grading_mode: 'auto_immediate', max_violations: 5, auto_submit_on_violations: true,
 };
+
+const inputCls = 'w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm';
+const labelCls = 'text-sm font-medium text-gray-700';
 
 export default function QuizBuilderPage() {
   const { quizId } = useParams();
@@ -56,7 +49,6 @@ export default function QuizBuilderPage() {
   const [filterQ, setFilterQ] = useState('');
   const [savedQuizId, setSavedQuizId] = useState<number | null>(numId);
 
-  // Pre-fill form if editing
   useState(() => {
     if (existingQuiz) {
       setForm({
@@ -81,9 +73,7 @@ export default function QuizBuilderPage() {
     if (numId) {
       updateQuiz.mutate({ id: numId, ...payload }, { onSuccess: () => setStep('questions') });
     } else {
-      createQuiz.mutate(payload, {
-        onSuccess: (res: any) => { setSavedQuizId(res.data.id); setStep('questions'); },
-      });
+      createQuiz.mutate(payload, { onSuccess: (res: any) => { setSavedQuizId(res.data.id); setStep('questions'); } });
     }
   };
 
@@ -132,7 +122,7 @@ export default function QuizBuilderPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <button onClick={() => navigate('/teacher/quiz')} className="text-sm text-primary-600 hover:underline">{t('quiz.backToManage') || '← Back to Manage'}</button>
-      <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+      <h1 className="text-2xl font-bold text-gray-900">
         {numId ? t('quiz.editQuiz') || 'Edit Quiz' : t('quiz.createQuiz') || 'Create Quiz'}
       </h1>
 
@@ -140,8 +130,7 @@ export default function QuizBuilderPage() {
       <div className="flex gap-2">
         {(['info', 'questions', 'settings'] as const).map(s => (
           <button key={s} onClick={() => setStep(s)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${step === s ? 'bg-primary-600 text-white' : 'border'}`}
-            style={step === s ? undefined : { borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${step === s ? 'bg-primary-600 text-white' : 'border border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
             {t(`quiz.step${s.charAt(0).toUpperCase() + s.slice(1)}`) || s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
@@ -149,34 +138,29 @@ export default function QuizBuilderPage() {
 
       {/* Step: Info */}
       {step === 'info' && (
-        <div className="rounded-xl border p-6 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.title') || 'Title'} *</label>
-              <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.title') || 'Title'} *</label>
+              <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className={inputCls} />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.description') || 'Description'}</label>
-              <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" rows={2} style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.description') || 'Description'}</label>
+              <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className={inputCls} rows={2} />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.instructions') || 'Instructions'}</label>
-              <textarea value={form.instructions} onChange={e => setForm({ ...form, instructions: e.target.value })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" rows={2} style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.instructions') || 'Instructions'}</label>
+              <textarea value={form.instructions} onChange={e => setForm({ ...form, instructions: e.target.value })} className={inputCls} rows={2} />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.subject') || 'Subject'} *</label>
-              <select value={form.subject} onChange={e => setForm({ ...form, subject: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+              <label className={labelCls}>{t('quiz.subject') || 'Subject'} *</label>
+              <select value={form.subject} onChange={e => setForm({ ...form, subject: Number(e.target.value) })} className={inputCls}>
                 <option value="">Select</option>
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.class') || 'Class'} *</label>
-              <select value={form.school_class} onChange={e => setForm({ ...form, school_class: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+              <label className={labelCls}>{t('quiz.class') || 'Class'} *</label>
+              <select value={form.school_class} onChange={e => setForm({ ...form, school_class: Number(e.target.value) })} className={inputCls}>
                 <option value="">Select</option>
               </select>
             </div>
@@ -191,68 +175,67 @@ export default function QuizBuilderPage() {
       {/* Step: Questions */}
       {step === 'questions' && (
         <div className="space-y-4">
-          <div className="rounded-xl border p-6 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-            <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('quiz.questionBank') || 'Question Bank'}</h2>
+          <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
+            <h2 className="font-semibold text-gray-900">{t('quiz.questionBank') || 'Question Bank'}</h2>
             <input value={filterQ} onChange={e => setFilterQ(e.target.value)} placeholder={t('quiz.searchQuestions') || 'Search questions...'}
-              className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-primary)' }} />
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 text-sm" />
             <div className="max-h-60 overflow-y-auto space-y-2">
               {filteredBank.map((q: Question) => (
-                <div key={q.id} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: 'var(--color-border-light)' }}>
-                  <div className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{q.text}</div>
+                <div key={q.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100">
+                  <div className="text-sm text-gray-900">{q.text}</div>
                   <button onClick={() => handleAttachFromBank(q.id)} className="text-xs text-primary-600 hover:underline shrink-0 ml-2">+ Add</button>
                 </div>
               ))}
-              {filteredBank.length === 0 && <p className="text-xs text-center py-4" style={{ color: 'var(--color-text-muted)' }}>{t('quiz.noQuestionsInBank') || 'No questions in bank'}</p>}
+              {filteredBank.length === 0 && <p className="text-xs text-gray-500 text-center py-4">{t('quiz.noQuestionsInBank') || 'No questions in bank'}</p>}
             </div>
           </div>
 
-          <div className="rounded-xl border p-6 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+          <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('quiz.currentQuestions') || 'Current Questions'} ({allQuestions.length})</h2>
+              <h2 className="font-semibold text-gray-900">{t('quiz.currentQuestions') || 'Current Questions'} ({allQuestions.length})</h2>
               <button onClick={() => setShowNewQuestion(true)} className="text-xs text-primary-600 hover:underline">{t('quiz.addNew') || '+ Add New'}</button>
             </div>
             {showNewQuestion && (
-              <div className="p-4 rounded-lg border space-y-3" style={{ borderColor: 'var(--color-primary-200)', backgroundColor: 'var(--color-primary-50)' }}>
+              <div className="p-4 rounded-lg border border-primary-200 bg-primary-50 space-y-3">
                 <textarea value={newQ.text} onChange={e => setNewQ({ ...newQ, text: e.target.value })}
                   placeholder={t('quiz.questionText') || 'Question text...'} rows={2}
-                  className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+                  className={inputCls} />
                 <div className="flex gap-3">
                   <select value={newQ.type} onChange={e => setNewQ({ ...newQ, type: e.target.value as any })}
-                    className="px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+                    className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm">
                     <option value="mcq">MCQ</option>
                     <option value="true_false">True/False</option>
                   </select>
                   <input type="number" value={newQ.marks} onChange={e => setNewQ({ ...newQ, marks: Number(e.target.value) })}
-                    className="w-20 px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+                    className="w-20 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm" />
                 </div>
                 {newQ.type === 'mcq' && (
                   <div className="grid grid-cols-2 gap-2">
                     {newQ.options.map((opt, i) => (
                       <input key={i} value={opt} onChange={e => { const opts = [...newQ.options]; opts[i] = e.target.value; setNewQ({ ...newQ, options: opts }); }}
-                        className="px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+                        className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm" />
                     ))}
                   </div>
                 )}
                 <div className="flex gap-3">
                   <select value={newQ.correct} onChange={e => setNewQ({ ...newQ, correct: e.target.value })}
-                    className="px-3 py-1.5 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+                    className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm">
                     {newQ.options.map((_, i) => <option key={i} value={String.fromCharCode(65 + i)}>{String.fromCharCode(65 + i)}</option>)}
                   </select>
                   <input value={newQ.explanation} onChange={e => setNewQ({ ...newQ, explanation: e.target.value })}
-                    placeholder={t('quiz.explanation') || 'Explanation (optional)'} className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
-                    style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+                    placeholder={t('quiz.explanation') || 'Explanation (optional)'} className="flex-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm" />
                 </div>
                 <div className="flex gap-2">
                   <button onClick={handleAddQuestion} className="btn-press px-4 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-medium">{t('quiz.add') || 'Add'}</button>
-                  <button onClick={() => setShowNewQuestion(false)} className="px-4 py-1.5 rounded-lg border text-xs" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>{t('quiz.cancel') || 'Cancel'}</button>
+                  <button onClick={() => setShowNewQuestion(false)} className="px-4 py-1.5 rounded-lg border border-gray-200 text-gray-700 text-xs hover:bg-gray-50 transition-colors">{t('quiz.cancel') || 'Cancel'}</button>
                 </div>
               </div>
             )}
             {allQuestions.map((q: any) => (
-              <div key={q.id} className="flex items-center justify-between p-3 rounded-lg border" style={{ borderColor: 'var(--color-border-light)' }}>
+              <div key={q.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{q.question_text || q.text}</p>
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{q.question_type} • {q.marks} mark{q.marks !== 1 ? 's' : ''}</p>
+                  <p className="text-sm font-medium text-gray-900">{q.question_text || q.text}</p>
+                  <p className="text-xs text-gray-500">{q.question_type} • {q.marks} mark{q.marks !== 1 ? 's' : ''}</p>
                 </div>
                 {q.id < 0 ? (
                   <button onClick={() => setNewQuestions(prev => prev.filter((_, idx) => idx !== Math.abs(q.id) - 1))}
@@ -262,11 +245,11 @@ export default function QuizBuilderPage() {
                 )}
               </div>
             ))}
-            {allQuestions.length === 0 && <p className="text-xs text-center py-4" style={{ color: 'var(--color-text-muted)' }}>{t('quiz.noQuestionsYet') || 'No questions yet'}</p>}
+            {allQuestions.length === 0 && <p className="text-xs text-gray-500 text-center py-4">{t('quiz.noQuestionsYet') || 'No questions yet'}</p>}
           </div>
 
           <div className="flex justify-between">
-            <button onClick={() => setStep('info')} className="px-4 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>{t('quiz.back') || '← Back'}</button>
+            <button onClick={() => setStep('info')} className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors">{t('quiz.back') || '← Back'}</button>
             <button onClick={() => { handleSaveAllQuestions(); }} disabled={allQuestions.length === 0 || createQuestion.isPending}
               className="btn-press px-6 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium disabled:opacity-50">
               {t('quiz.nextStep') || 'Next: Settings →'}
@@ -277,66 +260,58 @@ export default function QuizBuilderPage() {
 
       {/* Step: Settings */}
       {step === 'settings' && (
-        <div className="rounded-xl border p-6 space-y-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-          <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('quiz.quizSettings') || 'Quiz Settings'}</h2>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
+          <h2 className="font-semibold text-gray-900">{t('quiz.quizSettings') || 'Quiz Settings'}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.timeLimit') || 'Time Limit (min)'}</label>
-              <input type="number" value={form.time_limit_minutes} onChange={e => setForm({ ...form, time_limit_minutes: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.timeLimit') || 'Time Limit (min)'}</label>
+              <input type="number" value={form.time_limit_minutes} onChange={e => setForm({ ...form, time_limit_minutes: Number(e.target.value) })} className={inputCls} />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.gracePeriod') || 'Grace Period (min)'}</label>
-              <input type="number" value={form.grace_period_minutes} onChange={e => setForm({ ...form, grace_period_minutes: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.gracePeriod') || 'Grace Period (min)'}</label>
+              <input type="number" value={form.grace_period_minutes} onChange={e => setForm({ ...form, grace_period_minutes: Number(e.target.value) })} className={inputCls} />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.passingScore') || 'Passing Score (%)'}</label>
-              <input type="number" value={form.passing_score} onChange={e => setForm({ ...form, passing_score: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.passingScore') || 'Passing Score (%)'}</label>
+              <input type="number" value={form.passing_score} onChange={e => setForm({ ...form, passing_score: Number(e.target.value) })} className={inputCls} />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.totalMarks') || 'Total Marks'}</label>
-              <input type="number" value={form.total_marks} onChange={e => setForm({ ...form, total_marks: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.totalMarks') || 'Total Marks'}</label>
+              <input type="number" value={form.total_marks} onChange={e => setForm({ ...form, total_marks: Number(e.target.value) })} className={inputCls} />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.difficulty') || 'Difficulty'}</label>
-              <select value={form.difficulty} onChange={e => setForm({ ...form, difficulty: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+              <label className={labelCls}>{t('quiz.difficulty') || 'Difficulty'}</label>
+              <select value={form.difficulty} onChange={e => setForm({ ...form, difficulty: Number(e.target.value) })} className={inputCls}>
                 {[1, 2, 3, 4, 5].map(d => <option key={d} value={d}>{d} - {['', 'Easy', 'Medium', 'Hard', 'Expert', 'Master'][d]}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.maxAttempts') || 'Max Attempts'}</label>
-              <input type="number" value={form.max_attempts} onChange={e => setForm({ ...form, max_attempts: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.maxAttempts') || 'Max Attempts'}</label>
+              <input type="number" value={form.max_attempts} onChange={e => setForm({ ...form, max_attempts: Number(e.target.value) })} className={inputCls} />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.gradingMode') || 'Grading Mode'}</label>
-              <select value={form.grading_mode} onChange={e => setForm({ ...form, grading_mode: e.target.value as any })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+              <label className={labelCls}>{t('quiz.gradingMode') || 'Grading Mode'}</label>
+              <select value={form.grading_mode} onChange={e => setForm({ ...form, grading_mode: e.target.value as any })} className={inputCls}>
                 <option value="auto_immediate">Auto (Immediate)</option>
                 <option value="auto_release_later">Auto (Release Later)</option>
                 <option value="manual">Manual</option>
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{t('quiz.maxViolations') || 'Max Violations'}</label>
-              <input type="number" value={form.max_violations} onChange={e => setForm({ ...form, max_violations: Number(e.target.value) })}
-                className="w-full mt-1 px-3 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }} />
+              <label className={labelCls}>{t('quiz.maxViolations') || 'Max Violations'}</label>
+              <input type="number" value={form.max_violations} onChange={e => setForm({ ...form, max_violations: Number(e.target.value) })} className={inputCls} />
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {([ 'shuffle_questions', 'show_results_immediately', 'show_correct_answers', 'allow_back_navigation', 'require_fullscreen', 'auto_submit_on_violations'] as const).map(key => (
-              <label key={key} className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            {(['shuffle_questions', 'show_results_immediately', 'show_correct_answers', 'allow_back_navigation', 'require_fullscreen', 'auto_submit_on_violations'] as const).map(key => (
+              <label key={key} className="flex items-center gap-2 text-sm text-gray-700">
                 <input type="checkbox" checked={form[key] as boolean} onChange={e => setForm({ ...form, [key]: e.target.checked })} className="rounded" />
                 {t(`quiz.${key}`) || key.replace(/_/g, ' ')}
               </label>
             ))}
           </div>
           <div className="flex justify-between pt-4">
-            <button onClick={() => setStep('questions')} className="px-4 py-2 rounded-lg border text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>{t('quiz.back') || '← Back'}</button>
+            <button onClick={() => setStep('questions')} className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm hover:bg-gray-50 transition-colors">{t('quiz.back') || '← Back'}</button>
             <div className="flex gap-2">
               {savedQuizId && (
                 <button onClick={() => publishQuiz.mutate(savedQuizId, { onSuccess: () => navigate('/teacher/quiz') })}

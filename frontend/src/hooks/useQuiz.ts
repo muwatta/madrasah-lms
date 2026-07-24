@@ -197,3 +197,51 @@ export function useReportViolation() {
 export { useQuizQuestions as useQuizQQuestions };
 export { useQuizzes as useQuizQuizzes };
 export { useQuiz as useQuizDetail };
+
+// ── Aliases used by pages ──────────────────────────────────────────────────
+
+export { useQuizQuestions as useQuestions };
+export { useQuizAnalysis as useQuestionAnalysis };
+
+export function useQuizResults() {
+  return useQuery<QuizAttempt[]>({
+    queryKey: ['quiz', 'my-results'],
+    queryFn: async () => {
+      const res = await quizAPI.quizzes.myResults();
+      return res.data.results ?? res.data;
+    },
+  });
+}
+
+export function useUpdateQuestion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }: { id: number; [key: string]: unknown }) => quizAPI.questions.update(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quiz', 'questions'] }),
+  });
+}
+
+export function useDeleteQuestion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => quizAPI.questions.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quiz', 'questions'] }),
+  });
+}
+
+export function useAttachQuestion() {
+  return useAddQuizQuestion();
+}
+
+export function useDetachQuestion() {
+  return useRemoveQuizQuestion();
+}
+
+export function useUpdateQuizQuestion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ quizId, questionId, data }: { quizId: number; questionId: number; data: Record<string, unknown> }) =>
+      api.put(`/quizzes/${quizId}/questions/${questionId}/`, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['quiz'] }),
+  });
+}

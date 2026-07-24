@@ -1,3 +1,4 @@
+from django.db.models import Avg, Count
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -416,7 +417,6 @@ class QuizOverviewView(APIView):
     permission_classes = [IsAuthenticated, CanManageQuizzes]
 
     def get(self, request):
-        from django.db.models import Avg, Count
         user = request.user
         quizzes = Quiz.objects.filter(madrasah=user.madrasah)
         attempts = QuizAttempt.objects.filter(madrasah=user.madrasah)
@@ -432,3 +432,15 @@ class QuizOverviewView(APIView):
                 (attempts.filter(is_pass=True).count() / attempts.count() * 100)
                 if attempts.count() else 0, 1),
         })
+
+
+class MyQuizResultsView(APIView):
+    permission_classes = [IsAuthenticated, CanTakeQuiz]
+
+    def get(self, request):
+        user = request.user
+        attempts = QuizAttempt.objects.filter(
+            student=user, madrasah=user.madrasah
+        ).select_related('quiz').order_by('-submitted_at')
+        data = QuizAttemptSerializer(attempts, many=True).data
+        return Response(data)
