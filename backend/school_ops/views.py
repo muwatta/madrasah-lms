@@ -292,7 +292,34 @@ class AttendanceListView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if self.request.user.role not in ('mudeer', 'ustaadh', 'idaarah'):
             raise PermissionDenied()
-        serializer.save(madrasah=self.request.user.madrasah, marked_by=self.request.user)
+        att = serializer.save(madrasah=self.request.user.madrasah, marked_by=self.request.user)
+        if att.status in ('absent', 'late'):
+            self._create_attendance_notifications(att)
+
+    def _create_attendance_notifications(self, att):
+        parents = StudentParent.objects.filter(student=att.student).select_related('parent')
+        for link in parents:
+            Notification.objects.create(
+                madrasah=self.request.user.madrasah,
+                recipient=link.parent,
+                notification_type='attendance_absent' if att.status == 'absent' else 'attendance_late',
+                title=f"{att.student.get_full_name()} - {att.status.title()}",
+                message=f"{att.student.get_full_name()} was marked {att.status} on {att.date}",
+                link='/attendance',
+            )
+
+
+def _create_bulk_attendance_notifications(madrasah, att):
+    parents = StudentParent.objects.filter(student=att.student).select_related('parent')
+    for link in parents:
+        Notification.objects.create(
+            madrasah=madrasah,
+            recipient=link.parent,
+            notification_type='attendance_absent' if att.status == 'absent' else 'attendance_late',
+            title=f"{att.student.get_full_name()} - {att.status.title()}",
+            message=f"{att.student.get_full_name()} was marked {att.status} on {att.date}",
+            link='/attendance',
+        )
 
 
 class BulkAttendanceView(APIView):
@@ -333,6 +360,8 @@ class BulkAttendanceView(APIView):
                 }
             )
             created.append(obj.id)
+            if status_val in ('absent', 'late'):
+                _create_bulk_attendance_notifications(request.user.madrasah, obj)
 
         logger.info(
             "Bulk attendance saved: date=%s created=%s skipped=%s by user %s",
@@ -477,7 +506,26 @@ class AnnouncementListView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         if self.request.user.role not in ('mudeer', 'idaarah', 'ustaadh'):
             raise PermissionDenied()
-        serializer.save(madrasah=self.request.user.madrasah, created_by=self.request.user)
+        announcement = serializer.save(madrasah=self.request.user.madrasah, created_by=self.request.user)
+        self._create_announcement_notifications(announcement)
+
+    def _create_announcement_notifications(self, announcement):
+        audience = announcement.audience
+        role_map = {'parents': 'parent', 'students': 'student', 'teachers': 'ustaadh'}
+        target_role = role_map.get(audience)
+        if target_role:
+            recipients = User.objects.filter(madrasah=announcement.madrasah, role=target_role)
+        else:
+            recipients = User.objects.filter(madrasah=announcement.madrasah, role__in=['student', 'parent', 'ustaadh'])
+        for r in recipients:
+            Notification.objects.create(
+                madrasah=announcement.madrasah,
+                recipient=r,
+                notification_type='announcement',
+                title=announcement.title,
+                message=announcement.message[:200] if announcement.message else '',
+                link='/announcements',
+            )
 
 
 class AnnouncementDetailView(generics.RetrieveUpdateDestroyAPIView):

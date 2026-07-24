@@ -825,6 +825,7 @@ class ApprovalService:
                 published_by=actor,
                 status='published',
             )
+            _notify_parents_of_published_results(results, term, actor)
 
         return count
 
@@ -1325,3 +1326,24 @@ class ReportCardService:
                 continue
 
         return count
+
+
+def _notify_parents_of_published_results(results, term, actor):
+    from school_ops.models import Notification
+    from users.models import StudentParent
+
+    notified = set()
+    for sr in results.select_related('student', 'subject'):
+        if sr.student_id in notified:
+            continue
+        parents = StudentParent.objects.filter(student=sr.student).select_related('parent')
+        for link in parents:
+            Notification.objects.create(
+                madrasah=actor.madrasah,
+                recipient=link.parent,
+                notification_type='exam_result',
+                title=f"Results Published - {term}",
+                message=f"{sr.student.get_full_name()}'s results for {term} have been published.",
+                link='/my-results',
+            )
+        notified.add(sr.student_id)
