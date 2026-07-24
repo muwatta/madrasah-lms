@@ -684,3 +684,14 @@ export interface SearchResult {
 export const searchAPI = {
   search: (q: string) => api.get<SearchResult[]>('/search/', { params: { q } }),
 };
+
+export const auditAPI = {
+  list: (params?: Record<string, string> & { url?: string }) => {
+    if (params?.url) {
+      // When using a next/prev URL, extract the path + query
+      const url = new URL(params.url, window.location.origin);
+      return api.get(url.pathname + url.search);
+    }
+    return api.get('/audit/logs/', { params });
+  },
+};

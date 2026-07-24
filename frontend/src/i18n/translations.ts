@@ -50,6 +50,7 @@ export const translations = {
     publishResults: { ar: 'نشر النتائج', en: 'Publish Results' },
     chooseSubjects: { ar: 'اختر موادك', en: 'Choose Subjects' },
     fasaaha: { ar: 'فصاحه', en: 'Fasaaha' },
+    audit: { ar: 'سجل التدقيق', en: 'Audit Trail' },
     dialogue: { ar: 'محادثة', en: 'Conversation' },
     leaderboard: { ar: 'المتصدرين', en: 'Leaderboard' },
     dailyGoals: { ar: 'أهداف يومية', en: 'Daily Goals' },

@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'django_filters',
     'users',
     'curriculum',
     'assessments',
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     'character',
     'certificates',
     'fasaaha',
+    'audit',
 ]
 
 MIDDLEWARE = [
