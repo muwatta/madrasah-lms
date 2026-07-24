@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { notificationAPI } from '../api';
 import PageNavigation from './PageNavigation';
+import GlobalSearch from './GlobalSearch';
 import type { User } from '../types';
 
 interface NavLink {
@@ -196,6 +197,18 @@ export default function Layout() {
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -395,6 +408,20 @@ export default function Layout() {
               <span className="hidden sm:inline">{language === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
+            {/* Search trigger */}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="btn-press flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+              style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+              title={t('common.searchHint')}
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className="hidden sm:inline" style={{ color: 'var(--color-text-muted)' }}>{t('common.search')}</span>
+              <kbd className="hidden rounded border px-1.5 py-0.5 text-[10px] font-semibold sm:inline-block" style={{ color: 'var(--color-text-muted)', borderColor: 'var(--color-border)' }}>⌘K</kbd>
+            </button>
+
             {/* Notification bell */}
             <div className="relative" ref={notifRef}>
             <button
@@ -562,6 +589,7 @@ export default function Layout() {
         {/* Page content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)' }}><div className="page-enter"><Outlet /><PageNavigation links={links} /></div></main>
       </div>
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

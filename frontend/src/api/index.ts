@@ -651,3 +651,16 @@ export const quizAPI = {
   },
   overview: () => api.get('/quizzes/overview/'),
 };
+
+export interface SearchResult {
+  model: string;
+  id: number | string;
+  title: string;
+  subtitle: string;
+  preview: string;
+  url: string;
+}
+
+export const searchAPI = {
+  search: (q: string) => api.get<SearchResult[]>('/search/', { params: { q } }),
+};
