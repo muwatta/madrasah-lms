@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
+import { useExport } from '../../hooks/useExport'
 import { resultsAPI } from '../../api'
 
 export default function MyResultsPage() {
   const { t } = useLanguage()
+  const { exporting, exportData } = useExport()
   const [results, setResults] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -14,6 +16,8 @@ export default function MyResultsPage() {
   }, [])
 
   const terms = [...new Set(results.map(r => r.term_number))].sort()
+  const termIds = Object.fromEntries(results.map(r => [r.term_number, r.term]))
+  const studentId = results[0]?.student
 
   const getGradeColor = (grade: string) => {
     switch (grade) {
@@ -49,7 +53,25 @@ export default function MyResultsPage() {
         return (
           <div key={termNum} className="card bg-base-100 shadow-md mb-6">
             <div className="card-body">
-              <h2 className="card-title text-lg mb-4">{t('results.term')} {termNum}: {termName}</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="card-title text-lg">{t('results.term')} {termNum}: {termName}</h2>
+                <button
+                  onClick={() => {
+                    const termId = termIds[termNum]
+                    if (termId && studentId) {
+                      exportData(
+                        () => resultsAPI.reportCard.pdfByStudentTerm(studentId, termId),
+                        `report_card_term_${termNum}.pdf`,
+                      )
+                    }
+                  }}
+                  disabled={exporting}
+                  className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+                >
+                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  PDF
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="table table-zebra">
                   <thead>

@@ -131,6 +131,11 @@ export const resultsAPI = {
     subjectResults: (params?: any) => api.get('/results/export/subject-results/', { params, responseType: 'blob' }),
     termResults: (params?: any) => api.get('/results/export/term-results/', { params, responseType: 'blob' }),
   },
+  reportCard: {
+    pdf: (uuid: string) => api.get(`/results/report-cards/${uuid}/pdf/`, { responseType: 'blob' }),
+    pdfByStudentTerm: (studentId: number, termId: number) =>
+      api.get(`/results/report-cards/student/${studentId}/term/${termId}/pdf/`, { responseType: 'blob' }),
+  },
 };
 
 export const enrollmentAPI = {

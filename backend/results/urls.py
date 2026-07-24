@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 from . import export_views
+from . import pdf_views
 from . import result_views
 
 router = DefaultRouter()
@@ -75,6 +76,12 @@ urlpatterns = [
          export_views.ExportSubjectResultsView.as_view(), name='export-subject-results'),
     path('export/term-results/',
          export_views.ExportTermResultsView.as_view(), name='export-term-results'),
+
+    # ── Report Card PDFs ────────────────────────────────────────────
+    path('report-cards/<uuid:uuid>/pdf/',
+         pdf_views.GenerateReportCardPDFView.as_view(), name='report-card-pdf'),
+    path('report-cards/student/<int:student_id>/term/<int:term_id>/pdf/',
+         pdf_views.GenerateReportCardByStudentTermView.as_view(), name='report-card-pdf-by-student-term'),
 
     # ── Router MUST come after explicit paths ──────────────────────
     path('', include(router.urls)),
