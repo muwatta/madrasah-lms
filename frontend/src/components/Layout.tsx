@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { notificationAPI } from '../api';
 import PageNavigation from './PageNavigation';
 import GlobalSearch from './GlobalSearch';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 import type { User } from '../types';
 
 interface NavLink {
@@ -209,6 +210,16 @@ export default function Layout() {
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, []);
+
+  const { subscribe: subscribePush } = usePushNotifications();
+
+  useEffect(() => {
+    if (user && 'Notification' in window && Notification.permission === 'default') {
+      // Auto-request permission after a short delay (not on first load)
+      const timer = setTimeout(() => subscribePush(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, subscribePush]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

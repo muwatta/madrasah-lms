@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from . import export_views
+from . import push_views
 
 urlpatterns = [
     path('fee-structures/', views.FeeStructureListView.as_view(), name='fee-structure-list'),
@@ -23,6 +24,9 @@ urlpatterns = [
     path('notifications/mark-read/<int:pk>/', views.NotificationMarkReadView.as_view(), name='notification-mark-read'),
     path('notifications/mark-all-read/', views.NotificationMarkAllReadView.as_view(), name='notification-mark-all-read'),
     path('notifications/unread-count/', views.NotificationUnreadCountView.as_view(), name='notification-unread-count'),
+    path('push/subscribe/', push_views.PushSubscribeView.as_view(), name='push-subscribe'),
+    path('push/unsubscribe/', push_views.PushUnsubscribeView.as_view(), name='push-unsubscribe'),
+    path('push/vapid-key/', push_views.PushVapidPublicKeyView.as_view(), name='push-vapid-key'),
     path('attendance/qr/class/<int:class_id>/', views.AttendanceQRClassView.as_view(), name='attendance-qr-class'),
     path('attendance/qr/student/<int:student_id>/', views.AttendanceQRStudentView.as_view(), name='attendance-qr-student'),
     path('attendance/scan/', views.AttendanceScanView.as_view(), name='attendance-scan'),

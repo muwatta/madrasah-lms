@@ -237,6 +237,12 @@ export const notificationAPI = {
   markAllRead: () => api.post('/school/notifications/mark-all-read/'),
 };
 
+export const pushAPI = {
+  vapidKey: () => api.get('/school/push/vapid-key/'),
+  subscribe: (sub: PushSubscription) => api.post('/school/push/subscribe/', sub),
+  unsubscribe: (endpoint: string) => api.post('/school/push/unsubscribe/', { endpoint }),
+};
+
 export const academicAPI = {
   sessions: {
     list: (params?: any) => api.get('/academic/sessions/', { params }),

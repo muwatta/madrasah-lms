@@ -193,6 +193,10 @@ WHATSAPP_BUSINESS_ACCOUNT_ID = config('WHATSAPP_BUSINESS_ACCOUNT_ID', default=''
 WHATSAPP_APP_SECRET = config('WHATSAPP_APP_SECRET', default='')
 WHATSAPP_BASE_URL = 'https://graph.facebook.com'
 
+# Web Push (VAPID)
+VAPID_PUBLIC_KEY = config('VAPID_PUBLIC_KEY', default='')
+VAPID_PRIVATE_KEY = config('VAPID_PRIVATE_KEY', default='')
+
 # Email (Resend) 
 RESEND_API_KEY = config('RESEND_API_KEY', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@madrasahlms.com')

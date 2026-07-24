@@ -10,6 +10,18 @@ def forward_notification_to_whatsapp(sender, instance, created, **kwargs):
     if not created:
         return
 
+    # ── Web Push ──
+    try:
+        from school_ops.push import send_push_notification
+        send_push_notification(
+            user=instance.recipient,
+            title=instance.title,
+            body=instance.message or '',
+            url=instance.link or '',
+        )
+    except Exception as e:
+        logger.error("[SIGNAL] Push notification failed for %s: %s", instance.id, e)
+
     try:
         from .models import WhatsAppRecipient
         from .tasks import send_whatsapp_message
