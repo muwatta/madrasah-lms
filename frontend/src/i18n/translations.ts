@@ -1462,16 +1462,11 @@ export const translations = {
     // Phase 3: Score Trends
     scoreTrends: { ar: 'اتجاهات الدرجات', en: 'Score Trends' },
     scoreTrendsDesc: { ar: 'تتبع تقدمك على مدار الوقت', en: 'Track your progress over time' },
-    days: { ar: 'أيام', en: 'days' },
     noTrendsData: { ar: 'لا توجد بيانات بعد', en: 'No data yet' },
 
     // Dashboard widget
     quickTip: { ar: 'نصيحة سريعة', en: 'Quick Tip' },
     quickTipText: { ar: 'تحدث بالعربية لمدة 15 دقيقة يومياً لتحسين مهاراتك بسرعة. جرّب المحادثة مع المساعد الذكي!', en: 'Speak Arabic for 15 minutes daily to improve your skills quickly. Try the AI conversation practice!' },
-    speak: { ar: 'تحدث', en: 'Speak' },
-    viewMissions: { ar: 'المهمات', en: 'Missions' },
-    myProgress: { ar: 'تقدمي', en: 'My Progress' },
-    myBadgesLink: { ar: 'شاراتي', en: 'My Badges' },
 
     // Reading mode
     readingComplete: { ar: 'تمت القراءة!', en: 'Reading Complete!' },

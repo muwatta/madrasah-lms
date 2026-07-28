@@ -97,7 +97,11 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        return User.objects.filter(madrasah=self.request.user.madrasah).select_related('madrasah')
+        qs = User.objects.filter(madrasah=self.request.user.madrasah).select_related('madrasah')
+        role = self.request.query_params.get('role')
+        if role:
+            qs = qs.filter(role=role)
+        return qs
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):

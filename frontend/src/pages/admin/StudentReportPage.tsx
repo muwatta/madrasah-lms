@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { schoolAPI, userAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
@@ -6,7 +6,8 @@ import { Skeleton, SkeletonCard, SkeletonChart } from '../../components/Skeleton
 
 interface Student {
   id: number;
-  name: string;
+  name?: string;
+  full_name?: string;
   email: string;
 }
 
@@ -59,6 +60,10 @@ function getRecommendationIcon(type: string) {
   return { icon: '🌟', style: 'border-emerald-200 bg-emerald-50' };
 }
 
+function getDisplayName(s: Student) {
+  return s.full_name || s.name || s.email;
+}
+
 export default function StudentReportPage() {
   const { t, language } = useLanguage();
   const [students, setStudents] = useState<Student[]>([]);
@@ -67,6 +72,9 @@ export default function StudentReportPage() {
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [loadingReport, setLoadingReport] = useState(false);
   const [error, setError] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     userAPI.list({ role: 'student' })
@@ -88,6 +96,22 @@ export default function StudentReportPage() {
       .finally(() => setLoadingReport(false));
   }, [selectedId, language, t]);
 
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+        setSearchQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selectedStudent = students.find((s) => s.id === selectedId);
+  const filteredStudents = students.filter((s) =>
+    (getDisplayName(s)).toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const chartData = report?.subject_performance.map((s) => ({
     name: language === 'ar' ? s.subject : s.subject_en,
     average: s.average,
@@ -96,24 +120,97 @@ export default function StudentReportPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{t('studentReport.title')}</h1>
+      {/* Header with gradient */}
+      <div className="rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 border border-blue-200/50 dark:border-blue-800/30 p-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{t('studentReport.title')}</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('studentReport.selectStudent')}</p>
 
-      <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm opacity-0 animate-slide-up">
-        <label className="mb-1 block text-xs font-medium text-white-500">{t('studentReport.selectStudent')}</label>
-        {loadingStudents ? (
-          <Skeleton className="h-10 w-full" />
-        ) : (
-          <select
-            value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value ? Number(e.target.value) : '')}
-            className="w-full rounded-lg border border-gray-200 dark:border-[var(--color-border)] bg-gray-50 dark:bg-[var(--color-bg-primary)] px-3 py-2.5 text-sm text-gray-900 dark:text-[var(--color-text-primary)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-          >
-            <option value="">{language === 'ar' ? '-- اختر طالب --' : '-- Select a student --'}</option>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-        )}
+        <div className="mt-4 relative z-50" ref={dropdownRef}>
+          {loadingStudents ? (
+            <Skeleton className="h-11 w-full" />
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="w-full rounded-xl border-2 border-blue-500 dark:border-blue-400 bg-white dark:bg-gray-800 px-4 py-3 text-sm font-semibold text-left focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400/50 flex items-center justify-between shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40">
+                    <svg className="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className={selectedStudent ? 'text-red-600 dark:text-red-400' : 'text-gray-400'}>
+                    {selectedStudent ? getDisplayName(selectedStudent) : (language === 'ar' ? '-- اختر طالب --' : '-- Select a student --')}
+                  </span>
+                </div>
+                <svg className={`h-5 w-5 text-blue-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute z-50 mt-2 w-full rounded-xl border-2 border-blue-500 bg-white dark:bg-gray-800 shadow-xl overflow-hidden">
+                  <div className="p-3 border-b border-blue-100 dark:border-blue-800">
+                    <div className="relative">
+                      <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder={language === 'ar' ? 'بحث عن طالب...' : 'Search students...'}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full rounded-lg border border-blue-200 dark:border-blue-700 bg-blue-50/50 dark:bg-gray-700 pl-9 pr-3 py-2 text-sm text-red-600 dark:text-red-400 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {filteredStudents.length === 0 ? (
+                      <div className="px-4 py-8 text-center">
+                        <svg className="mx-auto h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <p className="mt-2 text-sm text-gray-400">{language === 'ar' ? 'لا يوجد طلاب' : 'No students found'}</p>
+                      </div>
+                    ) : (
+                      filteredStudents.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedId(s.id);
+                            setDropdownOpen(false);
+                            setSearchQuery('');
+                          }}
+                          className={`w-full px-4 py-2.5 text-sm font-medium text-left transition-colors flex items-center gap-3 ${
+                            s.id === selectedId
+                              ? 'bg-blue-500 text-white'
+                              : 'text-red-600 dark:text-red-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                          }`}
+                        >
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white ${
+                            s.id === selectedId ? 'bg-white/20' : 'bg-blue-500'
+                          }`}>
+                            {(getDisplayName(s)).charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate">{getDisplayName(s)}</p>
+                            {s.full_name && s.email && (
+                              <p className={`truncate text-xs ${s.id === selectedId ? 'text-white/70' : 'text-gray-400'}`}>{s.email}</p>
+                            )}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -129,10 +226,10 @@ export default function StudentReportPage() {
           <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm opacity-0 animate-slide-up">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-xl font-bold text-primary-700">
-                {report.student.name.charAt(0)}
+                {getDisplayName(report.student).charAt(0)}
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{report.student.name}</h2>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{getDisplayName(report.student)}</h2>
                 <p className="text-sm text-gray-400">{report.student.email}</p>
               </div>
             </div>
@@ -279,11 +376,14 @@ export default function StudentReportPage() {
       )}
 
       {!loadingReport && !report && selectedId === '' && !error && (
-        <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center opacity-0 animate-slide-up">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        <div className="rounded-2xl border border-dashed border-blue-200 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/50 to-white dark:from-blue-900/10 dark:to-transparent py-20 text-center opacity-0 animate-slide-up">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 dark:bg-blue-900/30">
+            <svg className="h-10 w-10 text-blue-400 dark:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
           </div>
-          <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{t('studentReport.noStudent')}</p>
+          <p className="text-base font-semibold text-gray-700 dark:text-gray-300">{t('studentReport.noStudent')}</p>
+          <p className="mt-1 text-sm text-gray-400">{language === 'ar' ? 'اختر طالباً من القائمة أعلاه' : 'Choose a student from the dropdown above'}</p>
         </div>
       )}
     </div>
