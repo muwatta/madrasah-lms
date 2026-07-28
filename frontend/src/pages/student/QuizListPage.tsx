@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { quizAPI, subjectAPI, attemptAPI } from '../../api';
+import { quizAPI, subjectAPI } from '../../api';
 import type { Quiz, Subject, QuizAttempt } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -21,8 +21,8 @@ export default function QuizListPage() {
         const params: Record<string, number> = {};
         if (filterSubject !== '') params.subject = filterSubject;
         const [quizRes, attemptRes] = await Promise.all([
-          quizAPI.list(params),
-          attemptAPI.myAttempts(),
+          quizAPI.quizzes.list(params),
+          quizAPI.quizzes.myResults(),
         ]);
         setQuizzes(quizRes.data.results || quizRes.data || []);
         setAttempts(attemptRes.data.results || attemptRes.data || []);
@@ -33,7 +33,7 @@ export default function QuizListPage() {
       }
     };
     fetchQuizzes();
-  }, [filterSubject]);
+  }, [filterSubject, t]);
 
   useEffect(() => {
     subjectAPI.list().then((res) => setSubjects(res.data.results || res.data || [])).catch(() => {});

@@ -32,7 +32,7 @@ export default function ParentDashboard() {
       .then((res) => setData(res.data))
       .catch((err) => setError(err.response?.data?.detail || t('parentDashboard.loadFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const summaryStats = useMemo(() => {
     if (!data?.children?.length) return null;

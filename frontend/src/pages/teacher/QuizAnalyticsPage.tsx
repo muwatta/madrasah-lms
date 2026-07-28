@@ -52,11 +52,11 @@ export default function QuizAnalyticsPage() {
 
   useEffect(() => {
     if (!id) return;
-    quizAPI.analytics(Number(id))
-      .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.detail || t('quizAnalytics.loadFailed')))
+    quizAPI.quizzes.analysis(Number(id))
+      .then((res: any) => setData(res.data))
+      .catch((err: any) => setError(err.response?.data?.detail || t('quizAnalytics.loadFailed')))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   if (loading) {
     return (

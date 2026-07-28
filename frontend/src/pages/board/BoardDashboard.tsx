@@ -20,7 +20,7 @@ export default function BoardDashboard() {
       .then((res) => setData(res.data))
       .catch((err) => setError(err.response?.data?.detail || t('boardDashboard.loadFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (

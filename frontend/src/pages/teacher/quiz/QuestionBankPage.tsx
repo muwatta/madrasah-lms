@@ -2,18 +2,17 @@ import { useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useQuestions, useCreateQuestion, useUpdateQuestion, useDeleteQuestion } from '../../../hooks/useQuiz';
 import { SkeletonCard } from '../../../components/Skeleton';
-import type { Question } from '../../../types';
+import type { QuizQuestion } from '../../../types';
 
 interface QForm {
-  text: string; question_type: 'mcq' | 'true_false';
+  question_text: string; question_type: 'mcq' | 'true_false';
   options: string[]; correct_answer: string; explanation: string;
-  subject: number | ''; difficulty: number; marks: number; tags: string[];
-  is_ai_generated: boolean;
+  subject: number | ''; difficulty: number; marks: number;
 }
 
 const defaultForm: QForm = {
-  text: '', question_type: 'mcq', options: ['A', 'B', 'C', 'D'],
-  correct_answer: 'A', explanation: '', subject: '', difficulty: 2, marks: 1, tags: [], is_ai_generated: false,
+  question_text: '', question_type: 'mcq', options: ['A', 'B', 'C', 'D'],
+  correct_answer: 'A', explanation: '', subject: '', difficulty: 2, marks: 1,
 };
 
 export default function QuestionBankPage() {
@@ -29,19 +28,18 @@ export default function QuestionBankPage() {
   const [filter, setFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('');
 
-  const filtered = questions.filter((q: Question) => {
-    if (filter && !q.text.toLowerCase().includes(filter.toLowerCase())) return false;
+  const filtered = questions.filter((q: QuizQuestion) => {
+    if (filter && !q.question_text.toLowerCase().includes(filter.toLowerCase())) return false;
     if (typeFilter && q.question_type !== typeFilter) return false;
     return true;
   });
 
-  const openEdit = (q: Question) => {
+  const openEdit = (q: QuizQuestion) => {
     setForm({
-      text: q.text, question_type: q.question_type,
+      question_text: q.question_text, question_type: q.question_type,
       options: q.options?.map((o: any) => o.text) || ['A', 'B', 'C', 'D'],
       correct_answer: q.correct_answer, explanation: q.explanation || '',
-      subject: q.subject || '', difficulty: q.difficulty, marks: q.marks, tags: q.tags || [],
-      is_ai_generated: q.is_ai_generated,
+      subject: q.subject || '', difficulty: q.difficulty, marks: q.marks,
     });
     setEditId(q.id);
     setShowForm(true);
@@ -49,17 +47,16 @@ export default function QuestionBankPage() {
 
   const handleSave = () => {
     const payload = {
-      text: form.text, question_type: form.question_type,
+      question_text: form.question_text, question_type: form.question_type,
       options: form.options.map((opt, i) => ({ key: String.fromCharCode(65 + i), text: opt })),
       correct_answer: form.correct_answer, explanation: form.explanation,
       subject: form.subject ? Number(form.subject) : undefined,
-      difficulty: form.difficulty, marks: form.marks, tags: form.tags,
-      is_ai_generated: form.is_ai_generated,
+      difficulty: form.difficulty, marks: form.marks,
     };
     if (editId) {
-      updateQ.mutate({ id: editId, ...payload }, { onSuccess: () => { setShowForm(false); setEditId(null); setForm(defaultForm); } });
+      updateQ.mutate({ id: editId, ...payload } as any, { onSuccess: () => { setShowForm(false); setEditId(null); setForm(defaultForm); } });
     } else {
-      createQ.mutate(payload, { onSuccess: () => { setShowForm(false); setForm(defaultForm); } });
+      createQ.mutate(payload as any, { onSuccess: () => { setShowForm(false); setForm(defaultForm); } });
     }
   };
 
@@ -87,7 +84,7 @@ export default function QuestionBankPage() {
       {showForm && (
         <div className="rounded-xl border border-primary-200 bg-primary-50 p-6 space-y-4">
           <h3 className="font-semibold text-gray-900">{editId ? t('quiz.editQuestion') || 'Edit Question' : t('quiz.newQuestion') || 'New Question'}</h3>
-          <textarea value={form.text} onChange={e => setForm({ ...form, text: e.target.value })}
+          <textarea value={form.question_text} onChange={e => setForm({ ...form, question_text: e.target.value })}
             placeholder={t('quiz.questionText') || 'Question text...'} rows={3}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm" />
           <div className="flex gap-3">
@@ -120,7 +117,7 @@ export default function QuestionBankPage() {
               placeholder={t('quiz.explanation') || 'Explanation'} className="flex-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm" />
           </div>
           <div className="flex gap-2">
-            <button onClick={handleSave} disabled={!form.text.trim() || createQ.isPending || updateQ.isPending}
+            <button onClick={handleSave} disabled={!form.question_text.trim() || createQ.isPending || updateQ.isPending}
               className="btn-press px-4 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-medium disabled:opacity-50">
               {editId ? t('quiz.save') || 'Save' : t('quiz.add') || 'Add'}
             </button>
@@ -134,16 +131,15 @@ export default function QuestionBankPage() {
         <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}</div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((q: Question) => (
+          {filtered.map((q: QuizQuestion) => (
             <div key={q.id} className="rounded-xl border border-gray-200 bg-white p-4 flex items-start gap-4">
               <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
                 q.question_type === 'mcq' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
               }`}>{q.question_type}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{q.text}</p>
+                <p className="text-sm font-medium text-gray-900">{q.question_text}</p>
                 <p className="text-xs mt-1 text-gray-500">
                   Correct: {q.correct_answer} • {q.marks} mark{q.marks !== 1 ? 's' : ''} • Difficulty {q.difficulty}
-                  {q.is_ai_generated && <span className="ml-2 text-purple-500">🤖 AI</span>}
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">

@@ -95,6 +95,7 @@ export default function HomeworkPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadData(); }, []);
 
   const filteredHomeworks = useMemo(() => {

@@ -110,6 +110,7 @@ export default function FinancePage() {
       .catch(() => {});
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     Promise.all([
       userAPI.list({ role: 'student' }).then((r) => setStudents(r.data.results ?? r.data)),

@@ -28,7 +28,7 @@ export default function TimetablePage() {
       .then((res) => setSlots(res.data))
       .catch(() => setError(t('timetable.loadFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const groupedSlots: TimetableSlot[][] = Array.from({ length: 7 }, () => []);
   slots.forEach((s) => {

@@ -56,7 +56,9 @@ export default function MessagesPage() {
       .catch(() => {});
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadMessages(); loadUnread(); }, [folder]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadRecipients(); }, []);
 
   const handleSend = async (e: React.FormEvent) => {

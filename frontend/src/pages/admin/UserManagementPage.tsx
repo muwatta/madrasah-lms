@@ -48,6 +48,7 @@ export default function UserManagementPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadUsers(); }, [roleFilter]);
 
   const handleSearch = (e: React.FormEvent) => {

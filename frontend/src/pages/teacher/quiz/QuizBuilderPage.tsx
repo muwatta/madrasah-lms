@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useQuiz, useQuestions, useCreateQuiz, useUpdateQuiz, useCreateQuestion, useAttachQuestion, useDetachQuestion, usePublishQuiz } from '../../../hooks/useQuiz';
-import type { Question, QuizQuestion } from '../../../types';
+import type { QuizQuestion } from '../../../types';
 
 interface QuizFormData {
   title: string; description: string; instructions: string;
@@ -56,9 +56,9 @@ export default function QuizBuilderPage() {
         instructions: existingQuiz.instructions || '', subject: existingQuiz.subject,
         school_class: existingQuiz.school_class, time_limit_minutes: existingQuiz.time_limit_minutes,
         grace_period_minutes: existingQuiz.grace_period_minutes, passing_score: existingQuiz.passing_score,
-        total_marks: existingQuiz.total_marks, shuffle_questions: existingQuiz.shuffle_questions,
-        show_results_immediately: existingQuiz.show_results_immediately,
-        show_correct_answers: existingQuiz.show_correct_answers,
+        total_marks: existingQuiz.total_marks, shuffle_questions: existingQuiz.shuffle_questions ?? false,
+        show_results_immediately: existingQuiz.show_results_immediately ?? false,
+        show_correct_answers: existingQuiz.show_correct_answers ?? false,
         allow_back_navigation: existingQuiz.allow_back_navigation,
         require_fullscreen: existingQuiz.require_fullscreen, difficulty: existingQuiz.difficulty,
         max_attempts: existingQuiz.max_attempts, grading_mode: existingQuiz.grading_mode,
@@ -71,7 +71,7 @@ export default function QuizBuilderPage() {
   const handleSaveQuiz = () => {
     const payload = { ...form, subject: Number(form.subject), school_class: Number(form.school_class) };
     if (numId) {
-      updateQuiz.mutate({ id: numId, ...payload }, { onSuccess: () => setStep('questions') });
+      updateQuiz.mutate({ id: numId, data: payload as Record<string, unknown> }, { onSuccess: () => setStep('questions') });
     } else {
       createQuiz.mutate(payload, { onSuccess: (res: any) => { setSavedQuizId(res.data.id); setStep('questions'); } });
     }
@@ -108,8 +108,8 @@ export default function QuizBuilderPage() {
     setStep('settings');
   };
 
-  const filteredBank = existingQuestions.filter((q: Question) =>
-    q.text.toLowerCase().includes(filterQ.toLowerCase())
+  const filteredBank = existingQuestions.filter((q: QuizQuestion) =>
+    q.question_text.toLowerCase().includes(filterQ.toLowerCase())
   );
 
   const existingQuizQuestions: QuizQuestion[] = (existingQuiz as any)?.questions || [];
@@ -180,9 +180,9 @@ export default function QuizBuilderPage() {
             <input value={filterQ} onChange={e => setFilterQ(e.target.value)} placeholder={t('quiz.searchQuestions') || 'Search questions...'}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 text-sm" />
             <div className="max-h-60 overflow-y-auto space-y-2">
-              {filteredBank.map((q: Question) => (
+              {filteredBank.map((q: QuizQuestion) => (
                 <div key={q.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100">
-                  <div className="text-sm text-gray-900">{q.text}</div>
+                  <div className="text-sm text-gray-900">{q.question_text}</div>
                   <button onClick={() => handleAttachFromBank(q.id)} className="text-xs text-primary-600 hover:underline shrink-0 ml-2">+ Add</button>
                 </div>
               ))}

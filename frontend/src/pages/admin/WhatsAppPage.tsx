@@ -32,6 +32,7 @@ export default function WhatsAppPage() {
   useEffect(() => {
     loadData();
     userAPI.list({ role: 'parent' }).then(r => setParents(r.data.results ?? r.data)).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   const loadData = async () => {

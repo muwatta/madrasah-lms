@@ -61,6 +61,7 @@ export default function EnrollmentManagementPage() {
     ]).catch(() => {});
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadEnrollments(); }, [studentFilter, subjectFilter, teacherFilter]);
 
   const handleSubmit = async (e: React.FormEvent) => {

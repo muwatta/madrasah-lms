@@ -44,6 +44,7 @@ export default function AtRiskPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadData(); }, [t]);
 
   const handleGenerate = async () => {

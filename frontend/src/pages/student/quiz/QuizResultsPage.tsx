@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useQuizResults } from '../../../hooks/useQuiz';
 import { SkeletonCard } from '../../../components/Skeleton';
@@ -6,7 +5,6 @@ import type { QuizAttempt } from '../../../types';
 
 export default function QuizResultsPage() {
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const { data: results = [], isLoading } = useQuizResults();
 
   if (isLoading) return <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}</div>;

@@ -59,41 +59,6 @@ export interface Question {
   created_at: string;
 }
 
-export interface Quiz {
-  id: number;
-  madrasah: number;
-  subject: number;
-  subject_name: string;
-  created_by: number;
-  created_by_name: string;
-  title: string;
-  description: string;
-  question_ids: number[];
-  quiz_type: 'practice' | 'assignment' | 'test';
-  time_limit_minutes: number | null;
-  passing_score: number;
-  is_published: boolean;
-  question_count: number;
-  attempt_count: number;
-  average_score: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface QuizAttempt {
-  id: number;
-  quiz: number;
-  quiz_title: string;
-  student: number;
-  student_name: string;
-  answers: Record<string, string>;
-  score: number | null;
-  percentage: number | null;
-  attempt_number: number;
-  started_at: string;
-  submitted_at: string | null;
-}
-
 export interface Exam {
   id: number;
   madrasah: number;
@@ -316,6 +281,11 @@ export interface Quiz {
   attempt_count: number;
   average_score: number;
   is_available_now: boolean;
+  quiz_type?: 'practice' | 'assignment' | 'test';
+  question_ids?: number[];
+  shuffle_questions?: boolean;
+  show_results_immediately?: boolean;
+  show_correct_answers?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -430,7 +400,8 @@ export interface Mission {
 export type MissionType =
   | 'reading' | 'pronunciation' | 'repeat_after_me' | 'free_speaking'
   | 'storytelling' | 'picture_description' | 'conversation'
-  | 'role_play' | 'debate' | 'presentation';
+  | 'role_play' | 'debate' | 'presentation'
+  | 'recitation' | 'translation' | 'vocabulary' | 'grammar' | 'listening';
 
 export const MISSION_TYPE_LABELS: Record<MissionType, string> = {
   reading: 'Reading',
@@ -443,6 +414,11 @@ export const MISSION_TYPE_LABELS: Record<MissionType, string> = {
   role_play: 'Role Play',
   debate: 'Debate',
   presentation: 'Presentation',
+  recitation: 'Recitation',
+  translation: 'Translation',
+  vocabulary: 'Vocabulary',
+  grammar: 'Grammar',
+  listening: 'Listening',
 };
 
 export const MISSION_TYPE_ICONS: Record<MissionType, string> = {
@@ -456,6 +432,11 @@ export const MISSION_TYPE_ICONS: Record<MissionType, string> = {
   role_play: '🎭',
   debate: '⚖️',
   presentation: '🎤',
+  recitation: '🎵',
+  translation: '🌍',
+  vocabulary: '📝',
+  grammar: '📐',
+  listening: '🎧',
 };
 
 export interface SpeakingAttempt {
@@ -703,131 +684,4 @@ export interface ScoreTrend {
   avg_fluency: number;
 }
 
-// ─── Quizzes Module ──
-
-export interface QuizQuestion {
-  id: number;
-  uuid: string;
-  madrasah: number;
-  subject: number;
-  subject_name: string;
-  topic: number | null;
-  topic_name: string;
-  school_class: number | null;
-  school_class_name: string;
-  question_type: 'mcq' | 'true_false';
-  difficulty: number;
-  marks: number;
-  question_text: string;
-  question_text_ar: string;
-  options: Array<{ key: string; text: string; text_ar?: string }>;
-  correct_answer: string;
-  explanation: string;
-  explanation_ar: string;
-  is_active: boolean;
-  created_by: number;
-  created_by_name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Quiz {
-  id: number;
-  uuid: string;
-  madrasah: number;
-  created_by: number;
-  created_by_name: string;
-  title: string;
-  description: string;
-  instructions: string;
-  subject: number;
-  subject_name: string;
-  school_class: number;
-  school_class_name: string;
-  session: number | null;
-  term: number | null;
-  difficulty: number;
-  estimated_duration_minutes: number;
-  available_from: string | null;
-  available_until: string | null;
-  time_limit_minutes: number;
-  grace_period_minutes: number;
-  max_attempts: number;
-  passing_score: number;
-  marks_per_question: number;
-  negative_marking: boolean;
-  negative_mark_fraction: number;
-  randomize_questions: boolean;
-  randomize_options: boolean;
-  one_question_per_page: boolean;
-  allow_review: boolean;
-  allow_back_navigation: boolean;
-  show_question_numbers: boolean;
-  auto_save: boolean;
-  grading_mode: 'auto_immediate' | 'auto_release_later' | 'manual';
-  require_fullscreen: boolean;
-  max_violations: number;
-  auto_submit_on_violations: boolean;
-  status: 'draft' | 'published' | 'archived';
-  is_published: boolean;
-  total_marks: number;
-  question_count: number;
-  attempt_count: number;
-  average_score: number;
-  is_available_now: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface QuizAnswerItem {
-  id: number;
-  attempt: number;
-  question: number;
-  question_text: string;
-  question_text_ar: string;
-  question_type: string;
-  options: Array<{ key: string; text: string; text_ar?: string }>;
-  selected_answer: string;
-  is_correct: boolean | null;
-  marks_awarded: number;
-  is_flagged: boolean;
-  time_spent_seconds: number | null;
-  answered_at: string | null;
-  correct_answer: string;
-  explanation: string;
-  explanation_ar: string;
-}
-
-export interface QuizAttempt {
-  id: number;
-  uuid: string;
-  madrasah: number;
-  quiz: number;
-  quiz_title: string;
-  student: number;
-  student_name: string;
-  attempt_number: number;
-  status: 'in_progress' | 'submitted' | 'graded' | 'released';
-  score: number | null;
-  total_marks: number | null;
-  percentage: number | null;
-  is_pass: boolean | null;
-  started_at: string;
-  submitted_at: string | null;
-  time_spent_seconds: number | null;
-  ip_address: string | null;
-  answers: QuizAnswerItem[];
-  violation_count: number;
-  created_at: string;
-}
-
-export interface ViolationLog {
-  id: number;
-  attempt: number;
-  violation_type: string;
-  violation_display: string;
-  details: Record<string, unknown>;
-  timestamp: string;
-}
-
-
+// ── Fasaaha (Arabic Speaking Intelligence) ──

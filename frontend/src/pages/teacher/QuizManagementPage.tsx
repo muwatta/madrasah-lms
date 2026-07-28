@@ -44,8 +44,8 @@ export default function QuizManagementPage() {
 
   const loadQuizzes = useCallback(() => {
     setLoading(true);
-    quizAPI.list()
-      .then((res) => setQuizzes(unwrapPaginated(res.data)))
+    quizAPI.quizzes.list()
+      .then((res: any) => setQuizzes(unwrapPaginated(res.data)))
       .catch(() => setError(t('quizManagement.loadFailed')))
       .finally(() => setLoading(false));
   }, [t]);
@@ -89,10 +89,10 @@ export default function QuizManagementPage() {
       title: quiz.title,
       description: quiz.description,
       subject: quiz.subject,
-      quiz_type: quiz.quiz_type,
+      quiz_type: quiz.quiz_type ?? 'practice',
       time_limit_minutes: quiz.time_limit_minutes ?? '',
       passing_score: quiz.passing_score,
-      question_ids: quiz.question_ids,
+      question_ids: quiz.question_ids ?? [],
     });
     setShowForm(true);
   };
@@ -107,9 +107,9 @@ export default function QuizManagementPage() {
         time_limit_minutes: form.time_limit_minutes === '' ? null : Number(form.time_limit_minutes),
       };
       if (editingId) {
-        await quizAPI.update(editingId, payload);
+        await quizAPI.quizzes.update(editingId, payload as Record<string, unknown>);
       } else {
-        await quizAPI.create(payload);
+        await quizAPI.quizzes.create(payload as Record<string, unknown>);
       }
       setShowForm(false);
       loadQuizzes();
@@ -122,7 +122,7 @@ export default function QuizManagementPage() {
 
   const togglePublish = async (quiz: Quiz) => {
     try {
-      await quizAPI.publish(quiz.id);
+      await quizAPI.quizzes.publish(quiz.id);
       loadQuizzes();
     } catch {
       setError(t('quizManagement.publishFailed'));
@@ -136,7 +136,7 @@ export default function QuizManagementPage() {
   const handleConfirmDelete = async () => {
     if (confirmDeleteId === null) return;
     try {
-      await quizAPI.delete(confirmDeleteId);
+      await quizAPI.quizzes.delete(confirmDeleteId);
       loadQuizzes();
     } catch {
       setError(t('quizManagement.deleteFailed'));

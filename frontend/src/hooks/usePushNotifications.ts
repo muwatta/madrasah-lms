@@ -34,7 +34,7 @@ export function usePushNotifications() {
             endpoint: subJson.endpoint,
             p256dh: (subJson.keys?.p256dh as string) || '',
             auth: (subJson.keys?.auth as string) || '',
-          } as PushSubscription);
+          } as any);
         }
         return true;
       }
@@ -44,7 +44,7 @@ export function usePushNotifications() {
       const vapidKey = res.data.publicKey;
       if (!vapidKey) return false;
 
-      const applicationServerKey = urlBase64ToUint8Array(vapidKey);
+      const applicationServerKey = urlBase64ToUint8Array(vapidKey) as any;
       subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey,
@@ -57,7 +57,7 @@ export function usePushNotifications() {
           endpoint: subJson.endpoint,
           p256dh: (subJson.keys?.p256dh as string) || '',
           auth: (subJson.keys?.auth as string) || '',
-        } as PushSubscription);
+        } as any);
       }
 
       return true;

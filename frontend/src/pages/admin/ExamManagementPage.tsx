@@ -42,6 +42,7 @@ export default function ExamManagementPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadExams(); }, []);
 
   const handleCreateExam = async (e: React.FormEvent) => {

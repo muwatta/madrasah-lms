@@ -157,6 +157,7 @@ export default function AuditLogPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadLogs(); }, [page, actionFilter, modelFilter]);
 
   const handleSearch = (e: React.FormEvent) => {

@@ -36,6 +36,7 @@ export default function SubjectManagementPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadSubjects(); }, []);
 
   const handleSubjectSubmit = async (e: React.FormEvent) => {

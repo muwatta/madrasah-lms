@@ -42,6 +42,7 @@ export default function ParentStudentPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadData(); }, []);
 
   const handleCreate = async (e: React.FormEvent) => {

@@ -27,7 +27,7 @@ export function SkeletonCard() {
   );
 }
 
-export function SkeletonTable({ rows = 5 }: { rows?: number }) {
+export function SkeletonTable({ rows = 5, cols: _cols }: { rows?: number; cols?: number }) {
   return (
     <div className="space-y-2">
       {Array.from({ length: rows }).map((_, i) => (

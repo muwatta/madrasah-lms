@@ -14,7 +14,6 @@ import type {
   FasaahaTeacherDashboard,
   DialogueSession,
   DialogueTurn,
-  DialogueEvaluation,
   DailyGoal,
   LeaderboardEntry,
   ScoreTrend,

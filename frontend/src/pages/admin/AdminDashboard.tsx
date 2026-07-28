@@ -19,7 +19,7 @@ export default function AdminDashboard() {
       .then((res) => setData(res.data))
       .catch((err) => setError(err.response?.data?.detail || t('adminDashboard.loadFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (

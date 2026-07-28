@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { quizAPI, attemptAPI, questionAPI } from '../../api';
+import { quizAPI, questionAPI } from '../../api';
 import type { Question, Quiz, GradingResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -18,7 +18,7 @@ export default function QuizTakePage() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
-  const [attemptId, setAttemptId] = useState<number | null>(null);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +43,7 @@ export default function QuizTakePage() {
     setShowConfirmModal(false);
     if (timerRef.current) clearInterval(timerRef.current);
     try {
-      const res = await attemptAPI.submit(attemptId, answers);
+      const res = await quizAPI.attempts.submit(attemptId);
       setResult(res.data.grading);
     } catch (err: any) {
       setError(err.response?.data?.detail || t('quizTake.submitFailed'));
@@ -55,7 +55,7 @@ export default function QuizTakePage() {
   useEffect(() => {
     const init = async () => {
       try {
-        const quizRes = await quizAPI.get(Number(quizId));
+        const quizRes = await quizAPI.quizzes.get(Number(quizId));
         const q = quizRes.data;
         setQuiz(q);
 
@@ -63,8 +63,8 @@ export default function QuizTakePage() {
         const fetchedQuestions = qRes.data.results || qRes.data || [];
         setQuestions(fetchedQuestions);
 
-        const attemptRes = await attemptAPI.start(Number(quizId));
-        setAttemptId(attemptRes.data.id);
+        const attemptRes = await quizAPI.attempts.start(Number(quizId));
+        setAttemptId(attemptRes.data.uuid || attemptRes.data.id);
 
         if (q.time_limit_minutes) {
           setTimeLeft(q.time_limit_minutes * 60);

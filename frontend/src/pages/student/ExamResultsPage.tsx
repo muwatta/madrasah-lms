@@ -22,7 +22,7 @@ export default function ExamResultsPage() {
       }
     };
     fetchResults();
-  }, []);
+  }, [t]);
 
   const stats = useMemo(() => {
     if (results.length === 0) return null;

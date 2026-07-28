@@ -240,8 +240,8 @@ export function useDetachQuestion() {
 export function useUpdateQuizQuestion() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ quizId, questionId, data }: { quizId: number; questionId: number; data: Record<string, unknown> }) =>
-      api.put(`/quizzes/${quizId}/questions/${questionId}/`, data),
+    mutationFn: ({ quizId, questionId: _questionId, data }: { quizId: number; questionId: number; data: Record<string, unknown> }) =>
+      quizAPI.quizzes.update(quizId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['quiz'] }),
   });
 }

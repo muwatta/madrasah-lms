@@ -63,7 +63,7 @@ export default function StudentDashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [t]);
 
   const completedAttempts = useMemo(() => attempts.filter((a) => a.score !== null), [attempts]);
   const sortedAttempts = useMemo(() =>

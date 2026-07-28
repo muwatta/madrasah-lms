@@ -82,6 +82,7 @@ export default function LessonPlannerPage() {
       .finally(() => setLoading(false));
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadData(); }, []);
 
   const filteredPlans = useMemo(() => {

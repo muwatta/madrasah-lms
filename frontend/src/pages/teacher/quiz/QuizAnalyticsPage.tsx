@@ -21,7 +21,7 @@ export default function QuizAnalyticsPage() {
           { label: t('quiz.totalAttempts') || 'Total Attempts', value: stats?.total_attempts ?? 0, color: 'text-blue-600' },
           { label: t('quiz.averageScore') || 'Avg Score', value: `${(stats?.average_score ?? 0).toFixed(1)}%`, color: 'text-green-600' },
           { label: t('quiz.passRate') || 'Pass Rate', value: `${(stats?.pass_rate ?? 0).toFixed(1)}%`, color: 'text-purple-600' },
-          { label: t('quiz.avgTimeSpent') || 'Avg Time', value: `${Math.round((stats?.average_time_spent ?? 0) / 60)}m`, color: 'text-orange-600' },
+          { label: t('quiz.avgTimeSpent') || 'Avg Time', value: `${Math.round(((stats as any)?.average_time_spent ?? 0) / 60)}m`, color: 'text-orange-600' },
         ].map(card => (
           <div key={card.label} className="rounded-xl border border-gray-200 bg-white p-4">
             <p className="text-xs text-gray-500">{card.label}</p>
