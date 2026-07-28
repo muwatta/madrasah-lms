@@ -118,6 +118,7 @@ export default function FinancePage() {
     ]).catch(() => {});
     loadFees();
     loadAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredFees = useMemo(() => {

@@ -57,6 +57,14 @@ export default function AudioRecorder({
     return "bg-green-500";
   };
 
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+    }
+    clearTimer();
+    setIsRecording(false);
+  }, [isRecording, clearTimer]);
+
   const startRecording = useCallback(async () => {
     setError(null);
     setRecordedBlob(null);
@@ -99,15 +107,7 @@ export default function AudioRecorder({
     } catch {
       setError(t("microphone_access_denied"));
     }
-  }, [maxDurationSeconds, clearTimer, t, recordedUrl]);
-
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-    }
-    clearTimer();
-    setIsRecording(false);
-  }, [isRecording, clearTimer]);
+  }, [maxDurationSeconds, clearTimer, t, recordedUrl, stopRecording]);
 
   const handleUseRecording = () => {
     if (recordedBlob) {

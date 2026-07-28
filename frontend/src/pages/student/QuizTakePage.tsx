@@ -50,7 +50,7 @@ export default function QuizTakePage() {
     } finally {
       setSubmitting(false);
     }
-  }, [attemptId, submitting, answers]);
+  }, [attemptId, submitting, t]);
 
   useEffect(() => {
     const init = async () => {
@@ -76,7 +76,7 @@ export default function QuizTakePage() {
       }
     };
     init();
-  }, [quizId]);
+  }, [quizId, t]);
 
   useEffect(() => {
     if (timeLeft === null || result) return;

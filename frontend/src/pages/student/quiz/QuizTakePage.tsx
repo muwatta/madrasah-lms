@@ -40,13 +40,17 @@ export default function QuizTakePage() {
     });
   };
 
+  const handleSubmit = useCallback(() => {
+    if (attemptUuid && !submitQuiz.isPending) submitQuiz.mutate(attemptUuid, { onSuccess: () => navigate('/student/quiz/results') });
+  }, [attemptUuid, submitQuiz, navigate]);
+
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress') return;
     const interval = setInterval(() => {
       setTimeLeft(prev => { if (prev <= 1) { handleSubmit(); return 0; } return prev - 1; });
     }, 1000);
     return () => clearInterval(interval);
-  }, [attempt?.status]);
+  }, [attempt, handleSubmit]);
 
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress' || !attemptUuid) return;
@@ -56,7 +60,7 @@ export default function QuizTakePage() {
       });
     }, 10000);
     return () => { if (autoSaveTimer.current) clearInterval(autoSaveTimer.current); };
-  }, [attempt?.status, attemptUuid, localAnswers]);
+  }, [attempt, attempt?.status, attemptUuid, localAnswers, saveAnswer]);
 
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress' || !attemptUuid) return;
@@ -67,7 +71,7 @@ export default function QuizTakePage() {
     document.addEventListener('visibilitychange', handleVisibility);
     window.addEventListener('blur', handleBlur);
     return () => { document.removeEventListener('visibilitychange', handleVisibility); window.removeEventListener('blur', handleBlur); };
-  }, [attempt?.status, attemptUuid]);
+  }, [attempt, attempt?.status, attemptUuid, reportViolation]);
 
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress' || !attemptUuid) return;
@@ -77,7 +81,7 @@ export default function QuizTakePage() {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [attempt?.status, attemptUuid]);
+  }, [attempt, attempt?.status, attemptUuid, reportViolation]);
 
   useEffect(() => {
     if (!attempt || attempt.status !== 'in_progress') return;
@@ -89,20 +93,16 @@ export default function QuizTakePage() {
     document.addEventListener('paste', preventPaste);
     document.addEventListener('selectstart', prevent);
     return () => { document.removeEventListener('contextmenu', prevent); document.removeEventListener('copy', preventCopy); document.removeEventListener('paste', preventPaste); document.removeEventListener('selectstart', prevent); };
-  }, [attempt?.status, attemptUuid]);
+  }, [attempt, attempt?.status, attemptUuid, reportViolation]);
 
   const handleAnswer = useCallback((questionId: number, answer: string) => {
     setLocalAnswers(prev => ({ ...prev, [questionId]: answer }));
     if (attemptUuid) saveAnswer.mutate({ attemptUuid, questionId, selectedAnswer: answer });
-  }, [attemptUuid]);
+  }, [attemptUuid, saveAnswer]);
 
   const handleFlag = useCallback((questionId: number) => {
     if (attemptUuid) flagQuestion.mutate({ attemptUuid, questionId });
-  }, [attemptUuid]);
-
-  const handleSubmit = () => {
-    if (attemptUuid && !submitQuiz.isPending) submitQuiz.mutate(attemptUuid, { onSuccess: () => navigate('/student/quiz/results') });
-  };
+  }, [attemptUuid, flagQuestion]);
 
   const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
