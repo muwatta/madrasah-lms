@@ -6,9 +6,11 @@ import type { TeacherDashboard as TeacherDashboardType } from '../../types';
 import StatCard from '../../components/StatCard';
 import { SkeletonStatsGrid, SkeletonChart, SkeletonCard } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function TeacherDashboard() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [data, setData] = useState<TeacherDashboardType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,8 +43,15 @@ export default function TeacherDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="mb-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{t('teacher.dashboard')}</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">{t('guides.teacherDashboard')}</p>
+      <div className="mb-8 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 border border-blue-200/50 dark:border-blue-800/30 p-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('teacher.dashboard')}</h1>
+        {user?.full_name && (
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {t('common.welcomeBack')}, <span className="font-semibold text-blue-700 dark:text-blue-400">{user.full_name}</span>
+          </p>
+        )}
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('guides.teacherDashboard')}</p>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard

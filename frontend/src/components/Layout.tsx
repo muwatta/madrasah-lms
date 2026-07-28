@@ -13,6 +13,7 @@ interface NavLink {
   labelKey: string;
   path: string;
   icon: JSX.Element;
+  color: string;
 }
 
 function S({ d, viewBox = '0 0 24 24' }: { d: string; viewBox?: string }) {
@@ -71,86 +72,86 @@ const navIcons: Record<string, JSX.Element> = {
 
 const roleNavLinks: Record<User['role'], NavLink[]> = {
   student: [
-    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
-    { labelKey: 'nav.myResults', path: '/results', icon: navIcons.myResults },
-    { labelKey: 'nav.exams', path: '/exams', icon: navIcons.exams },
-    { labelKey: 'nav.progress', path: '/progress', icon: navIcons.progress },
-    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance },
-    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework },
-    { labelKey: 'nav.calendar', path: '/calendar', icon: navIcons.calendar },
-    { labelKey: 'nav.portfolio', path: '/portfolio', icon: navIcons.portfolio },
-    { labelKey: 'nav.certificates', path: '/certificates', icon: navIcons.certificates },
-    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
-    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
-    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
-    { labelKey: 'nav.career', path: '/career', icon: navIcons.career },
-    { labelKey: 'nav.aiTutor', path: '/tutor', icon: navIcons.aiTutor },
-    { labelKey: 'nav.learningPath', path: '/path', icon: navIcons.learningPath },
-    { labelKey: 'nav.flashcards', path: '/flashcards', icon: navIcons.flashcards },
-    { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
-    { labelKey: 'nav.chooseSubjects', path: '/choose-subjects', icon: navIcons.enrollments },
-    { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha },
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#22c55e' },
+    { labelKey: 'nav.myResults', path: '/results', icon: navIcons.myResults, color: '#3b82f6' },
+    { labelKey: 'nav.exams', path: '/exams', icon: navIcons.exams, color: '#8b5cf6' },
+    { labelKey: 'nav.progress', path: '/progress', icon: navIcons.progress, color: '#f59e0b' },
+    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance, color: '#10b981' },
+    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework, color: '#ef4444' },
+    { labelKey: 'nav.calendar', path: '/calendar', icon: navIcons.calendar, color: '#06b6d4' },
+    { labelKey: 'nav.portfolio', path: '/portfolio', icon: navIcons.portfolio, color: '#ec4899' },
+    { labelKey: 'nav.certificates', path: '/certificates', icon: navIcons.certificates, color: '#f97316' },
+    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements, color: '#14b8a6' },
+    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages, color: '#6366f1' },
+    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes, color: '#84cc16' },
+    { labelKey: 'nav.career', path: '/career', icon: navIcons.career, color: '#a855f7' },
+    { labelKey: 'nav.aiTutor', path: '/tutor', icon: navIcons.aiTutor, color: '#eab308' },
+    { labelKey: 'nav.learningPath', path: '/path', icon: navIcons.learningPath, color: '#0ea5e9' },
+    { labelKey: 'nav.flashcards', path: '/flashcards', icon: navIcons.flashcards, color: '#d946ef' },
+    { labelKey: 'nav.character', path: '/character', icon: navIcons.character, color: '#f43f5e' },
+    { labelKey: 'nav.chooseSubjects', path: '/choose-subjects', icon: navIcons.enrollments, color: '#2dd4bf' },
+    { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha, color: '#818cf8' },
   ],
   ustaadh: [
-    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
-    { labelKey: 'nav.myQuizzes', path: '/quizzes', icon: navIcons.myQuizzes },
-    { labelKey: 'nav.questionBank', path: '/questions', icon: navIcons.questionBank },
-    { labelKey: 'nav.students', path: '/students', icon: navIcons.students },
-    { labelKey: 'nav.lessonPlanner', path: '/lesson-planner', icon: navIcons.lessonPlanner },
-    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework },
-    { labelKey: 'nav.timetable', path: '/timetable', icon: navIcons.calendar },
-    { labelKey: 'nav.quran', path: '/quran', icon: navIcons.quran },
-    { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
-    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance },
-    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
-    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
-    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
-    { labelKey: 'nav.resultsEntry', path: '/results', icon: navIcons.reports },
-    { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha },
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#3b82f6' },
+    { labelKey: 'nav.myQuizzes', path: '/quizzes', icon: navIcons.myQuizzes, color: '#8b5cf6' },
+    { labelKey: 'nav.questionBank', path: '/questions', icon: navIcons.questionBank, color: '#06b6d4' },
+    { labelKey: 'nav.students', path: '/students', icon: navIcons.students, color: '#22c55e' },
+    { labelKey: 'nav.lessonPlanner', path: '/lesson-planner', icon: navIcons.lessonPlanner, color: '#f59e0b' },
+    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework, color: '#ef4444' },
+    { labelKey: 'nav.timetable', path: '/timetable', icon: navIcons.calendar, color: '#14b8a6' },
+    { labelKey: 'nav.quran', path: '/quran', icon: navIcons.quran, color: '#10b981' },
+    { labelKey: 'nav.character', path: '/character', icon: navIcons.character, color: '#f43f5e' },
+    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance, color: '#84cc16' },
+    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements, color: '#f97316' },
+    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages, color: '#6366f1' },
+    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes, color: '#a855f7' },
+    { labelKey: 'nav.resultsEntry', path: '/results', icon: navIcons.reports, color: '#0ea5e9' },
+    { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha, color: '#d946ef' },
   ],
   parent: [
-    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
-    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
-    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance },
-    { labelKey: 'nav.feeStatus', path: '/fees', icon: navIcons.feeStatus },
-    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
-    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
-    { labelKey: 'nav.whatsapp', path: '/whatsapp', icon: navIcons.whatsapp },
-    { labelKey: 'nav.childResults', path: '/child-results', icon: navIcons.reports },
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#a855f7' },
+    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages, color: '#6366f1' },
+    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance, color: '#22c55e' },
+    { labelKey: 'nav.feeStatus', path: '/fees', icon: navIcons.feeStatus, color: '#f59e0b' },
+    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements, color: '#14b8a6' },
+    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes, color: '#10b981' },
+    { labelKey: 'nav.whatsapp', path: '/whatsapp', icon: navIcons.whatsapp, color: '#25d366' },
+    { labelKey: 'nav.childResults', path: '/child-results', icon: navIcons.reports, color: '#3b82f6' },
   ],
   mudeer: [
-    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
-    { labelKey: 'nav.users', path: '/users', icon: navIcons.users },
-    { labelKey: 'nav.subjects', path: '/subjects', icon: navIcons.subjects },
-    { labelKey: 'nav.exams', path: '/exams', icon: navIcons.exams },
-    { labelKey: 'nav.enrollments', path: '/enrollments', icon: navIcons.enrollments },
-    { labelKey: 'nav.finance', path: '/finance', icon: navIcons.finance },
-    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance },
-    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
-    { labelKey: 'nav.reports', path: '/reports', icon: navIcons.reports },
-    { labelKey: 'nav.engagement', path: '/engagement', icon: navIcons.engagement },
-    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
-    { labelKey: 'nav.admissions', path: '/admissions', icon: navIcons.admissions },
-    { labelKey: 'nav.atRisk', path: '/at-risk', icon: navIcons.atRisk },
-    { labelKey: 'nav.teacherWorkload', path: '/teacher-workload', icon: navIcons.teacherWorkload },
-    { labelKey: 'nav.character', path: '/character', icon: navIcons.character },
-    { labelKey: 'nav.whatsapp', path: '/whatsapp', icon: navIcons.whatsapp },
-    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
-    { labelKey: 'nav.publishResults', path: '/results', icon: navIcons.reports },
-    { labelKey: 'nav.parentLinks', path: '/parent-students', icon: navIcons.parentLinks },
-    { labelKey: 'nav.audit', path: '/audit', icon: navIcons.audit },
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#f59e0b' },
+    { labelKey: 'nav.users', path: '/users', icon: navIcons.users, color: '#3b82f6' },
+    { labelKey: 'nav.subjects', path: '/subjects', icon: navIcons.subjects, color: '#8b5cf6' },
+    { labelKey: 'nav.exams', path: '/exams', icon: navIcons.exams, color: '#ef4444' },
+    { labelKey: 'nav.enrollments', path: '/enrollments', icon: navIcons.enrollments, color: '#22c55e' },
+    { labelKey: 'nav.finance', path: '/finance', icon: navIcons.finance, color: '#10b981' },
+    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance, color: '#06b6d4' },
+    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements, color: '#f97316' },
+    { labelKey: 'nav.reports', path: '/reports', icon: navIcons.reports, color: '#14b8a6' },
+    { labelKey: 'nav.engagement', path: '/engagement', icon: navIcons.engagement, color: '#6366f1' },
+    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages, color: '#a855f7' },
+    { labelKey: 'nav.admissions', path: '/admissions', icon: navIcons.admissions, color: '#ec4899' },
+    { labelKey: 'nav.atRisk', path: '/at-risk', icon: navIcons.atRisk, color: '#f43f5e' },
+    { labelKey: 'nav.teacherWorkload', path: '/teacher-workload', icon: navIcons.teacherWorkload, color: '#0ea5e9' },
+    { labelKey: 'nav.character', path: '/character', icon: navIcons.character, color: '#d946ef' },
+    { labelKey: 'nav.whatsapp', path: '/whatsapp', icon: navIcons.whatsapp, color: '#25d366' },
+    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes, color: '#84cc16' },
+    { labelKey: 'nav.publishResults', path: '/results', icon: navIcons.reports, color: '#2dd4bf' },
+    { labelKey: 'nav.parentLinks', path: '/parent-students', icon: navIcons.parentLinks, color: '#818cf8' },
+    { labelKey: 'nav.audit', path: '/audit', icon: navIcons.audit, color: '#eab308' },
   ],
   idaarah: [
-    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard },
-    { labelKey: 'nav.finance', path: '/finance', icon: navIcons.finance },
-    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance },
-    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements },
-    { labelKey: 'nav.reports', path: '/reports', icon: navIcons.reports },
-    { labelKey: 'nav.engagement', path: '/engagement', icon: navIcons.engagement },
-    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages },
-    { labelKey: 'nav.lessonPlanner', path: '/lesson-planner', icon: navIcons.lessonPlanner },
-    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework },
-    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes },
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#f43f5e' },
+    { labelKey: 'nav.finance', path: '/finance', icon: navIcons.finance, color: '#22c55e' },
+    { labelKey: 'nav.attendance', path: '/attendance', icon: navIcons.attendance, color: '#3b82f6' },
+    { labelKey: 'nav.announcements', path: '/announcements', icon: navIcons.announcements, color: '#f59e0b' },
+    { labelKey: 'nav.reports', path: '/reports', icon: navIcons.reports, color: '#8b5cf6' },
+    { labelKey: 'nav.engagement', path: '/engagement', icon: navIcons.engagement, color: '#06b6d4' },
+    { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages, color: '#6366f1' },
+    { labelKey: 'nav.lessonPlanner', path: '/lesson-planner', icon: navIcons.lessonPlanner, color: '#14b8a6' },
+    { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework, color: '#ef4444' },
+    { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes, color: '#10b981' },
   ],
 };
 
@@ -296,8 +297,9 @@ export default function Layout() {
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-islamic-dark text-white">
-      <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
-        <span className="text-lg font-semibold">{t('nav.schoolLms')}</span>
+      <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-600/20 via-transparent to-emerald-500/20" />
+        <span className="relative text-lg font-semibold">{t('nav.schoolLms')}</span>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin">
@@ -315,7 +317,14 @@ export default function Layout() {
               }`}
               style={{ animationDelay: `${i * 40}ms` }}
             >
-              {link.icon}
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${
+                  isActive ? 'bg-white/20' : 'bg-white/5'
+                }`}
+                style={!isActive ? { backgroundColor: `${link.color}15` } : undefined}
+              >
+                <span style={isActive ? undefined : { color: link.color }}>{link.icon}</span>
+              </span>
               <span className="truncate">{link.label}</span>
               {isActive && <span className="ms-auto h-1.5 w-1.5 rounded-full bg-white" />}
             </Link>
@@ -325,8 +334,17 @@ export default function Layout() {
 
       {user && (
         <div className="border-t border-white/10 p-4">
-          <p className="text-xs text-gray-400">{t(roleLabelKeys[user.role])}</p>
-          <p className="truncate text-sm font-medium">{user.full_name}</p>
+          <div className="flex items-center gap-3">
+            <span
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${roleColors[user.role]}`}
+            >
+              {user.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs text-gray-400">{t(roleLabelKeys[user.role])}</p>
+              <p className="truncate text-sm font-medium">{user.full_name}</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

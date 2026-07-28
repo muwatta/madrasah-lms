@@ -5,9 +5,11 @@ import type { AdminDashboard as AdminDashboardType } from '../../types';
 import StatCard from '../../components/StatCard';
 import { SkeletonStatsGrid, SkeletonTable, SkeletonCard } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AdminDashboard() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [data, setData] = useState<AdminDashboardType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,18 +48,27 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-1">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('adminDashboard.title')}</h1>
-        <a
-          href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/export/students/?format=csv`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-press rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-        >
-          {t('common.exportCsv')}
-        </a>
+      <div className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/5 to-yellow-500/10 border border-amber-200/50 dark:border-amber-800/30 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('adminDashboard.title')}</h1>
+            {user?.full_name && (
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {t('common.welcomeBack')}, <span className="font-semibold text-amber-700 dark:text-amber-400">{user.full_name}</span>
+              </p>
+            )}
+          </div>
+          <a
+            href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/export/students/?format=csv`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-press rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+          >
+            {t('common.exportCsv')}
+          </a>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{t('guides.adminDashboard')}</p>
       </div>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.adminDashboard')}</p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title={t('adminDashboard.totalUsers')} value={data.total_users} delay={0} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>} />

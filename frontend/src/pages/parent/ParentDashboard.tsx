@@ -5,6 +5,7 @@ import { dashboardAPI } from '../../api';
 import type { ParentDashboard as ParentDashboardType } from '../../types';
 import { SkeletonStatsGrid, SkeletonCard, SkeletonTable, SkeletonChart } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 function getInitials(name: string) {
   return name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -21,6 +22,7 @@ function getAvatarColor(name: string) {
 
 export default function ParentDashboard() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [data, setData] = useState<ParentDashboardType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,8 +86,15 @@ export default function ParentDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{t('parentDashboard.title')}</h1>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.parentDashboard')}</p>
+      <div className="rounded-2xl bg-gradient-to-r from-purple-500/10 via-violet-500/5 to-fuchsia-500/10 border border-purple-200/50 dark:border-purple-800/30 p-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{t('parentDashboard.title')}</h1>
+        {user?.full_name && (
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {t('common.welcomeBack')}, <span className="font-semibold text-purple-700 dark:text-purple-400">{user.full_name}</span>
+          </p>
+        )}
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{t('guides.parentDashboard')}</p>
+      </div>
 
       {/* Summary stats */}
       {summaryStats && (

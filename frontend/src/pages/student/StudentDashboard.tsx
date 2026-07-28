@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { dashboardAPI } from '../../api';
 import type { Quiz, QuizAttempt, Enrollment, ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import StatCard from '../../components/StatCard';
 import { SkeletonStatsGrid, SkeletonCard, SkeletonChart } from '../../components/Skeleton';
 
@@ -38,6 +39,7 @@ function getGradeBg(score: number): string {
 
 export default function StudentDashboard() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -209,8 +211,15 @@ export default function StudentDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{t('student.myJourney')}</h1>
+      <div className="mb-8 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-blue-500/10 border border-emerald-200/50 dark:border-emerald-800/30 p-6">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+          {t('student.myJourney')}
+        </h1>
+        {user?.full_name && (
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {t('common.welcomeBack')}, <span className="font-semibold text-emerald-700 dark:text-emerald-400">{user.full_name}</span>
+          </p>
+        )}
         <p className="text-gray-500 dark:text-gray-400 mt-1">{t('student.journeySubtitle')}</p>
       </div>
 

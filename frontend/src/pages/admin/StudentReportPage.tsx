@@ -99,7 +99,7 @@ export default function StudentReportPage() {
       <h1 className="text-2xl font-bold text-gray-900 dark:text-[var(--color-text-primary)]">{t('studentReport.title')}</h1>
 
       <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm opacity-0 animate-slide-up">
-        <label className="mb-1 block text-xs font-medium text-gray-500">{t('studentReport.selectStudent')}</label>
+        <label className="mb-1 block text-xs font-medium text-white-500">{t('studentReport.selectStudent')}</label>
         {loadingStudents ? (
           <Skeleton className="h-10 w-full" />
         ) : (

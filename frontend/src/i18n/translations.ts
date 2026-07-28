@@ -133,6 +133,7 @@ export const translations = {
     retry: { ar: 'إعادة المحاولة', en: 'Retry' },
     pageNotFound: { ar: 'الصفحة غير موجودة', en: 'Page not found' },
     welcome: { ar: 'أهلاً بك', en: 'Welcome' },
+    welcomeBack: { ar: 'مرحباً بعودتك', en: 'Welcome back' },
     loadingData: { ar: 'جارٍ تحميل البيانات...', en: 'Loading data...' },
     noItems: { ar: 'لا توجد عناصر', en: 'No items' },
     yes: { ar: 'نعم', en: 'Yes' },
