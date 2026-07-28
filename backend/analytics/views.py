@@ -15,9 +15,9 @@ class AtRiskPredictionListView(generics.ListAPIView):
 
     def get_queryset(self):
         qs = AtRiskPrediction.objects.filter(
-            madrasah=self.request.user.madrasah, is_active=True,  # pyright: ignore[reportAttributeAccessIssue]
+            madrasah=self.request.user.madrasah, is_active=True, 
         ).select_related('student')
-        risk_level = self.request.query_params.get('risk_level')  # pyright: ignore[reportAttributeAccessIssue]
+        risk_level = self.request.query_params.get('risk_level') 
         if risk_level:
             qs = qs.filter(risk_level=risk_level)
         return qs
@@ -28,7 +28,7 @@ class AtRiskPredictionDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated, IsMudeer]
 
     def get_queryset(self):
-        return AtRiskPrediction.objects.filter(madrasah=self.request.user.madrasah).select_related('student')  # pyright: ignore[reportAttributeAccessIssue]
+        return AtRiskPrediction.objects.filter(madrasah=self.request.user.madrasah).select_related('student') 
 
 
 class GenerateAtRiskPredictionsView(APIView):
@@ -36,7 +36,7 @@ class GenerateAtRiskPredictionsView(APIView):
 
     def post(self, request):
         from .tasks import generate_at_risk_predictions
-        generate_at_risk_predictions.delay(madrasah_id=request.user.madrasah_id)  # pyright: ignore[reportAttributeAccessIssue]
+        generate_at_risk_predictions.delay(madrasah_id=request.user.madrasah_id) 
         return Response({
             'message': 'At-risk prediction generation started',
         }, status=status.HTTP_202_ACCEPTED)
@@ -79,12 +79,12 @@ class TeacherWorkloadListView(generics.ListAPIView):
         data = []
         for teacher in teachers:
             data.append({
-                'teacher': teacher.id,  # pyright: ignore[reportAttributeAccessIssue]
+                'teacher': teacher.id, 
                 'teacher_name': teacher.get_full_name(),
-                'lesson_plans_count': hw_count_map.get(teacher.id, 0),  # pyright: ignore[reportAttributeAccessIssue]
-                'homework_count': hw_count_map.get(teacher.id, 0),  # pyright: ignore[reportAttributeAccessIssue]
-                'ungraded_submissions_count': ungraded_map.get(teacher.id, 0),  # pyright: ignore[reportAttributeAccessIssue]
-                'upcoming_lessons': upcoming_map.get(teacher.id, 0),  # pyright: ignore[reportAttributeAccessIssue]
+                'lesson_plans_count': hw_count_map.get(teacher.id, 0), 
+                'homework_count': hw_count_map.get(teacher.id, 0), 
+                'ungraded_submissions_count': ungraded_map.get(teacher.id, 0), 
+                'upcoming_lessons': upcoming_map.get(teacher.id, 0), 
             })
 
         return Response(data)
@@ -95,13 +95,13 @@ class TeacherWorkloadMeView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.role not in ('ustaadh', 'mudeer', 'idaarah'):  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role not in ('ustaadh', 'mudeer', 'idaarah'): 
             return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
         from datetime import date, timedelta
         from lessons.models import Homework, HomeworkSubmission
 
-        madrasah = user.madrasah  # pyright: ignore[reportAttributeAccessIssue]
+        madrasah = user.madrasah 
         today = date.today()
         week_end = today + timedelta(days=(6 - today.weekday()))
 
@@ -119,7 +119,7 @@ class TeacherWorkloadMeView(APIView):
         ).count()
 
         return Response({
-            'teacher': user.id,  # pyright: ignore[reportAttributeAccessIssue]
+            'teacher': user.id, 
             'teacher_name': user.get_full_name(),
             'lesson_plans_count': lesson_plans,
             'homework_count': homework_count,
@@ -134,20 +134,20 @@ class SkillAssessmentListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = SkillAssessment.objects.filter(madrasah=user.madrasah).select_related('student', 'teacher')  # pyright: ignore[reportAttributeAccessIssue]
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
+        qs = SkillAssessment.objects.filter(madrasah=user.madrasah).select_related('student', 'teacher') 
+        if user.role == 'student': 
             qs = qs.filter(student=user)
-        student_id = self.request.query_params.get('student')  # pyright: ignore[reportAttributeAccessIssue]
+        student_id = self.request.query_params.get('student') 
         if student_id:
             qs = qs.filter(student_id=student_id)
         return qs
 
     def perform_create(self, serializer):
         user = self.request.user
-        if user.role not in ('mudeer', 'ustaadh', 'idaarah'):  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role not in ('mudeer', 'ustaadh', 'idaarah'): 
             raise PermissionDenied()
-        teacher = user if user.role == 'ustaadh' else None  # pyright: ignore[reportAttributeAccessIssue]
-        serializer.save(madrasah=user.madrasah, teacher=teacher)  # pyright: ignore[reportAttributeAccessIssue]
+        teacher = user if user.role == 'ustaadh' else None 
+        serializer.save(madrasah=user.madrasah, teacher=teacher) 
 
 
 class SkillAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -156,13 +156,13 @@ class SkillAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = SkillAssessment.objects.filter(madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
+        qs = SkillAssessment.objects.filter(madrasah=user.madrasah) 
+        if user.role == 'student': 
             qs = qs.filter(student=user)
         return qs
 
     def perform_destroy(self, instance):
-        if self.request.user.role not in ('mudeer', 'ustaadh', 'idaarah'):  # pyright: ignore[reportAttributeAccessIssue]
+        if self.request.user.role not in ('mudeer', 'ustaadh', 'idaarah'): 
             raise PermissionDenied()
         instance.delete()
 
@@ -174,20 +174,20 @@ class DigitalPortfolioListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah).select_related('student')  # pyright: ignore[reportAttributeAccessIssue]
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
+        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah).select_related('student') 
+        if user.role == 'student': 
             qs = qs.filter(student=user)
-        student_id = self.request.query_params.get('student')  # pyright: ignore[reportAttributeAccessIssue]
+        student_id = self.request.query_params.get('student') 
         if student_id:
             qs = qs.filter(student_id=student_id)
         return qs
 
     def perform_create(self, serializer):
         user = self.request.user
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
-            serializer.save(madrasah=user.madrasah, student=user)  # pyright: ignore[reportAttributeAccessIssue]
-        elif user.role in ('mudeer', 'idaarah'):  # pyright: ignore[reportAttributeAccessIssue]
-            serializer.save(madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
+        if user.role == 'student': 
+            serializer.save(madrasah=user.madrasah, student=user) 
+        elif user.role in ('mudeer', 'idaarah'): 
+            serializer.save(madrasah=user.madrasah) 
         else:
             raise PermissionDenied()
 
@@ -198,13 +198,13 @@ class DigitalPortfolioDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah)  # pyright: ignore[reportAttributeAccessIssue]
-        if user.role == 'student':  # pyright: ignore[reportAttributeAccessIssue]
+        qs = DigitalPortfolio.objects.filter(madrasah=user.madrasah) 
+        if user.role == 'student': 
             qs = qs.filter(student=user)
         return qs
 
     def perform_destroy(self, instance):
-        if self.request.user.role not in ('mudeer', 'idaarah') and instance.student != self.request.user:  # pyright: ignore[reportAttributeAccessIssue]
+        if self.request.user.role not in ('mudeer', 'idaarah') and instance.student != self.request.user: 
             raise PermissionDenied()
         instance.delete()
 
@@ -226,7 +226,7 @@ class AdminDashboardView(APIView):
         from assessments.models import QuizAttempt
         from results.models import Exam
 
-        madrasah = request.user.madrasah  # pyright: ignore[reportAttributeAccessIssue]
+        madrasah = request.user.madrasah 
         today = date.today()
         now = timezone.now()
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -296,7 +296,7 @@ class AdminDashboardView(APIView):
             madrasah=madrasah,
         ).select_related('recipient')[:5]
         notifications_data = [{
-            'id': n.id,  # pyright: ignore[reportAttributeAccessIssue]
+            'id': n.id, 
             'title': n.title,
             'message': n.message,
             'type': n.notification_type,
