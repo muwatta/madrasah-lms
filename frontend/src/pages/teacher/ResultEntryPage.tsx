@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { resultsAPI, enrollmentAPI, academicAPI, schoolClassAPI } from '../../api'
@@ -67,6 +67,7 @@ export default function ResultEntryPage() {
   const { t } = useLanguage()
   const { user } = useAuth()
   const isTeacher = user?.role === 'ustaadh'
+  const canManageComponents = !isTeacher
 
   const [sessions, setSessions] = useState<Session[]>([])
   const [selectedSession, setSelectedSession] = useState('')
@@ -153,11 +154,41 @@ export default function ResultEntryPage() {
     loadStudents()
   }, [loadStudents])
 
+  const genLockRef = useRef<string | null>(null)
+
   const loadComponents = useCallback(() => {
     if (!selectedSubject || !selectedTerm || !selectedClass) return
     setLoading(true)
+    const key = `${selectedSubject}_${selectedTerm}_${selectedClass}`
     resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass })
-      .then(r => setComponents(unwrapPaginated(r.data)))
+      .then(r => {
+        const data = unwrapPaginated<Component>(r.data)
+        if (data.length > 0) {
+          setComponents(data)
+          return
+        }
+        if (genLockRef.current === key) {
+          setComponents([])
+          return
+        }
+        genLockRef.current = key
+        resultsAPI.teacher.generateComponents({
+          subject: Number(selectedSubject),
+          term: Number(selectedTerm),
+          school_class: Number(selectedClass),
+        }).then(() => {
+          return resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass })
+        }).then(r2 => {
+          const generated = unwrapPaginated<Component>(r2.data)
+          setComponents(generated)
+          if (generated.length === 0) {
+            toast.error('No template configured — ask an admin to create one.')
+          }
+        }).catch(() => {
+          setComponents([])
+          toast.error('No template configured — ask an admin to create one.')
+        })
+      })
       .finally(() => setLoading(false))
   }, [selectedSubject, selectedTerm, selectedClass])
 
@@ -522,14 +553,16 @@ export default function ResultEntryPage() {
             <span>⚡</span>
             {t('results.generateComponents')}
           </button>
-          <button
-            onClick={handleOpenAddModal}
-            disabled={students.length === 0}
-            className="btn-press inline-flex items-center gap-2 rounded-lg border border-primary-300 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50 dark:border-primary-700 dark:bg-gray-800 dark:text-primary-300 dark:hover:bg-primary-900/20"
-          >
-            <span>+</span>
-            {t('results.addComponent')}
-          </button>
+          {canManageComponents && (
+            <button
+              onClick={handleOpenAddModal}
+              disabled={students.length === 0}
+              className="btn-press inline-flex items-center gap-2 rounded-lg border border-primary-300 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50 dark:border-primary-700 dark:bg-gray-800 dark:text-primary-300 dark:hover:bg-primary-900/20"
+            >
+              <span>+</span>
+              {t('results.addComponent')}
+            </button>
+          )}
         </div>
       )}
 
@@ -564,26 +597,30 @@ export default function ResultEntryPage() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleOpenEditModal(comp)}
-                className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                title="Edit component"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-              </button>
-              <button
-                onClick={() => handleDeleteComponent(comp.id)}
-                disabled={deletingComponent === comp.id}
-                className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                title="Delete component"
-              >
-                {deletingComponent === comp.id ? (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                ) : (
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                )}
-              </button>
-              <div className="mx-2 h-5 w-px bg-[var(--color-border-light)] dark:bg-gray-700" />
+              {canManageComponents && (
+                <>
+                  <button
+                    onClick={() => handleOpenEditModal(comp)}
+                    className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                    title="Edit component"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteComponent(comp.id)}
+                    disabled={deletingComponent === comp.id}
+                    className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    title="Delete component"
+                  >
+                    {deletingComponent === comp.id ? (
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    )}
+                  </button>
+                  <div className="mx-2 h-5 w-px bg-[var(--color-border-light)] dark:bg-gray-700" />
+                </>
+              )}
               <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
                 {existingScores[comp.id]?.length || 0}/{students.length} {t('results.scoresEntered')}
               </span>
