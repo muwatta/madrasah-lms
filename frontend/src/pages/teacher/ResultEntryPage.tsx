@@ -173,8 +173,8 @@ export default function ResultEntryPage() {
         }
         genLockRef.current = key
         const defaults = [
-          { name: 'Test', component_type: 'test', max_score: 100, weight: 30 },
           { name: 'Assignment', component_type: 'assignment', max_score: 100, weight: 20 },
+          { name: 'Test', component_type: 'test', max_score: 100, weight: 30 },
           { name: 'Exam', component_type: 'exam', max_score: 100, weight: 50 },
         ]
         const payload = {
@@ -348,6 +348,71 @@ export default function ResultEntryPage() {
     } finally {
       setSaving(prev => ({ ...prev, [componentId]: false }))
     }
+  }
+
+  const calcTotal = (studentId: number): string => {
+    let weighted = 0
+    let totalWeight = 0
+    for (const comp of components) {
+      const raw = parseFloat(scores[comp.id]?.[studentId] ?? '')
+      if (!isNaN(raw)) {
+        weighted += (raw / comp.max_score) * comp.weight
+        totalWeight += comp.weight
+      }
+    }
+    return totalWeight > 0 ? (weighted / totalWeight * 100).toFixed(1) : '—'
+  }
+
+  const csvFileRef = useRef<HTMLInputElement>(null)
+
+  const downloadCsvTemplate = () => {
+    const headers = ['Student ID', 'Student Name', ...components.map(c => c.name)]
+    const rows = students.map(s => [String(s.student), s.student_name, ...components.map(() => '')])
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `scores_${selectedSubject}_${selectedClass}_${selectedTerm}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleCsvUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string
+      const lines = text.split('\n').filter(l => l.trim())
+      if (lines.length < 2) { toast.error('CSV must have a header row and at least one data row'); return }
+      const header = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
+      const nameIdx = header.findIndex(h => /student.*name|name/i.test(h))
+      const idIdx = header.findIndex(h => /student.*id|id/i.test(h))
+      if (nameIdx < 0 && idIdx < 0) { toast.error('CSV must have a "Student Name" or "Student ID" column'); return }
+      const compCols: { compIdx: number; colIdx: number }[] = []
+      components.forEach(c => {
+        const ci = header.findIndex(h => h.toLowerCase() === c.name.toLowerCase())
+        if (ci >= 0) compCols.push({ compIdx: c.id, colIdx: ci })
+      })
+      if (compCols.length === 0) { toast.error('No score columns match component names'); return }
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''))
+        const name = nameIdx >= 0 ? cols[nameIdx] : ''
+        const id = idIdx >= 0 ? cols[idIdx] : ''
+        const student = students.find(s => s.student_name === name || String(s.student) === id)
+        if (!student) continue
+        compCols.forEach(({ compIdx, colIdx }) => {
+          const val = cols[colIdx]
+          if (val && !isNaN(Number(val))) {
+            handleScoreChange(compIdx, student.student, val)
+          }
+        })
+      }
+      toast.success('CSV uploaded — scores filled in')
+    }
+    reader.readAsText(file)
+    e.target.value = ''
   }
 
   const handleSubmit = async () => {
@@ -708,9 +773,47 @@ export default function ResultEntryPage() {
         </div>
       ))}
 
+      {components.length > 0 && students.length > 0 && (
+        <div className="mb-6 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="border-b border-[var(--color-border-light)] px-5 py-3 dark:border-gray-700">
+            <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
+              Student Summary · Total (Weighted)
+            </h3>
+          </div>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
+                <th className="w-12 px-3 py-2 text-center">#</th>
+                <th className="px-3 py-2 text-start">Student</th>
+                {components.map(c => (
+                  <th key={c.id} className="px-3 py-2 text-center">{c.name}<br /><span className="text-[10px] font-normal">({c.weight}%)</span></th>
+                ))}
+                <th className="px-3 py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">Total %</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
+              {students.map((student, idx) => (
+                <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
+                  <td className="px-3 py-2 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
+                  <td className="px-3 py-2 font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</td>
+                  {components.map(c => (
+                    <td key={c.id} className="px-3 py-2 text-center text-[var(--color-text-secondary)] dark:text-gray-300">
+                      {scores[c.id]?.[student.student] || '—'}
+                    </td>
+                  ))}
+                  <td className="px-3 py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">
+                    {calcTotal(student.student)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {components.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-[var(--color-text-secondary)] dark:text-gray-300">{t('results.status')}:</span>
             <span className={`rounded-full px-3 py-0.5 text-xs font-semibold ${
               getStatus() === 'submitted' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
@@ -721,6 +824,22 @@ export default function ResultEntryPage() {
                 : getStatus() === 'in_progress' ? t('results.inProgress')
                 : t('results.draft')}
             </span>
+            <div className="mx-3 h-5 w-px bg-[var(--color-border-light)] dark:bg-gray-700" />
+            <button
+              onClick={downloadCsvTemplate}
+              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              Download CSV
+            </button>
+            <button
+              onClick={() => csvFileRef.current?.click()}
+              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+              Upload CSV
+            </button>
+            <input ref={csvFileRef} type="file" accept=".csv" className="hidden" onChange={handleCsvUpload} />
           </div>
           <button
             onClick={handleSubmit}
