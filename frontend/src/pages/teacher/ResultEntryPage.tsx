@@ -172,22 +172,34 @@ export default function ResultEntryPage() {
           return
         }
         genLockRef.current = key
-        resultsAPI.teacher.generateComponents({
+        const defaults = [
+          { name: 'Test', component_type: 'test', max_score: 100, weight: 30 },
+          { name: 'Assignment', component_type: 'assignment', max_score: 100, weight: 20 },
+          { name: 'Exam', component_type: 'exam', max_score: 100, weight: 50 },
+        ]
+        const payload = {
           subject: Number(selectedSubject),
           term: Number(selectedTerm),
           school_class: Number(selectedClass),
-        }).then(() => {
-          return resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass })
-        }).then(r2 => {
-          const generated = unwrapPaginated<Component>(r2.data)
-          setComponents(generated)
-          if (generated.length === 0) {
-            toast.error('No template configured — ask an admin to create one.')
-          }
-        }).catch(() => {
-          setComponents([])
-          toast.error('No template configured — ask an admin to create one.')
-        })
+        }
+        resultsAPI.teacher.generateComponents(payload)
+          .then(() => resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass }))
+          .then(r2 => {
+            const generated = unwrapPaginated<Component>(r2.data)
+            if (generated.length > 0) {
+              setComponents(generated)
+              return
+            }
+            return Promise.all(defaults.map(d => resultsAPI.teacher.createComponent({ ...d, ...payload })))
+              .then(() => resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass }))
+              .then(r3 => setComponents(unwrapPaginated<Component>(r3.data)))
+          })
+          .catch(() => {
+            Promise.all(defaults.map(d => resultsAPI.teacher.createComponent({ ...d, ...payload })))
+              .then(() => resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass }))
+              .then(r3 => setComponents(unwrapPaginated<Component>(r3.data)))
+              .catch(() => setComponents([]))
+          })
       })
       .finally(() => setLoading(false))
   }, [selectedSubject, selectedTerm, selectedClass])
