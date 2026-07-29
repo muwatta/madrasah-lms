@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import HeroScene from '../../components/HeroScene';
 
 interface Stats {
   students: number;
@@ -297,29 +299,67 @@ export default function LandingPage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900 text-white">
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-emerald-500/10 to-transparent rounded-full blur-3xl" />
-        <div className="relative max-w-7xl mx-auto px-6 py-32 md:py-48 text-center">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-emerald-100 text-sm font-medium mb-4">
-            {t('landing.platformTag')}
-          </div>
-          <HeroCarousel />
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight">
-            <div>{t('landing.heroTitle1')}</div>
-            <div className="mt-4 text-emerald-200">
-              {t('landing.heroTitle2')}
+        <div className="relative max-w-7xl mx-auto px-6 py-16 md:py-24">
+          <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-12">
+            <div className="flex-1 text-center lg:text-left">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-emerald-100 text-xs font-medium mb-3"
+              >
+                {t('landing.platformTag')}
+              </motion.div>
+              <motion.h1
+                className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <div>{t('landing.heroTitle1')}</div>
+                <div className="mt-2 text-emerald-200">
+                  {t('landing.heroTitle2')}
+                </div>
+              </motion.h1>
+              <motion.p
+                className="mt-4 md:mt-6 text-base md:text-lg text-emerald-100/90 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.35 }}
+              >
+                {t('landing.heroDesc')}
+              </motion.p>
+              <motion.div
+                className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center lg:justify-start justify-center gap-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <Link to="/register" className="w-full sm:w-auto px-6 py-3 bg-white text-emerald-800 font-semibold rounded-xl hover:bg-emerald-50 transition-all shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-1 text-sm">
+                  {t('landing.startFreeTrial')}
+                </Link>
+                <Link to="#features" className="w-full sm:w-auto px-6 py-3 border-2 border-emerald-300/50 text-emerald-100 font-semibold rounded-xl hover:bg-emerald-800/50 transition-all hover:border-emerald-300 hover:-translate-y-1 backdrop-blur-sm text-sm">
+                  {t('landing.exploreFeatures')}
+                </Link>
+              </motion.div>
+              <motion.p
+                className="mt-4 text-xs text-emerald-200/70"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.65 }}
+              >
+                {t('landing.noCard')}
+              </motion.p>
             </div>
-          </h1>
-          <p className="mt-10 text-lg md:text-xl text-emerald-100/90 max-w-2xl mx-auto leading-relaxed">
-            {t('landing.heroDesc')}
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/register" className="w-full sm:w-auto px-8 py-3.5 bg-white text-emerald-800 font-semibold rounded-xl hover:bg-emerald-50 transition-all shadow-xl shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/30 hover:-translate-y-1">
-              {t('landing.startFreeTrial')}
-            </Link>
-            <Link to="#features" className="w-full sm:w-auto px-8 py-3.5 border-2 border-emerald-300/50 text-emerald-100 font-semibold rounded-xl hover:bg-emerald-800/50 transition-all hover:border-emerald-300 hover:-translate-y-1 backdrop-blur-sm">
-              {t('landing.exploreFeatures')}
-            </Link>
+            <motion.div
+              className="flex-1 w-full max-w-xs lg:max-w-md mt-4 lg:mt-0 hidden sm:block"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
+              <HeroScene />
+            </motion.div>
           </div>
-          <p className="mt-6 text-sm text-emerald-200/70">{t('landing.noCard')}</p>
         </div>
       </section>
 
