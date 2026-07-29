@@ -335,7 +335,11 @@ export default function ResultEntryPage() {
     try {
       await resultsAPI.teacher.bulkScores(componentId, { scores: entries })
       if (!isAutoSave) toast.success(t('results.scoresSaved'))
-      loadExistingScores(componentId)
+      setExistingScores(prev => ({
+        ...prev,
+        [componentId]: entries.map(e => ({ student: Number(e.student), score: e.score, remarks: e.remarks }))
+      }))
+      if (!isAutoSave) loadExistingScores(componentId)
     } catch (e: any) {
       toast.error(e.response?.data?.error || t('results.saveFailed'))
     } finally {
@@ -360,7 +364,7 @@ export default function ResultEntryPage() {
     }
     autoSaveTimers.current[componentId] = setTimeout(() => {
       performSave(componentId, true)
-    }, 800)
+    }, 1500)
   }
 
   const handleScoreBlur = (componentId: number, studentId: number) => {
