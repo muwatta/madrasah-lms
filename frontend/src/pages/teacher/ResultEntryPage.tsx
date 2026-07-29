@@ -363,6 +363,18 @@ export default function ResultEntryPage() {
     }, 800)
   }
 
+  const handleScoreBlur = (componentId: number, studentId: number) => {
+    const comp = components.find(c => c.id === componentId)
+    if (!comp) return
+    setScores(prev => {
+      const cur = prev[componentId]?.[studentId]
+      if (cur === undefined || cur === '' || isNaN(Number(cur))) return prev
+      const clamped = Math.min(Math.max(Number(cur), 0), comp.max_score)
+      if (clamped === Number(cur)) return prev
+      return { ...prev, [componentId]: { ...(prev[componentId] || {}), [studentId]: String(clamped) } }
+    })
+  }
+
   const handleSaveScores = async (componentId: number) => {
     if (autoSaveTimers.current[componentId]) {
       clearTimeout(autoSaveTimers.current[componentId])
@@ -689,6 +701,7 @@ export default function ResultEntryPage() {
                         step="0.5"
                         value={scores[c.id]?.[student.student] ?? ''}
                         onChange={e => handleScoreChange(c.id, student.student, e.target.value)}
+                        onBlur={() => handleScoreBlur(c.id, student.student)}
                         placeholder="—"
                         className="w-full max-w-[80px] mx-auto rounded-lg border border-[var(--color-border)] bg-white px-2 py-1.5 text-center text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500"
                       />
