@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
-import { FasaahaHero } from '../../components/fasaaha/hero';
+import { LandingHero } from '../../components/hero';
 
 interface Stats {
   students: number;
@@ -226,7 +226,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <FasaahaHero />
+      <LandingHero />
 
       {statsLoaded && (
         <section ref={statsRef} className="relative -mt-12 z-10 transition-all duration-700 transform" style={{ opacity: statsVisible ? 1 : 0, transform: statsVisible ? 'translateY(0)' : 'translateY(20px)' }}>
