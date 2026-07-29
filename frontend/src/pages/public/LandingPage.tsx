@@ -88,13 +88,114 @@ function useOnScreen(ref: React.RefObject<HTMLDivElement | null>, threshold = 0.
   return isVisible;
 }
 
-const heroQuotes = [
-  { ar: 'اطْلُبُوا الْعِلْمَ مِنَ الْمَهْدِ إِلَى اللَّحْدِ', en: 'Seek knowledge from the cradle to the grave' },
-  { ar: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', en: 'The best of you are those who learn the Quran and teach it' },
-  { ar: 'رَبِّ زِدْنِي عِلْماً', en: 'My Lord, increase me in knowledge' },
-  { ar: 'الْعِلْمُ نُورٌ', en: 'Knowledge is light' },
-  { ar: 'مَنْ سَلَكَ طَرِيقاً يَلْتَمِسُ فِيهِ عِلْماً سَهَّلَ اللَّهُ لَهُ طَرِيقاً إِلَى الْجَنَّةِ', en: 'Whoever treads a path seeking knowledge, Allah eases their way to Paradise' },
-  { ar: 'الْعِلْمُ فِي الصِّغَرِ كَالنَّقْشِ عَلَى الْحَجَرِ', en: 'Knowledge in childhood is like engraving on stone' },
+const schoolScenes = [
+  <svg key="0" viewBox="0 0 240 140" className="w-full h-full">
+    <rect x="80" y="10" width="100" height="60" rx="4" className="fill-emerald-900/50 stroke-emerald-700/40" strokeWidth="1.5" />
+    <rect x="85" y="15" width="90" height="50" rx="2" className="fill-emerald-800/30" />
+    <text x="120" y="30" className="fill-white/60 text-[6px] font-mono">الدرس</text>
+    <text x="115" y="42" className="fill-white/40 text-[5px] font-mono">{'{'} 1 + 1 = ? {'}'}</text>
+    <line x1="85" y1="48" x2="175" y2="48" className="stroke-white/20" strokeWidth="0.5" />
+    <circle cx="100" cy="30" r="10" className="fill-amber-200/80" />
+    <rect x="93" y="40" width="14" height="18" rx="2" className="fill-blue-600/70" />
+    <line x1="100" y1="58" x2="100" y2="80" className="stroke-blue-600/50" strokeWidth="3" />
+    <line x1="95" y1="80" x2="85" y2="100" className="stroke-blue-600/50" strokeWidth="2.5" />
+    <line x1="105" y1="80" x2="115" y2="100" className="stroke-blue-600/50" strokeWidth="2.5" />
+    <rect x="15" y="75" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="15" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="31" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="25" cy="65" r="7" className="fill-amber-200/70" />
+    <rect x="19" y="72" width="12" height="14" rx="2" className="fill-emerald-600/70" />
+    <rect x="50" y="75" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="50" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="66" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="60" cy="65" r="7" className="fill-amber-200/70" />
+    <rect x="54" y="72" width="12" height="14" rx="2" className="fill-emerald-600/70" />
+    <rect x="160" y="75" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="160" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="176" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="170" cy="65" r="7" className="fill-amber-200/70" />
+    <rect x="164" y="72" width="12" height="14" rx="2" className="fill-emerald-600/70" />
+    <rect x="195" y="75" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="195" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="211" y="89" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="205" cy="65" r="7" className="fill-amber-200/70" />
+    <rect x="199" y="72" width="12" height="14" rx="2" className="fill-emerald-600/70" />
+  </svg>,
+  <svg key="1" viewBox="0 0 240 140" className="w-full h-full">
+    <rect x="50" y="60" width="140" height="60" rx="6" className="fill-amber-700/50" />
+    <rect x="65" y="75" width="28" height="20" rx="1" className="fill-emerald-700/50" />
+    <rect x="97" y="65" width="22" height="28" rx="1" className="fill-emerald-700/50" />
+    <rect x="123" y="78" width="18" height="22" rx="1" className="fill-emerald-700/50" />
+    <rect x="145" y="70" width="24" height="26" rx="1" className="fill-emerald-700/50" />
+    <line x1="65" y1="55" x2="65" y2="30" className="stroke-white/20" strokeWidth="1" />
+    <line x1="135" y1="55" x2="135" y2="25" className="stroke-white/20" strokeWidth="1" />
+    <line x1="65" y1="30" x2="135" y2="25" className="stroke-white/20" strokeWidth="1" />
+    <rect x="70" y="95" width="20" height="24" rx="2" className="fill-amber-700/90" />
+    <circle cx="80" cy="85" r="7" className="fill-amber-200/70" />
+    <rect x="74" y="92" width="12" height="14" rx="2" className="fill-blue-600/70" />
+    <rect x="145" y="95" width="20" height="24" rx="2" className="fill-amber-700/90" />
+    <circle cx="155" cy="85" r="7" className="fill-amber-200/70" />
+    <rect x="149" y="92" width="12" height="14" rx="2" className="fill-blue-600/70" />
+    <rect x="105" y="95" width="20" height="24" rx="2" className="fill-amber-700/90" />
+    <rect x="105" y="119" width="4" height="10" className="fill-amber-800/50" />
+    <rect x="121" y="119" width="4" height="10" className="fill-amber-800/50" />
+    <circle cx="115" cy="85" r="7" className="fill-amber-200/70" />
+    <rect x="109" y="92" width="12" height="16" rx="2" className="fill-emerald-600/70" />
+  </svg>,
+  <svg key="2" viewBox="0 0 240 140" className="w-full h-full">
+    <rect x="30" y="70" width="100" height="60" rx="3" className="fill-amber-700/60" />
+    <rect x="30" y="70" width="5" height="60" className="fill-amber-800/50" />
+    <rect x="125" y="70" width="5" height="60" className="fill-amber-800/50" />
+    <rect x="35" y="75" width="90" height="50" rx="2" className="fill-emerald-800/20" />
+    <rect x="145" y="55" width="80" height="50" rx="3" className="fill-emerald-900/50 stroke-emerald-700/40" strokeWidth="1.5" />
+    <text x="160" y="72" className="fill-white/50 text-[5px] font-mono">قواعد</text>
+    <text x="155" y="84" className="fill-white/40 text-[4px] font-mono">اللغة</text>
+    <text x="155" y="94" className="fill-white/40 text-[4px] font-mono">العربية</text>
+    <circle cx="80" cy="45" r="10" className="fill-amber-200/80" />
+    <rect x="73" y="55" width="14" height="18" rx="2" className="fill-blue-600/70" />
+    <line x1="80" y1="73" x2="80" y2="90" className="stroke-blue-600/50" strokeWidth="3" />
+    <line x1="75" y1="90" x2="65" y2="110" className="stroke-blue-600/50" strokeWidth="2.5" />
+    <line x1="85" y1="90" x2="95" y2="110" className="stroke-blue-600/50" strokeWidth="2.5" />
+    <circle cx="180" cy="45" r="10" className="fill-amber-200/80" />
+    <rect x="173" y="55" width="14" height="18" rx="2" className="fill-emerald-600/70" />
+    <line x1="180" y1="73" x2="180" y2="95" className="stroke-emerald-600/50" strokeWidth="3" />
+    <line x1="175" y1="95" x2="170" y2="110" className="stroke-emerald-600/50" strokeWidth="2.5" />
+    <line x1="185" y1="95" x2="190" y2="110" className="stroke-emerald-600/50" strokeWidth="2.5" />
+    <line x1="80" y1="73" x2="180" y2="73" className="stroke-emerald-400/30" strokeWidth="1" strokeDasharray="4 2" />
+  </svg>,
+  <svg key="3" viewBox="0 0 240 140" className="w-full h-full">
+    <rect x="80" y="15" width="80" height="55" rx="3" className="fill-emerald-900/50 stroke-emerald-700/40" strokeWidth="1.5" />
+    <text x="105" y="32" className="fill-white/50 text-[5px] font-mono">العرض</text>
+    <text x="100" y="44" className="fill-white/40 text-[4px] font-mono">التقديمي</text>
+    <rect x="83" y="50" width="74" height="16" rx="1" className="fill-white/10" />
+    <circle cx="120" cy="55" r="4" className="fill-emerald-400/70" />
+    <circle cx="120" cy="55" r="1.5" className="fill-white/80" />
+    <circle cx="40" cy="70" r="8" className="fill-amber-200/70" />
+    <rect x="33" y="78" width="14" height="16" rx="2" className="fill-emerald-600/70" />
+    <line x1="40" y1="94" x2="40" y2="110" className="stroke-emerald-600/50" strokeWidth="2.5" />
+    <line x1="35" y1="110" x2="28" y2="125" className="stroke-emerald-600/50" strokeWidth="2" />
+    <line x1="45" y1="110" x2="52" y2="125" className="stroke-emerald-600/50" strokeWidth="2" />
+    <rect x="40" y="70" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="40" y="84" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="56" y="84" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="50" cy="60" r="7" className="fill-amber-200/70" />
+    <rect x="44" y="67" width="12" height="14" rx="2" className="fill-blue-600/70" />
+    <rect x="80" y="60" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="80" y="74" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="96" y="74" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="90" cy="50" r="7" className="fill-amber-200/70" />
+    <rect x="84" y="57" width="12" height="14" rx="2" className="fill-emerald-600/70" />
+    <rect x="140" y="60" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="140" y="74" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="156" y="74" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="150" cy="50" r="7" className="fill-amber-200/70" />
+    <rect x="144" y="57" width="12" height="14" rx="2" className="fill-emerald-600/70" />
+    <rect x="190" y="65" width="20" height="14" rx="2" className="fill-amber-700/60" />
+    <rect x="190" y="79" width="4" height="14" className="fill-amber-800/50" />
+    <rect x="206" y="79" width="4" height="14" className="fill-amber-800/50" />
+    <circle cx="200" cy="55" r="7" className="fill-amber-200/70" />
+    <rect x="194" y="62" width="12" height="14" rx="2" className="fill-blue-600/70" />
+  </svg>,
 ];
 
 function HeroCarousel() {
@@ -103,7 +204,7 @@ function HeroCarousel() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const next = useCallback(() => {
-    setIndex(i => (i + 1) % heroQuotes.length);
+    setIndex(i => (i + 1) % schoolScenes.length);
   }, []);
 
   useEffect(() => {
@@ -117,24 +218,21 @@ function HeroCarousel() {
 
   return (
     <div
-      className="relative h-28 md:h-32 overflow-hidden mb-4"
+      className="relative h-[132px] md:h-[148px] overflow-hidden mb-3"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div
         key={index}
-        className="absolute inset-0 flex flex-col items-center justify-center animate-slide-in"
+        className="absolute inset-0 flex items-center justify-center animate-slide-in"
       >
-        <p className="text-2xl md:text-3xl leading-relaxed text-emerald-100" dir="rtl">
-          {heroQuotes[index].ar}
-        </p>
-        <p className="mt-2 text-sm md:text-base text-emerald-200/70 italic">
-          {heroQuotes[index].en}
-        </p>
+        <div className="w-full max-w-[240px]">
+          {schoolScenes[index]}
+        </div>
       </div>
 
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-1.5">
-        {heroQuotes.map((_, i) => (
+      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1.5">
+        {schoolScenes.map((_, i) => (
           <button
             key={i}
             onClick={() => setIndex(i)}
@@ -309,6 +407,13 @@ export default function LandingPage() {
                 className="inline-block px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-emerald-100 text-xs font-medium mb-3"
               >
                 {t('landing.platformTag')}
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+              >
+                <HeroCarousel />
               </motion.div>
               <motion.h1
                 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
