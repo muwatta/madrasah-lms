@@ -321,18 +321,19 @@ export default function ResultEntryPage() {
   }
 
   const performSave = async (componentId: number, isAutoSave = false) => {
-    const componentScores = scoresRef.current[componentId]
+    const componentScores = scoresRef.current[componentId] || {}
     const componentRemarks = remarksRef.current[componentId] || {}
-    if (!componentScores) return
+    const entries = Object.entries(componentScores)
+      .filter(([, s]) => s !== '' && !isNaN(Number(s)))
+      .map(([student, score]) => ({
+        student,
+        score,
+        remarks: componentRemarks[Number(student)] || '',
+      }))
+    if (entries.length === 0) return
     setSaving(prev => ({ ...prev, [componentId]: true }))
     try {
-      await resultsAPI.teacher.bulkScores(componentId, {
-        scores: Object.entries(componentScores).map(([student, score]) => ({
-          student,
-          score,
-          remarks: componentRemarks[Number(student)] || '',
-        }))
-      })
+      await resultsAPI.teacher.bulkScores(componentId, { scores: entries })
       if (!isAutoSave) toast.success(t('results.scoresSaved'))
       loadExistingScores(componentId)
     } catch (e: any) {
@@ -470,6 +471,11 @@ export default function ResultEntryPage() {
       {label}
     </label>
   )
+
+  const sortedComponents = [...components].sort((a, b) => {
+    const order: Record<string, number> = { assignment: 0, test: 1, exam: 2 }
+    return (order[a.component_type] ?? 99) - (order[b.component_type] ?? 99)
+  })
 
   const selectedSubjectObj = subjects.find(s => String(s.id) === selectedSubject)
   const selectedClassObj = classes.find(c => String(c.id) === selectedClass)
@@ -614,12 +620,7 @@ export default function ResultEntryPage() {
         </div>
       )}
 
-      {components.length > 0 && students.length > 0 && (() => {
-        const sortedComponents = [...components].sort((a, b) => {
-          const order: Record<string, number> = { assignment: 0, test: 1, exam: 2 }
-          return (order[a.component_type] ?? 99) - (order[b.component_type] ?? 99)
-        })
-        return (
+      {components.length > 0 && students.length > 0 && (
         <div className="mb-6 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="border-b border-[var(--color-border-light)] px-5 py-3 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
@@ -701,7 +702,7 @@ export default function ResultEntryPage() {
             </tbody>
           </table>
         </div>
-      )})()}
+      )}
 
       {components.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
