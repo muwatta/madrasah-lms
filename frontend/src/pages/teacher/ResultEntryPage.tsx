@@ -91,6 +91,11 @@ export default function ResultEntryPage() {
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [loadErrors, setLoadErrors] = useState<string[]>([])
+  const [showComponentModal, setShowComponentModal] = useState(false)
+  const [editingComponent, setEditingComponent] = useState<Component | null>(null)
+  const [componentForm, setComponentForm] = useState({ name: '', component_type: 'test', max_score: 100, weight: 0 })
+  const [deletingComponent, setDeletingComponent] = useState<number | null>(null)
+  const [savingComponent, setSavingComponent] = useState(false)
 
   useEffect(() => {
     const errors: string[] = []
@@ -189,6 +194,67 @@ export default function ResultEntryPage() {
       components.forEach(c => loadExistingScores(c.id))
     }
   }, [components, loadExistingScores])
+
+  const handleOpenAddModal = () => {
+    setEditingComponent(null)
+    setComponentForm({ name: '', component_type: 'test', max_score: 100, weight: 0 })
+    setShowComponentModal(true)
+  }
+
+  const handleOpenEditModal = (comp: Component) => {
+    setEditingComponent(comp)
+    setComponentForm({ name: comp.name, component_type: comp.component_type, max_score: comp.max_score, weight: comp.weight })
+    setShowComponentModal(true)
+  }
+
+  const handleCloseModal = () => {
+    setShowComponentModal(false)
+    setEditingComponent(null)
+  }
+
+  const handleSaveComponent = async () => {
+    if (!componentForm.name.trim()) {
+      toast.error('Component name is required')
+      return
+    }
+    if (!selectedSubject || !selectedTerm || !selectedClass) return
+    setSavingComponent(true)
+    try {
+      const payload = {
+        ...componentForm,
+        subject: Number(selectedSubject),
+        term: Number(selectedTerm),
+        school_class: Number(selectedClass),
+      }
+      if (editingComponent) {
+        await resultsAPI.teacher.updateComponent(editingComponent.id, payload)
+        toast.success('Component updated')
+      } else {
+        await resultsAPI.teacher.createComponent(payload)
+        toast.success('Component created')
+      }
+      handleCloseModal()
+      loadComponents()
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || 'Failed to save component')
+    } finally {
+      setSavingComponent(false)
+    }
+  }
+
+  const handleDeleteComponent = async (compId: number) => {
+    if (!window.confirm('Delete this component? All scores for this component will be removed.')) return
+    setDeletingComponent(compId)
+    try {
+      await resultsAPI.teacher.deleteComponent(compId)
+      toast.success('Component deleted')
+      loadComponents()
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || 'Failed to delete component')
+    } finally {
+      setDeletingComponent(null)
+    }
+  }
 
   const handleGenerate = async () => {
     if (!selectedSubject || !selectedTerm || !selectedClass) return
@@ -447,7 +513,7 @@ export default function ResultEntryPage() {
       )}
 
       {allSelected && (
-        <div className="mb-4 flex gap-3">
+        <div className="mb-4 flex flex-wrap gap-3">
           <button
             onClick={handleGenerate}
             disabled={loading || students.length === 0}
@@ -455,6 +521,14 @@ export default function ResultEntryPage() {
           >
             <span>⚡</span>
             {t('results.generateComponents')}
+          </button>
+          <button
+            onClick={handleOpenAddModal}
+            disabled={students.length === 0}
+            className="btn-press inline-flex items-center gap-2 rounded-lg border border-primary-300 bg-white px-4 py-2 text-sm font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50 dark:border-primary-700 dark:bg-gray-800 dark:text-primary-300 dark:hover:bg-primary-900/20"
+          >
+            <span>+</span>
+            {t('results.addComponent')}
           </button>
         </div>
       )}
@@ -489,7 +563,27 @@ export default function ResultEntryPage() {
                 {t('results.weight')}: {comp.weight}% · {t('results.maxScore')}: {comp.max_score}
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleOpenEditModal(comp)}
+                className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                title="Edit component"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              </button>
+              <button
+                onClick={() => handleDeleteComponent(comp.id)}
+                disabled={deletingComponent === comp.id}
+                className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                title="Delete component"
+              >
+                {deletingComponent === comp.id ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                )}
+              </button>
+              <div className="mx-2 h-5 w-px bg-[var(--color-border-light)] dark:bg-gray-700" />
               <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
                 {existingScores[comp.id]?.length || 0}/{students.length} {t('results.scoresEntered')}
               </span>
@@ -591,6 +685,76 @@ export default function ResultEntryPage() {
               </span>
             ) : t('results.submitForReview')}
           </button>
+        </div>
+      )}
+      {showComponentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+            <h3 className="mb-4 text-lg font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
+              {editingComponent ? 'Edit Component' : 'Add Component'}
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-400">Component Name</label>
+                <input
+                  value={componentForm.name}
+                  onChange={e => setComponentForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  placeholder="e.g. Midterm Test, Final Exam, Homework 1"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-400">Type</label>
+                <select
+                  value={componentForm.component_type}
+                  onChange={e => setComponentForm(prev => ({ ...prev, component_type: e.target.value }))}
+                  className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                >
+                  <option value="test">Test</option>
+                  <option value="assignment">Assignment</option>
+                  <option value="exam">Exam</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-400">Max Score</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={componentForm.max_score}
+                    onChange={e => setComponentForm(prev => ({ ...prev, max_score: Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-400">Weight (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={componentForm.weight}
+                    onChange={e => setComponentForm(prev => ({ ...prev, weight: Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={handleCloseModal}
+                className="rounded-lg border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveComponent}
+                disabled={savingComponent}
+                className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+              >
+                {savingComponent ? 'Saving...' : editingComponent ? 'Update' : 'Create'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
