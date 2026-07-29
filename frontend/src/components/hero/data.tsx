@@ -15,6 +15,7 @@ export interface SlideData {
   title: string;
   subtitle: string;
   cta: string;
+  ctaHref: string;
   ctaIcon: ReactNode;
   floatingIcons: string[];
   cards?: FloatingCardData[];
@@ -26,6 +27,7 @@ export const slides: SlideData[] = [
     title: 'Stop Juggling Paper.\nStart Inspiring.',
     subtitle: 'Replace spreadsheets, attendance registers, and WhatsApp groups with one joyful platform. Teachers teach, parents engage, students excel - all in one place.',
     cta: 'Start Free Trial',
+    ctaHref: '/register',
     ctaIcon: <Sparkles className="w-4 h-4" />,
     floatingIcons: ['📊', '📋', '✅', '📱'],
     cards: [
@@ -39,6 +41,7 @@ export const slides: SlideData[] = [
     title: 'AI-Powered Tools\nfor Every Role',
     subtitle: 'Teachers assign work, track Quran progress, and give feedback. Students learn with AI-powered tools. Parents stay informed. Admins get full oversight.',
     cta: 'Explore Features',
+    ctaHref: '/pricing',
     ctaIcon: <Target className="w-4 h-4" />,
     floatingIcons: ['🤖', '📈', '🎯', '📚'],
     cards: [
@@ -53,6 +56,7 @@ export const slides: SlideData[] = [
     title: 'Join Thousands of\nMadrasahs Worldwide',
     subtitle: 'Complete school management made simple. Track attendance, manage finances, issue certificates, and monitor student progress — all from one dashboard.',
     cta: 'Begin Your Journey',
+    ctaHref: '/register',
     ctaIcon: <GraduationCap className="w-4 h-4" />,
     floatingIcons: ['🌍', '🏆', '🎓', '⭐'],
     cards: [

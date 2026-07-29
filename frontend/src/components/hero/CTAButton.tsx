@@ -1,16 +1,21 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
 interface Props {
+  to?: string;
   icon?: ReactNode;
   delay: number;
   children: React.ReactNode;
 }
 
-export default function CTAButton({ icon, delay, children }: Props) {
+export default function CTAButton({ to, icon, delay, children }: Props) {
+  const navigate = useNavigate();
+
   return (
     <motion.button
+      onClick={() => to && navigate(to)}
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.6, delay, type: 'spring', stiffness: 100, damping: 15 }}

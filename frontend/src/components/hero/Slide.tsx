@@ -221,7 +221,7 @@ export default function Slide({ slide, isActive, slideIndex }: Props) {
           </motion.p>
 
           <div className="mt-4 sm:mt-5 md:mt-6 lg:mt-8 flex justify-center lg:justify-start">
-            <CTAButton icon={slide.ctaIcon} delay={0.5}>
+            <CTAButton to={slide.ctaHref} icon={slide.ctaIcon} delay={0.5}>
               {slide.cta}
             </CTAButton>
           </div>
