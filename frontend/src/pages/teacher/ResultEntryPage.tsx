@@ -87,7 +87,7 @@ export default function ResultEntryPage() {
   const [scores, setScores] = useState<Record<number, Record<number, string>>>({})
   const [remarks, setRemarks] = useState<Record<number, Record<number, string>>>({})
   const [loading, setLoading] = useState(false)
-  const [loadingStudents, setLoadingStudents] = useState(false)
+  const [, setLoadingStudents] = useState(false)
   const [saving, setSaving] = useState<Record<number, boolean>>({})
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
@@ -321,13 +321,6 @@ export default function ResultEntryPage() {
     }))
   }
 
-  const handleRemarksChange = (componentId: number, studentId: number, value: string) => {
-    setRemarks(prev => ({
-      ...prev,
-      [componentId]: { ...(prev[componentId] || {}), [studentId]: value }
-    }))
-  }
-
   const handleSaveScores = async (componentId: number) => {
     const componentScores = scores[componentId]
     const componentRemarks = remarks[componentId] || {}
@@ -554,72 +547,6 @@ export default function ResultEntryPage() {
         )}
       </div>
 
-      {hasSubjectSelected && hasClassSelected && (
-        <div className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-5 py-3 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">👥</span>
-              <h2 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
-                {t('results.studentsCount')}
-              </h2>
-              {loadingStudents && (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
-              )}
-            </div>
-            {!loadingStudents && (
-              <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                {students.length}
-              </span>
-            )}
-          </div>
-
-          {loadingStudents ? (
-            <div className="px-5 py-8 text-center text-sm text-[var(--color-text-muted)] dark:text-gray-400">
-              {t('common.loading')}...
-            </div>
-          ) : students.length === 0 ? (
-            <div className="px-5 py-8 text-center">
-              <p className="text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('results.noStudents')}</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
-                    <th className="w-12 px-4 py-2.5 text-center">#</th>
-                    <th className="px-4 py-2.5 text-start">{t('results.student')}</th>
-                    <th className="hidden px-4 py-2.5 text-start sm:table-cell">{t('results.subject')}</th>
-                    <th className="hidden px-4 py-2.5 text-start sm:table-cell">{t('results.selectClass')}</th>
-                    <th className="hidden px-4 py-2.5 text-start md:table-cell">Email</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
-                  {students.map((student, idx) => (
-                    <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
-                      <td className="px-4 py-2 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
-                      <td className="px-4 py-2">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                            {student.student_name?.charAt(0) || '?'}
-                          </div>
-                          <div>
-                            <p className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</p>
-                            <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-500 sm:hidden">{student.student_email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="hidden px-4 py-2 text-[var(--color-text-secondary)] sm:table-cell dark:text-gray-300">{student.subject_name_en || student.subject_name}</td>
-                      <td className="hidden px-4 py-2 text-[var(--color-text-secondary)] sm:table-cell dark:text-gray-300">{student.school_class_name}</td>
-                      <td className="hidden px-4 py-2 text-xs text-[var(--color-text-muted)] md:table-cell dark:text-gray-500">{student.student_email}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
       {allSelected && (
         <div className="mb-4 flex flex-wrap gap-3">
           <button
@@ -661,147 +588,81 @@ export default function ResultEntryPage() {
         </div>
       )}
 
-      {(components || []).map(comp => (
-        <div key={comp.id} className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-border-light)] px-5 py-4 dark:border-gray-700">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full px-3 py-0.5 text-xs font-semibold capitalize" style={{ backgroundColor: comp.component_type === 'assignment' ? '#dbeafe' : comp.component_type === 'test' ? '#fef3c7' : '#fee2e2', color: comp.component_type === 'assignment' ? '#1d4ed8' : comp.component_type === 'test' ? '#92400e' : '#991b1b' }}>
-                {comp.component_type === 'assignment' ? t('results.assignment') : comp.component_type === 'test' ? t('results.test') : t('results.exam')}
-              </span>
-              <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">{comp.name}</h3>
-              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
-                {t('results.weight')}: {comp.weight}% · {t('results.maxScore')}: {comp.max_score}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              {canManageComponents && (
-                <>
-                  <button
-                    onClick={() => handleOpenEditModal(comp)}
-                    className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-                    title="Edit component"
-                  >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                  </button>
-                  <button
-                    onClick={() => handleDeleteComponent(comp.id)}
-                    disabled={deletingComponent === comp.id}
-                    className="inline-flex items-center justify-center rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                    title="Delete component"
-                  >
-                    {deletingComponent === comp.id ? (
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    ) : (
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    )}
-                  </button>
-                  <div className="mx-2 h-5 w-px bg-[var(--color-border-light)] dark:bg-gray-700" />
-                </>
-              )}
-              <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-500">
-                {existingScores[comp.id]?.length || 0}/{students.length} {t('results.scoresEntered')}
-              </span>
-              <button
-                onClick={() => handleSaveScores(comp.id)}
-                disabled={saving[comp.id]}
-                className="btn-press rounded-lg bg-primary-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
-              >
-                {saving[comp.id] ? (
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    {t('common.saving')}
-                  </span>
-                ) : t('common.save')}
-              </button>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
-                  <th className="w-12 px-4 py-2.5 text-center">#</th>
-                  <th className="px-4 py-2.5 text-start">{t('results.student')}</th>
-                  <th className="w-40 px-4 py-2.5 text-center">{t('results.score')}</th>
-                  <th className="w-56 px-4 py-2.5 text-start">{t('results.remarks')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
-                {students.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-[var(--color-text-muted)] dark:text-gray-400">
-                      {t('results.noStudents')}
-                    </td>
-                  </tr>
-                ) : (students || []).map((student, idx) => (
-                  <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
-                    <td className="px-4 py-2 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                          {student.student_name?.charAt(0) || '?'}
-                        </div>
-                        <span className="font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="number"
-                        min="0"
-                        max={comp.max_score}
-                        step="0.5"
-                        value={scores[comp.id]?.[student.student] ?? ''}
-                        onChange={e => handleScoreChange(comp.id, student.student, e.target.value)}
-                        placeholder="0"
-                        className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-1.5 text-center text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        type="text"
-                        value={remarks[comp.id]?.[student.student] ?? ''}
-                        onChange={e => handleRemarksChange(comp.id, student.student, e.target.value)}
-                        placeholder={t('results.remarksPlaceholder')}
-                        className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-1.5 text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-
       {components.length > 0 && students.length > 0 && (
         <div className="mb-6 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="border-b border-[var(--color-border-light)] px-5 py-3 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
-              Student Summary · Total (Weighted)
+              Score Entry
             </h3>
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
-                <th className="w-12 px-3 py-2 text-center">#</th>
-                <th className="px-3 py-2 text-start">Student</th>
+                <th className="w-10 px-2 py-2 text-center">#</th>
+                <th className="px-2 py-2 text-start min-w-[130px]">Student</th>
                 {components.map(c => (
-                  <th key={c.id} className="px-3 py-2 text-center">{c.name}<br /><span className="text-[10px] font-normal">({c.weight}%)</span></th>
+                  <th key={c.id} className="px-2 py-2 text-center min-w-[110px]">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold capitalize" style={{ backgroundColor: c.component_type === 'assignment' ? '#dbeafe' : c.component_type === 'test' ? '#fef3c7' : '#fee2e2', color: c.component_type === 'assignment' ? '#1d4ed8' : c.component_type === 'test' ? '#92400e' : '#991b1b' }}>
+                          {c.component_type === 'assignment' ? 'A' : c.component_type === 'test' ? 'T' : 'E'}
+                        </span>
+                        <span className="text-[11px] leading-tight font-bold">{c.name}</span>
+                        {canManageComponents && (
+                          <span className="inline-flex gap-0.5">
+                            <button onClick={() => handleOpenEditModal(c)} className="p-0.5 text-[var(--color-text-muted)] hover:text-primary-600" title="Edit">
+                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                            <button onClick={() => handleDeleteComponent(c.id)} disabled={deletingComponent === c.id} className="p-0.5 text-[var(--color-text-muted)] hover:text-red-600" title="Delete">
+                              {deletingComponent === c.id ? (
+                                <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                              ) : (
+                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                              )}
+                            </button>
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-normal leading-tight text-[var(--color-text-muted)] dark:text-gray-500">
+                        {c.weight}% · max {c.max_score}
+                      </span>
+                      <button
+                        onClick={() => handleSaveScores(c.id)}
+                        disabled={saving[c.id]}
+                        className="rounded bg-primary-600 px-2 py-0.5 text-[10px] font-medium text-white hover:bg-primary-700 disabled:opacity-50"
+                      >
+                        {saving[c.id] ? (
+                          <span className="inline-flex items-center gap-1">
+                            <span className="h-2.5 w-2.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          </span>
+                        ) : `Save (${existingScores[c.id]?.length || 0}/${students.length})`}
+                      </button>
+                    </div>
+                  </th>
                 ))}
-                <th className="px-3 py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">Total %</th>
+                <th className="px-2 py-2 text-center font-bold text-emerald-600 min-w-[70px] dark:text-emerald-400">Total %</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--color-border-light)] dark:divide-gray-700">
               {students.map((student, idx) => (
                 <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
-                  <td className="px-3 py-2 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
-                  <td className="px-3 py-2 font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</td>
+                  <td className="px-2 py-1.5 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
+                  <td className="px-2 py-1.5 font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</td>
                   {components.map(c => (
-                    <td key={c.id} className="px-3 py-2 text-center text-[var(--color-text-secondary)] dark:text-gray-300">
-                      {scores[c.id]?.[student.student] || '—'}
+                    <td key={c.id} className="px-2 py-1.5 text-center">
+                      <input
+                        type="number"
+                        min="0"
+                        max={c.max_score}
+                        step="0.5"
+                        value={scores[c.id]?.[student.student] ?? ''}
+                        onChange={e => handleScoreChange(c.id, student.student, e.target.value)}
+                        placeholder="—"
+                        className="w-full max-w-[80px] mx-auto rounded-lg border border-[var(--color-border)] bg-white px-2 py-1.5 text-center text-sm text-[var(--color-text-primary)] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500"
+                      />
                     </td>
                   ))}
-                  <td className="px-3 py-2 text-center font-bold text-emerald-600 dark:text-emerald-400">
+                  <td className="px-2 py-1.5 text-center font-bold text-emerald-600 dark:text-emerald-400">
                     {calcTotal(student.student)}
                   </td>
                 </tr>
