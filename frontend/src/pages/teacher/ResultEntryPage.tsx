@@ -98,6 +98,12 @@ export default function ResultEntryPage() {
   const [deletingComponent, setDeletingComponent] = useState<number | null>(null)
   const [savingComponent, setSavingComponent] = useState(false)
 
+  const scoresRef = useRef(scores)
+  useEffect(() => { scoresRef.current = scores }, [scores])
+  const remarksRef = useRef(remarks)
+  useEffect(() => { remarksRef.current = remarks }, [remarks])
+  const autoSaveTimers = useRef<Record<number, ReturnType<typeof setTimeout>>>({})
+
   useEffect(() => {
     const errors: string[] = []
     Promise.allSettled([
@@ -314,16 +320,9 @@ export default function ResultEntryPage() {
     }
   }
 
-  const handleScoreChange = (componentId: number, studentId: number, value: string) => {
-    setScores(prev => ({
-      ...prev,
-      [componentId]: { ...(prev[componentId] || {}), [studentId]: value }
-    }))
-  }
-
-  const handleSaveScores = async (componentId: number) => {
-    const componentScores = scores[componentId]
-    const componentRemarks = remarks[componentId] || {}
+  const performSave = async (componentId: number, isAutoSave = false) => {
+    const componentScores = scoresRef.current[componentId]
+    const componentRemarks = remarksRef.current[componentId] || {}
     if (!componentScores) return
     setSaving(prev => ({ ...prev, [componentId]: true }))
     try {
@@ -334,13 +333,40 @@ export default function ResultEntryPage() {
           remarks: componentRemarks[Number(student)] || '',
         }))
       })
-      toast.success(t('results.scoresSaved'))
+      if (!isAutoSave) toast.success(t('results.scoresSaved'))
       loadExistingScores(componentId)
     } catch (e: any) {
       toast.error(e.response?.data?.error || t('results.saveFailed'))
     } finally {
       setSaving(prev => ({ ...prev, [componentId]: false }))
     }
+  }
+
+  const handleScoreChange = (componentId: number, studentId: number, value: string) => {
+    const comp = components.find(c => c.id === componentId)
+    if (!comp) return
+    if (value !== '' && !isNaN(Number(value))) {
+      const num = Number(value)
+      if (num > comp.max_score) value = String(comp.max_score)
+      if (num < 0) value = '0'
+    }
+    setScores(prev => ({
+      ...prev,
+      [componentId]: { ...(prev[componentId] || {}), [studentId]: value }
+    }))
+    if (autoSaveTimers.current[componentId]) {
+      clearTimeout(autoSaveTimers.current[componentId])
+    }
+    autoSaveTimers.current[componentId] = setTimeout(() => {
+      performSave(componentId, true)
+    }, 800)
+  }
+
+  const handleSaveScores = async (componentId: number) => {
+    if (autoSaveTimers.current[componentId]) {
+      clearTimeout(autoSaveTimers.current[componentId])
+    }
+    await performSave(componentId, false)
   }
 
   const calcTotal = (studentId: number): string => {
@@ -588,7 +614,12 @@ export default function ResultEntryPage() {
         </div>
       )}
 
-      {components.length > 0 && students.length > 0 && (
+      {components.length > 0 && students.length > 0 && (() => {
+        const sortedComponents = [...components].sort((a, b) => {
+          const order: Record<string, number> = { assignment: 0, test: 1, exam: 2 }
+          return (order[a.component_type] ?? 99) - (order[b.component_type] ?? 99)
+        })
+        return (
         <div className="mb-6 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="border-b border-[var(--color-border-light)] px-5 py-3 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-[var(--color-text-primary)] dark:text-gray-100">
@@ -600,7 +631,7 @@ export default function ResultEntryPage() {
               <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
                 <th className="w-10 px-2 py-2 text-center">#</th>
                 <th className="px-2 py-2 text-start min-w-[130px]">Student</th>
-                {components.map(c => (
+                {sortedComponents.map(c => (
                   <th key={c.id} className="px-2 py-2 text-center min-w-[110px]">
                     <div className="flex flex-col items-center gap-1">
                       <div className="flex items-center gap-1">
@@ -648,7 +679,7 @@ export default function ResultEntryPage() {
                 <tr key={student.student} className="hover:bg-[var(--color-bg-secondary)] dark:hover:bg-gray-700/30">
                   <td className="px-2 py-1.5 text-center text-[var(--color-text-muted)] dark:text-gray-400">{idx + 1}</td>
                   <td className="px-2 py-1.5 font-medium text-[var(--color-text-primary)] dark:text-gray-100">{student.student_name}</td>
-                  {components.map(c => (
+                  {sortedComponents.map(c => (
                     <td key={c.id} className="px-2 py-1.5 text-center">
                       <input
                         type="number"
@@ -670,7 +701,7 @@ export default function ResultEntryPage() {
             </tbody>
           </table>
         </div>
-      )}
+      )})()}
 
       {components.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
