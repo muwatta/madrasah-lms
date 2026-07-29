@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 
 interface Props {
@@ -7,38 +8,36 @@ interface Props {
   onChange: (index: number) => void;
 }
 
-export default function Indicators({ total, current, progress, onChange }: Props) {
+function Indicators({ total, current, progress, onChange }: Props) {
   return (
-    <div className="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 md:gap-4 z-20">
-      <div className="flex gap-2">
-        {Array.from({ length: total }).map((_, i) => (
-          <button
-            key={i}
-            onClick={() => onChange(i)}
-            className="relative h-1.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
-            style={{ width: i === current ? 32 : 8 }}
-            aria-label={`Go to slide ${i + 1}`}
+    <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-2 md:gap-3">
+      {Array.from({ length: total }).map((_, i) => (
+        <button
+          key={i}
+          onClick={() => onChange(i)}
+          className="group relative"
+          aria-label={`Go to slide ${i + 1}`}
+        >
+          <div
+            className={`rounded-full transition-all duration-300 ${
+              i === current
+                ? 'bg-white w-6 sm:w-8 md:w-10 lg:w-12 h-1.5 sm:h-2'
+                : 'bg-white/30 hover:bg-white/50 w-1.5 sm:w-2 h-1.5 sm:h-2'
+            }`}
           >
-            <motion.div
-              className="absolute inset-0 rounded-full bg-white/20"
-              animate={{ opacity: i === current ? 1 : 0.5 }}
-            />
             {i === current && (
               <motion.div
-                className="absolute inset-0 rounded-full bg-white"
-                style={{ width: `${progress}%` }}
-              />
-            )}
-            {i === current && (
-              <motion.div
-                className="absolute inset-0 rounded-full bg-white/40"
+                className="absolute left-0 top-0 h-full rounded-full bg-emerald-400"
                 initial={{ width: '0%' }}
-                animate={{ width: `${100 - progress}%` }}
+                animate={{ width: `${progress * 100}%` }}
+                transition={{ duration: 0.1, ease: 'linear' }}
               />
             )}
-          </button>
-        ))}
-      </div>
+          </div>
+        </button>
+      ))}
     </div>
   );
 }
+
+export default memo(Indicators);

@@ -38,7 +38,6 @@ function Carousel() {
     progressRef.current = 0;
   }, []);
 
-  // Auto-play
   useEffect(() => {
     if (isPaused) {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -67,7 +66,6 @@ function Carousel() {
     };
   }, [isPaused, next]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') { prev(); e.preventDefault(); }
@@ -77,7 +75,6 @@ function Carousel() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [prev, next]);
 
-  // Touch/swipe support
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartRef.current = e.touches[0].clientX;
   };
@@ -101,7 +98,7 @@ function Carousel() {
   return (
     <section
       ref={carouselRef}
-      className="relative w-full h-screen max-h-screen overflow-hidden bg-gray-950 select-none"
+      className="relative w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-gray-950 select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onTouchStart={handleTouchStart}
@@ -131,20 +128,19 @@ function Carousel() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Arrow navigation */}
       <button
         onClick={prev}
-        className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+        className="absolute left-2 sm:left-4 md:left-6 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400/50 hidden sm:flex"
         aria-label="Previous slide"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
       <button
         onClick={next}
-        className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+        className="absolute right-2 sm:right-4 md:right-6 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400/50 hidden sm:flex"
         aria-label="Next slide"
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
       <Indicators
@@ -154,8 +150,7 @@ function Carousel() {
         onChange={goTo}
       />
 
-      {/* Slide number */}
-      <div className="absolute top-6 right-6 z-20 text-white/30 text-sm font-mono">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 z-20 text-white/30 text-[10px] sm:text-xs md:text-sm font-mono">
         {String(current + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
       </div>
     </section>

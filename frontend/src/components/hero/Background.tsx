@@ -7,11 +7,11 @@ interface Props {
 
 function FloatingOrbs() {
   const orbs = useMemo(() => [
-    { size: 300, x: '10%', y: '20%', color: 'from-emerald-400/15 to-teal-400/5', duration: 20, delay: 0 },
-    { size: 250, x: '70%', y: '10%', color: 'from-blue-400/10 to-cyan-400/5', duration: 25, delay: 2 },
-    { size: 200, x: '80%', y: '60%', color: 'from-amber-400/10 to-orange-400/5', duration: 18, delay: 1 },
-    { size: 180, x: '15%', y: '70%', color: 'from-violet-400/10 to-purple-400/5', duration: 22, delay: 3 },
-    { size: 350, x: '50%', y: '50%', color: 'from-emerald-500/5 to-teal-500/3', duration: 30, delay: 0.5 },
+    { size: 'min(300px, 50vw)', x: '10%', y: '20%', color: 'from-emerald-400/15 to-teal-400/5', duration: 20, delay: 0 },
+    { size: 'min(250px, 40vw)', x: '70%', y: '10%', color: 'from-blue-400/10 to-cyan-400/5', duration: 25, delay: 2 },
+    { size: 'min(200px, 35vw)', x: '80%', y: '60%', color: 'from-amber-400/10 to-orange-400/5', duration: 18, delay: 1 },
+    { size: 'min(180px, 30vw)', x: '15%', y: '70%', color: 'from-violet-400/10 to-purple-400/5', duration: 22, delay: 3 },
+    { size: 'min(350px, 60vw)', x: '50%', y: '50%', color: 'from-emerald-500/5 to-teal-500/3', duration: 30, delay: 0.5 },
   ], []);
 
   return (
@@ -45,7 +45,7 @@ function GridPattern() {
         className="absolute inset-0"
         style={{
           backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
+          backgroundSize: 'clamp(30px, 5vw, 60px) clamp(30px, 5vw, 60px)',
         }}
       />
     </div>

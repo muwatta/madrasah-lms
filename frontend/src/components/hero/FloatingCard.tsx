@@ -13,7 +13,7 @@ interface Props {
 export default function FloatingCard({ title, value, color, icon, position, delay, slideIndex }: Props) {
   return (
     <motion.div
-      className="absolute"
+      className="absolute hidden md:block"
       style={{ left: `${position.x}%`, top: `${position.y}%` }}
       initial={{ opacity: 0, y: 20, scale: 0.8 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}

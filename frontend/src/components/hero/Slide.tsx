@@ -31,7 +31,7 @@ function ClassroomVisual() {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <motion.div
-        className="relative w-56 h-56 md:w-72 md:h-72"
+        className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-72 lg:h-72"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8, type: 'spring', stiffness: 80, damping: 12 }}
@@ -97,7 +97,7 @@ function ClassroomVisual() {
 
 function MicrophoneVisual() {
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center gap-4">
+    <div className="relative w-full h-full flex flex-col items-center justify-center gap-3 sm:gap-4">
       <motion.div
         className="relative"
         initial={{ scale: 0 }}
@@ -109,12 +109,13 @@ function MicrophoneVisual() {
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 backdrop-blur-sm border border-emerald-400/30 flex items-center justify-center">
-          <Mic className="w-8 h-8 md:w-10 md:h-10 text-emerald-300" />
+        <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-full bg-gradient-to-br from-emerald-400/20 to-emerald-600/10 backdrop-blur-sm border border-emerald-400/30 flex items-center justify-center">
+          <Mic className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-10 lg:h-10 text-emerald-300" />
         </div>
       </motion.div>
 
       <motion.div
+        className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px]"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.5 }}
@@ -129,13 +130,13 @@ function DashboardVisual() {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <motion.div
-        className="relative w-64 h-48 md:w-80 md:h-56 backdrop-blur-xl rounded-2xl border border-white/10 p-4 shadow-2xl"
+        className="relative w-56 h-40 sm:w-64 sm:h-44 md:w-72 md:h-48 lg:w-80 lg:h-56 backdrop-blur-xl rounded-2xl border border-white/10 p-3 sm:p-4 shadow-2xl"
         style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))' }}
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, type: 'spring', stiffness: 80, damping: 14 }}
       >
-        <div className="flex items-end gap-1.5 h-16 mb-3">
+        <div className="flex items-end gap-1 h-10 sm:h-12 md:h-14 lg:h-16 mb-2 sm:mb-3">
           {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((h, i) => (
             <motion.div
               key={i}
@@ -150,7 +151,7 @@ function DashboardVisual() {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
           {[
             { label: 'Attendance', value: '96%', color: 'from-emerald-400/20' },
             { label: 'Engagement', value: '88%', color: 'from-blue-400/20' },
@@ -159,24 +160,24 @@ function DashboardVisual() {
           ].map((metric, i) => (
             <motion.div
               key={metric.label}
-              className={`rounded-lg bg-gradient-to-br ${metric.color} to-transparent p-2 border border-white/5`}
+              className={`rounded-lg bg-gradient-to-br ${metric.color} to-transparent p-1.5 sm:p-2 border border-white/5`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.2 + i * 0.1 }}
             >
-              <p className="text-[9px] md:text-[10px] text-white/50">{metric.label}</p>
-              <p className="text-xs md:text-sm font-bold text-white">{metric.value}</p>
+              <p className="text-[8px] sm:text-[9px] md:text-[10px] text-white/50">{metric.label}</p>
+              <p className="text-[10px] sm:text-xs md:text-sm font-bold text-white">{metric.value}</p>
             </motion.div>
           ))}
         </div>
 
         <motion.div
-          className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center shadow-lg"
+          className="absolute -top-2 -right-2 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-amber-400 flex items-center justify-center shadow-lg"
           initial={{ scale: 0 }}
           animate={{ scale: [0, 1.2, 1] }}
           transition={{ duration: 0.5, delay: 2.0, type: 'spring' }}
         >
-          <Trophy className="w-3 h-3 text-amber-900" />
+          <Trophy className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-900" />
         </motion.div>
       </motion.div>
     </div>
@@ -191,10 +192,10 @@ export default function Slide({ slide, isActive, slideIndex }: Props) {
       <Background slideIndex={slideIndex} />
       <FloatingIcons icons={slide.floatingIcons} />
 
-      <div className="absolute inset-0 flex flex-col lg:flex-row items-center justify-center px-6 md:px-12 lg:px-20">
-        <div className="flex-1 max-w-xl z-10 text-center lg:text-left">
+      <div className="absolute inset-0 flex flex-col lg:flex-row items-center justify-center px-4 sm:px-6 md:px-12 lg:px-20 overflow-y-auto">
+        <div className="flex-1 w-full max-w-xl z-10 text-center lg:text-left order-2 lg:order-1 mt-4 lg:mt-0 pb-8 lg:pb-0">
           <motion.h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white mb-4 md:mb-6"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.1] text-white mb-3 sm:mb-4 md:mb-6"
             initial={{ opacity: 0, y: 30 }}
             animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
             transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
@@ -211,7 +212,7 @@ export default function Slide({ slide, isActive, slideIndex }: Props) {
           </motion.h1>
 
           <motion.p
-            className="text-sm md:text-base lg:text-lg text-emerald-100/80 max-w-lg mx-auto lg:mx-0 leading-relaxed"
+            className="text-xs sm:text-sm md:text-base lg:text-lg text-emerald-100/80 max-w-lg mx-auto lg:mx-0 leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
@@ -219,14 +220,14 @@ export default function Slide({ slide, isActive, slideIndex }: Props) {
             {slide.subtitle}
           </motion.p>
 
-          <div className="mt-6 md:mt-8 flex justify-center lg:justify-start">
+          <div className="mt-4 sm:mt-5 md:mt-6 lg:mt-8 flex justify-center lg:justify-start">
             <CTAButton icon={slide.ctaIcon} delay={0.5}>
               {slide.cta}
             </CTAButton>
           </div>
         </div>
 
-        <div className="flex-1 w-full max-w-md lg:max-w-lg mt-8 lg:mt-0 z-10">
+        <div className="flex-1 w-full max-w-[180px] sm:max-w-[220px] md:max-w-sm lg:max-w-md xl:max-w-lg z-10 order-1 lg:order-2">
           {slide.id === 1 && <ClassroomVisual />}
           {slide.id === 2 && <MicrophoneVisual />}
           {slide.id === 3 && <DashboardVisual />}
