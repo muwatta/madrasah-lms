@@ -12,59 +12,38 @@ function Carousel() {
   const [direction, setDirection] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const progressRef = useRef(0);
   const touchStartRef = useRef<number | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
 
   const goTo = useCallback((index: number) => {
     setDirection(index > current ? 1 : -1);
     setCurrent(index);
-    setProgress(0);
-    progressRef.current = 0;
   }, [current]);
 
   const next = useCallback(() => {
     setDirection(1);
     setCurrent(prev => (prev + 1) % slides.length);
-    setProgress(0);
-    progressRef.current = 0;
   }, []);
 
   const prev = useCallback(() => {
     setDirection(-1);
     setCurrent(prev => (prev - 1 + slides.length) % slides.length);
-    setProgress(0);
-    progressRef.current = 0;
   }, []);
 
   useEffect(() => {
-    if (isPaused) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-
-    const startTime = Date.now();
-    progressRef.current = 0;
-
-    const tick = () => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min(elapsed / AUTO_PLAY_DURATION, 1);
-      progressRef.current = pct;
-      setProgress(pct);
-    };
-
-    intervalRef.current = setInterval(tick, 16);
-
-    const timeout = setTimeout(() => {
-      if (!isPaused) next();
-    }, AUTO_PLAY_DURATION);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      clearTimeout(timeout);
-    };
+    if (isPaused) return;
+    const id = setInterval(() => next(), AUTO_PLAY_DURATION);
+    return () => clearInterval(id);
   }, [isPaused, next]);
+
+  useEffect(() => {
+    setProgress(0);
+    if (isPaused) return;
+    const start = Date.now();
+    const id = setInterval(() => {
+      setProgress(Math.min((Date.now() - start) / AUTO_PLAY_DURATION, 1));
+    }, 16);
+    return () => clearInterval(id);
+  }, [current, isPaused]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -97,7 +76,6 @@ function Carousel() {
 
   return (
     <section
-      ref={carouselRef}
       className="relative w-full h-[100dvh] max-h-[100dvh] overflow-hidden bg-gray-950 select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
