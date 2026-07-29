@@ -832,7 +832,10 @@ class ScoreTrendsView(APIView):
         from users.models import User
         sid = student_id or request.user.id
         student = User.objects.get(pk=sid)
-        days = int(request.query_params.get('days', 30))
+        try:
+            days = int(request.query_params.get('days', 30))
+        except (ValueError, TypeError):
+            days = 30
         trends = get_score_trends(student=student, madrasah=request.user.madrasah, days=days)
         data = list(trends)
         for d in data:

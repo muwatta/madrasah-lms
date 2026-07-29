@@ -237,7 +237,10 @@ class QuestionGeneratorView(APIView):
         subject_id = request.data.get('subject')
         difficulty = request.data.get('difficulty', 'medium')
         question_types = request.data.get('types', ['mcq'])
-        count = min(int(request.data.get('count', 5)), 20)
+        try:
+            count = min(int(request.data.get('count', 5)), 20)
+        except (ValueError, TypeError):
+            count = 5
 
         if not topic:
             return Response({'error': 'topic is required'}, status=status.HTTP_400_BAD_REQUEST)

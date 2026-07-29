@@ -11,12 +11,14 @@ from .serializers import (
     ChangePasswordSerializer, MadrasahSerializer, StudentParentSerializer
 )
 from .authentication import generate_tokens
+from .throttles import AuthAnonRateThrottle
 
 logger = logging.getLogger(__name__)
 
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -33,6 +35,7 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -55,6 +58,7 @@ class LoginView(APIView):
 
 class RefreshTokenView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         import jwt

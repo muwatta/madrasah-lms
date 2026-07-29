@@ -9,12 +9,12 @@ from django.utils.timezone import now
 from config.mixins import TenantAwareMixin
 from .models import (
     ResultTemplate, ResultTemplateItem, ResultComponent,
-    StudentResult, TermResult, ExamResult
+    StudentResult, SubjectResult, TermResult, ExamResult
 )
 from .serializers import (
     ResultTemplateSerializer, ResultTemplateItemSerializer,
     ResultComponentSerializer, StudentResultSerializer,
-    BulkScoreInputSerializer, TermResultSerializer,
+    BulkScoreInputSerializer, SubjectResultSerializer, TermResultSerializer,
     SessionSerializer, TermSerializer,
 )
 from academic.models import Session, Term
@@ -122,17 +122,22 @@ class ScoreBulkUpdateView(TenantAwareMixin, APIView):
         serializer.is_valid(raise_exception=True)
 
         results = []
+        errors = []
         with transaction.atomic():
             for entry in serializer.validated_data['scores']:
-                student_id = int(entry['student'])
-                score = float(entry['score'])
+                try:
+                    student_id = int(entry['student'])
+                    score = float(entry['score'])
+                except (ValueError, TypeError):
+                    errors.append({'entry': entry, 'error': 'Invalid student ID or score value'})
+                    continue
+
                 remarks = entry.get('remarks', '')
 
-                if score > float(component.max_score):
-                    return Response(
-                        {'error': f"Score {score} exceeds max {component.max_score} for student {student_id}"},
-                        status=400
-                    )
+                max_score = float(component.max_score) if component.max_score is not None else 100
+                if score > max_score:
+                    errors.append({'student': student_id, 'error': f'Score {score} exceeds max {max_score}'})
+                    continue
 
                 sr, created = StudentResult.objects.update_or_create(
                     component=component,
@@ -145,9 +150,14 @@ class ScoreBulkUpdateView(TenantAwareMixin, APIView):
                 )
                 results.append({'student': student_id, 'score': score, 'created': created})
 
-            self._recalculate_term_results(component, request.user.madrasah)
+            if not errors:
+                self._recalculate_term_results(component, request.user.madrasah)
 
-        return Response({'updated': len(results), 'results': results})
+        status_code = 200 if not errors else 400
+        resp = {'updated': len(results), 'results': results}
+        if errors:
+            resp['errors'] = errors
+        return Response(resp, status=status_code)
 
     def _recalculate_term_results(self, component, madrasah):
         students = User.objects.filter(
@@ -156,15 +166,28 @@ class ScoreBulkUpdateView(TenantAwareMixin, APIView):
             enrollments__subject=component.subject
         ).distinct()
         for student in students:
-            tr, _ = TermResult.objects.get_or_create(
+            sr, _ = SubjectResult.objects.get_or_create(
                 student=student,
                 subject=component.subject,
                 term=component.term,
-                defaults={'status': 'draft'}
+                defaults={'school_class': component.school_class, 'status': 'draft'}
             )
-            if tr.status == 'draft':
-                tr.calculate_total()
-                tr.save(update_fields=['total_score', 'grade'])
+            if sr.status == 'draft':
+                scores = StudentResult.objects.filter(
+                    component__subject=component.subject,
+                    component__term=component.term,
+                    component__school_class=component.school_class,
+                    student=student,
+                ).select_related('component')
+                total_weighted = 0
+                total_weight = 0
+                for s in scores:
+                    max_score = float(s.component.max_score)
+                    if max_score > 0:
+                        total_weighted += (float(s.score) / max_score) * float(s.component.weight)
+                        total_weight += float(s.component.weight)
+                sr.total_score = (total_weighted / total_weight * 100) if total_weight > 0 else 0
+                sr.save(update_fields=['total_score'])
 
 
 class ScoreListView(TenantAwareMixin, generics.ListAPIView):
@@ -190,28 +213,28 @@ class TeacherTermSubmitView(TenantAwareMixin, APIView):
         if not subject_id or not term_id:
             return Response({'error': 'subject and term required'}, status=400)
 
-        updated = TermResult.objects.filter(
+        updated = SubjectResult.objects.filter(
             subject_id=subject_id,
             term_id=term_id,
             status='draft'
-        ).update(status='submitted')
+        ).update(status='submitted', submitted_by=request.user, submitted_at=now())
 
         return Response({'submitted': updated})
 
 
 class PendingResultsView(TenantAwareMixin, generics.ListAPIView):
-    """Admin view: list term results pending publication."""
-    serializer_class = TermResultSerializer
+    """Admin view: list subject results pending publication."""
+    serializer_class = SubjectResultSerializer
 
     def get_queryset(self):
-        return TermResult.objects.filter(
+        return SubjectResult.objects.filter(
             subject__madrasah=self.request.user.madrasah,
             status='submitted'
-        ).select_related('student', 'subject', 'term').distinct('student', 'subject', 'term')
+        ).select_related('student', 'subject', 'term', 'school_class')
 
 
 class PublishResultsView(TenantAwareMixin, APIView):
-    """Admin publishes all term results for a subject+term."""
+    """Admin publishes all subject results for a subject+term."""
 
     def post(self, request):
         subject_id = request.data.get('subject')
@@ -222,24 +245,24 @@ class PublishResultsView(TenantAwareMixin, APIView):
             return Response({'error': 'subject and term required'}, status=400)
 
         if action == 'publish':
-            queryset = TermResult.objects.filter(
+            queryset = SubjectResult.objects.filter(
                 subject_id=subject_id,
                 term_id=term_id,
                 status='submitted'
             )
-            count = queryset.update(
-                status='published',
-                published_by=request.user,
-                published_at=now()
-            )
+            count = queryset.update(status='published')
             return Response({'published': count})
         elif action == 'unpublish':
-            queryset = TermResult.objects.filter(
+            queryset = SubjectResult.objects.filter(
                 subject_id=subject_id,
                 term_id=term_id,
                 status='published'
             )
-            count = queryset.update(status='submitted', published_by=None, published_at=None)
+            count = queryset.update(
+                status='submitted',
+                submitted_by=None,
+                submitted_at=None
+            )
             return Response({'unpublished': count})
         else:
             return Response({'error': 'action must be publish or unpublish'}, status=400)
@@ -290,26 +313,26 @@ class ResultTemplateItemBulkView(TenantAwareMixin, APIView):
 
 class MyTermResultsView(TenantAwareMixin, generics.ListAPIView):
     """Student views their own published results."""
-    serializer_class = TermResultSerializer
+    serializer_class = SubjectResultSerializer
 
     def get_queryset(self):
-        return TermResult.objects.filter(
+        return SubjectResult.objects.filter(
             student=self.request.user,
             status='published'
-        ).select_related('subject', 'term').order_by('term__term_number', 'subject__name_ar')
+        ).select_related('subject', 'term', 'school_class').order_by('term__term_number', 'subject__name_ar')
 
 
 class ChildTermResultsView(TenantAwareMixin, generics.ListAPIView):
     """Parent views their child's published results."""
-    serializer_class = TermResultSerializer
+    serializer_class = SubjectResultSerializer
 
     def get_queryset(self):
         child_id = self.request.query_params.get('student')
         if not child_id:
-            return TermResult.objects.none()
-        return TermResult.objects.filter(
+            return SubjectResult.objects.none()
+        return SubjectResult.objects.filter(
             student_id=child_id,
             student__student_parents__parent=self.request.user,
             status='published'
-        ).select_related('subject', 'term').order_by('term__term_number', 'subject__name_ar')
+        ).select_related('subject', 'term', 'school_class').order_by('term__term_number', 'subject__name_ar')
 

@@ -92,6 +92,8 @@ export default function ResultEntryPage() {
   const [submitting, setSubmitting] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [loadErrors, setLoadErrors] = useState<string[]>([])
+  const [componentLoadError, setComponentLoadError] = useState<string | null>(null)
+  const [scoresLoadErrors, setScoresLoadErrors] = useState<Record<number, string>>({})
   const [showComponentModal, setShowComponentModal] = useState(false)
   const [editingComponent, setEditingComponent] = useState<Component | null>(null)
   const [componentForm, setComponentForm] = useState({ name: '', component_type: 'test', max_score: 100, weight: 0 })
@@ -165,12 +167,14 @@ export default function ResultEntryPage() {
   const loadComponents = useCallback(() => {
     if (!selectedSubject || !selectedTerm || !selectedClass) return
     setLoading(true)
+    setComponentLoadError(null)
     const key = `${selectedSubject}_${selectedTerm}_${selectedClass}`
     resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass })
       .then(r => {
         const data = unwrapPaginated<Component>(r.data)
         if (data.length > 0) {
           setComponents(data)
+          setComponentLoadError(null)
           return
         }
         if (genLockRef.current === key) {
@@ -204,7 +208,10 @@ export default function ResultEntryPage() {
             Promise.all(defaults.map(d => resultsAPI.teacher.createComponent({ ...d, ...payload })))
               .then(() => resultsAPI.teacher.components({ subject: selectedSubject, term: selectedTerm, school_class: selectedClass }))
               .then(r3 => setComponents(unwrapPaginated<Component>(r3.data)))
-              .catch(() => setComponents([]))
+              .catch(() => {
+                setComponents([])
+                setComponentLoadError('Failed to load or generate components. Check your connection and try again.')
+              })
           })
       })
       .finally(() => setLoading(false))
@@ -233,8 +240,10 @@ export default function ResultEntryPage() {
       })
       setScores(prev => ({ ...prev, [componentId]: compScores }))
       setRemarks(prev => ({ ...prev, [componentId]: compRemarks }))
-    } catch {
+      setScoresLoadErrors(prev => { const n = { ...prev }; delete n[componentId]; return n })
+    } catch (e: any) {
       setExistingScores(prev => ({ ...prev, [componentId]: [] }))
+      setScoresLoadErrors(prev => ({ ...prev, [componentId]: e.response?.data?.detail || e.response?.data?.error || 'Failed to load scores' }))
     }
   }, [])
 
@@ -341,7 +350,8 @@ export default function ResultEntryPage() {
       }))
       if (!isAutoSave) loadExistingScores(componentId)
     } catch (e: any) {
-      toast.error(e.response?.data?.error || t('results.saveFailed'))
+      const errMsg = e.response?.data?.error || (e.response?.data?.errors && e.response.data.errors[0]?.error) || t('results.saveFailed')
+      if (!isAutoSave) toast.error(errMsg)
     } finally {
       setSaving(prev => ({ ...prev, [componentId]: false }))
     }
@@ -625,7 +635,25 @@ export default function ResultEntryPage() {
         </div>
       )}
 
-      {!loading && allSelected && components.length === 0 && (
+      {!loading && allSelected && componentLoadError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+          <div className="flex items-start gap-3">
+            <svg className="mt-0.5 h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-700 dark:text-red-400">{componentLoadError}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-300">Try using the "Generate Components" button above or add one manually.</p>
+            </div>
+            <button
+              onClick={() => { setComponentLoadError(null); loadComponents() }}
+              className="shrink-0 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-200 dark:bg-red-800/30 dark:text-red-400 dark:hover:bg-red-800/50"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!loading && allSelected && components.length === 0 && !componentLoadError && (
         <div className="rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-8 text-center dark:border-gray-600 dark:bg-gray-800/50">
           <p className="mb-1 text-sm text-[var(--color-text-muted)] dark:text-gray-400">{t('results.noComponents')}</p>
           {students.length > 0 && (
@@ -648,10 +676,20 @@ export default function ResultEntryPage() {
               <tr className="border-b border-[var(--color-border-light)] bg-[var(--color-bg-secondary)] text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] dark:border-gray-700 dark:bg-gray-700/50 dark:text-gray-400">
                 <th className="w-10 px-2 py-2 text-center">#</th>
                 <th className="px-2 py-2 text-start min-w-[130px]">Student</th>
-                {sortedComponents.map(c => (
-                  <th key={c.id} className="px-2 py-2 text-center min-w-[110px]">
+                  {sortedComponents.map(c => {
+                  const hasScoreError = scoresLoadErrors[c.id]
+                  return (
+                  <th key={c.id} className={`px-2 py-2 text-center min-w-[110px] ${hasScoreError ? 'bg-red-50 dark:bg-red-900/10' : ''}`}>
                     <div className="flex flex-col items-center gap-1">
                       <div className="flex items-center gap-1">
+                        {hasScoreError && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                            title={scoresLoadErrors[c.id]}
+                          >
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          </span>
+                        )}
                         <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold capitalize" style={{ backgroundColor: c.component_type === 'assignment' ? '#dbeafe' : c.component_type === 'test' ? '#fef3c7' : '#fee2e2', color: c.component_type === 'assignment' ? '#1d4ed8' : c.component_type === 'test' ? '#92400e' : '#991b1b' }}>
                           {c.component_type === 'assignment' ? 'A' : c.component_type === 'test' ? 'T' : 'E'}
                         </span>
@@ -685,9 +723,18 @@ export default function ResultEntryPage() {
                           </span>
                         ) : `Save (${existingScores[c.id]?.length || 0}/${students.length})`}
                       </button>
+                      {hasScoreError && (
+                        <button
+                          onClick={() => loadExistingScores(c.id)}
+                          className="mt-0.5 rounded bg-red-100 px-1.5 py-0.5 text-[9px] font-medium text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                        >
+                          Retry
+                        </button>
+                      )}
                     </div>
                   </th>
-                ))}
+                )
+              })}
                 <th className="px-2 py-2 text-center font-bold text-emerald-600 min-w-[70px] dark:text-emerald-400">Total %</th>
               </tr>
             </thead>

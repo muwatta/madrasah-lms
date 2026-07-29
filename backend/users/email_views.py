@@ -8,12 +8,14 @@ from rest_framework.response import Response
 
 from .models import User
 from .email import send_email, render_reset_email, render_verify_email
+from .throttles import AuthAnonRateThrottle
 
 token_generator = PasswordResetTokenGenerator()
 
 
 class RequestPasswordResetView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         email = request.data.get('email', '')
@@ -37,6 +39,7 @@ class RequestPasswordResetView(APIView):
 
 class ConfirmPasswordResetView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         uidb64 = request.data.get('uidb64', '')
@@ -71,6 +74,7 @@ class ConfirmPasswordResetView(APIView):
 
 class RequestEmailVerificationView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         email = request.data.get('email', '')
@@ -97,6 +101,7 @@ class RequestEmailVerificationView(APIView):
 
 class ConfirmEmailVerificationView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthAnonRateThrottle]
 
     def post(self, request):
         uidb64 = request.data.get('uidb64', '')

@@ -156,15 +156,15 @@ class LegacyTermResultSerializer(serializers.ModelSerializer):
     components = serializers.SerializerMethodField()
 
     class Meta:
-        model = TermResult
+        model = SubjectResult
         fields = [
             "id", "student", "student_name", "subject", "subject_name",
             "term", "term_name", "term_number", "total_score", "grade", "status",
-            "components", "published_by", "published_at", "created_at", "updated_at",
+            "components",
         ]
-        read_only_fields = ["total_score", "grade", "published_by", "published_at"]
+        read_only_fields = ["total_score", "grade"]
 
-    def get_components(self, obj: TermResult) -> list[dict[str, Any]]:
+    def get_components(self, obj: SubjectResult) -> list[dict[str, Any]]:
         scores = StudentResult.objects.filter(
             component__subject=obj.subject,
             component__term=obj.term,
