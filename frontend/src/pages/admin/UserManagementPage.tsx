@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { userAPI } from '../../api';
 import type { User } from '../../types';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -27,6 +28,7 @@ export default function UserManagementPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<UserFormData>({ email: '', password: '', first_name: '', last_name: '', role: 'student', madrasah: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -189,7 +191,13 @@ export default function UserManagementPage() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.password')} {editingId && <span className="text-gray-400 dark:text-[var(--color-text-muted)]">{t('userManagement.passHint')}</span>}</label>
-              <input type="password" required={!editingId} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-primary)] px-3 py-2 text-sm text-gray-900 dark:text-[var(--color-text-primary)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+              <div className="relative">
+                <input type={showPassword ? 'text' : 'password'} required={!editingId} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-primary)] px-3 py-2 pr-9 text-sm text-gray-900 dark:text-[var(--color-text-primary)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" tabIndex={-1}>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('fields.role')}</label>
