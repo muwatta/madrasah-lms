@@ -92,6 +92,8 @@ const ChooseSubjectsPage = lazy(() => import('./pages/student/ChooseSubjectsPage
 const PricingPage = lazy(() => import('./pages/public/PricingPage'));
 const DocsPage = lazy(() => import('./pages/public/DocsPage'));
 const ContactPage = lazy(() => import('./pages/public/ContactPage'));
+const HelpCenterPage = lazy(() => import('./pages/public/HelpCenterPage'));
+const CommunityPage = lazy(() => import('./pages/public/CommunityPage'));
 const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage'));
 const TermsPage = lazy(() => import('./pages/public/TermsPage'));
 const AboutPage = lazy(() => import('./pages/public/AboutPage'));
@@ -287,6 +289,8 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/help" element={<HelpCenterPage />} />
+            <Route path="/community" element={<CommunityPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/about" element={<AboutPage />} />

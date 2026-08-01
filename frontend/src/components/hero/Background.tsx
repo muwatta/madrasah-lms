@@ -1,87 +1,39 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion, type Transition, type TargetAndTransition } from 'framer-motion';
 
-interface Props {
-  slideIndex: number;
-}
+export default function Background() {
+  const reducedMotion = useReducedMotion();
 
-function FloatingOrbs() {
-  const orbs = useMemo(() => [
-    { size: 'min(300px, 50vw)', x: '10%', y: '20%', color: 'from-emerald-400/15 to-teal-400/5', duration: 20, delay: 0 },
-    { size: 'min(250px, 40vw)', x: '70%', y: '10%', color: 'from-blue-400/10 to-cyan-400/5', duration: 25, delay: 2 },
-    { size: 'min(200px, 35vw)', x: '80%', y: '60%', color: 'from-amber-400/10 to-orange-400/5', duration: 18, delay: 1 },
-    { size: 'min(180px, 30vw)', x: '15%', y: '70%', color: 'from-violet-400/10 to-purple-400/5', duration: 22, delay: 3 },
-    { size: 'min(350px, 60vw)', x: '50%', y: '50%', color: 'from-emerald-500/5 to-teal-500/3', duration: 30, delay: 0.5 },
-  ], []);
-
-  return (
-    <>
-      {orbs.map((orb, i) => (
-        <motion.div
-          key={i}
-          className={`absolute rounded-full bg-gradient-to-br ${orb.color} blur-3xl`}
-          style={{ width: orb.size, height: orb.size, left: orb.x, top: orb.y }}
-          animate={{
-            x: [0, 30, -20, 10, 0],
-            y: [0, -20, 10, -10, 0],
-            scale: [1, 1.05, 0.95, 1.02, 1],
-          }}
-          transition={{
-            duration: orb.duration,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: orb.delay,
-          }}
-        />
-      ))}
-    </>
+  const orb = (className: string, animate: TargetAndTransition, transition: Transition) => (
+    <motion.div
+      className={`absolute rounded-full blur-3xl ${className}`}
+      animate={reducedMotion ? undefined : animate}
+      transition={transition}
+    />
   );
-}
-
-function GridPattern() {
-  return (
-    <div className="absolute inset-0 overflow-hidden opacity-[0.03] dark:opacity-[0.05]">
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-          backgroundSize: 'clamp(30px, 5vw, 60px) clamp(30px, 5vw, 60px)',
-        }}
-      />
-    </div>
-  );
-}
-
-export default function Background({ slideIndex }: Props) {
-  const gradients = [
-    'from-emerald-950 via-emerald-900 to-teal-900',
-    'from-slate-950 via-blue-950 to-indigo-950',
-    'from-gray-950 via-emerald-950 to-teal-950',
-  ];
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-br ${gradients[slideIndex % gradients.length]} transition-colors duration-1000`}
-        animate={{ opacity: [0.8, 1, 0.8] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <FloatingOrbs />
-      <GridPattern />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-950 via-slate-950 to-teal-950" />
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+            backgroundSize: 'clamp(40px, 6vw, 80px) clamp(40px, 6vw, 80px)',
+          }}
+        />
+      </div>
+
+      {orb('left-[-6%] top-[14%] h-72 w-72 bg-emerald-500/20', { y: [0, 34, 0], x: [0, -14, 0] }, { duration: 11, repeat: Infinity, ease: 'easeInOut' })}
+      {orb('right-[-5%] top-[22%] h-80 w-80 bg-teal-400/15', { y: [0, -28, 0], x: [0, 18, 0] }, { duration: 13, repeat: Infinity, ease: 'easeInOut' })}
+      {orb('bottom-[-10%] left-[28%] h-72 w-72 bg-emerald-600/10', { y: [0, -22, 0] }, { duration: 9, repeat: Infinity, ease: 'easeInOut' })}
 
       <motion.div
         className="absolute inset-0"
-        animate={{ scale: [1, 1.02, 1] }}
-        transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        <div
-          className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
-          style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.3) 0%, transparent 60%)',
-            backgroundSize: '100% 100%',
-          }}
-        />
-      </motion.div>
+        style={{ background: 'radial-gradient(circle at 50% 35%, rgba(16,185,129,0.18) 0%, transparent 55%)' }}
+        animate={reducedMotion ? undefined : { opacity: [0.7, 1, 0.7] }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+      />
     </div>
   );
 }
