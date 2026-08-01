@@ -21,6 +21,7 @@ interface CarouselSlide {
 const CHECK_ICONS = [Check, Clock, BookOpen];
 
 function VisualPace() {
+  const { t } = useLanguage();
   const reducedMotion = useReducedMotion();
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-950 via-slate-950 to-teal-950 p-8 sm:p-10">
@@ -31,14 +32,14 @@ function VisualPace() {
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold text-emerald-300">Arabic Language · Unit 3</div>
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-300">12/18</span>
+          <div className="text-xs font-semibold text-emerald-300">{t('landing.cvPaceCourse')}</div>
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-300">{t('landing.cvPaceProgress')}</span>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
           <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-emerald-400 to-teal-300" />
         </div>
         <div className="mt-5 space-y-3">
-          {['Vocabulary: Greetings', 'Grammar: Sentence structure', 'Listening: Daily dialogues'].map((lesson, i) => (
+          {[t('landing.cvPaceLesson1'), t('landing.cvPaceLesson2'), t('landing.cvPaceLesson3')].map((lesson, i) => (
             <div key={lesson} className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5">
               <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${i === 2 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-500 text-emerald-950'}`}>
                 {i === 2 ? <Play className="h-3 w-3" /> : <Check className="h-3 w-3" />}
@@ -49,8 +50,8 @@ function VisualPace() {
           ))}
         </div>
         <div className="mt-5 flex items-center justify-between">
-          <span className="rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-emerald-950">Continue learning</span>
-          <span className="text-[11px] text-white/40">15 min remaining</span>
+          <span className="rounded-lg bg-emerald-500 px-4 py-2 text-xs font-bold text-emerald-950">{t('landing.cvPaceCta')}</span>
+          <span className="text-[11px] text-white/40">{t('landing.cvPaceRemaining')}</span>
         </div>
       </motion.div>
     </div>
@@ -58,6 +59,7 @@ function VisualPace() {
 }
 
 function VisualInteractive() {
+  const { t } = useLanguage();
   const reducedMotion = useReducedMotion();
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-teal-950 via-slate-950 to-emerald-950 p-8 sm:p-10">
@@ -68,14 +70,14 @@ function VisualInteractive() {
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
       >
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold text-white/80">Quick Quiz · Science</div>
+          <div className="text-xs font-semibold text-white/80">{t('landing.cvQuizTitle')}</div>
           <span className="flex items-center gap-1 rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-bold text-amber-300">
-            <Star className="h-3 w-3" /> 92%
+            <Star className="h-3 w-3" /> {t('landing.cvQuizScore')}
           </span>
         </div>
-        <p className="mt-4 text-sm font-medium text-white">Which of these is a source of energy?</p>
+        <p className="mt-4 text-sm font-medium text-white">{t('landing.cvQuizQuestion')}</p>
         <div className="mt-4 space-y-2.5">
-          {['Water', 'Sunlight', 'Stone', 'Wind'].map((opt, i) => (
+          {[t('landing.cvQuizOpt1'), t('landing.cvQuizOpt2'), t('landing.cvQuizOpt3'), t('landing.cvQuizOpt4')].map((opt, i) => (
             <div
               key={opt}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-medium ${i === 1 ? 'border border-emerald-400/60 bg-emerald-500/15 text-emerald-200' : 'bg-white/5 text-white/60'}`}
@@ -89,8 +91,8 @@ function VisualInteractive() {
           ))}
         </div>
         <div className="mt-5 flex items-center gap-2">
-          <span className="rounded-lg bg-teal-400 px-4 py-2 text-xs font-bold text-teal-950">Check answer</span>
-          <span className="flex items-center gap-1 text-[11px] text-white/40"><Clock className="h-3 w-3" /> 0:42</span>
+          <span className="rounded-lg bg-teal-400 px-4 py-2 text-xs font-bold text-teal-950">{t('landing.cvQuizCta')}</span>
+          <span className="flex items-center gap-1 text-[11px] text-white/40"><Clock className="h-3 w-3" /> {t('landing.cvQuizTime')}</span>
         </div>
       </motion.div>
     </div>
@@ -98,6 +100,7 @@ function VisualInteractive() {
 }
 
 function VisualAchieve() {
+  const { t } = useLanguage();
   const reducedMotion = useReducedMotion();
   return (
     <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-slate-950 via-emerald-950 to-teal-950 p-8 sm:p-10">
@@ -110,14 +113,14 @@ function VisualAchieve() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 shadow-lg shadow-amber-500/20">
           <Award className="h-7 w-7" />
         </div>
-        <div className="mt-4 text-xs font-bold uppercase tracking-widest text-amber-300">Certificate of Completion</div>
-        <div className="mt-3 text-lg font-bold text-white">Qur'an Memorisation · Level 3</div>
-        <div className="mt-1 text-xs text-white/50">Awarded to Ahmad Al-Amin</div>
+        <div className="mt-4 text-xs font-bold uppercase tracking-widest text-amber-300">{t('landing.cvCertTitle')}</div>
+        <div className="mt-3 text-lg font-bold text-white">{t('landing.cvCertCourse')}</div>
+        <div className="mt-1 text-xs text-white/50">{t('landing.cvCertAwarded')}</div>
         <div className="mt-5 grid grid-cols-3 gap-2">
           {[
-            { icon: <Trophy className="h-4 w-4" />, label: 'Courses', value: '12' },
-            { icon: <BarChart3 className="h-4 w-4" />, label: 'Avg score', value: '96%' },
-            { icon: <BookOpen className="h-4 w-4" />, label: 'Hours', value: '240' },
+            { icon: <Trophy className="h-4 w-4" />, label: t('landing.cvCertCourses'), value: '12' },
+            { icon: <BarChart3 className="h-4 w-4" />, label: t('landing.cvCertAvgScore'), value: '96%' },
+            { icon: <BookOpen className="h-4 w-4" />, label: t('landing.cvCertHours'), value: '240' },
           ].map(s => (
             <div key={s.label} className="rounded-xl bg-white/5 px-2 py-3">
               <div className="mx-auto flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-300">{s.icon}</div>
@@ -330,7 +333,7 @@ export default function EducationalCarousel() {
                     <div className="mt-8">
                       <Link
                         to={slide.ctaTo}
-                        className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-emerald-700"
+                        className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-700/25 transition-colors hover:bg-emerald-800"
                       >
                         {t(slide.ctaKey)}
                         <ArrowRight className="h-4 w-4 rtl:rotate-180" />
@@ -352,14 +355,13 @@ export default function EducationalCarousel() {
               <ChevronLeft className="h-5 w-5 rtl:rotate-180" />
             </button>
 
-            <div className="flex items-center gap-2" role="tablist" aria-label={t('landing.carouselTitle')}>
+            <div className="flex items-center gap-2" role="group" aria-label={t('landing.carouselTitle')}>
               {slides.map((slide, i) => (
                 <button
                   key={slide.id}
                   type="button"
-                  role="tab"
-                  aria-selected={i === index}
                   aria-label={`${t('landing.carouselGoTo')} ${i + 1}`}
+                  aria-current={i === index ? 'true' : undefined}
                   onClick={() => goTo(i)}
                   className={`h-2.5 rounded-full transition-all duration-300 ${i === index ? 'w-8 bg-emerald-600' : 'w-2.5 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'}`}
                 />

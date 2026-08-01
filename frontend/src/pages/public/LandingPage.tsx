@@ -221,7 +221,7 @@ export default function LandingPage() {
           <Link to="/login" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
             {t('landing.login')}
           </Link>
-          <Link to="/register" className="text-sm font-medium bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700 transition-all hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5">
+          <Link to="/register" className="text-sm font-medium bg-emerald-700 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-800 transition-all hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5">
             {t('landing.getStarted')}
           </Link>
         </div>
@@ -231,7 +231,20 @@ export default function LandingPage() {
 
       <EducationalCarousel />
 
-      {statsLoaded && (
+      {!statsLoaded ? (
+        <section aria-hidden="true" className="relative z-10 py-16">
+          <div className="max-w-5xl mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 rounded-3xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 md:p-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse space-y-3 text-center">
+                  <div className="mx-auto h-12 w-24 rounded-lg bg-gray-300 dark:bg-gray-600" />
+                  <div className="mx-auto h-4 w-20 rounded-md bg-gray-300 dark:bg-gray-600" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : (
         <section ref={statsRef} className="relative z-10 py-16 transition-all duration-700 transform" style={{ opacity: statsVisible ? 1 : 0, transform: statsVisible ? 'translateY(0)' : 'translateY(20px)' }}>
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 bg-gradient-to-r from-emerald-800/90 to-emerald-900/90 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl shadow-emerald-900/30 p-6 md:p-8">
@@ -401,6 +414,7 @@ export default function LandingPage() {
               <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <button
                   className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                  aria-expanded={activeFAQ === idx}
                   onClick={() => setActiveFAQ(activeFAQ === idx ? null : idx)}
                 >
                   <span className="font-medium text-gray-900 dark:text-white">{faq.q}</span>
@@ -428,10 +442,10 @@ export default function LandingPage() {
               {t('landing.ctaDesc')}
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/register" className="inline-block px-12 py-4 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-1 text-lg">
+              <Link to="/register" className="inline-block px-12 py-4 bg-gradient-to-r from-emerald-700 to-emerald-800 text-white font-semibold rounded-xl hover:from-emerald-800 hover:to-emerald-900 transition-all shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:-translate-y-1 text-lg">
                 {t('landing.ctaFreeTrial')}
               </Link>
-              <a href="#features" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">
+              <a href="#features" className="text-emerald-700 dark:text-emerald-400 font-medium hover:underline">
                 {t('landing.ctaSeeFeatures')}
               </a>
             </div>

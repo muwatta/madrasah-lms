@@ -51,7 +51,7 @@ function FloatingCard({ className, delay, reducedMotion, children }: FloatingCar
 }
 
 export default function Hero() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const reducedMotion = useReducedMotion();
 
   const iconWrap = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300';
@@ -59,13 +59,13 @@ export default function Hero() {
   const value = 'text-sm font-bold text-white';
 
   return (
-    <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden bg-gray-950 px-6 py-20 select-none">
+    <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden bg-gray-950 px-6 py-20">
       <Background />
 
       <FloatingCard className="left-[5%] top-[26%]" delay={0.3} reducedMotion={reducedMotion}>
         <span className={iconWrap}><Check className="h-5 w-5" /></span>
         <div>
-          <div className={sub}>{language === 'ar' ? 'نجحت في الاختبار' : 'Quiz passed'}</div>
+          <div className={sub}>{t('landing.heroCardQuiz')}</div>
           <div className={value}>A+ · 96%</div>
         </div>
       </FloatingCard>
@@ -73,7 +73,7 @@ export default function Hero() {
       <FloatingCard className="right-[5%] top-[32%]" delay={1.2} reducedMotion={reducedMotion}>
         <span className={iconWrap}><BookOpen className="h-5 w-5" /></span>
         <div>
-          <div className={sub}>{language === 'ar' ? 'حفظ القرآن' : 'Qur\'an memorisation'}</div>
+          <div className={sub}>{t('landing.heroCardQuran')}</div>
           <div className="mt-1 flex items-center gap-2">
             <div className="h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
               <div className="h-full w-[65%] rounded-full bg-gradient-to-r from-emerald-400 to-teal-300" />
@@ -86,7 +86,7 @@ export default function Hero() {
       <FloatingCard className="left-[8%] bottom-[18%]" delay={2.1} reducedMotion={reducedMotion}>
         <span className={iconWrap}><Check className="h-5 w-5" /></span>
         <div>
-          <div className={sub}>{language === 'ar' ? 'حضور الطلاب' : 'Attendance'}</div>
+          <div className={sub}>{t('landing.heroCardAttendance')}</div>
           <div className={value}>98%</div>
         </div>
       </FloatingCard>
@@ -130,7 +130,7 @@ export default function Hero() {
             whileHover={reducedMotion ? undefined : { y: -2, scale: 1.02 }}
             whileTap={reducedMotion ? undefined : { scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/30 transition-colors hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-700/30 transition-colors hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:w-auto"
           >
             {t('landing.startFreeTrial')}
             <ArrowRight className="h-4 w-4 rtl:rotate-180" />
