@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -14,6 +14,7 @@ const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
+const GuestPendingPage = lazy(() => import('./pages/auth/GuestPendingPage'));
 const ChangePasswordPage = lazy(() => import('./pages/auth/ChangePasswordPage'));
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
 const QuizListPage = lazy(() => import('./pages/student/quiz/QuizListPage'));
@@ -114,6 +115,17 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route
+              path="/guest"
+              element={
+                <ProtectedRoute allowedRoles={['guest']}>
+                  <Outlet />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="pending" replace />} />
+              <Route path="pending" element={<GuestPendingPage />} />
+            </Route>
 
             <Route
               path="/student"

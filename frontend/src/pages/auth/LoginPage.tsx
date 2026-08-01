@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 
 const ROLE_ROUTES: Record<string, string> = {
+  guest: '/guest/pending',
   student: '/student/dashboard',
   ustaadh: '/teacher/dashboard',
   parent: '/parent/dashboard',

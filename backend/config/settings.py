@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from decouple import config
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -124,6 +125,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
+        'config.permissions.IsApprovedMember',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -162,6 +164,16 @@ JWT_SECRET = config('JWT_SECRET', default='jwt-secret-key-change')
 JWT_EXPIRATION_HOURS = config('JWT_EXPIRATION_HOURS', default=24, cast=int)
 QR_SECRET_KEY = config('QR_SECRET_KEY', default='change-me-in-production')
 
+if not DEBUG:
+    if JWT_SECRET in ('', 'jwt-secret-key-change'):
+        raise ImproperlyConfigured(
+            'JWT_SECRET must be set to a strong random value when DEBUG=False.'
+        )
+    if QR_SECRET_KEY in ('', 'change-me-in-production'):
+        raise ImproperlyConfigured(
+            'QR_SECRET_KEY must be set to a strong random value when DEBUG=False.'
+        )
+
 # Celery 
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
@@ -181,6 +193,10 @@ CELERY_BEAT_SCHEDULE = {
     'process-pending-messages': {
         'task': 'whatsapp.tasks.process_pending_messages',
         'schedule': 300,  # every 5 minutes
+    },
+    'purge-expired-refresh-tokens': {
+        'task': 'users.tasks.purge_expired_refresh_tokens',
+        'schedule': 86400,  # once daily
     },
 }
 

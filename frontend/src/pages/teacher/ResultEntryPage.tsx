@@ -538,7 +538,7 @@ export default function ResultEntryPage() {
               <option value="">{t('results.selectYear')}</option>
               {(sessions || []).map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.name} {s.is_current ? `(${t('common.current')})` : ''}
+                  {s.name} {s.is_current }
                 </option>
               ))}
             </select>

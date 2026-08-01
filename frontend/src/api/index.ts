@@ -10,7 +10,6 @@ export const authAPI = {
     password_confirm: string;
     first_name: string;
     last_name: string;
-    role: string;
     madrasah: number;
   }) => api.post('/auth/register/', data),
 
@@ -164,9 +163,10 @@ export const dashboardAPI = {
 export const userAPI = {
   list: (params?: any) => api.get('/users/', { params }),
   get: (id: number) => api.get(`/users/${id}/`),
-  create: (data: any) => api.post('/auth/register/', data),
+  create: (data: any) => api.post('/users/create/', data),
   update: (id: number, data: any) => api.put(`/users/${id}/`, data),
   delete: (id: number) => api.delete(`/users/${id}/`),
+  approve: (id: number, data: any) => api.post(`/users/${id}/approve/`, data),
   bulkImport: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);

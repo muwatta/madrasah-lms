@@ -5,6 +5,7 @@ import LoadingSpinner from './LoadingSpinner';
 import type { ReactNode } from 'react';
 
 const ROLE_DASHBOARDS: Record<User['role'], string> = {
+  guest: '/guest/pending',
   student: '/student/dashboard',
   ustaadh: '/teacher/dashboard',
   parent: '/parent/dashboard',

@@ -1,6 +1,18 @@
 from rest_framework.permissions import IsAuthenticated, BasePermission
 
 
+class IsApprovedMember(BasePermission):
+    """Allow any authenticated user whose role has been assigned by an admin.
+
+    Guests (self-registered, pending approval) are denied.
+    """
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role != 'guest'
+        )
+
+
 class IsMudeer(BasePermission):
     """Allow only mudeer (principal) and idaarah (admin) roles."""
     def has_permission(self, request, view):

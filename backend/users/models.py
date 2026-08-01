@@ -48,6 +48,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     ROLE_CHOICES = [
+        ('guest', 'Guest (Pending Approval)'),
         ('ustaadh', 'Ustaadh (Teacher)'),
         ('mudeer', 'Mudeer (Administrator)'),
         ('idaarah', 'Idaarah (Board)'),
@@ -100,6 +101,22 @@ class StudentParent(models.Model):
 
     def __str__(self):
         return f"{self.parent.get_full_name()} - {self.student.get_full_name()} ({self.relationship})"
+
+
+class RefreshToken(models.Model):
+    """Tracks issued refresh tokens to support rotation and reuse detection."""
+
+    jti = models.CharField(max_length=64, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='refresh_tokens')
+    issued_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_revoked = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-issued_at']
+
+    def __str__(self):
+        return f"{self.jti} ({self.user.email})"
 
 
 class Message(models.Model):

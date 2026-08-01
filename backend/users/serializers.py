@@ -17,9 +17,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'full_name',
-            'role', 'madrasah', 'madrasah_name', 'is_active', 'date_joined'
+            'role', 'madrasah', 'madrasah_name', 'is_active', 'email_verified',
+            'date_joined'
         ]
-        read_only_fields = ['id', 'date_joined', 'madrasah']
+        read_only_fields = ['id', 'date_joined', 'madrasah', 'email_verified']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -28,7 +29,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name', 'role', 'madrasah']
+        fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name', 'madrasah']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
@@ -37,8 +38,36 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
+        validated_data['role'] = 'guest'
+        validated_data['is_staff'] = False
+        validated_data['is_superuser'] = False
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class AdminCreateUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True)
+    role = serializers.ChoiceField(choices=['ustaadh', 'mudeer', 'idaarah', 'student', 'parent'])
+
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'password_confirm', 'first_name', 'last_name', 'role']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({'password_confirm': 'Passwords do not match'})
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+        madrasah = self.context['request'].user.madrasah
+        user = User.objects.create_user(**validated_data, madrasah=madrasah)
+        return user
+
+
+class GuestApprovalSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=['ustaadh', 'mudeer', 'idaarah', 'student', 'parent'])
 
 
 class LoginSerializer(serializers.Serializer):

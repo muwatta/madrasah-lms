@@ -14,19 +14,12 @@ export default function RegisterPage() {
     password_confirm: '',
     first_name: '',
     last_name: '',
-    role: 'student',
     madrasah: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const ROLES = [
-    { value: 'student', label: t('roles.student') },
-    { value: 'ustaadh', label: t('roles.ustaadh') },
-    { value: 'parent', label: t('roles.parent') },
-  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -49,7 +42,6 @@ export default function RegisterPage() {
         password_confirm: formData.password_confirm,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        role: formData.role,
         madrasah: Number(formData.madrasah) || 1,
       });
       navigate('/login');
@@ -123,20 +115,6 @@ export default function RegisterPage() {
                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
                 placeholder="you@example.com"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('fields.role')}</label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
-              >
-                {ROLES.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
-                ))}
-              </select>
             </div>
 
             <div>

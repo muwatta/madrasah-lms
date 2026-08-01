@@ -20,6 +20,8 @@ auth_urlpatterns = [
 
 user_urlpatterns = [
     path('', views.UserListView.as_view(), name='user-list'),
+    path('create/', views.AdminCreateUserView.as_view(), name='user-create'),
+    path('<int:pk>/approve/', views.ApproveGuestView.as_view(), name='user-approve'),
     path('<int:pk>/', views.UserDetailView.as_view(), name='user-detail'),
     path('madrasahs/', views.MadrasahListView.as_view(), name='madrasah-list'),
     path('student-parents/', views.StudentParentListCreateView.as_view(), name='student-parent-list'),

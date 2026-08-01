@@ -1,8 +1,9 @@
 import jwt
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 from django.conf import settings
 from rest_framework import authentication, exceptions
-from .models import User
+from .models import User, RefreshToken
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
@@ -26,6 +27,9 @@ class JWTAuthentication(authentication.BaseAuthentication):
         except jwt.InvalidTokenError:
             raise exceptions.AuthenticationFailed('Invalid token')
 
+        if payload.get('type') != 'access':
+            raise exceptions.AuthenticationFailed('Invalid token type')
+
         try:
             user = User.objects.get(id=payload['user_id'])
         except User.DoesNotExist:
@@ -38,25 +42,34 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
 
 def generate_tokens(user):
+    now = datetime.now(timezone.utc)
     access_payload = {
         'user_id': user.id,
         'email': user.email,
         'role': user.role,
         'madrasah_id': user.madrasah_id,
-        'exp': datetime.now(timezone.utc) + timedelta(hours=settings.JWT_EXPIRATION_HOURS),
-        'iat': datetime.now(timezone.utc),
+        'exp': now + timedelta(hours=settings.JWT_EXPIRATION_HOURS),
+        'iat': now,
         'type': 'access',
     }
 
+    refresh_exp = now + timedelta(days=7)
     refresh_payload = {
         'user_id': user.id,
-        'exp': datetime.now(timezone.utc) + timedelta(days=7),
-        'iat': datetime.now(timezone.utc),
+        'exp': refresh_exp,
+        'iat': now,
         'type': 'refresh',
+        'jti': uuid4().hex,
     }
 
     access_token = jwt.encode(access_payload, settings.JWT_SECRET, algorithm='HS256')
     refresh_token = jwt.encode(refresh_payload, settings.JWT_SECRET, algorithm='HS256')
+
+    RefreshToken.objects.create(
+        jti=refresh_payload['jti'],
+        user=user,
+        expires_at=refresh_exp,
+    )
 
     return {
         'access': access_token,

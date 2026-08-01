@@ -59,6 +59,7 @@ export const translations = {
   },
   // Roles
   roles: {
+    guest: { ar: 'ضيف (قيد المراجعة)', en: 'Guest (Pending)' },
     student: { ar: 'طالب', en: 'Student' },
     ustaadh: { ar: 'معلم', en: 'Teacher' },
     parent: { ar: 'ولي أمر', en: 'Parent' },
@@ -213,6 +214,15 @@ export const translations = {
     invalidCredentials: { ar: 'البريد الإلكتروني أو كلمة المرور غير صحيحة', en: 'Invalid email or password' },
     registrationFailed: { ar: 'فشل التسجيل', en: 'Registration failed' },
     loginFailed: { ar: 'فشل تسجيل الدخول', en: 'Login failed' },
+    guestPendingTitle: { ar: 'قيد مراجعة المسؤول', en: 'Awaiting Admin Approval' },
+    guestPendingSubtitle: { ar: 'تم إنشاء حسابك بنجاح. سيقوم مسؤول المدرسة بمراجعة طلبك وتحديد دورك. ستتمكن من الوصول إلى المنصة بعد الموافقة.', en: 'Your account was created successfully. A school administrator will review your request and assign your role. You will get access once approved.' },
+    guestVerified: { ar: 'تم التحقق من البريد الإلكتروني', en: 'Email verified' },
+    guestNotVerified: { ar: 'البريد الإلكتروني غير مُتحقق منه', en: 'Email not verified yet' },
+    guestVerifyHint: { ar: 'تحقق من بريدك الإلكتروني لإكمال عملية الموافقة.', en: 'Please verify your email to complete the approval process.' },
+    guestResendVerify: { ar: 'إعادة إرسال رابط التحقق', en: 'Resend verification link' },
+    guestVerifySent: { ar: 'تم إرسال رابط التحقق. تحقق من بريدك الإلكتروني.', en: 'Verification link sent. Check your email.' },
+    guestApprovedHint: { ar: 'تمت الموافقة على حسابك! أعد تسجيل الدخول للوصول.', en: 'Your account was approved! Sign in again to get access.' },
+    guestLogout: { ar: 'تسجيل الخروج', en: 'Sign Out' },
   },
   // Common filters
   filters: {
@@ -484,6 +494,12 @@ export const translations = {
     loadFailed: { ar: 'فشل تحميل المستخدمين', en: 'Failed to load users' },
     passHint: { ar: '(اتركها فارغة للحفاظ عليها)', en: '(leave blank to keep)' },
     operationFailed: { ar: 'فشلت العملية', en: 'Operation failed' },
+    approve: { ar: 'موافقة', en: 'Approve' },
+    approveGuest: { ar: 'الموافقة على الضيف', en: 'Approve Guest' },
+    approveGuestHint: { ar: 'اختر الدور الذي سيُمنح لهذا المستخدم بعد الموافقة.', en: 'Select the role to assign to this user on approval.' },
+    approveGuestUnverified: { ar: 'لا يمكن الموافقة حتى يتم التحقق من البريد الإلكتروني.', en: 'Cannot approve until the email is verified.' },
+    assignRole: { ar: 'تعيين الدور', en: 'Assign Role' },
+    approveFailed: { ar: 'فشلت الموافقة', en: 'Approval failed' },
   },
   // Enrollment management
   enrollmentManagement: {

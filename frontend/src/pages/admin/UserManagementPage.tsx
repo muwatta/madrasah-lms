@@ -35,6 +35,7 @@ export default function UserManagementPage() {
 
   const ROLES: { value: string; label: string }[] = [
     { value: '', label: t('filters.allRoles') },
+    { value: 'guest', label: t('roles.guest') },
     { value: 'student', label: t('roles.student') },
     { value: 'ustaadh', label: t('roles.ustaadh') },
     { value: 'parent', label: t('roles.parent') },
@@ -114,6 +115,7 @@ export default function UserManagementPage() {
 
   const roleBadge = (role: string) => {
     const labels: Record<string, string> = {
+      guest: t('roles.guest'),
       student: t('roles.student'),
       ustaadh: t('roles.ustaadh'),
       parent: t('roles.parent'),
@@ -121,6 +123,7 @@ export default function UserManagementPage() {
       idaarah: t('roles.idaarah'),
     };
     const colors: Record<string, string> = {
+      guest: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
       student: 'bg-blue-100 text-blue-700',
       ustaadh: 'bg-purple-100 text-purple-700',
       parent: 'bg-amber-100 text-amber-700',
@@ -128,6 +131,26 @@ export default function UserManagementPage() {
       idaarah: 'bg-red-100 text-red-700',
     };
     return <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${colors[role] || 'bg-gray-100 text-gray-700'}`}>{labels[role] || role}</span>;
+  };
+
+  const [approveUser, setApproveUser] = useState<User | null>(null);
+  const [approveRole, setApproveRole] = useState('student');
+  const [approving, setApproving] = useState(false);
+  const [approveError, setApproveError] = useState<string | null>(null);
+
+  const handleApprove = async () => {
+    if (!approveUser) return;
+    setApproving(true);
+    setApproveError(null);
+    try {
+      await userAPI.approve(approveUser.id, { role: approveRole });
+      setApproveUser(null);
+      loadUsers();
+    } catch (err: any) {
+      setApproveError(err.response?.data?.error || err.response?.data?.role?.[0] || t('userManagement.approveFailed'));
+    } finally {
+      setApproving(false);
+    }
   };
 
   return (
@@ -260,7 +283,16 @@ export default function UserManagementPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button onClick={() => openEdit(user)} className="text-primary-600 hover:underline text-sm font-medium">{t('common.edit')}</button>
-                      {user.is_active && (
+                      {user.role === 'guest' && (
+                        <button
+                          onClick={() => { setApproveUser(user); setApproveRole('student'); setApproveError(null); }}
+                          className="text-emerald-600 hover:underline text-sm font-medium"
+                          title={user.email_verified ? undefined : t('userManagement.approveGuestUnverified')}
+                        >
+                          {t('userManagement.approve')}
+                        </button>
+                      )}
+                      {user.is_active && user.role !== 'guest' && (
                         <button onClick={() => setConfirmDeactivateId(user.id)} className="text-red-600 hover:underline text-sm font-medium">{t('userManagement.deactivate')}</button>
                       )}
                     </div>
@@ -282,6 +314,53 @@ export default function UserManagementPage() {
           onCancel={() => setConfirmDeactivateId(null)}
           variant="danger"
         />
+      )}
+
+      {approveUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('userManagement.approveGuest')}</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-[var(--color-text-muted)]">{t('userManagement.approveGuestHint')}</p>
+            <p className="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">{approveUser.full_name || approveUser.email}</p>
+
+            {!approveUser.email_verified && (
+              <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-700 dark:text-amber-400">
+                {t('userManagement.approveGuestUnverified')}
+              </div>
+            )}
+
+            <div className="mt-4">
+              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{t('userManagement.assignRole')}</label>
+              <select
+                value={approveRole}
+                onChange={(e) => setApproveRole(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-primary)] px-3 py-2 text-sm text-gray-900 dark:text-[var(--color-text-primary)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              >
+                {ROLES.filter((r) => r.value && r.value !== 'guest').map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+              </select>
+            </div>
+
+            {approveError && (
+              <div className="mt-3 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">{approveError}</div>
+            )}
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={handleApprove}
+                disabled={approving || !approveUser.email_verified}
+                className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:bg-emerald-400 disabled:opacity-50"
+              >
+                {approving ? t('common.saving') : t('userManagement.approve')}
+              </button>
+              <button
+                onClick={() => setApproveUser(null)}
+                className="flex-1 rounded-lg border border-gray-300 dark:border-[var(--color-border)] px-4 py-2 text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)] hover:bg-gray-50 dark:hover:bg-gray-700/30"
+              >
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

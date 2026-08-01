@@ -661,6 +661,9 @@ class ApprovalService:
             ValueError: If the transition is not allowed from the
                 current status.
         """
+        subject_result = (
+            SubjectResult.objects.select_for_update().get(pk=subject_result.pk)
+        )
         current_status = subject_result.status
 
         if new_status not in cls.VALID_TRANSITIONS.get(current_status, []):
@@ -733,6 +736,7 @@ class ApprovalService:
         """
         results = (
             SubjectResult.objects
+            .select_for_update()
             .filter(
                 subject_id__in=subject_ids,
                 term_id=term_id,
@@ -768,6 +772,7 @@ class ApprovalService:
         """
         results = (
             SubjectResult.objects
+            .select_for_update()
             .filter(
                 subject_id__in=subject_ids,
                 term_id=term_id,
@@ -806,6 +811,7 @@ class ApprovalService:
 
         results = (
             SubjectResult.objects
+            .select_for_update()
             .filter(
                 term_id=term_id,
                 school_class_id=school_class_id,
@@ -852,6 +858,7 @@ class ApprovalService:
         """
         results = (
             SubjectResult.objects
+            .select_for_update()
             .filter(
                 id__in=subject_result_ids,
                 status__in=['published', 'locked'],

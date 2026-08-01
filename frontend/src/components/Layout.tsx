@@ -71,6 +71,7 @@ const navIcons: Record<string, JSX.Element> = {
 };
 
 const roleNavLinks: Record<User['role'], NavLink[]> = {
+  guest: [],
   student: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#22c55e' },
     { labelKey: 'nav.myResults', path: '/results', icon: navIcons.myResults, color: '#3b82f6' },
@@ -156,6 +157,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
 };
 
 const rolePrefixMap: Record<User['role'], string> = {
+  guest: '/guest',
   student: '/student',
   ustaadh: '/teacher',
   parent: '/parent',
@@ -164,6 +166,7 @@ const rolePrefixMap: Record<User['role'], string> = {
 };
 
 const roleLabelKeys: Record<User['role'], string> = {
+  guest: 'roles.guest',
   student: 'roles.student',
   ustaadh: 'roles.ustaadh',
   parent: 'roles.parent',
@@ -172,6 +175,7 @@ const roleLabelKeys: Record<User['role'], string> = {
 };
 
 const roleColors: Record<User['role'], string> = {
+  guest: 'bg-amber-500',
   student: 'bg-emerald-500',
   ustaadh: 'bg-blue-500',
   parent: 'bg-purple-500',

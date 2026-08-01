@@ -1,14 +1,17 @@
 import logging
+from datetime import datetime, timezone
 
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from .models import User, Madrasah, StudentParent
+from config.permissions import IsMudeer
+from .models import User, Madrasah, StudentParent, RefreshToken
 from .serializers import (
-    UserSerializer, RegisterSerializer, LoginSerializer,
-    ChangePasswordSerializer, MadrasahSerializer, StudentParentSerializer
+    UserSerializer, RegisterSerializer, LoginSerializer, AdminCreateUserSerializer,
+    ChangePasswordSerializer, MadrasahSerializer, StudentParentSerializer,
+    GuestApprovalSerializer,
 )
 from .authentication import generate_tokens
 from .throttles import AuthAnonRateThrottle
@@ -69,29 +72,61 @@ class RefreshTokenView(APIView):
 
         try:
             payload = jwt.decode(refresh_token, settings.JWT_SECRET, algorithms=['HS256'])
-            if payload.get('type') != 'refresh':
-                return Response({'error': 'Invalid token type'}, status=status.HTTP_400_BAD_REQUEST)
-            user = User.objects.get(id=payload['user_id'])
-            tokens = generate_tokens(user)
-            return Response({'tokens': tokens})
         except jwt.ExpiredSignatureError:
             return Response({'error': 'Refresh token expired'}, status=status.HTTP_401_UNAUTHORIZED)
         except jwt.InvalidTokenError:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
 
+        if payload.get('type') != 'refresh':
+            return Response({'error': 'Invalid token type'}, status=status.HTTP_400_BAD_REQUEST)
+
+        jti = payload.get('jti')
+        if not jti:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            token_record = RefreshToken.objects.select_for_update().get(jti=jti)
+        except RefreshToken.DoesNotExist:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if token_record.is_revoked:
+            token_record.user.refresh_tokens.update(is_revoked=True)
+            return Response(
+                {'error': 'Token reuse detected. Please log in again.'},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if token_record.expires_at < datetime.now(timezone.utc):
+            return Response({'error': 'Refresh token expired'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = token_record.user
+        if not user.is_active:
+            return Response({'error': 'User is inactive'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        token_record.is_revoked = True
+        token_record.save(update_fields=['is_revoked'])
+
+        tokens = generate_tokens(user)
+        return Response({'tokens': tokens})
+
 
 class MeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
 
 class ChangePasswordView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             request.user.set_password(serializer.validated_data['new_password'])
             request.user.save()
+            request.user.refresh_tokens.update(is_revoked=True)
             logger.info("Password changed for user %s", request.user.id)
             return Response({'message': 'Password changed successfully'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -99,6 +134,7 @@ class ChangePasswordView(APIView):
 
 class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
+    permission_classes = [IsMudeer]
 
     def get_queryset(self):
         qs = User.objects.filter(madrasah=self.request.user.madrasah).select_related('madrasah')
@@ -110,9 +146,52 @@ class UserListView(generics.ListAPIView):
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
+    permission_classes = [IsMudeer]
 
     def get_queryset(self):
         return User.objects.filter(madrasah=self.request.user.madrasah).select_related('madrasah')
+
+
+class AdminCreateUserView(APIView):
+    permission_classes = [IsMudeer]
+
+    def post(self, request):
+        serializer = AdminCreateUserSerializer(
+            data=request.data,
+            context={'request': request},
+        )
+        if serializer.is_valid():
+            user = serializer.save()
+            logger.info("Admin %s created user %s (role=%s)", request.user.id, user.id, user.role)
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApproveGuestView(APIView):
+    permission_classes = [IsMudeer]
+
+    def post(self, request, pk):
+        try:
+            guest = User.objects.get(pk=pk, madrasah=request.user.madrasah, role='guest')
+        except User.DoesNotExist:
+            return Response({'error': 'Guest not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not guest.email_verified:
+            return Response(
+                {'error': 'Cannot approve a guest until their email is verified.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = GuestApprovalSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        guest.role = serializer.validated_data['role']
+        guest.is_active = True
+        guest.save(update_fields=['role', 'is_active'])
+
+        logger.info("Guest %s approved as %s by %s", guest.id, guest.role, request.user.id)
+        return Response(UserSerializer(guest).data)
 
 
 class MadrasahListView(generics.ListCreateAPIView):
