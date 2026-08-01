@@ -13,6 +13,7 @@ from academic.models import Session, Term
 QUESTION_TYPE_CHOICES = [
     ('mcq', 'Multiple Choice'),
     ('true_false', 'True / False'),
+    ('short_answer', 'Short Answer'),
 ]
 
 DIFFICULTY_CHOICES = [
@@ -73,6 +74,9 @@ class Question(models.Model):
     explanation = models.TextField(blank=True, default='', help_text='Explanation shown after submission')
     explanation_ar = models.TextField(blank=True, default='')
     is_active = models.BooleanField(default=True)
+    question_bank = models.ForeignKey(
+        'question_banks.QuestionBank', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='bank_questions')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
         related_name='created_new_quiz_questions')
@@ -151,6 +155,9 @@ class Quiz(models.Model):
     # Status
     status = models.CharField(max_length=20, choices=QUIZ_STATUS_CHOICES, default='draft')
     is_published = models.BooleanField(default=False)
+    source_bank = models.ForeignKey(
+        'question_banks.QuestionBank', on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='converted_quizzes')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -294,7 +301,7 @@ class QuizAttempt(models.Model):
 class QuizAnswer(models.Model):
     attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name='answers')
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='quiz_answers')
-    selected_answer = models.CharField(max_length=10, blank=True, default='')
+    selected_answer = models.TextField(blank=True, default='')
     is_correct = models.BooleanField(null=True, blank=True)
     marks_awarded = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     is_flagged = models.BooleanField(default=False)

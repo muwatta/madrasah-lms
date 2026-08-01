@@ -230,6 +230,14 @@ export default function QuizTakePage() {
                 </button>
               ))}
             </>
+          ) : current.question_type === 'short_answer' ? (
+            <textarea
+              value={localAnswers[current.question] ?? ''}
+              onChange={(e) => handleAnswer(current.question, e.target.value)}
+              rows={3}
+              placeholder={t('quiz.typeAnswer') || 'Type your answer here...'}
+              className="w-full p-3 rounded-lg border border-gray-200 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            />
           ) : (
             (current.options || []).map(opt => (
               <button key={opt.key} onClick={() => handleAnswer(current.question, opt.key)}

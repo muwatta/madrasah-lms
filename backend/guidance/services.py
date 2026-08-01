@@ -432,6 +432,71 @@ class AIService:
         )
         return transcript
 
+    def gap_analysis(self, student_name, subject_name, wrong_questions):
+        """Analyse which areas a student needs to cover based on wrong quiz answers."""
+        if not self.client:
+            logger.info("[AI] No API key; using template fallback for gap analysis")
+            return self._gap_fallback(subject_name, wrong_questions)
+
+        if not wrong_questions:
+            return "Excellent work! No gaps identified — you answered every question correctly."
+
+        question_lines = []
+        for i, q in enumerate(wrong_questions, start=1):
+            lines = [f"{i}. {q.get('question', '')}"]
+            if q.get('your_answer'):
+                lines.append(f"   Your answer: {q['your_answer']}")
+            if q.get('correct_answer'):
+                lines.append(f"   Correct answer: {q['correct_answer']}")
+            if q.get('explanation'):
+                lines.append(f"   Explanation: {q['explanation']}")
+            question_lines.append('\n'.join(lines))
+
+        prompt = (
+            f"Student: {student_name}\n"
+            f"Subject: {subject_name}\n\n"
+            f"The student answered the following questions incorrectly. For each, identify the "
+            f"underlying concept or skill that must be covered. Then give a concise list of the "
+            f"top learning gaps, ordered by priority, with a recommended action for each.\n\n"
+            f"Questions answered incorrectly:\n" + '\n'.join(question_lines)
+        )
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are an educational analyst. Identify the concepts a student "
+                            "needs to revisit after a quiz. Respond in clear, concise bullet "
+                            "points: list each learning gap, why it matters, and a concrete "
+                            "next step. Do not invent facts outside the provided questions."
+                        ),
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            logger.error("[AI] Gap analysis error: %s", e)
+            return self._gap_fallback(subject_name, wrong_questions)
+
+    def _gap_fallback(self, subject_name, wrong_questions):
+        lines = [f"**Learning Gaps — {subject_name}**\n"]
+        if not wrong_questions:
+            lines.append("No gaps detected.")
+        else:
+            lines.append(
+                f"{len(wrong_questions)} question(s) were answered incorrectly. "
+                "Review the correct answers and explanations for those questions, then "
+                "practise similar exercises. Detailed AI analysis becomes available once "
+                "OPENAI_API_KEY is configured."
+            )
+        return '\n'.join(lines)
+
     def _mock_student(self, name):
         class MockStudent:
             def get_full_name(self):

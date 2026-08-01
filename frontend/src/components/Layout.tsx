@@ -97,6 +97,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#3b82f6' },
     { labelKey: 'nav.myQuizzes', path: '/quizzes', icon: navIcons.myQuizzes, color: '#8b5cf6' },
     { labelKey: 'nav.questionBank', path: '/questions', icon: navIcons.questionBank, color: '#06b6d4' },
+    { labelKey: 'nav.termQuestionBanks', path: '/question-banks', icon: navIcons.questionBank, color: '#0ea5e9' },
     { labelKey: 'nav.students', path: '/students', icon: navIcons.students, color: '#22c55e' },
     { labelKey: 'nav.lessonPlanner', path: '/lesson-planner', icon: navIcons.lessonPlanner, color: '#f59e0b' },
     { labelKey: 'nav.homework', path: '/homework', icon: navIcons.homework, color: '#ef4444' },

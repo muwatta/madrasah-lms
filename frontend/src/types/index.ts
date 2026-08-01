@@ -223,7 +223,7 @@ export interface QuizQuestion {
   topic_name: string;
   school_class: number | null;
   school_class_name: string;
-  question_type: 'mcq' | 'true_false';
+  question_type: 'mcq' | 'true_false' | 'short_answer';
   difficulty: number;
   marks: number;
   question_text: string;
@@ -278,6 +278,7 @@ export interface Quiz {
   auto_submit_on_violations: boolean;
   status: 'draft' | 'published' | 'archived';
   is_published: boolean;
+  source_bank: number | null;
   total_marks: number;
   question_count: number;
   attempt_count: number;
@@ -317,6 +318,7 @@ export interface QuizAttempt {
   madrasah: number;
   quiz: number;
   quiz_title: string;
+  source_bank: number | null;
   student: number;
   student_name: string;
   attempt_number: number;
@@ -332,6 +334,43 @@ export interface QuizAttempt {
   answers: QuizAnswerItem[];
   violation_count: number;
   created_at: string;
+}
+
+export interface QuestionBank {
+  id: number;
+  madrasah: number;
+  created_by: number;
+  created_by_name: string;
+  subject: number;
+  subject_name: string;
+  school_class: number;
+  school_class_name: string;
+  session: number;
+  session_name: string;
+  term: number;
+  term_name: string;
+  term_number: number;
+  title: string;
+  description: string;
+  file: string | null;
+  file_url: string | null;
+  file_type: 'docx' | 'pdf';
+  original_size: number;
+  stored_size: number;
+  size_saved: number;
+  status: 'processing' | 'ready' | 'failed';
+  error_message: string;
+  question_count: number;
+  converted_quiz: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GapAnalysis {
+  analysis: string;
+  cached: boolean;
+  wrong_count: number;
+  attempt: string;
 }
 
 export interface ViolationLog {

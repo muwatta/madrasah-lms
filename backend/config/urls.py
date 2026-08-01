@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/v1/certificates/', include('certificates.urls')),
     path('api/v1/fasaaha/', include('fasaaha.urls')),
     path('api/v1/quizzes/', include('quizzes.urls')),
+    path('api/v1/question-banks/', include('question_banks.urls')),
     path('api/v1/search/', include('search.urls')),
     path('api/v1/audit/', include('audit.urls')),
 ]

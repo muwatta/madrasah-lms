@@ -695,3 +695,15 @@ export const auditAPI = {
     return api.get('/audit/logs/', { params });
   },
 };
+
+export const questionBankAPI = {
+  list: (params?: Record<string, unknown>) => api.get('/question-banks/', { params }),
+  get: (id: number) => api.get(`/question-banks/${id}/`),
+  create: (formData: FormData) =>
+    api.post('/question-banks/', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  delete: (id: number) => api.delete(`/question-banks/${id}/`),
+  convert: (id: number) => api.post(`/question-banks/${id}/convert/`),
+  questions: (id: number) => api.get(`/question-banks/${id}/questions/`),
+  gapAnalysis: (bankId: number, attemptUuid: string) =>
+    api.get(`/question-banks/${bankId}/gap-analysis/${attemptUuid}/`),
+};

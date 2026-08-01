@@ -24,6 +24,8 @@ const ExamResultsPage = lazy(() => import('./pages/student/ExamResultsPage'));
 const TeacherDashboard = lazy(() => import('./pages/teacher/TeacherDashboard'));
 const QuizManagementPage = lazy(() => import('./pages/teacher/quiz/QuizManagerPage'));
 const QuestionBankPage = lazy(() => import('./pages/teacher/quiz/QuestionBankPage'));
+const TermQuestionBanksPage = lazy(() => import('./pages/teacher/question-banks/QuestionBanksPage'));
+const QuestionBankEditorPage = lazy(() => import('./pages/teacher/question-banks/QuestionBankEditorPage'));
 const StudentPerformancePage = lazy(() => import('./pages/teacher/StudentPerformancePage'));
 const ParentDashboard = lazy(() => import('./pages/parent/ParentDashboard'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -185,6 +187,8 @@ function App() {
               <Route path="quiz/builder/:quizId" element={<QuizBuilderPage />} />
               <Route path="quizzes/:id/analytics" element={<QuizAnalyticsPage />} />
               <Route path="questions" element={<QuestionBankPage />} />
+              <Route path="question-banks" element={<TermQuestionBanksPage />} />
+              <Route path="question-banks/:id" element={<QuestionBankEditorPage />} />
               <Route path="students" element={<StudentPerformancePage />} />
               <Route path="messages" element={<MessagesPage />} />
               <Route path="attendance" element={<AttendancePage />} />

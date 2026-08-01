@@ -21,6 +21,7 @@ class QuestionSerializer(serializers.ModelSerializer):
             'question_type', 'difficulty', 'marks',
             'question_text', 'question_text_ar', 'options', 'correct_answer',
             'explanation', 'explanation_ar', 'is_active',
+            'question_bank',
             'created_by', 'created_by_name', 'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'uuid', 'madrasah', 'created_by', 'created_at', 'updated_at']
@@ -30,7 +31,7 @@ class QuestionWriteSerializer(serializers.Serializer):
     subject = serializers.IntegerField()
     topic = serializers.IntegerField(required=False, default=None, allow_null=True)
     school_class = serializers.IntegerField(required=False, default=None, allow_null=True)
-    question_type = serializers.ChoiceField(choices=['mcq', 'true_false'], default='mcq')
+    question_type = serializers.ChoiceField(choices=['mcq', 'true_false', 'short_answer'], default='mcq')
     difficulty = serializers.IntegerField(min_value=1, max_value=5, default=2)
     marks = serializers.DecimalField(max_digits=6, decimal_places=2, default=1.00)
     question_text = serializers.CharField()
@@ -84,7 +85,7 @@ class QuizSerializer(serializers.ModelSerializer):
             'show_question_numbers', 'auto_save',
             'grading_mode',
             'require_fullscreen', 'max_violations', 'auto_submit_on_violations',
-            'status', 'is_published',
+            'status', 'is_published', 'source_bank',
             'total_marks', 'question_count', 'attempt_count', 'average_score',
             'is_available_now',
             'created_at', 'updated_at',
@@ -161,13 +162,14 @@ class QuizAnswerSerializer(serializers.ModelSerializer):
 class QuizAttemptSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student.get_full_name', read_only=True)
     quiz_title = serializers.CharField(source='quiz.title', read_only=True)
+    source_bank = serializers.IntegerField(source='quiz.source_bank_id', read_only=True, default=None)
     answers = QuizAnswerSerializer(many=True, read_only=True)
     violation_count = serializers.SerializerMethodField()
 
     class Meta:
         model = QuizAttempt
         fields = [
-            'id', 'uuid', 'madrasah', 'quiz', 'quiz_title',
+            'id', 'uuid', 'madrasah', 'quiz', 'quiz_title', 'source_bank',
             'student', 'student_name', 'attempt_number', 'status',
             'score', 'total_marks', 'percentage', 'is_pass',
             'started_at', 'submitted_at', 'time_spent_seconds',
@@ -190,7 +192,7 @@ class StartAttemptSerializer(serializers.Serializer):
 
 class SaveAnswerSerializer(serializers.Serializer):
     question_id = serializers.IntegerField()
-    selected_answer = serializers.CharField(max_length=10)
+    selected_answer = serializers.CharField(allow_blank=True)
 
 
 class FlagQuestionSerializer(serializers.Serializer):

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'certificates',
     'fasaaha',
     'audit',
+    'question_banks',
 ]
 
 MIDDLEWARE = [

@@ -153,7 +153,7 @@ class QuestionService:
             if not options or len(options) < 2:
                 raise ValueError("MCQ requires at least 2 options.")
             valid_keys = [o.get('key', '') for o in options]
-            if correct_answer not in valid_keys:
+            if correct_answer and correct_answer not in valid_keys:
                 raise ValueError(f"Correct answer must be one of: {', '.join(valid_keys)}")
 
         return Question.objects.create(
@@ -325,7 +325,15 @@ class AttemptService:
                 correct = correct if correct in ('A', 'B') else ('A' if correct in ('TRUE', 'true') else 'B')
                 selected = selected if selected in ('A', 'B') else ('A' if selected in ('TRUE', 'true') else 'B')
 
-            if selected == correct:
+            is_correct = selected == correct
+
+            if question.question_type == 'short_answer' and correct and selected:
+                correct_keywords = set(correct.split())
+                given_keywords = set(selected.split())
+                overlap = correct_keywords & given_keywords
+                is_correct = len(correct_keywords) > 0 and len(overlap) / len(correct_keywords) >= 0.5
+
+            if is_correct:
                 answer.is_correct = True
                 answer.marks_awarded = effective_marks
                 total_score += effective_marks
