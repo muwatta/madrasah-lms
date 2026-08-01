@@ -221,6 +221,7 @@ class AdminDashboardView(APIView):
         total_students = User.objects.filter(madrasah=madrasah, role='student').count()
         total_teachers = User.objects.filter(madrasah=madrasah, role='ustaadh').count()
         total_parents = User.objects.filter(madrasah=madrasah, role='parent').count()
+        pending_guests = User.objects.filter(madrasah=madrasah, role='guest', is_active=True).count()
 
         total_subjects = Subject.objects.filter(madrasah=madrasah).count()
         total_quizzes = Quiz.objects.filter(madrasah=madrasah).count()
@@ -241,6 +242,7 @@ class AdminDashboardView(APIView):
             'total_students': total_students,
             'total_teachers': total_teachers,
             'total_parents': total_parents,
+            'pending_guests': pending_guests,
             'total_subjects': total_subjects,
             'total_quizzes': total_quizzes,
             'total_exams': total_exams,

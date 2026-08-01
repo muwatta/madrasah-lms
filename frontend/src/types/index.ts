@@ -173,6 +173,7 @@ export interface AdminDashboard {
   total_students: number;
   total_teachers: number;
   total_parents: number;
+  pending_guests: number;
   total_subjects: number;
   total_quizzes: number;
   total_exams: number;

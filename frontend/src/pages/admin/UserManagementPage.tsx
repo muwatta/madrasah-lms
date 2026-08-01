@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { userAPI } from '../../api';
 import type { User } from '../../types';
@@ -20,10 +21,11 @@ interface UserFormData {
 export default function UserManagementPage() {
   const { t } = useLanguage();
   const { exporting, exportData } = useExport();
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [roleFilter, setRoleFilter] = useState('');
+  const [roleFilter, setRoleFilter] = useState(searchParams.get('role') || '');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);

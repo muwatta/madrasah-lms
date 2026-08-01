@@ -518,6 +518,8 @@ export const translations = {
     totalStudents: { ar: 'إجمالي الطلاب', en: 'Total Students' },
     totalTeachers: { ar: 'المعلمون', en: 'Teachers' },
     totalParents: { ar: 'أولياء الأمور', en: 'Parents' },
+    pendingApprovals: { ar: 'طلبات موافقة معلّقة', en: 'Pending approvals' },
+    reviewNow: { ar: 'راجع الآن', en: 'Review now' },
     totalSubjects: { ar: 'المواد', en: 'Subjects' },
     totalQuizzes: { ar: 'الاختبارات', en: 'Quizzes' },
     totalExams: { ar: 'الامتحانات', en: 'Exams' },

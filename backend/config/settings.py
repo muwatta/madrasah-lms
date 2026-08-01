@@ -209,6 +209,11 @@ WHATSAPP_BUSINESS_ACCOUNT_ID = config('WHATSAPP_BUSINESS_ACCOUNT_ID', default=''
 WHATSAPP_APP_SECRET = config('WHATSAPP_APP_SECRET', default='')
 WHATSAPP_BASE_URL = 'https://graph.facebook.com'
 
+if not DEBUG and WHATSAPP_ACCESS_TOKEN and not WHATSAPP_APP_SECRET:
+    raise ImproperlyConfigured(
+        'WHATSAPP_APP_SECRET must be set when WhatsApp is enabled and DEBUG=False.'
+    )
+
 # Web Push (VAPID)
 VAPID_PUBLIC_KEY = config('VAPID_PUBLIC_KEY', default='')
 VAPID_PRIVATE_KEY = config('VAPID_PRIVATE_KEY', default='')
