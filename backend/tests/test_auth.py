@@ -146,3 +146,13 @@ class TestMe:
     def test_get_me_unauthenticated(self, client):
         response = client.get('/api/v1/auth/me/')
         assert response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
+
+
+@pytest.mark.django_db
+class TestLandingStats:
+    def test_landing_stats_public(self, client, madrasah, student, teacher, admin_user):
+        response = client.get('/api/v1/public/stats/')
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data['students'] >= 1
+        assert response.data['teachers'] >= 1
+        assert response.data['schools'] >= 1

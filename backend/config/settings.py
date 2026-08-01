@@ -135,6 +135,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_THROTTLE_RATES': {
         'anon': '20/hour',
+        'landing': '600/hour',
     },
 }
 # Security hardening 

@@ -1,11 +1,13 @@
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from users.models import User, Madrasah
+from .throttles import LandingAnonRateThrottle
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@throttle_classes([LandingAnonRateThrottle])
 def landing_stats(request):
     total_students = User.objects.filter(role='student').count()
     total_teachers = User.objects.filter(role='ustaadh').count()
