@@ -6,7 +6,7 @@ from .models import User, Madrasah, StudentParent
 class MadrasahSerializer(serializers.ModelSerializer):
     class Meta:
         model = Madrasah
-        fields = ['id', 'name', 'address', 'city', 'phone', 'email', 'latitude', 'longitude', 'timezone', 'created_at']
+        fields = ['id', 'name', 'address', 'city', 'phone', 'email', 'created_at']
 
 
 class UserSerializer(serializers.ModelSerializer):

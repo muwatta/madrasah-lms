@@ -69,23 +69,3 @@ class TajwidAssessment(models.Model):
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.surah_name} {self.ayah_range}"
-
-
-class PrayerTimetable(models.Model):
-    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='prayer_timetables')
-    date = models.DateField()
-    fajr = models.TimeField()
-    sunrise = models.TimeField()
-    dhuhr = models.TimeField()
-    asr = models.TimeField()
-    maghrib = models.TimeField()
-    isha = models.TimeField()
-    jumuah_khutbah = models.TimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['madrasah', 'date']
-        ordering = ['date']
-
-    def __str__(self):
-        return f"{self.date} - {self.madrasah}"

@@ -361,13 +361,6 @@ export const quranAPI = {
     list: (params?: any) => api.get('/quran/tajwid/', { params }),
     create: (data: any) => api.post('/quran/tajwid/', data),
   },
-  prayerTimes: {
-    list: (params?: any) => api.get('/quran/prayer-times/', { params }),
-    create: (data: any) => api.post('/quran/prayer-times/', data),
-    today: () => api.get('/quran/prayer-times/today/'),
-    settings: () => api.get('/quran/prayer-times/settings/'),
-    generate: (data: any) => api.post('/quran/prayer-times/generate/', data),
-  },
   studentProgress: (studentId: number) => api.get(`/quran/student-progress/${studentId}/`),
 };
 

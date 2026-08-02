@@ -56,7 +56,6 @@ const HomeworkPage = lazy(() => import('./pages/teacher/HomeworkPage'));
 const QuranPage = lazy(() => import('./pages/teacher/QuranPage'));
 const StudentHomeworkPage = lazy(() => import('./pages/student/StudentHomeworkPage'));
 const PortfolioPage = lazy(() => import('./pages/student/PortfolioPage'));
-const PrayerTimesPage = lazy(() => import('./pages/shared/PrayerTimesPage'));
 const AtRiskPage = lazy(() => import('./pages/admin/AtRiskPage'));
 const TeacherWorkloadPage = lazy(() => import('./pages/admin/TeacherWorkloadPage'));
 const LearningPathPage = lazy(() => import('./pages/student/LearningPathPage'));
@@ -154,7 +153,6 @@ function App() {
               <Route path="portfolio" element={<PortfolioPage />} />
               <Route path="certificates" element={<CertificatesPage />} />
               <Route path="calendar" element={<CalendarPage />} />
-              <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="career" element={<CareerGuidancePage />} />
               <Route path="tutor" element={<AITutorPage />} />
               <Route path="path" element={<LearningPathPage />} />
@@ -200,7 +198,6 @@ function App() {
               <Route path="homework" element={<HomeworkPage />} />
               <Route path="quran" element={<QuranPage />} />
               <Route path="character" element={<CharacterPage />} />
-              <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="timetable" element={<TeacherTimetablePage />} />
               <Route path="results" element={<ResultEntryPage />} />
               <Route path="fasaaha" element={<FasaahaTeacherDashboard />} />
@@ -226,7 +223,6 @@ function App() {
               <Route path="fees" element={<FeeStatusPage />} />
               <Route path="attendance" element={<StudentAttendancePage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
-              <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="whatsapp" element={<WhatsAppOptInPage />} />
               <Route path="child-results" element={<MyResultsPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
@@ -261,7 +257,6 @@ function App() {
               <Route path="teacher-workload" element={<TeacherWorkloadPage />} />
               <Route path="character" element={<CharacterPage />} />
               <Route path="whatsapp" element={<WhatsAppPage />} />
-              <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="results" element={<ResultsPublishPage />} />
               <Route path="audit" element={<AuditLogPage />} />
             </Route>
@@ -284,7 +279,6 @@ function App() {
               <Route path="homework" element={<HomeworkPage />} />
               <Route path="reports" element={<StudentReportPage />} />
               <Route path="engagement" element={<AdminEngagementPage />} />
-              <Route path="prayer-times" element={<PrayerTimesPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 

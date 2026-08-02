@@ -5,10 +5,6 @@ from assessments.models import Question, Quiz
 from results.models import Exam, ExamResult
 from decimal import Decimal
 from school_ops.models import FeeStructure, Fee, FeePayment, Attendance, Announcement
-from quran.models import PrayerTimetable
-from quran.prayer_calculator import compute_prayer_times, resolve_location, utc_offset_hours
-from calendar import monthrange
-from datetime import date
 
 
 CLASSES = [
@@ -415,22 +411,6 @@ class Command(BaseCommand):
                 'created_by': admin,
             }
         )
-
-        # Seed prayer times for the current and surrounding months
-        lat, lon, tz = resolve_location(madrasah)
-        today = date.today()
-        for offset in (-1, 0, 1):
-            year, month = today.year, today.month + offset
-            while month < 1:
-                month += 12
-                year -= 1
-            while month > 12:
-                month -= 12
-                year += 1
-            for day in range(1, monthrange(year, month)[1] + 1):
-                d = date(year, month, day)
-                times = compute_prayer_times(d, lat, lon, utc_offset_hours(tz, d))
-                PrayerTimetable.objects.get_or_create(madrasah=madrasah, date=d, defaults=times)
 
         self.stdout.write(self.style.SUCCESS('Database seeded successfully!'))
         self.stdout.write(f'  Madrasah: {madrasah.name}')

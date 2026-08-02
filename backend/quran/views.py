@@ -1,4 +1,3 @@
-import calendar
 import logging
 from datetime import date
 from django.utils import timezone
@@ -7,17 +6,12 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from config.permissions import IsApprovedMember, IsMudeer, IsMudeerOrReadOnly
-
-from .models import MemorizationTracker, RevisionSchedule, TajwidAssessment, PrayerTimetable
-from .prayer_calculator import compute_prayer_times, resolve_location, utc_offset_hours
+from .models import MemorizationTracker, RevisionSchedule, TajwidAssessment
 from .serializers import (
     MemorizationTrackerSerializer,
     RevisionScheduleSerializer,
     TajwidAssessmentSerializer,
-    PrayerTimetableSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -127,103 +121,6 @@ class TajwidAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.role == 'student':
             qs = qs.filter(student=self.request.user)
         return qs
-
-
-class PrayerTimetableListCreateView(generics.ListCreateAPIView):
-    serializer_class = PrayerTimetableSerializer
-    permission_classes = [IsMudeerOrReadOnly]
-
-    def get_queryset(self):
-        return PrayerTimetable.objects.filter(madrasah=self.request.user.madrasah)
-
-    def perform_create(self, serializer):
-        serializer.save(madrasah=self.request.user.madrasah)
-
-
-class PrayerTimetableDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = PrayerTimetableSerializer
-    permission_classes = [IsMudeerOrReadOnly]
-
-    def get_queryset(self):
-        return PrayerTimetable.objects.filter(madrasah=self.request.user.madrasah)
-
-
-class PrayerTimesSettingsView(APIView):
-    permission_classes = [IsAuthenticated, IsApprovedMember]
-
-    def get(self, request):
-        madrasah = request.user.madrasah
-        return Response({
-            'latitude': madrasah.latitude,
-            'longitude': madrasah.longitude,
-            'timezone': madrasah.timezone,
-            'city': madrasah.city,
-        })
-
-
-class GeneratePrayerTimesView(APIView):
-    permission_classes = [IsAuthenticated, IsMudeer]
-
-    def post(self, request):
-        madrasah = request.user.madrasah
-        today = timezone.localdate()
-        try:
-            year = int(request.data.get('year') or today.year)
-            month = int(request.data.get('month') or today.month)
-            last_day = calendar.monthrange(year, month)[1]
-        except (TypeError, ValueError):
-            return Response({'detail': 'Invalid year or month.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        save_fields = []
-        if request.data.get('latitude') is not None and request.data.get('longitude') is not None:
-            try:
-                madrasah.latitude = float(request.data['latitude'])
-                madrasah.longitude = float(request.data['longitude'])
-            except (TypeError, ValueError):
-                return Response({'detail': 'Invalid latitude or longitude.'}, status=status.HTTP_400_BAD_REQUEST)
-            save_fields += ['latitude', 'longitude']
-        if request.data.get('timezone'):
-            madrasah.timezone = request.data['timezone']
-            save_fields.append('timezone')
-        if save_fields:
-            madrasah.save(update_fields=save_fields)
-
-        latitude, longitude, timezone_name = resolve_location(madrasah)
-        created = 0
-        updated = 0
-        for day in range(1, last_day + 1):
-            target = date(year, month, day)
-            times = compute_prayer_times(
-                target, latitude, longitude, utc_offset_hours(timezone_name, target)
-            )
-            _, was_created = PrayerTimetable.objects.update_or_create(
-                madrasah=madrasah, date=target, defaults=times,
-            )
-            created += 1 if was_created else 0
-            updated += 0 if was_created else 1
-
-        return Response({
-            'detail': 'Prayer times generated.',
-            'created': created,
-            'updated': updated,
-            'year': year,
-            'month': month,
-            'latitude': latitude,
-            'longitude': longitude,
-            'timezone': timezone_name,
-        })
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def today_prayer_times(request):
-    timetable = PrayerTimetable.objects.filter(
-        madrasah=request.user.madrasah, date=date.today()
-    ).first()
-    if not timetable:
-        return Response({'detail': 'No prayer timetable for today.'}, status=status.HTTP_404_NOT_FOUND)
-    serializer = PrayerTimetableSerializer(timetable)
-    return Response(serializer.data)
 
 
 @api_view(['GET'])

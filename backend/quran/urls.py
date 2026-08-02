@@ -9,10 +9,5 @@ urlpatterns = [
     path('revision/<int:pk>/', views.RevisionScheduleDetailView.as_view(), name='revision-detail'),
     path('tajwid/', views.TajwidAssessmentListCreateView.as_view(), name='tajwid-list'),
     path('tajwid/<int:pk>/', views.TajwidAssessmentDetailView.as_view(), name='tajwid-detail'),
-    path('prayer-times/', views.PrayerTimetableListCreateView.as_view(), name='prayer-times-list'),
-    path('prayer-times/<int:pk>/', views.PrayerTimetableDetailView.as_view(), name='prayer-times-detail'),
-    path('prayer-times/today/', views.today_prayer_times, name='prayer-times-today'),
-    path('prayer-times/settings/', views.PrayerTimesSettingsView.as_view(), name='prayer-times-settings'),
-    path('prayer-times/generate/', views.GeneratePrayerTimesView.as_view(), name='prayer-times-generate'),
     path('student-progress/<int:student_id>/', views.student_progress, name='student-progress'),
 ]

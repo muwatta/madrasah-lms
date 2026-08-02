@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import MemorizationTracker, RevisionSchedule, TajwidAssessment, PrayerTimetable
+from .models import MemorizationTracker, RevisionSchedule, TajwidAssessment
 
 
 class MemorizationTrackerSerializer(serializers.ModelSerializer):
@@ -40,23 +40,5 @@ class TajwidAssessmentSerializer(serializers.ModelSerializer):
             'assessment_date', 'surah_number', 'surah_name', 'ayah_range',
             'makharij_score', 'sifaat_score', 'ghunna_score', 'madd_score',
             'waqf_score', 'overall_score', 'notes', 'audio_submission', 'created_at',
-        ]
-        read_only_fields = ['madrasah']
-
-
-class PrayerTimetableSerializer(serializers.ModelSerializer):
-    fajr = serializers.TimeField(format='%H:%M')
-    sunrise = serializers.TimeField(format='%H:%M')
-    dhuhr = serializers.TimeField(format='%H:%M')
-    asr = serializers.TimeField(format='%H:%M')
-    maghrib = serializers.TimeField(format='%H:%M')
-    isha = serializers.TimeField(format='%H:%M')
-    jumuah_khutbah = serializers.TimeField(format='%H:%M', allow_null=True, required=False)
-
-    class Meta:
-        model = PrayerTimetable
-        fields = [
-            'id', 'madrasah', 'date', 'fajr', 'sunrise', 'dhuhr', 'asr',
-            'maghrib', 'isha', 'jumuah_khutbah', 'created_at',
         ]
         read_only_fields = ['madrasah']
