@@ -540,6 +540,12 @@ export default function Layout() {
                         <p className="text-[11px] font-medium uppercase" style={{ color: 'var(--color-text-muted)' }}>{t('common.currentAccount')}</p>
                         <div className="flex gap-2">
                           <Link
+                            to={`${rolePrefixMap[user.role]}/profile`}
+                            className="text-[11px] font-medium transition-colors hover:text-gray-700 dark:hover:text-gray-300" style={{ color: 'var(--color-text-muted)' }}
+                          >
+                            {t('common.profile')}
+                          </Link>
+                          <Link
                             to={`${rolePrefixMap[user.role]}/change-password`}
                             className="text-[11px] font-medium transition-colors hover:text-gray-700 dark:hover:text-gray-300" style={{ color: 'var(--color-text-muted)' }}
                           >

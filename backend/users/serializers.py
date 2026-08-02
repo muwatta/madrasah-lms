@@ -16,11 +16,22 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'full_name',
+            'id', 'email', 'first_name', 'last_name', 'full_name', 'phone',
             'role', 'madrasah', 'madrasah_name', 'is_active', 'email_verified',
-            'date_joined'
+            'date_of_birth', 'date_joined'
         ]
         read_only_fields = ['id', 'date_joined', 'madrasah', 'email_verified']
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """Restricted self-service profile fields.
+
+    A user may edit their own basic details only; email, role and madrasah are
+    managed by admins.
+    """
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'phone', 'date_of_birth']
 
 
 class RegisterSerializer(serializers.ModelSerializer):

@@ -4,11 +4,13 @@ export interface User {
   first_name: string;
   last_name: string;
   full_name: string;
+  phone?: string;
   role: 'guest' | 'ustaadh' | 'mudeer' | 'idaarah' | 'student' | 'parent';
   madrasah: number;
   madrasah_name: string;
   is_active: boolean;
   email_verified?: boolean;
+  date_of_birth?: string | null;
   date_joined: string;
   student_ids?: number[];
 }

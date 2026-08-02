@@ -16,6 +16,7 @@ interface AuthContextType {
   switchAccount: (email: string) => boolean;
   getStoredSessions: () => StoredSession[];
   removeStoredSession: (email: string) => void;
+  refreshUser: () => Promise<User | null>;
 }
 
 const SESSIONS_KEY = 'lms_sessions';
@@ -132,6 +133,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     saveStoredSessions(sessions);
   };
 
+  const refreshUser = useCallback(async (): Promise<User | null> => {
+    try {
+      const response = await authAPI.getMe();
+      const activeEmail = sessionStorage.getItem(ACTIVE_EMAIL_KEY);
+      if (activeEmail) {
+        const sessions = getStoredSessions();
+        if (sessions[activeEmail]) {
+          sessions[activeEmail].user = response.data;
+          saveStoredSessions(sessions);
+        }
+      }
+      setUser(response.data);
+      return response.data;
+    } catch {
+      return null;
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -143,6 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         switchAccount,
         getStoredSessions: listStoredSessions,
         removeStoredSession,
+        refreshUser,
       }}
     >
       {children}

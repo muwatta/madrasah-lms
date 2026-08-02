@@ -16,6 +16,7 @@ const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
 const GuestPendingPage = lazy(() => import('./pages/auth/GuestPendingPage'));
 const ChangePasswordPage = lazy(() => import('./pages/auth/ChangePasswordPage'));
+const ProfilePage = lazy(() => import('./pages/shared/ProfilePage'));
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
 const QuizListPage = lazy(() => import('./pages/student/quiz/QuizListPage'));
 const QuizTakePage = lazy(() => import('./pages/student/quiz/QuizTakePage'));
@@ -170,6 +171,7 @@ function App() {
               <Route path="fasaaha/leaderboard" element={<FasaahaLeaderboard />} />
               <Route path="fasaaha/goals" element={<FasaahaDailyGoals />} />
               <Route path="fasaaha/trends" element={<FasaahaScoreTrends />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -206,6 +208,7 @@ function App() {
               <Route path="fasaaha/analytics" element={<FasaahaAnalyticsPage />} />
               <Route path="qr-scanner" element={<QRScannerPage />} />
               <Route path="class-subjects" element={<TeacherClassSubjectsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -225,6 +228,7 @@ function App() {
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="whatsapp" element={<WhatsAppOptInPage />} />
               <Route path="child-results" element={<MyResultsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -259,6 +263,7 @@ function App() {
               <Route path="whatsapp" element={<WhatsAppPage />} />
               <Route path="results" element={<ResultsPublishPage />} />
               <Route path="audit" element={<AuditLogPage />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
 
             <Route
@@ -279,6 +284,7 @@ function App() {
               <Route path="homework" element={<HomeworkPage />} />
               <Route path="reports" element={<StudentReportPage />} />
               <Route path="engagement" element={<AdminEngagementPage />} />
+              <Route path="profile" element={<ProfilePage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 

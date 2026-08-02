@@ -7,6 +7,9 @@ from .models import User, RefreshToken
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
+    def authenticate_header(self, request):
+        return 'Bearer'
+
     def authenticate(self, request):
         auth_header = request.headers.get('Authorization')
 

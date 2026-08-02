@@ -18,6 +18,13 @@ export const authAPI = {
 
   getMe: () => api.get('/auth/me/'),
 
+  updateProfile: (data: {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    date_of_birth?: string | null;
+  }) => api.patch('/auth/me/', data),
+
   forgotPassword: (email: string) =>
     api.post('/auth/password-reset/', { email }),
 

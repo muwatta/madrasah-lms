@@ -11,7 +11,7 @@ from .models import User, Madrasah, StudentParent, RefreshToken
 from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer, AdminCreateUserSerializer,
     ChangePasswordSerializer, MadrasahSerializer, StudentParentSerializer,
-    GuestApprovalSerializer,
+    GuestApprovalSerializer, ProfileUpdateSerializer,
 )
 from .authentication import generate_tokens
 from .throttles import AuthAnonRateThrottle
@@ -116,6 +116,16 @@ class MeView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+    def put(self, request):
+        serializer = ProfileUpdateSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            logger.info("User %s updated their profile", request.user.id)
+            return Response(UserSerializer(request.user).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    patch = put
 
 
 class ChangePasswordView(APIView):
