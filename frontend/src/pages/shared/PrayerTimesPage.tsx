@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { quranAPI } from '../../api';
+import { useCallback, useEffect, useState } from 'react';import { quranAPI } from '../../api';
 import { unwrapPaginated } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
@@ -67,40 +66,64 @@ export default function PrayerTimesPage() {
   const [form, setForm] = useState<Record<string, string>>({ fajr: '', sunrise: '', dhuhr: '', asr: '', maghrib: '', isha: '' });
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
+  const [showGen, setShowGen] = useState(false);
+  const [genLat, setGenLat] = useState('');
+  const [genLon, setGenLon] = useState('');
+  const [genTz, setGenTz] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [genMsg, setGenMsg] = useState('');
+
+  const loadMonth = useCallback(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    return quranAPI.prayerTimes.list({ year, month })
+      .then((res) => setMonthData(unwrapPaginated(res.data)))
+      .catch(() => {});
+  }, [currentDate]);
+
+  const loadTodayYesterday = () => {
     const todayStr = toInputDate(new Date());
     const yesterdayStr = toInputDate(new Date(Date.now() - 86400000));
-
-    Promise.all([
+    return Promise.all([
       quranAPI.prayerTimes.today().catch(() => ({ data: null as PrayerTime | null })),
       quranAPI.prayerTimes.list({ date: todayStr }).catch(() => ({ data: [] as PrayerTime[] })),
       quranAPI.prayerTimes.list({ date: yesterdayStr }).catch(() => ({ data: [] as PrayerTime[] })),
-    ])
-      .then(([todayRes, todayListRes, yesterdayListRes]) => {
-        const today = todayRes as { data: PrayerTime | null };
-        const todayList = todayListRes as { data: PrayerTime[] };
-        const yesterdayList = yesterdayListRes as { data: PrayerTime[] };
-        if (today.data) {
-          setToday(today.data);
-        } else {
-          const list = unwrapPaginated(todayList.data);
-          if (list.length > 0) setToday(list[0] as PrayerTime);
-        }
-        const yList = unwrapPaginated(yesterdayList.data);
-        if (yList.length > 0) setYesterday(yList[0] as PrayerTime);
-      })
+    ]).then(([todayRes, todayListRes, yesterdayListRes]) => {
+      const today = todayRes as { data: PrayerTime | null };
+      const todayList = todayListRes as { data: PrayerTime[] };
+      const yesterdayList = yesterdayListRes as { data: PrayerTime[] };
+      if (today.data) {
+        setToday(today.data);
+      } else {
+        const list = unwrapPaginated(todayList.data);
+        if (list.length > 0) setToday(list[0] as PrayerTime);
+      }
+      const yList = unwrapPaginated(yesterdayList.data);
+      if (yList.length > 0) setYesterday(yList[0] as PrayerTime);
+    });
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    loadTodayYesterday()
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
   }, [t]);
 
   useEffect(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-    quranAPI.prayerTimes.list({ year, month })
-      .then((res) => setMonthData(unwrapPaginated(res.data)))
+    loadMonth();
+  }, [loadMonth]);
+
+  useEffect(() => {
+    if (!canManage) return;
+    quranAPI.prayerTimes.settings()
+      .then((res) => {
+        setGenLat(res.data.latitude != null ? String(res.data.latitude) : '');
+        setGenLon(res.data.longitude != null ? String(res.data.longitude) : '');
+        setGenTz(res.data.timezone || '');
+      })
       .catch(() => {});
-  }, [currentDate]);
+  }, [canManage]);
 
   const navigateMonth = (dir: number) => {
     setCurrentDate((prev) => {
@@ -124,14 +147,33 @@ export default function PrayerTimesPage() {
         const pt = Array.isArray(data) ? data[0] : data;
         setToday(pt);
       }
-      const year = currentDate.getFullYear();
-      const month = currentDate.getMonth() + 1;
-      const monthRes = await quranAPI.prayerTimes.list({ year, month });
-      setMonthData(unwrapPaginated(monthRes.data));
+      await loadMonth();
     } catch {
       setError(t('common.saveFailed'));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGenerating(true);
+    setGenMsg('');
+    try {
+      const payload: Record<string, string | number> = {
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth() + 1,
+      };
+      if (genLat) payload.latitude = parseFloat(genLat);
+      if (genLon) payload.longitude = parseFloat(genLon);
+      if (genTz) payload.timezone = genTz;
+      const res = await quranAPI.prayerTimes.generate(payload);
+      setGenMsg(language === 'ar' ? `تم توليد ${res.data.created} مواقيت` : `${res.data.created} prayer times generated`);
+      await Promise.all([loadTodayYesterday(), loadMonth()]);
+    } catch {
+      setError(t('common.saveFailed'));
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -164,7 +206,7 @@ export default function PrayerTimesPage() {
       )}
 
       {canManage && (
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap gap-3">
           <button
             onClick={() => setShowForm(!showForm)}
             className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
@@ -172,6 +214,57 @@ export default function PrayerTimesPage() {
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             {language === 'ar' ? 'إضافة مواقيت' : 'Add Prayer Times'}
           </button>
+          <button
+            onClick={() => setShowGen(!showGen)}
+            className="btn-press inline-flex items-center gap-2 rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+            {language === 'ar' ? 'توليد مواقيت الشهر' : 'Generate Month'}
+          </button>
+        </div>
+      )}
+
+      {showGen && (
+        <div className="animate-slide-down mb-6 rounded-xl border border-primary-100 dark:border-primary-800 bg-white dark:bg-gray-800 p-6 shadow-md">
+          <h2 className="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {language === 'ar' ? 'توليد مواقيت شهر' : 'Generate Monthly Prayer Times'}
+          </h2>
+          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            {language === 'ar'
+              ? 'يتم احتساب المواقيت تلقائياً حسب موقع المدرسة.'
+              : 'Times are computed automatically from the madrasah location.'}
+          </p>
+          <form onSubmit={handleGenerate} className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{language === 'ar' ? 'خط العرض' : 'Latitude'}</label>
+                <input type="number" step="any" value={genLat} onChange={(e) => setGenLat(e.target.value)} placeholder="6.5244"
+                  className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{language === 'ar' ? 'خط الطول' : 'Longitude'}</label>
+                <input type="number" step="any" value={genLon} onChange={(e) => setGenLon(e.target.value)} placeholder="3.3792"
+                  className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">{language === 'ar' ? 'المنطقة الزمنية' : 'Timezone'}</label>
+                <input type="text" value={genTz} onChange={(e) => setGenTz(e.target.value)} placeholder="Africa/Lagos"
+                  className="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 text-sm focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none" />
+              </div>
+            </div>
+            {genMsg && (
+              <p className="text-sm text-green-600 dark:text-green-400">{genMsg}</p>
+            )}
+            <div className="flex gap-3">
+              <button type="submit" disabled={generating}
+                className="btn-press rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
+                {generating ? t('common.saving') : (language === 'ar' ? 'توليد المواقيت' : 'Generate')}
+              </button>
+              <button type="button" onClick={() => setShowGen(false)} className="rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700">
+                {t('common.cancel')}
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

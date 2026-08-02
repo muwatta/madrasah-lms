@@ -45,6 +45,14 @@ class TajwidAssessmentSerializer(serializers.ModelSerializer):
 
 
 class PrayerTimetableSerializer(serializers.ModelSerializer):
+    fajr = serializers.TimeField(format='%H:%M')
+    sunrise = serializers.TimeField(format='%H:%M')
+    dhuhr = serializers.TimeField(format='%H:%M')
+    asr = serializers.TimeField(format='%H:%M')
+    maghrib = serializers.TimeField(format='%H:%M')
+    isha = serializers.TimeField(format='%H:%M')
+    jumuah_khutbah = serializers.TimeField(format='%H:%M', allow_null=True, required=False)
+
     class Meta:
         model = PrayerTimetable
         fields = [
