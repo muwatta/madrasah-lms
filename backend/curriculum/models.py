@@ -7,6 +7,11 @@ class SchoolClass(models.Model):
     name_ar = models.CharField(max_length=100)
     name_en = models.CharField(max_length=100)
     order = models.PositiveSmallIntegerField()
+    class_teacher = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='classes_teaching',
+        help_text='The teacher responsible for managing this class\'s subjects and enrollments.',
+    )
 
     class Meta:
         ordering = ['order']
@@ -44,6 +49,25 @@ class Topic(models.Model):
 
     class Meta:
         ordering = ['name']
+
+
+class ClassSubject(models.Model):
+    """Subjects attached to a school class.
+
+    Only subjects listed here may be enrolled for students of this class.
+    Admins and the class teacher manage these records.
+    """
+    madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='class_subjects')
+    school_class = models.ForeignKey(SchoolClass, on_delete=models.CASCADE, related_name='class_subjects')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='class_subjects')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['school_class', 'subject']
+
+    def __str__(self):
+        return f"{self.school_class.name_ar} - {self.subject.name_ar}"
 
 
 class Enrollment(models.Model):

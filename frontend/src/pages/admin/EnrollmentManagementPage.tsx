@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { enrollmentAPI, userAPI, subjectAPI, schoolClassAPI } from '../../api';
-import type { Enrollment, User, Subject } from '../../types';
+import { enrollmentAPI, userAPI, subjectAPI, schoolClassAPI, classSubjectAPI } from '../../api';
+import type { Enrollment, User, Subject, ClassSubject } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonCard } from '../../components/Skeleton';
 
@@ -29,10 +29,12 @@ export default function EnrollmentManagementPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
   const [schoolClasses, setSchoolClasses] = useState<any[]>([]);
+  const [classSubjects, setClassSubjects] = useState<ClassSubject[]>([]);
 
   const [studentFilter, setStudentFilter] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('');
   const [teacherFilter, setTeacherFilter] = useState('');
+  const [classFilter, setClassFilter] = useState('');
 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ student: '', subject: '', ustaadh: '', school_class: '' });
@@ -46,6 +48,7 @@ export default function EnrollmentManagementPage() {
       student: studentFilter || undefined,
       subject: subjectFilter || undefined,
       ustaadh: teacherFilter || undefined,
+      school_class: classFilter || undefined,
     })
       .then((res) => setEnrollments(res.data.results ?? res.data))
       .catch((err) => setError(err.response?.data?.detail || t('enrollmentManagement.loadFailed')))
@@ -58,11 +61,12 @@ export default function EnrollmentManagementPage() {
       subjectAPI.list().then((r) => setSubjects(r.data.results ?? r.data)),
       userAPI.list({ role: 'ustaadh' }).then((r) => setTeachers(r.data.results ?? r.data)),
       schoolClassAPI.list().then((r) => setSchoolClasses(r.data.results ?? r.data)),
+      classSubjectAPI.list().then((r) => setClassSubjects(r.data.results ?? r.data)),
     ]).catch(() => {});
   }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadEnrollments(); }, [studentFilter, subjectFilter, teacherFilter]);
+  useEffect(() => { loadEnrollments(); }, [studentFilter, subjectFilter, teacherFilter, classFilter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +103,23 @@ export default function EnrollmentManagementPage() {
       setSaving(false);
     }
   };
+
+  const handleDelete = async (enrollment: Enrollment) => {
+    if (!window.confirm(t('classSubjects.confirmDropEnrollment'))) return;
+    try {
+      await enrollmentAPI.delete(enrollment.id);
+      setEnrollments((prev) => prev.filter((e) => e.id !== enrollment.id));
+    } catch {
+      // ignore
+    }
+  };
+
+  const classSubjectIdsForClass = (classId: number) =>
+    new Set(classSubjects.filter((cs) => cs.school_class === classId).map((cs) => cs.subject));
+
+  const formSubjects = form.school_class
+    ? subjects.filter((s) => classSubjectIdsForClass(Number(form.school_class)).has(s.id))
+    : subjects;
 
   const grouped: Record<string, Enrollment[]> = {};
   const groupOrder: string[] = [];
@@ -174,9 +195,16 @@ export default function EnrollmentManagementPage() {
               {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>)}
             </select>
           </div>
-          {(studentFilter || subjectFilter || teacherFilter) && (
+          <div className="min-w-[160px] flex-1">
+            <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'تصفية حسب الصف' : 'Filter by Class'}</label>
+            <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className={selectCls}>
+              <option value="">{language === 'ar' ? 'كل الصفوف' : 'All Classes'}</option>
+              {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</option>)}
+            </select>
+          </div>
+          {(studentFilter || subjectFilter || teacherFilter || classFilter) && (
             <button
-              onClick={() => { setStudentFilter(''); setSubjectFilter(''); setTeacherFilter(''); }}
+              onClick={() => { setStudentFilter(''); setSubjectFilter(''); setTeacherFilter(''); setClassFilter(''); }}
               className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -211,7 +239,7 @@ export default function EnrollmentManagementPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الصف' : 'Class'}</label>
-              <select required value={form.school_class} onChange={(e) => { setForm({ ...form, school_class: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.school_class; return n; }); }} className={`${selectCls} ${fieldErrors.school_class ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
+              <select required value={form.school_class} onChange={(e) => { setForm({ ...form, school_class: e.target.value, subject: '' }); setFieldErrors(fe => { const n = { ...fe }; delete n.school_class; return n; }); }} className={`${selectCls} ${fieldErrors.school_class ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
                 <option value="">{language === 'ar' ? 'اختر الصف' : 'Choose Class'}</option>
                 {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</option>)}
               </select>
@@ -221,9 +249,14 @@ export default function EnrollmentManagementPage() {
               <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.subject')}</label>
               <select required value={form.subject} onChange={(e) => { setForm({ ...form, subject: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.subject; return n; }); }} className={`${selectCls} ${fieldErrors.subject ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
                 <option value="">{t('filters.chooseSubject')}</option>
-                {subjects.map((s) => <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>)}
+                {formSubjects.map((s) => <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>)}
               </select>
               {fieldErrors.subject && <p className="mt-1 text-xs text-red-500">{fieldErrors.subject}</p>}
+              {form.school_class && (
+                <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">
+                  {language === 'ar' ? 'المواد مرتبطة بمواد الصف المختار' : 'Only subjects attached to the selected class are shown'}
+                </p>
+              )}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.teacher')}</label>
@@ -288,11 +321,20 @@ export default function EnrollmentManagementPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-gray-700 dark:text-[var(--color-text-secondary)]">{language === 'ar' ? e.subject_name : e.subject_name_en}</p>
-                          <p className="truncate text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{e.ustaadh_name || '—'}</p>
+                          <p className="truncate text-xs text-gray-400 dark:text-[var(--color-text-muted)]">
+                            {e.ustaadh_name || '—'}{e.school_class_name ? ` · ${e.school_class_name}` : ''}
+                          </p>
                         </div>
                         <span className="shrink-0 rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:text-[var(--color-text-muted)]">
                           {new Date(e.enrolled_at).toLocaleDateString()}
                         </span>
+                        <button
+                          onClick={() => handleDelete(e)}
+                          className="shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                          title={t('classSubjects.removeEnrollment')}
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
                       </li>
                     ))}
                   </ul>

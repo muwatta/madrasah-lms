@@ -32,6 +32,8 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const UserManagementPage = lazy(() => import('./pages/admin/UserManagementPage'));
 const SubjectManagementPage = lazy(() => import('./pages/admin/SubjectManagementPage'));
 const EnrollmentManagementPage = lazy(() => import('./pages/admin/EnrollmentManagementPage'));
+const AdminClassSubjectsPage = lazy(() => import('./pages/admin/ClassSubjectsPage'));
+const TeacherClassSubjectsPage = lazy(() => import('./pages/teacher/ClassSubjectsPage'));
 const ExamManagementPage = lazy(() => import('./pages/admin/ExamManagementPage'));
 const ParentStudentPage = lazy(() => import('./pages/admin/ParentStudentPage'));
 const BoardDashboard = lazy(() => import('./pages/board/BoardDashboard'));
@@ -88,7 +90,6 @@ const ResultEntryPage = lazy(() => import('./pages/teacher/ResultEntryPage'));
 const QRScannerPage = lazy(() => import('./pages/teacher/QRScannerPage'));
 const ResultsPublishPage = lazy(() => import('./pages/admin/ResultsPublishPage'));
 const MyResultsPage = lazy(() => import('./pages/student/MyResultsPage'));
-const ChooseSubjectsPage = lazy(() => import('./pages/student/ChooseSubjectsPage'));
 const PricingPage = lazy(() => import('./pages/public/PricingPage'));
 const DocsPage = lazy(() => import('./pages/public/DocsPage'));
 const ContactPage = lazy(() => import('./pages/public/ContactPage'));
@@ -160,7 +161,7 @@ function App() {
               <Route path="flashcards" element={<FlashCardPage />} />
               <Route path="character" element={<StudentCharacterPage />} />
               <Route path="my-results" element={<MyResultsPage />} />
-              <Route path="choose-subjects" element={<ChooseSubjectsPage />} />
+              <Route path="choose-subjects" element={<Navigate to="dashboard" replace />} />
               <Route path="fasaaha" element={<FasaahaStudentDashboard />} />
               <Route path="fasaaha/missions" element={<FasaahaMissionBrowser />} />
               <Route path="fasaaha/speak/:missionId" element={<FasaahaSpeakPage />} />
@@ -207,6 +208,7 @@ function App() {
               <Route path="fasaaha/review" element={<FasaahaReviewPage />} />
               <Route path="fasaaha/analytics" element={<FasaahaAnalyticsPage />} />
               <Route path="qr-scanner" element={<QRScannerPage />} />
+              <Route path="class-subjects" element={<TeacherClassSubjectsPage />} />
               <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
@@ -243,6 +245,7 @@ function App() {
               <Route path="users" element={<UserManagementPage />} />
               <Route path="subjects" element={<SubjectManagementPage />} />
               <Route path="enrollments" element={<EnrollmentManagementPage />} />
+              <Route path="class-subjects" element={<AdminClassSubjectsPage />} />
               <Route path="exams" element={<ExamManagementPage />} />
               <Route path="parent-students" element={<ParentStudentPage />} />
               <Route path="interventions" element={<InterventionAlertsPage />} />

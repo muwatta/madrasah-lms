@@ -1,18 +1,25 @@
-from collections import defaultdict
+from django.db.models import Q
 
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Enrollment
+from rest_framework.exceptions import PermissionDenied
+from config.permissions import CanManageEnrollments
+from .models import Enrollment, SchoolClass
 from .enrollment_serializers import EnrollmentSerializer
 
 
 class EnrollmentListView(generics.ListCreateAPIView):
     serializer_class = EnrollmentSerializer
+    permission_classes = [CanManageEnrollments]
 
     def get_queryset(self):
         user = self.request.user
-        qs = Enrollment.objects.filter(madrasah=user.madrasah)
+        qs = Enrollment.objects.filter(madrasah=user.madrasah).select_related('student', 'subject', 'school_class')
+
+        # Teachers see the classes they lead plus the students they teach.
+        if user.role not in ('mudeer', 'idaarah'):
+            qs = qs.filter(Q(school_class__class_teacher=user) | Q(ustaadh=user))
 
         student_id = self.request.query_params.get('student')
         subject_id = self.request.query_params.get('subject')
@@ -31,7 +38,24 @@ class EnrollmentListView(generics.ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(madrasah=self.request.user.madrasah)
+        user = self.request.user
+        school_class = serializer.validated_data.get('school_class')
+        if user.role not in ('mudeer', 'idaarah'):
+            if school_class is None or school_class.class_teacher_id != user.id:
+                raise PermissionDenied('Only the class teacher can manage enrollments for this class.')
+        serializer.save(madrasah=user.madrasah)
+
+
+class EnrollmentDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = EnrollmentSerializer
+    permission_classes = [CanManageEnrollments]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = Enrollment.objects.filter(madrasah=user.madrasah)
+        if user.role not in ('mudeer', 'idaarah'):
+            qs = qs.filter(Q(school_class__class_teacher=user) | Q(ustaadh=user))
+        return qs
 
 
 class StudentEnrollmentsView(APIView):
@@ -102,101 +126,15 @@ class TeacherClassesView(APIView):
         return Response(data)
 
 
-class AvailableSubjectsView(APIView):
-    """Returns subjects that have at least one teacher assigned via enrollment."""
+class ClassTeacherClassesView(APIView):
+    """Returns the classes where the current user is the class teacher."""
     def get(self, request):
-        from curriculum.models import Subject
-        madrasah = request.user.madrasah
-
-        # Get subjects that have at least one teacher enrolled
-        subject_ids = (
-            Enrollment.objects.filter(
-                madrasah=madrasah,
-                ustaadh__isnull=False,
-            )
-            .values_list('subject_id', flat=True)
-            .distinct()
-        )
-        subjects = Subject.objects.filter(id__in=subject_ids, madrasah=madrasah)
+        classes = SchoolClass.objects.filter(
+            madrasah=request.user.madrasah,
+            class_teacher=request.user,
+        ).order_by('order')
         data = [
-            {'id': s.id, 'name_ar': s.name_ar, 'name_en': s.name_en, 'code': s.code}
-            for s in subjects
+            {'id': c.id, 'name_ar': c.name_ar, 'name_en': c.name_en, 'order': c.order}
+            for c in classes
         ]
         return Response(data)
-
-
-class SubjectTeachersView(APIView):
-    """Returns teachers for a given subject."""
-    def get(self, request):
-        subject_id = request.query_params.get('subject')
-        if not subject_id:
-            return Response([])
-
-        madrasah = request.user.madrasah
-        teachers = (
-            Enrollment.objects.filter(
-                madrasah=madrasah,
-                subject_id=subject_id,
-                ustaadh__isnull=False,
-            )
-            .select_related('ustaadh')
-            .values_list('ustaadh_id', 'ustaadh__first_name', 'ustaadh__last_name')
-            .distinct()
-        )
-        data = [
-            {
-                'id': t[0],
-                'name': f'{t[1]} {t[2]}'.strip(),
-            }
-            for t in teachers
-        ]
-        return Response(data)
-
-
-class StudentSelfEnrollView(APIView):
-    """Lets a student enroll themselves in a subject (requires a teacher to be assigned)."""
-    def post(self, request):
-        user = request.user
-        if user.role != 'student':
-            return Response(
-                {'error': 'Only students can self-enroll'},
-                status=403)
-
-        subject_id = request.data.get('subject')
-        teacher_id = request.data.get('ustaadh')
-
-        if not subject_id:
-            return Response(
-                {'error': 'subject is required'},
-                status=400)
-
-        # Check if already enrolled
-        if Enrollment.objects.filter(
-            student=user, subject_id=subject_id, madrasah=user.madrasah
-        ).exists():
-            return Response(
-                {'error': 'Already enrolled in this subject'},
-                status=400)
-
-        # Find the teacher's school_class if not provided
-        school_class = request.data.get('school_class')
-        if not school_class and teacher_id:
-            existing = Enrollment.objects.filter(
-                ustaadh_id=teacher_id, subject_id=subject_id, madrasah=user.madrasah
-            ).first()
-            if existing:
-                school_class = existing.school_class_id
-
-        enrollment = Enrollment.objects.create(
-            madrasah=user.madrasah,
-            student=user,
-            subject_id=subject_id,
-            ustaadh_id=teacher_id,
-            school_class_id=school_class,
-        )
-        return Response({
-            'id': enrollment.id,
-            'subject': enrollment.subject_id,
-            'ustaadh': enrollment.ustaadh_id,
-            'school_class': enrollment.school_class_id,
-        }, status=201)

@@ -96,9 +96,34 @@ export interface Enrollment {
   subject: number;
   subject_name: string;
   subject_name_en: string;
+  school_class: number | null;
+  school_class_name: string | null;
+  school_class_name_ar: string | null;
   ustaadh: number | null;
   ustaadh_name: string | null;
   enrolled_at: string;
+}
+
+export interface SchoolClass {
+  id: number;
+  madrasah: number;
+  name_ar: string;
+  name_en: string;
+  order: number;
+  class_teacher: number | null;
+  class_teacher_name: string | null;
+}
+
+export interface ClassSubject {
+  id: number;
+  madrasah: number;
+  school_class: number;
+  school_class_name: string | null;
+  school_class_name_ar: string | null;
+  subject: number;
+  subject_name: string;
+  subject_name_en: string;
+  created_at: string;
 }
 
 export interface GradingResult {

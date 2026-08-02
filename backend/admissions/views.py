@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from config.permissions import IsMudeer
-from curriculum.models import Enrollment, Subject
+from curriculum.models import Enrollment, Subject, ClassSubject
 from users.models import User
 
 from .models import Application, ApplicationDocument
@@ -111,8 +111,17 @@ class ApplicationEnrollView(APIView):
             madrasah=madrasah,
         )
 
-        subjects = Subject.objects.filter(madrasah=madrasah)
         school_class = application.applying_for_class
+        # Only enroll the student in the subjects attached to their class.
+        class_subjects = ClassSubject.objects.filter(
+            madrasah=madrasah,
+            school_class=school_class,
+        ).select_related('subject')
+        subjects = [cs.subject for cs in class_subjects]
+        if not subjects:
+            # Fall back to all madrasah subjects while the class has no
+            # subjects configured yet.
+            subjects = list(Subject.objects.filter(madrasah=madrasah))
         for subject in subjects:
             Enrollment.objects.get_or_create(
                 student=user,

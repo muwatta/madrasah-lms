@@ -47,6 +47,13 @@ export const subjectAPI = {
 
 export const schoolClassAPI = {
   list: () => api.get('/curriculum/classes/'),
+  update: (id: number, data: any) => api.put(`/curriculum/classes/${id}/`, data),
+};
+
+export const classSubjectAPI = {
+  list: (params?: any) => api.get('/curriculum/class-subjects/', { params }),
+  create: (data: any) => api.post('/curriculum/class-subjects/', data),
+  delete: (id: number) => api.delete(`/curriculum/class-subjects/${id}/`),
 };
 
 export const questionAPI = {
@@ -140,13 +147,11 @@ export const resultsAPI = {
 export const enrollmentAPI = {
   list: (params?: any) => api.get('/enrollments/', { params }),
   create: (data: any) => api.post('/enrollments/', data),
+  delete: (id: number) => api.delete(`/enrollments/${id}/`),
   myEnrollments: () => api.get('/enrollments/my/'),
   teacherStudents: () => api.get('/enrollments/teacher/students/'),
   teacherClasses: () => api.get('/enrollments/teacher/classes/'),
-  availableSubjects: () => api.get('/enrollments/available-subjects/'),
-  subjectTeachers: (subjectId: number) => api.get('/enrollments/subject-teachers/', { params: { subject: subjectId } }),
-  selfEnroll: (data: { subject: number; ustaadh?: number; school_class?: number }) =>
-    api.post('/enrollments/self-enroll/', data),
+  classTeacherClasses: () => api.get('/enrollments/class-teacher/classes/'),
 };
 
 export const dashboardAPI = {

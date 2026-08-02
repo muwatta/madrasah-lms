@@ -90,7 +90,6 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.learningPath', path: '/path', icon: navIcons.learningPath, color: '#0ea5e9' },
     { labelKey: 'nav.flashcards', path: '/flashcards', icon: navIcons.flashcards, color: '#d946ef' },
     { labelKey: 'nav.character', path: '/character', icon: navIcons.character, color: '#f43f5e' },
-    { labelKey: 'nav.chooseSubjects', path: '/choose-subjects', icon: navIcons.enrollments, color: '#2dd4bf' },
     { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha, color: '#818cf8' },
   ],
   ustaadh: [
@@ -109,6 +108,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.messages', path: '/messages', icon: navIcons.messages, color: '#6366f1' },
     { labelKey: 'nav.prayerTimes', path: '/prayer-times', icon: navIcons.prayerTimes, color: '#a855f7' },
     { labelKey: 'nav.resultsEntry', path: '/results', icon: navIcons.reports, color: '#0ea5e9' },
+    { labelKey: 'nav.classSubjects', path: '/class-subjects', icon: navIcons.subjects, color: '#06b6d4' },
     { labelKey: 'nav.fasaaha', path: '/fasaaha', icon: navIcons.fasaaha, color: '#d946ef' },
   ],
   parent: [
@@ -125,6 +125,7 @@ const roleNavLinks: Record<User['role'], NavLink[]> = {
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: navIcons.dashboard, color: '#f59e0b' },
     { labelKey: 'nav.users', path: '/users', icon: navIcons.users, color: '#3b82f6' },
     { labelKey: 'nav.subjects', path: '/subjects', icon: navIcons.subjects, color: '#8b5cf6' },
+    { labelKey: 'nav.classSubjects', path: '/class-subjects', icon: navIcons.subjects, color: '#a855f7' },
     { labelKey: 'nav.exams', path: '/exams', icon: navIcons.exams, color: '#ef4444' },
     { labelKey: 'nav.enrollments', path: '/enrollments', icon: navIcons.enrollments, color: '#22c55e' },
     { labelKey: 'nav.finance', path: '/finance', icon: navIcons.finance, color: '#10b981' },
