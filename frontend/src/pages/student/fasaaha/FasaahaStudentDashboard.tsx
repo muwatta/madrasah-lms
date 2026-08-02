@@ -1,98 +1,116 @@
 import { Link } from 'react-router-dom';
+import { RefreshCw } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaDashboard, useFasaahaProgress } from '../../../hooks/useFasaaha';
-import { SkeletonStatsGrid } from '../../../components/Skeleton';
-import DailyGoalsWidget from '../../../components/fasaaha/DailyGoalsWidget';
+import Reveal from '../../../components/fasaaha/dashboard/Reveal';
+import FasaahaHero from '../../../components/fasaaha/dashboard/FasaahaHero';
+import SpeakingOverview from '../../../components/fasaaha/dashboard/SpeakingOverview';
+import PrimaryLearningActions from '../../../components/fasaaha/dashboard/PrimaryLearningActions';
+import RecommendedActivity from '../../../components/fasaaha/dashboard/RecommendedActivity';
+import DailyGoalsSection from '../../../components/fasaaha/dashboard/DailyGoalsSection';
+import ProgressInsights from '../../../components/fasaaha/dashboard/ProgressInsights';
+import BadgesSection from '../../../components/fasaaha/dashboard/BadgesSection';
+import LeaderboardSection from '../../../components/fasaaha/dashboard/LeaderboardSection';
+import QuickTip from '../../../components/fasaaha/dashboard/QuickTip';
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-10">
+      <div className="h-72 animate-pulse rounded-3xl" style={{ background: 'var(--color-bg-muted)' }} />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-28 animate-pulse rounded-2xl" style={{ background: 'var(--color-bg-muted)' }} />
+        ))}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-80 animate-pulse rounded-3xl" style={{ background: 'var(--color-bg-muted)' }} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function FasaahaStudentDashboard() {
-  const { t, language } = useLanguage();
-  const { data, isLoading: loading, error } = useFasaahaDashboard();
+  const { t } = useLanguage();
+  const { data, isLoading: loading, error, refetch } = useFasaahaDashboard();
   const { data: progress = [] } = useFasaahaProgress();
 
-  if (loading) return <SkeletonStatsGrid />;
-  if (error) return <div className="rounded-lg bg-red-50 p-4 text-red-700 dark:bg-red-900/20 dark:text-red-400">{t('common.loadError')}</div>;
-  if (!data) return null;
+  if (loading) return <DashboardSkeleton />;
 
-  const stats = [
-    { label: t('fasaaha.currentLevel'), value: data.current_level ? (language === 'ar' ? data.current_level.name_ar : data.current_level.name) : '-', color: 'bg-primary-500' },
-    { label: t('fasaaha.totalPoints'), value: data.total_points, color: 'bg-amber-500' },
-    { label: t('fasaaha.completedMissions'), value: data.completed_missions, color: 'bg-green-500' },
-    { label: t('fasaaha.currentStreak'), value: `${data.current_streak} 🔥`, color: 'bg-orange-500' },
-    { label: t('fasaaha.longestStreak'), value: data.longest_streak, color: 'bg-red-500' },
-    { label: t('fasaaha.badges'), value: data.badge_count, color: 'bg-purple-500' },
-  ];
+  if (error || !data) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed p-10 text-center" style={{ borderColor: 'var(--color-border)' }}>
+        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{t('common.loadError')}</p>
+        <button
+          onClick={() => refetch()}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-primary-700"
+        >
+          <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+          {t('common.retry')}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.dashboardTitle')}</h1>
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.subtitle')}</p>
+    <div className="space-y-10">
+      <Reveal>
+        <FasaahaHero dashboard={data} />
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <SpeakingOverview dashboard={data} progress={progress} />
+      </Reveal>
+
+      <PrimaryLearningActions dashboard={data} />
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Reveal className="lg:col-span-2">
+          <RecommendedActivity dashboard={data} progress={progress} />
+        </Reveal>
+        <Reveal delay={0.08}>
+          <DailyGoalsSection />
+        </Reveal>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border p-4 card-hover" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-            <div className={`w-2 h-2 rounded-full ${s.color} mb-2`} />
-            <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{s.value}</p>
-            <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{s.label}</p>
-          </div>
-        ))}
+      <Reveal>
+        <ProgressInsights progress={progress} />
+      </Reveal>
+
+      <Reveal>
+        <BadgesSection />
+      </Reveal>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Reveal className="lg:col-span-2">
+          <LeaderboardSection />
+        </Reveal>
+        <Reveal delay={0.08}>
+          <QuickTip />
+        </Reveal>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { to: '/student/fasaaha/speak/0', label: t('fasaaha.speak'), icon: '🎙️' },
-          { to: '/student/fasaaha/missions', label: t('fasaaha.viewMissions'), icon: '📋' },
-          { to: '/student/fasaaha/conversation', label: t('fasaaha.conversation'), icon: '💬' },
-          { to: '/student/fasaaha/trends', label: t('fasaaha.scoreTrends'), icon: '📈' },
-          { to: '/student/fasaaha/progress', label: t('fasaaha.myProgress'), icon: '📊' },
-          { to: '/student/fasaaha/badges', label: t('fasaaha.myBadgesLink'), icon: '🏅' },
-          { to: '/student/fasaaha/leaderboard', label: t('fasaaha.leaderboard'), icon: '🏆' },
-          { to: '/student/fasaaha/goals', label: t('fasaaha.dailyGoals'), icon: '🎯' },
-        ].map(a => (
-          <Link key={a.to} to={a.to} className="rounded-xl border p-4 text-center card-hover btn-press" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-            <span className="text-2xl block mb-1">{a.icon}</span>
-            <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{a.label}</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DailyGoalsWidget />
-        <div className="rounded-xl border p-4" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-card)' }}>
-          <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            {t('fasaaha.quickTip')}
-          </h3>
-          <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-            {t('fasaaha.quickTipText')}
-          </p>
-        </div>
-      </div>
-
-      {progress.length > 0 && (
-        <div className="rounded-xl border p-5" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-          <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.levelsTitle')}</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {progress.map(p => {
-              const pct = p.missions_attempted > 0 ? Math.round((p.missions_completed / p.missions_attempted) * 100) : 0;
-              const completed = p.status === 'completed';
-              return (
-                <div key={p.id} className={`shrink-0 w-36 rounded-xl border p-3 text-center ${completed ? 'border-green-400' : ''}`}
-                  style={{ borderColor: completed ? undefined : 'var(--color-border-light)' }}>
-                  <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center text-sm font-bold ${completed ? 'bg-green-500 text-white' : 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'}`}>
-                    {p.level_number}
-                  </div>
-                  <p className="text-xs font-medium" style={{ color: 'var(--color-text-primary)' }}>{language === 'ar' ? p.level_name_ar : p.level_name}</p>
-                  <p className="text-[10px] mt-1" style={{ color: 'var(--color-text-muted)' }}>{p.missions_completed}/{p.missions_attempted}</p>
-                  <div className="h-1.5 rounded-full mt-2 overflow-hidden" style={{ backgroundColor: 'var(--color-border-light)' }}>
-                    <div className={`h-full rounded-full ${completed ? 'bg-green-500' : 'bg-primary-500'}`} style={{ width: `${pct}%` }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <Reveal>
+        <nav aria-label={t('fasaaha.quickActions')} className="flex flex-wrap gap-2">
+          {[
+            { to: '/student/fasaaha/progress', label: t('fasaaha.myProgress') },
+            { to: '/student/fasaaha/trends', label: t('fasaaha.scoreTrends') },
+            { to: '/student/fasaaha/goals', label: t('fasaaha.dailyGoals') },
+            { to: '/student/fasaaha/badges', label: t('fasaaha.myBadgesLink') },
+            { to: '/student/fasaaha/leaderboard', label: t('fasaaha.leaderboard') },
+          ].map((a) => (
+            <Link
+              key={a.to}
+              to={a.to}
+              className="rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
+              style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+            >
+              {a.label}
+            </Link>
+          ))}
+        </nav>
+      </Reveal>
     </div>
   );
 }
