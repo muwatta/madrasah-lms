@@ -57,12 +57,13 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
 }
 
 function PronunciationHeatmap({ wordScores }: { wordScores: WordScore[] }) {
+  const { t } = useLanguage();
   if (!wordScores || wordScores.length === 0) return null;
 
   return (
     <div className="border-t pt-4 space-y-2" style={{ borderColor: 'var(--color-border)' }}>
       <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-        Word-Level Pronunciation
+        {t('fasaaha.wordLevelFeedback')}
       </p>
       <div className="flex flex-wrap gap-1.5 leading-relaxed" dir="rtl">
         {wordScores.map((ws, i) => (
@@ -108,7 +109,7 @@ export default function ScoreDisplay({
 
       {transcribedText && (
         <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}>
-          <span className="text-xs font-semibold" style={{ color: 'var(--color-text-muted)' }}>Transcription: </span>
+          <span className="text-xs font-semibold" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.transcription')}: </span>
           <span style={{ fontFamily: 'var(--font-arabic, serif)' }}>{transcribedText}</span>
         </div>
       )}
@@ -123,14 +124,14 @@ export default function ScoreDisplay({
         <div className="grid grid-cols-2 gap-3">
           {confidenceScore !== null && confidenceScore !== undefined && (
             <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Confidence</p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.confidenceScore')}</p>
               <p className={`text-lg font-bold ${getScoreTextColor(confidenceScore)}`}>{Math.round(confidenceScore)}%</p>
             </div>
           )}
           {fluencyWPM !== null && fluencyWPM !== undefined && (
             <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Speech Rate</p>
-              <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{fluencyWPM} <span className="text-xs font-normal">wpm</span></p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.speechRate')}</p>
+              <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{fluencyWPM} <span className="text-xs font-normal">{t('fasaaha.wordsPerMinute')}</span></p>
             </div>
           )}
         </div>

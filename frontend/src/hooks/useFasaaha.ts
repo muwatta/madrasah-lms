@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fasaahaAPI } from '../api';
 import { unwrapPaginated } from '../api/client';
@@ -105,6 +106,62 @@ export function useSubmitAttempt() {
       qc.invalidateQueries({ queryKey: ['fasaaha', 'streak'] });
     },
   });
+}
+
+/**
+ * Poll a submitted speaking attempt until the AI analysis has finished
+ * (status 'completed' / 'reviewed') or the attempt failed. This powers the
+ * "real-time result" experience while Celery processes the audio in the
+ * background. If the analysis has not finished within `timeoutMs`, polling
+ * stops and `timedOut` is set so the UI can fall back gracefully.
+ */
+export function useAttemptResult(
+  attemptId: number | null,
+  initialData?: SpeakingAttempt,
+  timeoutMs: number = 90_000,
+) {
+  const deadlineRef = useRef<number | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    deadlineRef.current = attemptId !== null && attemptId > 0 ? Date.now() + timeoutMs : null;
+  }, [attemptId, timeoutMs]);
+
+  const isProcessing = useCallback(
+    (data: SpeakingAttempt | undefined) => {
+      if (!data) return true;
+      return data.status === 'pending' || data.status === 'processing';
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (attemptId === null || attemptId <= 0) return;
+    const remaining = deadlineRef.current !== null ? deadlineRef.current - Date.now() : 0;
+    if (remaining <= 0) return;
+    const id = setTimeout(() => setNow(Date.now()), remaining);
+    return () => clearTimeout(id);
+  }, [attemptId, timeoutMs]);
+
+  const query = useQuery<SpeakingAttempt>({
+    queryKey: ['fasaaha', 'attempt', attemptId, 'result'],
+    queryFn: async () => {
+      const res = await fasaahaAPI.attempts.get(attemptId!);
+      return res.data;
+    },
+    enabled: attemptId !== null && attemptId > 0,
+    initialData,
+    refetchInterval: (q) => {
+      const data = q.state.data;
+      if (!isProcessing(data)) return false;
+      if (deadlineRef.current !== null && Date.now() > deadlineRef.current) return false;
+      return 2000;
+    },
+  });
+
+  const timedOut = isProcessing(query.data) && (deadlineRef.current === null || now > deadlineRef.current);
+
+  return { ...query, timedOut };
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────
@@ -356,6 +413,8 @@ export { useMission as useFasaahaMission };
 export { useMissionsForLevel as useFasaahaMissionsForLevel };
 export { useAttempts as useFasaahaAttempts };
 export { useSubmitAttempt as useFasaahaSubmitAttempt };
+
+export { useAttemptResult as useFasaahaAttemptResult };
 export { useStudentDashboard as useFasaahaDashboard };
 export { useTeacherDashboard as useFasaahaTeacherDashboard };
 export { useProgress as useFasaahaProgress };

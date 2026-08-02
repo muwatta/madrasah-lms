@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaMission, useFasaahaSubmitAttempt } from '../../../hooks/useFasaaha';
 import AudioRecorder from '../../../components/fasaaha/AudioRecorder';
-import ScoreDisplay from '../../../components/fasaaha/ScoreDisplay';
+import MissionResultView from '../../../components/fasaaha/missions/MissionResultView';
 
 export default function FasaahaSpeakPage() {
   const { missionId } = useParams();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const numericId = missionId && missionId !== '0' ? Number(missionId) : null;
   const { data: mission, isLoading: loadingMission } = useFasaahaMission(numericId);
   const submitAttempt = useFasaahaSubmitAttempt();
@@ -41,31 +42,19 @@ export default function FasaahaSpeakPage() {
   }
 
   if (result) {
-    const analysis = result.ai_analysis;
-    const review = result.teacher_review;
     return (
-      <div className="space-y-6 max-w-xl mx-auto">
-        <div className="text-center py-4">
-          <span className="text-3xl">🎉</span>
-          <h2 className="text-xl font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.missionComplete')}</h2>
-        </div>
-        <ScoreDisplay
-          aiScore={analysis?.overall_score ?? null}
-          pronunciationScore={analysis?.pronunciation_score ?? null}
-          grammarScore={analysis?.grammar_score ?? null}
-          fluencyScore={analysis?.fluency_score ?? null}
-          teacherScore={review?.overall_score ?? null}
-          aiFeedback={analysis?.pronunciation_feedback ? `${analysis.pronunciation_feedback} ${analysis.grammar_feedback} ${analysis.fluency_feedback}` : null}
-          teacherFeedback={review?.feedback ?? null}
-          wordScores={analysis?.word_scores}
-          transcribedText={analysis?.transcribed_text}
-          confidenceScore={analysis?.confidence_score}
-          fluencyWPM={analysis?.fluency_words_per_minute}
+      <div className="mx-auto max-w-xl space-y-6">
+        <MissionResultView
+          attemptId={result.id}
+          initialAttempt={result}
+          mission={mission}
+          hasNext={!!mission}
+          onRetry={() => {
+            setResult(null);
+            setRecordingBlob(null);
+          }}
+          onNextMission={() => navigate('/student/fasaaha/missions')}
         />
-        <div className="flex gap-3 justify-center">
-          <button onClick={() => { setResult(null); setRecordingBlob(null); }} className="btn-press px-4 py-2 rounded-lg border text-sm font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{t('fasaaha.tryAgain')}</button>
-          <Link to="/student/fasaaha/missions" className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium">{t('fasaaha.viewMissions')}</Link>
-        </div>
       </div>
     );
   }
