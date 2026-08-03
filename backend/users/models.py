@@ -60,6 +60,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=100, blank=True)
     last_name = models.CharField(max_length=100, blank=True)
     phone = models.CharField(max_length=20, blank=True, default='')
+    gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')], blank=True, default='')
+    address = models.CharField(max_length=255, blank=True, default='')
     role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     madrasah = models.ForeignKey(Madrasah, on_delete=models.CASCADE, related_name='users')
     is_active = models.BooleanField(default=True)

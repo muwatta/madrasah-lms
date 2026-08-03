@@ -17,6 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'full_name', 'phone',
+            'gender', 'address',
             'role', 'madrasah', 'madrasah_name', 'is_active', 'email_verified',
             'date_of_birth', 'date_joined'
         ]
@@ -24,14 +25,32 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):
-    """Restricted self-service profile fields.
+    """Self-service profile fields.
 
-    A user may edit their own basic details only; email, role and madrasah are
-    managed by admins.
+    A user may edit their own basic details and email. Changing the email
+    clears verification for the new address; role and madrasah remain
+    admin-managed.
     """
+    email = serializers.EmailField(required=False)
+
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'phone', 'date_of_birth']
+        fields = ['first_name', 'last_name', 'phone', 'gender', 'address',
+                  'date_of_birth', 'email']
+
+    def validate_email(self, value):
+        user = self.instance
+        if value and user is not None and value != user.email:
+            if User.objects.filter(email__iexact=value).exclude(pk=user.pk).exists():
+                raise serializers.ValidationError('This email is already in use.')
+        return value
+
+    def update(self, instance, validated_data):
+        email = validated_data.pop('email', None)
+        if email and email != instance.email:
+            instance.email = email
+            instance.email_verified = False
+        return super().update(instance, validated_data)
 
 
 class RegisterSerializer(serializers.ModelSerializer):

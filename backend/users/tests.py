@@ -38,6 +38,8 @@ class MeViewTests(TestCase):
             'last_name': 'Khan',
             'phone': '+966500000000',
             'date_of_birth': '2010-05-15',
+            'gender': 'male',
+            'address': 'Riyadh, KSA',
         }, format='json')
         self.assertEqual(response.status_code, 200)
         data = response.data
@@ -45,6 +47,8 @@ class MeViewTests(TestCase):
         self.assertEqual(data['last_name'], 'Khan')
         self.assertEqual(data['phone'], '+966500000000')
         self.assertEqual(data['date_of_birth'], '2010-05-15')
+        self.assertEqual(data['gender'], 'male')
+        self.assertEqual(data['address'], 'Riyadh, KSA')
         self.assertEqual(data['email'], 'user@test.com')
 
     def test_put_also_updates_profile(self):
@@ -56,12 +60,33 @@ class MeViewTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, 'Sara')
 
-    def test_email_and_role_cannot_be_changed(self):
+    def test_email_can_be_changed(self):
         response = self.client.patch('/api/v1/auth/me/', {
-            'email': 'hacked@test.com',
+            'email': 'new-email@test.com',
+        }, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, 'new-email@test.com')
+        self.assertFalse(self.user.email_verified)
+
+    def test_email_must_be_unique(self):
+        other = User.objects.create_user(
+            email='other@test.com', password='pass123',
+            first_name='X', last_name='Y',
+            role='student', madrasah=self.madrasah,
+        )
+        response = self.client.patch('/api/v1/auth/me/', {
+            'email': 'OTHER@test.com',
+        }, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('email', response.data)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, 'user@test.com')
+
+    def test_role_cannot_be_changed(self):
+        response = self.client.patch('/api/v1/auth/me/', {
             'role': 'mudeer',
         }, format='json')
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.email, 'user@test.com')
         self.assertEqual(self.user.role, 'student')

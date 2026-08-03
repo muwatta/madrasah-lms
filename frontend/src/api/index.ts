@@ -22,7 +22,10 @@ export const authAPI = {
     first_name?: string;
     last_name?: string;
     phone?: string;
+    gender?: string;
+    address?: string;
     date_of_birth?: string | null;
+    email?: string;
   }) => api.patch('/auth/me/', data),
 
   forgotPassword: (email: string) =>

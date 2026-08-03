@@ -17,6 +17,7 @@ interface AuthContextType {
   getStoredSessions: () => StoredSession[];
   removeStoredSession: (email: string) => void;
   refreshUser: () => Promise<User | null>;
+  migrateSessionEmail: (oldEmail: string, newEmail: string) => void;
 }
 
 const SESSIONS_KEY = 'lms_sessions';
@@ -151,6 +152,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const migrateSessionEmail = useCallback((oldEmail: string, newEmail: string) => {
+    if (!oldEmail || oldEmail === newEmail) return;
+    const sessions = getStoredSessions();
+    if (sessions[oldEmail]) {
+      sessions[newEmail] = sessions[oldEmail];
+      delete sessions[oldEmail];
+      saveStoredSessions(sessions);
+    }
+    if (sessionStorage.getItem(ACTIVE_EMAIL_KEY) === oldEmail) {
+      sessionStorage.setItem(ACTIVE_EMAIL_KEY, newEmail);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -163,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getStoredSessions: listStoredSessions,
         removeStoredSession,
         refreshUser,
+        migrateSessionEmail,
       }}
     >
       {children}
