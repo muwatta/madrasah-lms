@@ -73,10 +73,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 import socket
 
+DB_HOST = config('DB_HOST', default='localhost')
+DB_PORT = config('DB_PORT', default='5432')
+
 def is_postgres_available():
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('localhost', 5432))
+        result = sock.connect_ex((DB_HOST, int(DB_PORT)))
         sock.close()
         return result == 0
     except Exception:
@@ -89,8 +92,8 @@ if is_postgres_available():
             'NAME': config('DB_NAME', default='madrasah_lms'),
             'USER': config('DB_USER', default='postgres'),
             'PASSWORD': config('DB_PASSWORD', default='postgres'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
         }
     }
 else:
@@ -114,6 +117,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -154,12 +158,10 @@ if not DEBUG:
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 FILE_UPLOAD_PERMISSIONS = 0o644
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173'
+).split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 JWT_SECRET = config('JWT_SECRET', default='jwt-secret-key-change')

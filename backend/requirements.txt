@@ -15,8 +15,10 @@ coverage==7.15.2
 distro==1.9.0
 Django==4.2.30
 django-cors-headers==4.3.1
+django-filter==23.5
 django-extensions==4.1
 djangorestframework==3.14.0
+gunicorn==23.0.0
 h11==0.16.0
 hijri-converter==2.3.2.post1
 hijridate==2.3.0
@@ -61,3 +63,4 @@ urllib3==2.7.0
 vine==5.1.0
 wcwidth==0.8.2
 pypdf==6.14.2
+pywebpush==2.3.0

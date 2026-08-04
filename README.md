@@ -14,9 +14,10 @@ Learning Management System for Islamic schools (Madrasahs) in West Africa.
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Django 4.2 + Django REST Framework |
-| Frontend | React 18 + TypeScript + Tailwind CSS + Vite |
+| Backend | Django 4.2 + Django REST Framework + Gunicorn |
+| Frontend | React 18 + TypeScript + Tailwind CSS + Vite + Nginx |
 | Database | PostgreSQL 15 (SQLite fallback for dev) |
+| Cache/Queue | Redis 7 + Celery |
 | Auth | JWT (PyJWT) |
 | Charts | Recharts |
 | Tests | Pytest + pytest-django |
@@ -45,16 +46,53 @@ madrasah_lms/
 │       │   ├── admin/   # Dashboard, Users, Subjects, Enrollments, Exams
 │       │   └── board/   # Dashboard (institutional metrics)
 │       └── types/       # TypeScript type definitions
-├── docker-compose.yml   # PostgreSQL container
+├── docker-compose.yml   # Full stack: PostgreSQL, Redis, backend, worker, beat, frontend
+├── backend/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── docker-entrypoint.sh
+│   ├── config/          # Django settings, URLs, WSGI
+│   ├── users/           # User model, JWT auth, roles
+│   ├── curriculum/      # Subjects, Topics, Enrollments
+│   ├── assessments/     # Questions, Quizzes, Auto-grading
+│   ├── results/         # Exams, Dashboards, Export
+│   └── tests/           # pytest tests
+├── frontend/
+│   ├── Dockerfile
+│   ├── .dockerignore
+│   ├── nginx.conf       # Reverse proxy to backend
+│   └── src/
+│       ├── api/         # Axios client, API functions
+│       ├── components/  # Layout, ProtectedRoute, StatCard
+│       ├── context/     # AuthContext (JWT management)
+│       ├── pages/       # Role-based page components
+│       │   ├── auth/    # Login, Register
+│       │   ├── student/ # Dashboard, Quiz list/take/results
+│       │   ├── teacher/ # Dashboard, Quizzes, Questions, Students
+│       │   ├── parent/  # Dashboard (child progress)
+│       │   ├── admin/   # Dashboard, Users, Subjects, Enrollments, Exams
+│       │   └── board/   # Dashboard (institutional metrics)
+│       └── types/       # TypeScript type definitions
 └── .gitignore
 ```
 
 ## Quick Start
 
 ### Prerequisites
-- Python 3.12
-- Node.js 18+
-- Docker (for PostgreSQL, optional)
+- Docker and Docker Compose
+
+### 1. Docker (Recommended)
+
+```bash
+docker compose up -d --build
+docker compose exec backend python manage.py seed_data
+```
+
+Open http://localhost:3000. Backend runs on http://localhost:8000.
+
+### 2. Local Dev (Without Docker)
+
+Requires Python 3.12, Node.js 18+, and a running PostgreSQL instance.
 
 ### 1. Start Database (PostgreSQL via Docker)
 
@@ -183,6 +221,7 @@ python -m pytest tests/ -v
 - [x] Student learning path and flashcards
 - [x] Career guidance and prayer times
 - [x] Email service (Resend.com) for password reset & verification
+- [x] Docker Compose full stack (PostgreSQL, Redis, Gunicorn, Celery, Nginx)
 - [x] 37 passing tests
 
 ## What's Left
