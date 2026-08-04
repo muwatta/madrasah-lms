@@ -16,7 +16,7 @@ Learning Management System for Islamic schools (Madrasahs) in West Africa.
 |-------|-----------|
 | Backend | Django 4.2 + Django REST Framework + Gunicorn |
 | Frontend | React 18 + TypeScript + Tailwind CSS + Vite + Nginx |
-| Database | PostgreSQL 15 (SQLite fallback for dev) |
+| Database | PostgreSQL 15 |
 | Cache/Queue | Redis 7 + Celery |
 | Auth | JWT (PyJWT) |
 | Charts | Recharts |
@@ -79,28 +79,13 @@ madrasah_lms/
 ## Quick Start
 
 ### Prerequisites
-- Docker and Docker Compose
+- Python 3.12, Node.js 18+, PostgreSQL 15
 
-### 1. Docker (Recommended)
-
-```bash
-docker compose up -d --build
-docker compose exec backend python manage.py seed_data
-```
-
-Open http://localhost:3000. Backend runs on http://localhost:8000.
-
-### 2. Local Dev (Without Docker)
-
-Requires Python 3.12, Node.js 18+, and a running PostgreSQL instance.
-
-### 1. Start Database (PostgreSQL via Docker)
+### 1. Start PostgreSQL
 
 ```bash
-docker-compose up -d
+docker compose up -d db redis
 ```
-
-Or use SQLite (automatic fallback if PostgreSQL isn't running).
 
 ### 2. Backend
 
