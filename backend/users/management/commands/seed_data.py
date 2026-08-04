@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from users.models import User, Madrasah, StudentParent
-from curriculum.models import Subject, Topic, Enrollment, SchoolClass
+from curriculum.models import Subject, Topic, Enrollment, SchoolClass, ClassSubject
 from assessments.models import Question, Quiz
 from results.models import Exam, ExamResult
 from decimal import Decimal
@@ -68,6 +68,35 @@ TOPICS = {
     'العلوم': ['المخلوقات الحية', 'الطقس', 'الجسم الإنساني'],
     'اللغة الإنجليزية': ['الإنجليزية الأساسية', 'Grammar Basics', 'Common Phrases'],
 }
+
+# Subject assignments by school level (Arabic names matching SUBJECTS list)
+# Primary (1-6): core Islamic + basic academic
+# JSS (1-3):     Islamic + language arts + sciences
+# SSS (1-3):     Islamic + advanced sciences + arts
+PRIMARY_SUBJECTS = [
+    'القرآن الكريم', 'التجويد', 'التفسير', 'الحديث', 'العقيدة',
+    'الفقه', 'السيرة النبوية', 'الأخلاق الإسلامية',
+    'اللغة العربية', 'الإملاء', 'الإنشاء', 'الخط العربي', 'المطالعة',
+    'اللغة الإنجليزية', 'الرياضيات', 'العلوم',
+    'ال التربية الوطنية', 'التربية البدنية',
+]
+JSS_SUBJECTS = [
+    'القرآن الكريم', 'التجويد', 'التفسير', 'الحديث', 'العقيدة',
+    'الفقه', 'أصول الفقه', 'السيرة النبوية', 'الأخلاق الإسلامية',
+    'اللغة العربية', 'النحو', 'الأدب العربي', 'الإملاء', 'الإنشاء',
+    'اللغة الإنجليزية', 'الرياضيات', 'العلوم',
+    'الدراسات الاجتماعية', 'التاريخ', 'الجغرافيا',
+    'التربية الوطنية', 'الحاسوب', 'التربية البدنية',
+]
+SSS_SUBJECTS = [
+    'القرآن الكريم', 'التفسير', 'الحديث', 'العقيدة',
+    'الفقه', 'أصول الفقه', 'السيرة النبوية',
+    'اللغة العربية', 'النحو', 'الصرف', 'البلاغة', 'الأدب العربي',
+    'اللغة الإنجليزية', 'الرياضيات',
+    'الفيزياء', 'الكيمياء', 'الأحياء',
+    'الدراسات الاجتماعية', 'التاريخ', 'الجغرافيا',
+    'التربية الوطنية', 'الحاسوب', 'التربية البدنية',
+]
 
 
 class Command(BaseCommand):
@@ -200,6 +229,27 @@ class Command(BaseCommand):
                     name=tname,
                 )
                 topics_map[subj.name_ar].append(topic)
+
+        # Create ClassSubject records linking subjects to classes by level
+        subjects_by_name = {s.name_ar: s for s in subjects}
+        level_subjects = {
+            1: PRIMARY_SUBJECTS, 2: PRIMARY_SUBJECTS, 3: PRIMARY_SUBJECTS,
+            4: PRIMARY_SUBJECTS, 5: PRIMARY_SUBJECTS, 6: PRIMARY_SUBJECTS,
+            7: JSS_SUBJECTS, 8: JSS_SUBJECTS, 9: JSS_SUBJECTS,
+            10: SSS_SUBJECTS, 11: SSS_SUBJECTS, 12: SSS_SUBJECTS,
+        }
+        cs_count = 0
+        for school_class in classes:
+            for subj_name in level_subjects.get(school_class.order, PRIMARY_SUBJECTS):
+                subj = subjects_by_name.get(subj_name)
+                if subj:
+                    _, created = ClassSubject.objects.get_or_create(
+                        madrasah=madrasah,
+                        school_class=school_class,
+                        subject=subj,
+                    )
+                    if created:
+                        cs_count += 1
 
         # Enroll first 5 subjects for all students with different teachers per subject
         teacher_assignments = [teachers[0], teachers[1], teachers[0], teachers[1], teachers[2]]

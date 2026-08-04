@@ -30,6 +30,8 @@ export default function EnrollmentManagementPage() {
   const [teachers, setTeachers] = useState<User[]>([]);
   const [schoolClasses, setSchoolClasses] = useState<any[]>([]);
   const [classSubjects, setClassSubjects] = useState<ClassSubject[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   const [studentFilter, setStudentFilter] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('');
@@ -55,21 +57,41 @@ export default function EnrollmentManagementPage() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
+  const fetchAllPages = async (fetcher: (params?: any) => Promise<any>, params?: any) => {
+    const all: any[] = [];
+    let page = 1;
+    while (true) {
+      const res = await fetcher({ ...params, page });
+      const results = res.data?.results ?? res.data;
+      if (Array.isArray(results)) all.push(...results);
+      if (!res.data?.next || !Array.isArray(results) || results.length === 0) break;
+      page++;
+    }
+    return all;
+  };
+
+  const loadData = () => {
+    setDataLoading(true);
+    setDataError(null);
     Promise.all([
-      userAPI.list({ role: 'student' }).then((r) => setStudents(r.data.results ?? r.data)),
-      subjectAPI.list().then((r) => setSubjects(r.data.results ?? r.data)),
-      userAPI.list({ role: 'ustaadh' }).then((r) => setTeachers(r.data.results ?? r.data)),
-      schoolClassAPI.list().then((r) => setSchoolClasses(r.data.results ?? r.data)),
-      classSubjectAPI.list().then((r) => setClassSubjects(r.data.results ?? r.data)),
-    ]).catch(() => {});
-  }, []);
+      fetchAllPages((p) => userAPI.list({ role: 'student', ...p })).then(setStudents),
+      fetchAllPages((p) => subjectAPI.list(p)).then(setSubjects),
+      fetchAllPages((p) => userAPI.list({ role: 'ustaadh', ...p })).then(setTeachers),
+      fetchAllPages((p) => schoolClassAPI.list(p)).then(setSchoolClasses),
+      fetchAllPages((p) => classSubjectAPI.list(p)).then(setClassSubjects),
+    ])
+      .catch(() => setDataError(language === 'ar' ? 'فشل تحميل البيانات' : 'Failed to load data'))
+      .finally(() => setDataLoading(false));
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadEnrollments(); }, [studentFilter, subjectFilter, teacherFilter, classFilter]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.student || !form.school_class || !form.subject) return;
     setFormError(null);
     setFieldErrors({});
     setSaving(true);
@@ -172,6 +194,16 @@ export default function EnrollmentManagementPage() {
         </div>
       </div>
 
+      {dataError && (
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+          <span className="flex-1">{dataError}</span>
+          <button onClick={loadData} className="shrink-0 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-200">
+            {language === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      )}
+
       <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[160px] flex-1">
@@ -247,14 +279,38 @@ export default function EnrollmentManagementPage() {
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.subject')}</label>
-              <select required value={form.subject} onChange={(e) => { setForm({ ...form, subject: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.subject; return n; }); }} className={`${selectCls} ${fieldErrors.subject ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
-                <option value="">{t('filters.chooseSubject')}</option>
-                {formSubjects.map((s) => <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>)}
-              </select>
+              {dataLoading ? (
+                <div className={`${selectCls} flex items-center gap-2 text-gray-400`}>
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                  {language === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}
+                </div>
+              ) : (
+                <>
+                  <select
+                    required
+                    value={form.subject}
+                    disabled={!form.school_class}
+                    onChange={(e) => { setForm({ ...form, subject: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.subject; return n; }); }}
+                    className={`${selectCls} ${fieldErrors.subject ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''} ${!form.school_class ? 'cursor-not-allowed bg-gray-100 text-gray-400' : ''}`}
+                  >
+                    <option value="">{!form.school_class
+                      ? (language === 'ar' ? 'اختر الصف أولاً' : 'Select a class first')
+                      : t('filters.chooseSubject')
+                    }</option>
+                    {formSubjects.map((s) => <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>)}
+                  </select>
+                  {form.school_class && formSubjects.length === 0 && !dataError && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+                      <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                      {language === 'ar' ? 'لا توجد مواد مخصصة لهذا الصف بعد' : 'No subjects have been assigned to this class yet'}
+                    </p>
+                  )}
+                </>
+              )}
               {fieldErrors.subject && <p className="mt-1 text-xs text-red-500">{fieldErrors.subject}</p>}
-              {form.school_class && (
+              {form.school_class && formSubjects.length > 0 && (
                 <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">
-                  {language === 'ar' ? 'المواد مرتبطة بمواد الصف المختار' : 'Only subjects attached to the selected class are shown'}
+                  {language === 'ar' ? `${formSubjects.length} مواد متاحة` : `${formSubjects.length} subject(s) available`}
                 </p>
               )}
             </div>
@@ -267,7 +323,7 @@ export default function EnrollmentManagementPage() {
               {fieldErrors.ustaadh && <p className="mt-1 text-xs text-red-500">{fieldErrors.ustaadh}</p>}
             </div>
             <div className="flex items-end gap-3 sm:col-span-2 lg:col-span-4">
-              <button type="submit" disabled={saving} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
+              <button type="submit" disabled={saving || !form.student || !form.school_class || !form.subject} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
                 {saving ? (
                   <><svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>{t('common.saving')}</>
                 ) : (
