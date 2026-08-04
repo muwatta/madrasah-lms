@@ -662,7 +662,7 @@ class PermissionTests(BaseResultsTestCase):
 
     def test_student_can_only_see_own_results(self):
         self.client.force_authenticate(user=self.student1)
-        response = self.client.get('/api/results/subject-results/')
+        response = self.client.get('/api/v1/results/subject-results/')
         self.assertEqual(response.status_code, 200)
         for item in response.data['results']:
             self.assertEqual(item['student'], self.student1.pk)
@@ -675,21 +675,21 @@ class PermissionTests(BaseResultsTestCase):
             status='published',
         )
         self.client.force_authenticate(user=self.student1)
-        response = self.client.get('/api/results/subject-results/')
+        response = self.client.get('/api/v1/results/subject-results/')
         self.assertEqual(response.status_code, 200)
         student_ids = [item['student'] for item in response.data['results']]
         self.assertNotIn(self.student2.pk, student_ids)
 
     def test_parent_can_see_linked_child_results(self):
         self.client.force_authenticate(user=self.parent)
-        response = self.client.get('/api/results/subject-results/')
+        response = self.client.get('/api/v1/results/subject-results/')
         self.assertEqual(response.status_code, 200)
         student_ids = [item['student'] for item in response.data['results']]
         self.assertIn(self.student1.pk, student_ids)
 
     def test_parent_cannot_see_unlinked_child(self):
         self.client.force_authenticate(user=self.parent)
-        response = self.client.get('/api/results/subject-results/')
+        response = self.client.get('/api/v1/results/subject-results/')
         student_ids = [item['student'] for item in response.data['results']]
         self.assertNotIn(self.student2.pk, student_ids)
 
@@ -701,26 +701,26 @@ class PermissionTests(BaseResultsTestCase):
             status='draft',
         )
         self.client.force_authenticate(user=self.student1)
-        response = self.client.get('/api/results/subject-results/')
+        response = self.client.get('/api/v1/results/subject-results/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['results']), 1)
 
     def test_unauthenticated_cannot_access(self):
         self.client.force_authenticate(user=None)
-        response = self.client.get('/api/results/subject-results/')
+        response = self.client.get('/api/v1/results/subject-results/')
         self.assertEqual(response.status_code, 401)
 
     def test_student_cannot_approve_results(self):
         self.client.force_authenticate(user=self.student1)
         response = self.client.post(
-            f'/api/results/subject-results/{self.subject_result.pk}/approve/',
+            f'/api/v1/results/subject-results/{self.subject_result.pk}/approve/',
         )
         self.assertIn(response.status_code, [403, 405])
 
     def test_teacher_can_enter_scores(self):
         self.client.force_authenticate(user=self.teacher)
         response = self.client.post(
-            f'/api/results/scores/',
+            f'/api/v1/results/assessment-scores/',
             {'assessment': self.quiz_asmt.pk, 'student': self.student1.pk,
              'score': '15'},
             format='json',

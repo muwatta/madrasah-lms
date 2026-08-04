@@ -493,6 +493,7 @@ export const certificateAPI = {
   get: (id: string) => api.get(`/certificates/${id}/`),
   generate: (data: any) => api.post('/certificates/generate/', data),
   download: (id: string) => api.get(`/certificates/${id}/download/`, { responseType: 'blob' }),
+  delete: (id: string) => api.delete(`/certificates/${id}/`),
 };
 
 export const quizzesAPI = {

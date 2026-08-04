@@ -92,7 +92,7 @@ class CharacterTraitAPITest(APITestCase):
 
     def test_mudeer_can_create_trait(self):
         self.client.force_authenticate(user=self.mudeer)
-        res = self.client.post('/api/character/traits/', {
+        res = self.client.post('/api/v1/character/traits/', {
             'name': 'Respect',
             'name_ar': 'الاحترام',
             'category': 'social',
@@ -101,7 +101,7 @@ class CharacterTraitAPITest(APITestCase):
 
     def test_teacher_cannot_create_trait(self):
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.post('/api/character/traits/', {
+        res = self.client.post('/api/v1/character/traits/', {
             'name': 'Respect',
             'name_ar': 'الاحترام',
             'category': 'social',
@@ -114,7 +114,7 @@ class CharacterTraitAPITest(APITestCase):
             category='moral', is_active=True,
         )
         self.client.force_authenticate(user=self.student)
-        res = self.client.get('/api/character/traits/')
+        res = self.client.get('/api/v1/character/traits/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_mudeer_can_update_trait(self):
@@ -123,7 +123,7 @@ class CharacterTraitAPITest(APITestCase):
             category='moral',
         )
         self.client.force_authenticate(user=self.mudeer)
-        res = self.client.patch(f'/api/character/traits/{trait.id}/', {
+        res = self.client.patch(f'/api/v1/character/traits/{trait.id}/', {
             'description': 'Being truthful',
         })
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -134,7 +134,7 @@ class CharacterTraitAPITest(APITestCase):
             category='moral',
         )
         self.client.force_authenticate(user=self.mudeer)
-        res = self.client.delete(f'/api/character/traits/{trait.id}/')
+        res = self.client.delete(f'/api/v1/character/traits/{trait.id}/')
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
 
 
@@ -168,7 +168,7 @@ class CharacterEvaluationAPITest(APITestCase):
 
     def test_create_evaluation_with_scores(self):
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.post('/api/character/evaluations/', {
+        res = self.client.post('/api/v1/character/evaluations/', {
             'student': self.student.id,
             'evaluation_date': date.today().isoformat(),
             'overall_notes': 'Good behavior',
@@ -182,7 +182,7 @@ class CharacterEvaluationAPITest(APITestCase):
 
     def test_create_evaluation_without_scores_fails(self):
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.post('/api/character/evaluations/', {
+        res = self.client.post('/api/v1/character/evaluations/', {
             'student': self.student.id,
             'evaluation_date': date.today().isoformat(),
             'scores': [],
@@ -208,7 +208,7 @@ class CharacterEvaluationAPITest(APITestCase):
         )
 
         self.client.force_authenticate(user=self.student)
-        res = self.client.get('/api/character/evaluations/')
+        res = self.client.get('/api/v1/character/evaluations/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         ids = [e['id'] for e in res.data.get('results', res.data)]
         self.assertIn(my_eval.id, ids)
@@ -219,7 +219,7 @@ class CharacterEvaluationAPITest(APITestCase):
             teacher=self.teacher, evaluation_date=date.today(),
         )
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.get('/api/character/evaluations/')
+        res = self.client.get('/api/v1/character/evaluations/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_summary_endpoint(self):
@@ -231,7 +231,7 @@ class CharacterEvaluationAPITest(APITestCase):
         CharacterScore.objects.create(evaluation=evaluation, trait=self.trait2, score=5)
 
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.get(f'/api/character/evaluations/summary/?student={self.student.id}')
+        res = self.client.get(f'/api/v1/character/evaluations/summary/?student={self.student.id}')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data['student_name'], 'Ahmad Hassan')
         self.assertEqual(len(res.data['traits']), 2)
@@ -243,14 +243,14 @@ class CharacterEvaluationAPITest(APITestCase):
             teacher=self.teacher, evaluation_date=date.today(),
         )
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.patch(f'/api/character/evaluations/{evaluation.id}/', {
+        res = self.client.patch(f'/api/v1/character/evaluations/{evaluation.id}/', {
             'overall_notes': 'Updated notes',
         }, format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_invalid_score_range(self):
         self.client.force_authenticate(user=self.teacher)
-        res = self.client.post('/api/character/evaluations/', {
+        res = self.client.post('/api/v1/character/evaluations/', {
             'student': self.student.id,
             'evaluation_date': date.today().isoformat(),
             'scores': [

@@ -182,7 +182,7 @@ class WhatsAppAPITest(TestCase):
         self.client.force_authenticate(user=self.admin)
 
     def test_opt_in(self):
-        resp = self.client.post('/api/whatsapp/recipients/opt_in/', {
+        resp = self.client.post('/api/v1/whatsapp/recipients/opt_in/', {
             'parent_id': self.parent_user.pk,
             'phone_number': '+1234567890',
             'language': 'ar',
@@ -195,13 +195,13 @@ class WhatsAppAPITest(TestCase):
             madrasah=self.madrasah, parent=self.parent_user,
             phone_number='+1234567890', is_opted_in=True,
         )
-        resp = self.client.post(f'/api/whatsapp/recipients/{r.pk}/opt_out/')
+        resp = self.client.post(f'/api/v1/whatsapp/recipients/{r.pk}/opt_out/')
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.data['is_opted_in'])
 
     def test_parent_cannot_manage_templates(self):
         self.client.force_authenticate(user=self.parent_user)
-        resp = self.client.post('/api/whatsapp/templates/', {
+        resp = self.client.post('/api/v1/whatsapp/templates/', {
             'name': 'test',
             'message_type': 'general',
             'body_ar': 'test',
@@ -210,7 +210,7 @@ class WhatsAppAPITest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
     def test_template_crud(self):
-        resp = self.client.post('/api/whatsapp/templates/', {
+        resp = self.client.post('/api/v1/whatsapp/templates/', {
             'name': 'my_template',
             'message_type': 'fee_reminder',
             'body_ar': 'رسوم {{student_name}}',
@@ -220,10 +220,10 @@ class WhatsAppAPITest(TestCase):
         self.assertEqual(resp.status_code, 201)
         tid = resp.data['id']
 
-        resp = self.client.get('/api/whatsapp/templates/')
+        resp = self.client.get('/api/v1/whatsapp/templates/')
         self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.put(f'/api/whatsapp/templates/{tid}/', {
+        resp = self.client.put(f'/api/v1/whatsapp/templates/{tid}/', {
             'name': 'my_template',
             'message_type': 'fee_reminder',
             'body_ar': 'رسوم {{student_name}} - محدث',
@@ -234,11 +234,11 @@ class WhatsAppAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(resp.data['is_active'])
 
-        resp = self.client.delete(f'/api/whatsapp/templates/{tid}/')
+        resp = self.client.delete(f'/api/v1/whatsapp/templates/{tid}/')
         self.assertEqual(resp.status_code, 204)
 
     def test_send_message(self):
-        resp = self.client.post('/api/whatsapp/send/', {
+        resp = self.client.post('/api/v1/whatsapp/send/', {
             'parent_id': self.parent_user.pk,
             'message_type': 'general',
             'body': 'Test message',
@@ -256,13 +256,13 @@ class WhatsAppAPITest(TestCase):
             madrasah=self.madrasah, recipient=r, message_type='general',
             body='test', status='sent', sent_at=timezone.now(),
         )
-        resp = self.client.get('/api/whatsapp/messages/')
+        resp = self.client.get('/api/v1/whatsapp/messages/')
         self.assertEqual(resp.status_code, 200)
 
     def test_webhook_verification(self):
         self.client2 = Client()
         resp = self.client2.get(
-            '/api/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token=madrasah-webhook-token&hub.challenge=abc123'
+            '/api/v1/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token=madrasah-webhook-token&hub.challenge=abc123'
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b'abc123')
@@ -299,7 +299,7 @@ class WhatsAppAPITest(TestCase):
         body = json.dumps(payload).encode('utf-8')
         self.client2 = Client()
         resp = self.client2.post(
-            '/api/whatsapp/webhook/',
+            '/api/v1/whatsapp/webhook/',
             data=body,
             content_type='application/json',
             HTTP_X_HUB_SIGNATURE_256=self._sign_webhook(body),

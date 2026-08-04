@@ -4,9 +4,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 from users import urls as users_urls
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', views.health_check),
 
     path('api/v1/auth/', include(users_urls.auth_urlpatterns)),
     path('api/v1/public/', include('users.public_urls')),

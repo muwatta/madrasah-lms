@@ -69,6 +69,8 @@ const WhatsAppOptInPage = lazy(() => import('./pages/parent/WhatsAppOptInPage'))
 const CharacterPage = lazy(() => import('./pages/teacher/CharacterPage'));
 const WhatsAppPage = lazy(() => import('./pages/admin/WhatsAppPage'));
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'));
+const AdminCertificatesPage = lazy(() => import('./pages/admin/AdminCertificatesPage'));
+const AdminTimetablePage = lazy(() => import('./pages/admin/AdminTimetablePage'));
 const FasaahaStudentDashboard = lazy(() => import('./pages/student/fasaaha/FasaahaStudentDashboard'));
 const FasaahaMissionBrowser = lazy(() => import('./pages/student/fasaaha/FasaahaMissionBrowser'));
 const FasaahaSpeakPage = lazy(() => import('./pages/student/fasaaha/FasaahaSpeakPage'));
@@ -263,6 +265,8 @@ function App() {
               <Route path="whatsapp" element={<WhatsAppPage />} />
               <Route path="results" element={<ResultsPublishPage />} />
               <Route path="audit" element={<AuditLogPage />} />
+              <Route path="certificates" element={<AdminCertificatesPage />} />
+              <Route path="timetable" element={<AdminTimetablePage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
 

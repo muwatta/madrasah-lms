@@ -321,6 +321,11 @@ class AttemptService:
             correct = question.correct_answer.upper()
             selected = answer.selected_answer.upper()
 
+            if question.question_type == 'essay':
+                answer.is_correct = None
+                answer.marks_awarded = 0
+                continue
+
             if question.question_type == 'true_false':
                 correct = correct if correct in ('A', 'B') else ('A' if correct in ('TRUE', 'true') else 'B')
                 selected = selected if selected in ('A', 'B') else ('A' if selected in ('TRUE', 'true') else 'B')

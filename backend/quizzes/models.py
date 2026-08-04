@@ -14,6 +14,7 @@ QUESTION_TYPE_CHOICES = [
     ('mcq', 'Multiple Choice'),
     ('true_false', 'True / False'),
     ('short_answer', 'Short Answer'),
+    ('essay', 'Essay'),
 ]
 
 DIFFICULTY_CHOICES = [
