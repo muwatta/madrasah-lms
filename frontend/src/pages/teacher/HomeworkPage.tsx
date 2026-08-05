@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { lessonAPI, subjectAPI, schoolClassAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
@@ -82,14 +83,14 @@ export default function HomeworkPage() {
     setLoading(true);
     setError(null);
     Promise.all([
-      lessonAPI.homework.list(),
-      subjectAPI.list(),
-      schoolClassAPI.list(),
+      fetchAllPages((p) => lessonAPI.homework.list(p)),
+      fetchAllPages((p) => subjectAPI.list(p)),
+      fetchAllPages((p) => schoolClassAPI.list(p)),
     ])
       .then(([hwRes, subRes, clsRes]) => {
-        setHomeworks(hwRes.data.results ?? hwRes.data);
-        setSubjects(subRes.data.results ?? subRes.data);
-        setSchoolClasses(clsRes.data.results ?? clsRes.data);
+        setHomeworks(hwRes);
+        setSubjects(subRes);
+        setSchoolClasses(clsRes);
       })
       .catch((err) => setError(err.response?.data?.detail || t('homework.loadFailed')))
       .finally(() => setLoading(false));
@@ -168,8 +169,8 @@ export default function HomeworkPage() {
     setViewingHomework(hw);
     setSubmissionsLoading(true);
     try {
-      const res = await lessonAPI.homework.submissions(hw.id);
-      setSubmissions(res.data.results ?? res.data);
+      const subs = await fetchAllPages(() => lessonAPI.homework.submissions(hw.id));
+      setSubmissions(subs);
     } catch {
       setSubmissions([]);
     } finally {

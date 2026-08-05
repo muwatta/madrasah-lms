@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { userAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { User } from '../../types';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
@@ -47,8 +48,8 @@ export default function UserManagementPage() {
 
   const loadUsers = () => {
     setLoading(true);
-    userAPI.list({ role: roleFilter || undefined, search: search || undefined })
-      .then((res) => setUsers(res.data.results ?? res.data))
+    fetchAllPages((p) => userAPI.list({ ...p, role: roleFilter || undefined, search: search || undefined }))
+      .then(setUsers)
       .catch((err) => setError(err.response?.data?.detail || t('userManagement.loadFailed')))
       .finally(() => setLoading(false));
   };

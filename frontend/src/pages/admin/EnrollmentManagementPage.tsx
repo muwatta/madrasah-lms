@@ -46,13 +46,14 @@ export default function EnrollmentManagementPage() {
 
   const loadEnrollments = () => {
     setLoading(true);
-    enrollmentAPI.list({
+    fetchAllPages((p) => enrollmentAPI.list({
       student: studentFilter || undefined,
       subject: subjectFilter || undefined,
       ustaadh: teacherFilter || undefined,
       school_class: classFilter || undefined,
-    })
-      .then((res) => setEnrollments(res.data.results ?? res.data))
+      ...p,
+    }))
+      .then(setEnrollments)
       .catch((err) => setError(err.response?.data?.detail || t('enrollmentManagement.loadFailed')))
       .finally(() => setLoading(false));
   };

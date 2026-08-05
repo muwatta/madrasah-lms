@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { admissionsAPI, schoolClassAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
@@ -86,12 +87,12 @@ export default function AdmissionsPage() {
     setLoading(true);
     setError(null);
     Promise.all([
-      admissionsAPI.list(),
-      schoolClassAPI.list(),
+      fetchAllPages((p) => admissionsAPI.list(p)),
+      fetchAllPages((p) => schoolClassAPI.list(p)),
     ])
-      .then(([appRes, clsRes]) => {
-        setApplications(appRes.data.results ?? appRes.data);
-        setSchoolClasses(clsRes.data.results ?? clsRes.data);
+      .then(([apps, classes]) => {
+        setApplications(apps);
+        setSchoolClasses(classes);
       })
       .catch((err) => setError(err.response?.data?.detail || 'Failed to load applications'))
       .finally(() => setLoading(false));

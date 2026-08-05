@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { questionAPI, subjectAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import type { Question, Subject, Topic } from '../../types';
 import { SkeletonTable } from '../../components/Skeleton';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -51,8 +51,8 @@ export default function QuestionBankPage() {
     if (filters.type) params.type = filters.type;
     if (filters.difficulty) params.difficulty = filters.difficulty;
     if (filters.search) params.search = filters.search;
-    questionAPI.list(params)
-      .then((res) => setQuestions(unwrapPaginated(res.data)))
+    fetchAllPages((p) => questionAPI.list({ ...params, ...p }))
+      .then(setQuestions)
       .catch(() => setError(t('questionBank.loadFailed')))
       .finally(() => setLoading(false));
   }, [filters, t]);
@@ -60,13 +60,13 @@ export default function QuestionBankPage() {
   useEffect(() => { loadQuestions(); }, [loadQuestions]);
 
   useEffect(() => {
-    subjectAPI.list().then((res) => setSubjects(unwrapPaginated(res.data))).catch(() => {});
+    fetchAllPages((p) => subjectAPI.list(p)).then(setSubjects).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (selectedSubject) {
-      subjectAPI.getTopics(selectedSubject as number)
-        .then((res) => setTopics(unwrapPaginated(res.data)))
+      fetchAllPages(() => subjectAPI.getTopics(selectedSubject as number))
+        .then(setTopics)
         .catch(() => setTopics([]));
     } else {
       setTopics([]);

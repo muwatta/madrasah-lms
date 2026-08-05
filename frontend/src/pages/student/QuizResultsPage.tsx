@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { quizAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { QuizAttempt } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
@@ -14,8 +15,7 @@ export default function QuizResultsPage() {
   useEffect(() => {
     const fetchAttempts = async () => {
       try {
-        const res = await quizAPI.quizzes.myResults();
-        setAttempts(res.data.results || res.data || []);
+        setAttempts(await fetchAllPages(() => quizAPI.quizzes.myResults()));
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadAttemptsFailed'));
       } finally {

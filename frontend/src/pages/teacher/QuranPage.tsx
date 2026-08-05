@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { quranAPI, userAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonTable, SkeletonStatsGrid } from '../../components/Skeleton';
 
@@ -90,8 +90,8 @@ export default function QuranPage() {
   const [showTajwidForm, setShowTajwidForm] = useState(false);
 
   useEffect(() => {
-    userAPI.list({ role: 'talib' })
-      .then((res) => setStudents(unwrapPaginated(res.data)))
+    fetchAllPages((p) => userAPI.list({ role: 'talib', ...p }))
+      .then(setStudents)
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
   }, [t]);
@@ -100,13 +100,13 @@ export default function QuranPage() {
     if (!selectedStudent) return;
     setLoading(true);
     Promise.all([
-      quranAPI.memorization.list({ student: selectedStudent }),
-      quranAPI.revision.list({ student: selectedStudent, completed: false }),
+      fetchAllPages<MemorizationRecord>((p) => quranAPI.memorization.list({ student: selectedStudent, ...p })),
+      fetchAllPages<Revision>((p) => quranAPI.revision.list({ student: selectedStudent, completed: false, ...p })),
       quranAPI.studentProgress(selectedStudent),
     ])
-      .then(([memRes, revRes, progRes]) => {
-        setRecords(unwrapPaginated(memRes.data));
-        setRevisions(unwrapPaginated(revRes.data));
+      .then(([memRecords, revRecords, progRes]) => {
+        setRecords(memRecords);
+        setRevisions(revRecords);
         setProgress(progRes.data);
       })
       .catch(() => setError(t('common.loadFailed')))
@@ -121,8 +121,8 @@ export default function QuranPage() {
       await quranAPI.memorization.create({ ...form, student: selectedStudent });
       setShowForm(false);
       setForm({ surah: 1, ayah_start: 1, ayah_end: 7, date: new Date().toISOString().split('T')[0], score: 80, notes: '' });
-      const res = await quranAPI.memorization.list({ student: selectedStudent });
-      setRecords(unwrapPaginated(res.data));
+      const records = await fetchAllPages<MemorizationRecord>((p) => quranAPI.memorization.list({ student: selectedStudent, ...p }));
+      setRecords(records);
     } catch {
       setError(t('common.saveFailed'));
     } finally {

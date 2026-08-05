@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { lessonAPI, subjectAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
@@ -60,12 +60,12 @@ export default function StudentHomeworkPage() {
 
   useEffect(() => {
     Promise.all([
-      lessonAPI.homework.list({ published: true }),
-      subjectAPI.list(),
+      fetchAllPages((p) => lessonAPI.homework.list({ published: true, ...p })),
+      fetchAllPages((p) => subjectAPI.list(p)),
     ])
-      .then(([hwRes, subRes]) => {
-        setHomework(unwrapPaginated(hwRes.data));
-        setSubjects(unwrapPaginated(subRes.data));
+      .then(([hwList, subList]) => {
+        setHomework(hwList);
+        setSubjects(subList);
       })
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
@@ -73,9 +73,8 @@ export default function StudentHomeworkPage() {
 
   useEffect(() => {
     if (homework.length === 0) return;
-    lessonAPI.homework.list()
-      .then((res) => {
-        const all = unwrapPaginated<any>(res.data);
+    fetchAllPages((p) => lessonAPI.homework.list(p))
+      .then((all) => {
         const mySubs: Submission[] = [];
         all.forEach((hw: any) => {
           if (hw.submissions) {
@@ -111,8 +110,7 @@ export default function StudentHomeworkPage() {
         payload = fd;
       }
       await lessonAPI.homework.submit(selectedHomework.id, payload);
-      const subRes = await lessonAPI.homework.submissions(selectedHomework.id);
-      const subs: Submission[] = unwrapPaginated(subRes.data) as Submission[];
+      const subs: Submission[] = await fetchAllPages(() => lessonAPI.homework.submissions(selectedHomework.id));
       if (subs.length > 0) {
         setSubmissions((prev) => [...prev.filter((s) => s.homework !== selectedHomework.id), { ...subs[0], homework: selectedHomework.id, homework_title: selectedHomework.title }]);
       }

@@ -45,7 +45,7 @@ export const authAPI = {
 };
 
 export const subjectAPI = {
-  list: () => api.get('/curriculum/'),
+  list: (params?: any) => api.get('/curriculum/', { params }),
   get: (id: number | string) => api.get(`/curriculum/${id}/`),
   create: (data: any) => api.post('/curriculum/', data),
   update: (id: number | string, data: any) => api.put(`/curriculum/${id}/`, data),
@@ -56,7 +56,7 @@ export const subjectAPI = {
 };
 
 export const schoolClassAPI = {
-  list: () => api.get('/curriculum/classes/'),
+  list: (params?: any) => api.get('/curriculum/classes/', { params }),
   update: (id: number, data: any) => api.put(`/curriculum/classes/${id}/`, data),
 };
 
@@ -110,12 +110,12 @@ export const examAPI = {
     api.post(`/results/exams/${examId}/results/`, data),
   bulkUpload: (examId: number, results: any[]) =>
     api.post(`/results/exams/${examId}/results/bulk/`, { results }),
-  myResults: () => api.get('/results/my-results/'),
+  myResults: (params?: any) => api.get('/results/my-results/', { params }),
 };
 
 export const resultsAPI = {
   teacher: {
-    subjects: () => api.get('/results/teacher/subjects/'),
+    subjects: (params?: any) => api.get('/results/teacher/subjects/', { params }),
     terms: () => api.get('/results/teacher/terms/'),
     components: (params?: any) => api.get('/results/components/', { params }),
     generateComponents: (data: any) => api.post('/results/components/generate/', data),
@@ -159,8 +159,8 @@ export const enrollmentAPI = {
   create: (data: any) => api.post('/enrollments/', data),
   delete: (id: number) => api.delete(`/enrollments/${id}/`),
   myEnrollments: () => api.get('/enrollments/my/'),
-  teacherStudents: () => api.get('/enrollments/teacher/students/'),
-  teacherClasses: () => api.get('/enrollments/teacher/classes/'),
+  teacherStudents: (params?: any) => api.get('/enrollments/teacher/students/', { params }),
+  teacherClasses: (params?: any) => api.get('/enrollments/teacher/classes/', { params }),
   classTeacherClasses: () => api.get('/enrollments/class-teacher/classes/'),
 };
 
@@ -211,7 +211,7 @@ export const schoolAPI = {
 };
 
 export const feeStructureAPI = {
-  list: () => api.get('/school/fee-structures/'),
+  list: (params?: any) => api.get('/school/fee-structures/', { params }),
   create: (data: any) => api.post('/school/fee-structures/', data),
 };
 
@@ -240,7 +240,7 @@ export const attendanceAPI = {
 };
 
 export const announcementAPI = {
-  list: () => api.get('/school/announcements/'),
+  list: (params?: any) => api.get('/school/announcements/', { params }),
   create: (data: any) => api.post('/school/announcements/', data),
   delete: (id: number) => api.delete(`/school/announcements/${id}/`),
 };
@@ -416,7 +416,7 @@ export const learningAPI = {
     create: (data: any) => api.post('/learning/decks/', data),
     update: (id: number, data: any) => api.put(`/learning/decks/${id}/`, data),
     delete: (id: number) => api.delete(`/learning/decks/${id}/`),
-    cards: (deckId: number) => api.get(`/learning/decks/${deckId}/cards/`),
+    cards: (deckId: number, params?: any) => api.get(`/learning/decks/${deckId}/cards/`, { params }),
     addCard: (deckId: number, data: any) => api.post(`/learning/decks/${deckId}/cards/`, data),
     updateCard: (deckId: number, cardId: number, data: any) =>
       api.put(`/learning/decks/${deckId}/cards/${cardId}/`, data),

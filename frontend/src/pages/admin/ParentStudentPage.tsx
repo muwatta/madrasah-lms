@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import api from '../../api/client';
+import api, { fetchAllPages } from '../../api/client';
 import { userAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
 import type { User } from '../../types';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
@@ -34,9 +33,9 @@ export default function ParentStudentPage() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      api.get('/users/student-parents/').then((r) => setLinks(unwrapPaginated<StudentParentLink>(r.data))),
-      userAPI.list({ role: 'student' }).then((r) => setStudents(unwrapPaginated<User>(r.data))),
-      userAPI.list({ role: 'parent' }).then((r) => setParents(unwrapPaginated<User>(r.data))),
+      fetchAllPages<StudentParentLink>((p) => api.get('/users/student-parents/', { params: p })).then(setLinks),
+      fetchAllPages<User>((p) => userAPI.list({ role: 'student', ...p })).then(setStudents),
+      fetchAllPages<User>((p) => userAPI.list({ role: 'parent', ...p })).then(setParents),
     ])
       .catch((err) => setError(err.response?.data?.detail || t('parentStudent.loadFailed')))
       .finally(() => setLoading(false));

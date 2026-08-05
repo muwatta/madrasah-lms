@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { notificationAPI } from '../api';
+import { fetchAllPages } from '../api/client';
 import PageNavigation from './PageNavigation';
 import GlobalSearch from './GlobalSearch';
 import { usePushNotifications } from '../hooks/usePushNotifications';
@@ -235,8 +236,8 @@ export default function Layout() {
   }, []);
 
   const loadNotifications = () => {
-    notificationAPI.list()
-      .then(res => setNotifications(res.data.results ?? res.data))
+    fetchAllPages((p) => notificationAPI.list(p))
+      .then(setNotifications)
       .catch(() => {});
   };
 

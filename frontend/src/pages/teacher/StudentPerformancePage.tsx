@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { enrollmentAPI, dashboardAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import type { Enrollment } from '../../types';
 import { Skeleton, SkeletonTable, SkeletonStatsGrid } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
@@ -38,8 +38,8 @@ export default function StudentPerformancePage() {
   const [perfLoading, setPerfLoading] = useState(false);
 
   useEffect(() => {
-    enrollmentAPI.teacherStudents()
-      .then((res) => setStudents(unwrapPaginated(res.data)))
+    fetchAllPages((p) => enrollmentAPI.teacherStudents(p))
+      .then(setStudents)
       .catch(() => setError(t('teacher.loadStudentsFailed')))
       .finally(() => setLoading(false));
   }, [t]);

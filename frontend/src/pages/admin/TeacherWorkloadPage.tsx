@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { analyticsAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonCard } from '../../components/Skeleton';
 
@@ -34,8 +34,8 @@ export default function TeacherWorkloadPage() {
   const [sortBy, setSortBy] = useState<'name' | 'workload'>('workload');
 
   useEffect(() => {
-    analyticsAPI.teacherWorkload.all()
-      .then((res) => setTeachers(unwrapPaginated(res.data)))
+    fetchAllPages(() => analyticsAPI.teacherWorkload.all())
+      .then(setTeachers)
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
   }, [t]);

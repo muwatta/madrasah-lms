@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { quizAPI, questionAPI, subjectAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import type { Quiz, Subject, Topic, Question } from '../../types';
 import { SkeletonTable } from '../../components/Skeleton';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -44,8 +44,8 @@ export default function QuizManagementPage() {
 
   const loadQuizzes = useCallback(() => {
     setLoading(true);
-    quizAPI.quizzes.list()
-      .then((res: any) => setQuizzes(unwrapPaginated(res.data)))
+    fetchAllPages((p) => quizAPI.quizzes.list(p))
+      .then(setQuizzes)
       .catch(() => setError(t('quizManagement.loadFailed')))
       .finally(() => setLoading(false));
   }, [t]);
@@ -53,13 +53,13 @@ export default function QuizManagementPage() {
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
 
   useEffect(() => {
-    subjectAPI.list().then((res) => setSubjects(unwrapPaginated(res.data))).catch(() => {});
+    fetchAllPages((p) => subjectAPI.list(p)).then(setSubjects).catch(() => {});
   }, []);
 
   useEffect(() => {
     if (form.subject) {
-      subjectAPI.getTopics(form.subject as number)
-        .then((res) => setTopics(unwrapPaginated(res.data)))
+      fetchAllPages(() => subjectAPI.getTopics(form.subject as number))
+        .then(setTopics)
         .catch(() => setTopics([]));
     } else {
       setTopics([]);
@@ -72,8 +72,8 @@ export default function QuizManagementPage() {
     if (questionFilter.type) params.type = questionFilter.type;
     if (questionFilter.difficulty) params.difficulty = questionFilter.difficulty;
     if (questionFilter.search) params.search = questionFilter.search;
-    questionAPI.list(params)
-      .then((res) => setQuestions(unwrapPaginated(res.data)))
+    fetchAllPages((p) => questionAPI.list({ ...params, ...p }))
+      .then(setQuestions)
       .catch(() => {});
   }, [questionFilter]);
 

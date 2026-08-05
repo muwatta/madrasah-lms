@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { whatsappAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
@@ -13,8 +14,7 @@ export default function WhatsAppOptInPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    whatsappAPI.recipients.list().then(r => {
-      const list = r.data.results ?? r.data;
+    fetchAllPages((p) => whatsappAPI.recipients.list(p)).then(list => {
       if (list.length > 0) {
         const r = list[0];
         setRecipient(r);

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { examAPI, subjectAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { Exam, ExamResult, Subject } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonTable } from '../../components/Skeleton';
@@ -35,8 +36,8 @@ export default function ExamManagementPage() {
   const loadExams = () => {
     setLoading(true);
     Promise.all([
-      examAPI.list().then((r) => setExams(r.data.results ?? r.data)),
-      subjectAPI.list().then((r) => setSubjects(r.data.results ?? r.data)),
+      fetchAllPages((p) => examAPI.list(p)).then(setExams),
+      fetchAllPages((p) => subjectAPI.list(p)).then(setSubjects),
     ])
       .catch((err) => setError(err.response?.data?.detail || t('examManagement.loadFailed')))
       .finally(() => setLoading(false));
@@ -70,8 +71,8 @@ export default function ExamManagementPage() {
     setResultsLoading(true);
     setResultsError(null);
     try {
-      const res = await examAPI.getResults(examId);
-      setResults(res.data.results ?? res.data);
+      const results = await fetchAllPages<ExamResult>(() => examAPI.getResults(examId));
+      setResults(results);
     } catch {
       setResultsError(t('examManagement.resultsLoadFailed'));
     } finally {

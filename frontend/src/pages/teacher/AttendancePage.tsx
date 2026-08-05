@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { attendanceAPI, enrollmentAPI, userAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { useExport } from '../../hooks/useExport';
@@ -50,43 +50,41 @@ export default function AttendancePage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [existingRecords, setExistingRecords] = useState<AttendanceRecord[]>([]);
 
-  const loadStudents = useCallback(() => {
+  const loadStudents = useCallback(async () => {
     setLoading(true);
-    const promise = isTeacher
-      ? enrollmentAPI.teacherStudents()
-      : userAPI.list({ role: 'student' });
-
-    promise
-      .then((res) => {
-        const raw = unwrapPaginated<any>(res.data);
-        const list = (isTeacher ? raw : raw.map((u: any) => ({
-              id: u.id,
-              student_id: u.id,
-              student_name: u.full_name,
-              student_email: u.email || '',
-              subject: 0,
-              subject_name: '',
-            }))).map((s: any) => ({
-              id: s.id ?? s.student,
-              student_id: s.student_id ?? s.student,
-              student_name: s.student_name,
-              student_email: s.student_email,
-              subject: s.subject ?? 0,
-              subject_name: s.subject_name ?? '',
-            }));
-        setStudents(list);
-        const initial: Record<number, Status> = {};
-        list.forEach((s: Student) => { initial[s.student_id] = 'present'; });
-        setMarks(initial);
-      })
-      .catch(() => setError(t('attendance.loadStudentsFailed')))
-      .finally(() => setLoading(false));
+    try {
+      const raw = await fetchAllPages<any>(
+        isTeacher ? (p) => enrollmentAPI.teacherStudents(p) : (p) => userAPI.list({ role: 'student', ...p })
+      );
+      const list = (isTeacher ? raw : raw.map((u: any) => ({
+            id: u.id,
+            student_id: u.id,
+            student_name: u.full_name,
+            student_email: u.email || '',
+            subject: 0,
+            subject_name: '',
+          }))).map((s: any) => ({
+            id: s.id ?? s.student,
+            student_id: s.student_id ?? s.student,
+            student_name: s.student_name,
+            student_email: s.student_email,
+            subject: s.subject ?? 0,
+            subject_name: s.subject_name ?? '',
+          }));
+      setStudents(list);
+      const initial: Record<number, Status> = {};
+      list.forEach((s: Student) => { initial[s.student_id] = 'present'; });
+      setMarks(initial);
+    } catch {
+      setError(t('attendance.loadStudentsFailed'));
+    } finally {
+      setLoading(false);
+    }
   }, [t, isTeacher]);
 
   const loadExistingAttendance = useCallback(() => {
-    attendanceAPI.list({ date })
-      .then((res) => {
-        const records = unwrapPaginated<AttendanceRecord>(res.data);
+    fetchAllPages<AttendanceRecord>((p) => attendanceAPI.list({ date, ...p }))
+      .then((records) => {
         setExistingRecords(records);
         if (records.length > 0) {
           setMarks((prev) => {

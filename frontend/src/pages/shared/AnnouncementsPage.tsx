@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { announcementAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -35,8 +36,8 @@ export default function AnnouncementsPage() {
 
   const loadAnnouncements = () => {
     setLoading(true);
-    announcementAPI.list()
-      .then((res) => setAnnouncements(res.data.results ?? res.data))
+    fetchAllPages((p) => announcementAPI.list(p))
+      .then(setAnnouncements)
       .catch(() => {})
       .finally(() => setLoading(false));
   };

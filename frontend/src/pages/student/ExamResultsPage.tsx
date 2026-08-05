@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { examAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonCard } from '../../components/Skeleton';
@@ -13,8 +14,7 @@ export default function ExamResultsPage() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await examAPI.myResults();
-        setResults(res.data.results || res.data || []);
+        setResults(await fetchAllPages((p) => examAPI.myResults(p)));
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadExamResultsFailed'));
       } finally {

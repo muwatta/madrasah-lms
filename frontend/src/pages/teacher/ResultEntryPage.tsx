@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
 import { resultsAPI, enrollmentAPI, academicAPI, schoolClassAPI } from '../../api'
-import { unwrapPaginated } from '../../api/client'
+import { unwrapPaginated, fetchAllPages } from '../../api/client'
 import toast from 'react-hot-toast'
 
 interface Subject {
@@ -109,22 +109,21 @@ export default function ResultEntryPage() {
   useEffect(() => {
     const errors: string[] = []
     Promise.allSettled([
-      academicAPI.sessions.list().catch(e => { errors.push(`Sessions: ${e.response?.statusText || e.message}`); throw e }),
-      isTeacher ? enrollmentAPI.teacherClasses().catch(e => { errors.push(`Classes: ${e.response?.statusText || e.message}`); throw e }) : schoolClassAPI.list().catch(e => { errors.push(`Classes: ${e.response?.statusText || e.message}`); throw e }),
-      resultsAPI.teacher.subjects().catch(e => { errors.push(`Subjects: ${e.response?.statusText || e.message}`); throw e }),
+      fetchAllPages((p) => academicAPI.sessions.list(p)).catch(e => { errors.push(`Sessions: ${e.response?.statusText || e.message}`); throw e }),
+      isTeacher ? fetchAllPages((p) => enrollmentAPI.teacherClasses(p)).catch(e => { errors.push(`Classes: ${e.response?.statusText || e.message}`); throw e }) : fetchAllPages((p) => schoolClassAPI.list(p)).catch(e => { errors.push(`Classes: ${e.response?.statusText || e.message}`); throw e }),
+      fetchAllPages((p) => resultsAPI.teacher.subjects(p)).catch(e => { errors.push(`Subjects: ${e.response?.statusText || e.message}`); throw e }),
     ]).then(([sessionsRes, classesRes, subjectsRes]) => {
       if (sessionsRes.status === 'fulfilled') {
-        const allSessions = unwrapPaginated<Session>(sessionsRes.value.data)
+        const allSessions = sessionsRes.value as Session[]
         setSessions(allSessions)
         const current = allSessions.find(s => s.is_current)
         if (current) setSelectedSession(String(current.id))
       }
       if (classesRes.status === 'fulfilled') {
-        const allClasses = unwrapPaginated<SchoolClass>(classesRes.value.data)
-        setClasses(allClasses)
+        setClasses(classesRes.value as SchoolClass[])
       }
       if (subjectsRes.status === 'fulfilled') {
-        setSubjects(unwrapPaginated(subjectsRes.value.data))
+        setSubjects(subjectsRes.value as Subject[])
       }
       if (errors.length > 0) setLoadErrors(errors)
     })
@@ -224,8 +223,8 @@ export default function ResultEntryPage() {
 
   const loadExistingScores = useCallback(async (componentId: number) => {
     try {
-      const res = await resultsAPI.teacher.scores({ component: componentId })
-      const scoreList: StudentScore[] = unwrapPaginated(res.data).map((sr: any) => ({
+      const scoreData = await fetchAllPages((p) => resultsAPI.teacher.scores({ component: componentId, ...p }))
+      const scoreList: StudentScore[] = scoreData.map((sr: any) => ({
         student: sr.student,
         score: String(sr.score),
         remarks: sr.remarks || '',

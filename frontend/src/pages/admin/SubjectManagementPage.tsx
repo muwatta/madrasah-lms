@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { subjectAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { Subject, Topic } from '../../types';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
@@ -30,8 +31,8 @@ export default function SubjectManagementPage() {
 
   const loadSubjects = () => {
     setLoading(true);
-    subjectAPI.list()
-      .then((res) => setSubjects(res.data.results ?? res.data))
+    fetchAllPages((p) => subjectAPI.list(p))
+      .then(setSubjects)
       .catch((err) => setError(err.response?.data?.detail || t('subjectManagement.deleteFailed')))
       .finally(() => setLoading(false));
   };
@@ -87,8 +88,8 @@ export default function SubjectManagementPage() {
       setTopicsLoading(subjectId);
       setTopicsError(null);
       try {
-        const res = await subjectAPI.getTopics(subjectId);
-        setTopics((prev) => ({ ...prev, [subjectId]: res.data.results ?? res.data }));
+        const list = await fetchAllPages(() => subjectAPI.getTopics(subjectId));
+        setTopics((prev) => ({ ...prev, [subjectId]: list }));
       } catch {
         setTopicsError(t('subjectManagement.topicsLoadFailed'));
       } finally {
@@ -115,8 +116,8 @@ export default function SubjectManagementPage() {
       };
       await subjectAPI.createTopic(topicSubjectId, payload);
       setShowTopicForm(false);
-      const res = await subjectAPI.getTopics(topicSubjectId);
-      setTopics((prev) => ({ ...prev, [topicSubjectId]: res.data.results ?? res.data }));
+      const list = await fetchAllPages(() => subjectAPI.getTopics(topicSubjectId));
+      setTopics((prev) => ({ ...prev, [topicSubjectId]: list }));
       loadSubjects();
     } catch (err: any) {
       setTopicError(Object.values(err.response?.data || {}).flat().join(', ') || t('subjectManagement.topicCreateFailed'));

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { quizAPI, subjectAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { Quiz, Subject, QuizAttempt } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -20,11 +21,11 @@ export default function QuizListPage() {
       try {
         const params: Record<string, number> = {};
         if (filterSubject !== '') params.subject = filterSubject;
-        const [quizRes, attemptRes] = await Promise.all([
-          quizAPI.quizzes.list(params),
+        const [quizList, attemptRes] = await Promise.all([
+          fetchAllPages((p) => quizAPI.quizzes.list({ ...params, ...p })),
           quizAPI.quizzes.myResults(),
         ]);
-        setQuizzes(quizRes.data.results || quizRes.data || []);
+        setQuizzes(quizList);
         setAttempts(attemptRes.data.results || attemptRes.data || []);
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadQuizzesFailed'));
@@ -36,7 +37,7 @@ export default function QuizListPage() {
   }, [filterSubject, t]);
 
   useEffect(() => {
-    subjectAPI.list().then((res) => setSubjects(res.data.results || res.data || [])).catch(() => {});
+    fetchAllPages((p) => subjectAPI.list(p)).then(setSubjects).catch(() => {});
   }, []);
 
   const attemptMap = useMemo(() => {

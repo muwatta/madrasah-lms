@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { analyticsAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonStatsGrid, SkeletonChart, SkeletonTable } from '../../components/Skeleton';
 
@@ -38,8 +38,8 @@ export default function AtRiskPage() {
 
   const loadData = () => {
     setLoading(true);
-    analyticsAPI.atRisk.list()
-      .then((res) => setStudents(unwrapPaginated(res.data)))
+    fetchAllPages((p) => analyticsAPI.atRisk.list(p))
+      .then(setStudents)
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
   };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { whatsappAPI, userAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonTable } from '../../components/Skeleton';
 
@@ -31,7 +32,7 @@ export default function WhatsAppPage() {
 
   useEffect(() => {
     loadData();
-    userAPI.list({ role: 'parent' }).then(r => setParents(r.data.results ?? r.data)).catch(() => {});
+    fetchAllPages((p) => userAPI.list({ role: 'parent', ...p })).then(setParents).catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
@@ -39,11 +40,11 @@ export default function WhatsAppPage() {
     setLoading(true);
     try {
       if (tab === 'templates') {
-        const r = await whatsappAPI.templates.list(); setTemplates(r.data.results ?? r.data);
+        setTemplates(await fetchAllPages((p) => whatsappAPI.templates.list(p)));
       } else if (tab === 'recipients') {
-        const r = await whatsappAPI.recipients.list(); setRecipients(r.data.results ?? r.data);
+        setRecipients(await fetchAllPages((p) => whatsappAPI.recipients.list(p)));
       } else if (tab === 'messages') {
-        const r = await whatsappAPI.messages.list(); setMessages(r.data.results ?? r.data);
+        setMessages(await fetchAllPages((p) => whatsappAPI.messages.list(p)));
       }
     } catch {}
     setLoading(false);

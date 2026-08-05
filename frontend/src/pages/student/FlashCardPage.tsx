@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { learningAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -61,8 +62,7 @@ export default function FlashCardPage() {
   const fetchDecks = async () => {
     try {
       setLoading(true);
-      const res = await learningAPI.decks.list();
-      setDecks(res.data.results ?? res.data);
+      setDecks(await fetchAllPages((p) => learningAPI.decks.list(p)));
     } catch {
       setError('Failed to load decks');
     } finally {
@@ -74,11 +74,11 @@ export default function FlashCardPage() {
     try {
       setCardsLoading(true);
       const [cardsRes, dueRes] = await Promise.all([
-        learningAPI.decks.cards(deckId),
-        learningAPI.decks.dueCards(deckId),
+        fetchAllPages((p) => learningAPI.decks.cards(deckId, p)),
+        fetchAllPages(() => learningAPI.decks.dueCards(deckId)),
       ]);
-      setCards(cardsRes.data.results ?? cardsRes.data);
-      setDueCards(dueRes.data.results ?? dueRes.data);
+      setCards(cardsRes);
+      setDueCards(dueRes);
     } catch {
       setError('Failed to load cards');
     } finally {

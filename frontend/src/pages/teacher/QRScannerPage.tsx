@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { attendanceAPI, schoolClassAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -51,9 +51,7 @@ export default function QRScannerPage() {
 
   const loadClasses = useCallback(async () => {
     try {
-      const res = await schoolClassAPI.list();
-      const list = unwrapPaginated<SchoolClass>(res.data);
-      setClasses(list);
+      setClasses(await fetchAllPages<SchoolClass>((p) => schoolClassAPI.list(p)));
     } catch {} finally {
       setLoading(false);
     }
@@ -61,9 +59,7 @@ export default function QRScannerPage() {
 
   const loadScans = useCallback(async () => {
     try {
-      const res = await attendanceAPI.scans();
-      const list = unwrapPaginated<ScanRecord>(res.data);
-      setScans(list);
+      setScans(await fetchAllPages<ScanRecord>((p) => attendanceAPI.scans(p)));
     } catch {}
   }, []);
 

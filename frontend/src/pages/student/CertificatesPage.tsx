@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { certificateAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { SkeletonCard } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -38,8 +38,8 @@ export default function CertificatesPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    certificateAPI.list()
-      .then((res) => setCertificates(unwrapPaginated(res.data)))
+    fetchAllPages((p) => certificateAPI.list(p))
+      .then(setCertificates)
       .catch(() => setError('Failed to load certificates'))
       .finally(() => setLoading(false));
   }, []);

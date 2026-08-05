@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { lessonAPI, subjectAPI, schoolClassAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
@@ -69,14 +70,14 @@ export default function LessonPlannerPage() {
     setLoading(true);
     setError(null);
     Promise.all([
-      lessonAPI.lessonPlans.list(),
-      subjectAPI.list(),
-      schoolClassAPI.list(),
+      fetchAllPages((p) => lessonAPI.lessonPlans.list(p)),
+      fetchAllPages((p) => subjectAPI.list(p)),
+      fetchAllPages((p) => schoolClassAPI.list(p)),
     ])
       .then(([lpRes, subRes, clsRes]) => {
-        setLessonPlans(lpRes.data.results ?? lpRes.data);
-        setSubjects(subRes.data.results ?? subRes.data);
-        setSchoolClasses(clsRes.data.results ?? clsRes.data);
+        setLessonPlans(lpRes);
+        setSubjects(subRes);
+        setSchoolClasses(clsRes);
       })
       .catch((err) => setError(err.response?.data?.detail || t('lessons.loadFailed')))
       .finally(() => setLoading(false));

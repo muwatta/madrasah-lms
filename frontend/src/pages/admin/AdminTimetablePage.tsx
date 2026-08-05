@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { academicAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
@@ -38,8 +38,8 @@ export default function AdminTimetablePage() {
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    academicAPI.timetables.list()
-      .then((res) => setTimetables(unwrapPaginated(res.data)))
+    fetchAllPages((p) => academicAPI.timetables.list(p))
+      .then(setTimetables)
       .catch(() => setError('Failed to load timetables'))
       .finally(() => setLoading(false));
   }, []);
@@ -49,8 +49,8 @@ export default function AdminTimetablePage() {
     setSlotsLoading(true);
     setConflicts([]);
     try {
-      const res = await academicAPI.timetables.slots(tt.id);
-      setSlots(unwrapPaginated(res.data));
+      const slotList = await fetchAllPages(() => academicAPI.timetables.slots(tt.id));
+      setSlots(slotList);
     } catch {
       setError('Failed to load timetable slots');
     } finally {

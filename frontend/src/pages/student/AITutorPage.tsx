@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { guidanceAPI, subjectAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 
 interface Attachment {
   id: number;
@@ -134,14 +135,13 @@ export default function AITutorPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [histRes, subRes] = await Promise.all([
-          guidanceAPI.tutor.history(),
-          subjectAPI.list(),
+        const [data, subjectList] = await Promise.all([
+          fetchAllPages<TutorSession>(() => guidanceAPI.tutor.history()),
+          fetchAllPages((p) => subjectAPI.list(p)),
         ]);
-        const data: TutorSession[] = histRes.data.results ?? histRes.data;
         setSessions(data);
         if (data.length > 0) setSessionId(data[0].session_id);
-        setSubjects(subRes.data.results ?? subRes.data);
+        setSubjects(subjectList);
       } catch {
       } finally {
         setLoading(false);

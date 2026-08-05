@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useLanguage } from '../../../context/LanguageContext';
-import { unwrapPaginated } from '../../../api/client';
+import { fetchAllPages } from '../../../api/client';
 import { academicAPI, subjectAPI, schoolClassAPI } from '../../../api';
 import {
   useQuestionBanks,
@@ -43,29 +43,25 @@ export default function QuestionBanksPage() {
   const { data: sessions = [] } = useQuery({
     queryKey: ['sessions'],
     queryFn: async () => {
-      const res = await academicAPI.sessions.list();
-      return unwrapPaginated<SessionRow>(res.data);
+      return fetchAllPages<SessionRow>((p) => academicAPI.sessions.list(p));
     },
   });
   const { data: terms = [] } = useQuery({
     queryKey: ['terms'],
     queryFn: async () => {
-      const res = await academicAPI.terms.list();
-      return unwrapPaginated<TermRow>(res.data);
+      return fetchAllPages<TermRow>((p) => academicAPI.terms.list(p));
     },
   });
   const { data: subjects = [] } = useQuery({
     queryKey: ['curriculum'],
     queryFn: async () => {
-      const res = await subjectAPI.list();
-      return unwrapPaginated<{ id: number; name_ar: string; name_en: string }>(res.data);
+      return fetchAllPages<{ id: number; name_ar: string; name_en: string }>((p) => subjectAPI.list(p));
     },
   });
   const { data: classes = [] } = useQuery({
     queryKey: ['school-classes'],
     queryFn: async () => {
-      const res = await schoolClassAPI.list();
-      return unwrapPaginated<{ id: number; name_ar: string; name_en: string }>(res.data);
+      return fetchAllPages<{ id: number; name_ar: string; name_en: string }>((p) => schoolClassAPI.list(p));
     },
   });
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { characterAPI, enrollmentAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { Skeleton, SkeletonCard } from '../../components/Skeleton';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -27,16 +28,15 @@ export default function CharacterPage() {
 
   useEffect(() => {
     Promise.all([
-      characterAPI.traits.list().then(r => setTraits(r.data.results ?? r.data)),
-      enrollmentAPI.teacherStudents().then(r => setStudents(r.data.results ?? r.data)),
+      fetchAllPages((p) => characterAPI.traits.list(p)).then(setTraits),
+      fetchAllPages((p) => enrollmentAPI.teacherStudents(p)).then(setStudents),
       loadEvaluations(),
     ]).finally(() => setLoading(false));
   }, []);
 
   const loadEvaluations = async () => {
     try {
-      const r = await characterAPI.evaluations.list();
-      setEvaluations(r.data.results ?? r.data);
+      setEvaluations(await fetchAllPages((p) => characterAPI.evaluations.list(p)));
     } catch {}
   };
 
@@ -59,8 +59,7 @@ export default function CharacterPage() {
       await characterAPI.traits.create(traitForm);
       setShowTraitForm(false);
       setTraitForm({ name: '', name_ar: '', category: 'moral' });
-      const r = await characterAPI.traits.list();
-      setTraits(r.data.results ?? r.data);
+      setTraits(await fetchAllPages((p) => characterAPI.traits.list(p)));
     } catch {}
   };
 

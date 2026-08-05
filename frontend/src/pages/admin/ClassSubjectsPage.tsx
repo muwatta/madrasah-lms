@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { schoolClassAPI, classSubjectAPI, subjectAPI, userAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { SchoolClass, Subject, User, ClassSubject } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -25,10 +26,10 @@ export default function ClassSubjectsPage() {
   const load = () => {
     setLoading(true);
     Promise.all([
-      schoolClassAPI.list().then((r) => r.data.results ?? r.data),
-      subjectAPI.list().then((r) => r.data.results ?? r.data),
-      userAPI.list({ role: 'ustaadh' }).then((r) => r.data.results ?? r.data),
-      classSubjectAPI.list().then((r) => r.data.results ?? r.data),
+      fetchAllPages((p) => schoolClassAPI.list(p)),
+      fetchAllPages((p) => subjectAPI.list(p)),
+      fetchAllPages((p) => userAPI.list({ role: 'ustaadh', ...p })),
+      fetchAllPages((p) => classSubjectAPI.list(p)),
     ])
       .then(([cls, subs, staff, cs]) => {
         setClasses(cls);
@@ -68,8 +69,7 @@ export default function ClassSubjectsPage() {
     setError(null);
     try {
       await schoolClassAPI.update(selectedClass.id, { class_teacher: teacherSelect });
-      const res = await schoolClassAPI.list();
-      setClasses(res.data.results ?? res.data);
+      setClasses(await fetchAllPages((p) => schoolClassAPI.list(p)));
       setMessage(t('classSubjects.teacherSaved'));
     } catch {
       setError(t('classSubjects.loadFailed'));

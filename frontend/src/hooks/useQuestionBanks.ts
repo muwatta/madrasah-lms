@@ -1,14 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { questionBankAPI } from '../api';
+import { fetchAllPages } from '../api/client';
 import type { QuestionBank, QuizQuestion, GapAnalysis } from '../types';
 
 export function useQuestionBanks(params?: Record<string, unknown>) {
   return useQuery<QuestionBank[]>({
     queryKey: ['question-banks', params],
-    queryFn: async () => {
-      const res = await questionBankAPI.list(params);
-      return res.data.results ?? res.data;
-    },
+    queryFn: () => fetchAllPages((p) => questionBankAPI.list(p), params),
   });
 }
 

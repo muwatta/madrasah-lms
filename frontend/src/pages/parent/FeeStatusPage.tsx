@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { feeAPI, dashboardAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonStatsGrid, SkeletonTable } from '../../components/Skeleton';
@@ -60,7 +61,7 @@ export default function FeeStatusPage() {
   const loadData = () => {
     setLoading(true);
     Promise.all([
-      feeAPI.list().then((r) => setFees(r.data.results ?? r.data)),
+      fetchAllPages((p) => feeAPI.list(p)).then(setFees),
       dashboardAPI.parent().then((r) => {
         const kids = (r.data?.children ?? []).map((c: any) => ({ id: c.id, name: c.name }));
         setChildren(kids);

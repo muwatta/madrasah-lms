@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { enrollmentAPI, classSubjectAPI, subjectAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import type { Enrollment, Subject, ClassSubject } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -49,8 +50,8 @@ export default function ClassTeacherClassSubjectsPage() {
     setLoading(true);
     Promise.all([
       enrollmentAPI.classTeacherClasses().then((r) => r.data),
-      subjectAPI.list().then((r) => r.data.results ?? r.data),
-      classSubjectAPI.list().then((r) => r.data.results ?? r.data),
+      fetchAllPages((p) => subjectAPI.list(p)),
+      fetchAllPages((p) => classSubjectAPI.list(p)),
     ])
       .then(([cls, subs, cs]) => {
         setMyClasses(cls);
@@ -68,8 +69,8 @@ export default function ClassTeacherClassSubjectsPage() {
   useEffect(() => {
     if (!selectedClassId) return;
     setEnrollments([]);
-    enrollmentAPI.list({ school_class: selectedClassId })
-      .then((r) => setEnrollments(r.data.results ?? r.data))
+    fetchAllPages((p) => enrollmentAPI.list({ school_class: selectedClassId, ...p }))
+      .then(setEnrollments)
       .catch(() => setError(t('classSubjects.loadFailed')));
   }, [selectedClassId, t]);
 
@@ -122,8 +123,8 @@ export default function ClassTeacherClassSubjectsPage() {
       setClassSubjects((prev) => prev.filter((x) => x.id !== cs.id));
       setMessage(t('classSubjects.saved'));
       if (selectedClassId) {
-        const r = await enrollmentAPI.list({ school_class: selectedClassId });
-        setEnrollments(r.data.results ?? r.data);
+        const list = await fetchAllPages((p) => enrollmentAPI.list({ school_class: selectedClassId, ...p }));
+        setEnrollments(list);
       }
     } catch {
       setError(t('classSubjects.loadFailed'));

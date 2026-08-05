@@ -57,3 +57,24 @@ export function unwrapPaginated<T>(data: any): T[] {
   if (data && Array.isArray(data.results)) return data.results;
   return [];
 }
+
+export async function fetchAllPages<T = any>(
+  fetcher: (params?: Record<string, any>) => Promise<{ data: any }>,
+  params?: Record<string, any>,
+): Promise<T[]> {
+  const all: T[] = [];
+  let res = await fetcher({ ...params, page: 1 });
+  while (true) {
+    const results = res.data?.results ?? res.data;
+    if (Array.isArray(results)) all.push(...results);
+    const next = res.data?.next;
+    if (!next || !Array.isArray(results) || results.length === 0) break;
+    const nextUrl = new URL(next, window.location.origin);
+    const basePath = new URL(api.defaults.baseURL ?? '', window.location.origin).pathname;
+    const relPath = nextUrl.pathname.startsWith(basePath)
+      ? nextUrl.pathname.slice(basePath.length)
+      : nextUrl.pathname;
+    res = await api.get(relPath + nextUrl.search);
+  }
+  return all;
+}

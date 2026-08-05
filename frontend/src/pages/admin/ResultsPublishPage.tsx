@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useExport } from '../../hooks/useExport'
 import { resultsAPI } from '../../api'
+import { fetchAllPages } from '../../api/client'
 import toast from 'react-hot-toast'
 
 export default function ResultsPublishPage() {
@@ -14,9 +15,8 @@ export default function ResultsPublishPage() {
 
   const loadPending = () => {
     setLoading(true)
-    resultsAPI.admin.pending()
-      .then(r => {
-        const results = Array.isArray(r.data) ? r.data : r.data?.results || []
+    fetchAllPages((p) => resultsAPI.admin.pending(p))
+      .then(results => {
         const groups: Record<string, any> = {}
         results.forEach((r: any) => {
           const key = `${r.subject}_${r.term}`

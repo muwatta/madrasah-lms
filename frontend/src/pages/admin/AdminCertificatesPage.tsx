@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { certificateAPI, userAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -44,11 +44,11 @@ export default function AdminCertificatesPage() {
 
   useEffect(() => {
     Promise.all([
-      certificateAPI.list(),
-      isAdmin ? userAPI.list({ role: 'student' }) : Promise.resolve({ data: [] }),
-    ]).then(([certRes, studRes]) => {
-      setCertificates(unwrapPaginated(certRes.data));
-      setStudents(unwrapPaginated(studRes.data));
+      fetchAllPages((p) => certificateAPI.list(p)),
+      isAdmin ? fetchAllPages((p) => userAPI.list({ role: 'student', ...p })) : Promise.resolve([]),
+    ]).then(([certs, studs]) => {
+      setCertificates(certs);
+      setStudents(studs);
     }).catch(() => setError('Failed to load data'))
       .finally(() => setLoading(false));
   }, [isAdmin]);

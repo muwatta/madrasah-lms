@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useExport } from '../../hooks/useExport'
 import { resultsAPI } from '../../api'
+import { fetchAllPages } from '../../api/client'
 
 export default function MyResultsPage() {
   const { t } = useLanguage()
@@ -10,8 +11,8 @@ export default function MyResultsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    resultsAPI.student.myResults()
-      .then(r => setResults(Array.isArray(r.data) ? r.data : r.data?.results || []))
+    fetchAllPages((p) => resultsAPI.student.myResults(p))
+      .then(setResults)
       .finally(() => setLoading(false))
   }, [])
 

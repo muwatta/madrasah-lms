@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { academicAPI, schoolClassAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import StatCard from '../../components/StatCard';
 import ConfirmModal from '../../components/ConfirmModal';
 import { useLanguage } from '../../context/LanguageContext';
@@ -141,20 +142,20 @@ export default function AcademicPage() {
     setLoading(true);
     setError(null);
     Promise.all([
-      academicAPI.sessions.list(),
-      academicAPI.terms.list(),
-      academicAPI.calendarEvents.list(),
-      academicAPI.classArms.list(),
-      academicAPI.timetables.list(),
-      schoolClassAPI.list(),
+      fetchAllPages((p) => academicAPI.sessions.list(p)),
+      fetchAllPages((p) => academicAPI.terms.list(p)),
+      fetchAllPages((p) => academicAPI.calendarEvents.list(p)),
+      fetchAllPages((p) => academicAPI.classArms.list(p)),
+      fetchAllPages((p) => academicAPI.timetables.list(p)),
+      fetchAllPages((p) => schoolClassAPI.list(p)),
     ])
       .then(([sRes, tRes, cRes, caRes, ttRes, scRes]) => {
-        setSessions(sRes.data.results ?? sRes.data);
-        setTerms(tRes.data.results ?? tRes.data);
-        setCalendarEvents(cRes.data.results ?? cRes.data);
-        setClassArms(caRes.data.results ?? caRes.data);
-        setTimetables(ttRes.data.results ?? ttRes.data);
-        setSchoolClasses(scRes.data.results ?? scRes.data);
+        setSessions(sRes);
+        setTerms(tRes);
+        setCalendarEvents(cRes);
+        setClassArms(caRes);
+        setTimetables(ttRes);
+        setSchoolClasses(scRes);
       })
       .catch((err) => setError(err.response?.data?.detail || 'Failed to load academic data'))
       .finally(() => setLoading(false));
@@ -162,7 +163,7 @@ export default function AcademicPage() {
 
   const loadSubjects = () => {
     import('../../api').then(({ subjectAPI }) => {
-      subjectAPI.list().then((res) => setSubjects(res.data.results ?? res.data)).catch(() => {});
+      fetchAllPages((p) => subjectAPI.list(p)).then(setSubjects).catch(() => {});
     });
   };
 
@@ -333,8 +334,7 @@ export default function AcademicPage() {
     setViewingTimetable(tt);
     setSlotsLoading(true);
     try {
-      const res = await academicAPI.timetables.slots(tt.id);
-      setTimetableSlots(res.data.results ?? res.data);
+      setTimetableSlots(await fetchAllPages(() => academicAPI.timetables.slots(tt.id)));
     } catch {
       setTimetableSlots([]);
     } finally {

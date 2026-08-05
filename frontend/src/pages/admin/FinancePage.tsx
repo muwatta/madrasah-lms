@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { feeAPI, feeStructureAPI, userAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import StatCard from '../../components/StatCard';
 import { useLanguage } from '../../context/LanguageContext';
 import { useExport } from '../../hooks/useExport';
@@ -98,8 +99,8 @@ export default function FinancePage() {
 
   const loadFees = () => {
     setLoading(true);
-    feeAPI.list()
-      .then((res) => setFees(res.data.results ?? res.data))
+    fetchAllPages((p) => feeAPI.list(p))
+      .then(setFees)
       .catch((err) => setError(err.response?.data?.detail || t('finance.loadFailed')))
       .finally(() => setLoading(false));
   };
@@ -113,8 +114,8 @@ export default function FinancePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     Promise.all([
-      userAPI.list({ role: 'student' }).then((r) => setStudents(r.data.results ?? r.data)),
-      feeStructureAPI.list().then((r) => setFeeStructures(r.data.results ?? r.data)),
+      fetchAllPages((p) => userAPI.list({ role: 'student', ...p })).then(setStudents),
+      fetchAllPages((p) => feeStructureAPI.list(p)).then(setFeeStructures),
     ]).catch(() => {});
     loadFees();
     loadAnalytics();

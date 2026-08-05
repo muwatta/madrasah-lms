@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { messageAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -37,8 +38,8 @@ export default function MessagesPage() {
 
   const loadMessages = () => {
     setLoading(true);
-    messageAPI.list({ folder })
-      .then((res) => setMessages(res.data.results ?? res.data))
+    fetchAllPages((p) => messageAPI.list({ ...p, folder }))
+      .then(setMessages)
       .catch(() => {})
       .finally(() => setLoading(false));
   };

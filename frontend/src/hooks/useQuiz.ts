@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { quizAPI } from '../api';
+import { fetchAllPages } from '../api/client';
 import type { Quiz, QuizQuestion, QuizAttempt } from '../types';
 
 // ── Questions ──────────────────────────────────────────────────────────────
@@ -7,10 +8,7 @@ import type { Quiz, QuizQuestion, QuizAttempt } from '../types';
 export function useQuizQuestions(params?: Record<string, unknown>) {
   return useQuery<QuizQuestion[]>({
     queryKey: ['quiz', 'questions', params],
-    queryFn: async () => {
-      const res = await quizAPI.questions.list(params);
-      return res.data.results ?? res.data;
-    },
+    queryFn: () => fetchAllPages((p) => quizAPI.questions.list(p), params),
   });
 }
 
@@ -27,10 +25,7 @@ export function useQuizQuestion(id: number | null) {
 export function useQuizzes(params?: Record<string, unknown>) {
   return useQuery<Quiz[]>({
     queryKey: ['quiz', 'list', params],
-    queryFn: async () => {
-      const res = await quizAPI.quizzes.list(params);
-      return res.data.results ?? res.data;
-    },
+    queryFn: () => fetchAllPages((p) => quizAPI.quizzes.list(p), params),
   });
 }
 
@@ -206,10 +201,7 @@ export { useQuizAnalysis as useQuestionAnalysis };
 export function useQuizResults() {
   return useQuery<QuizAttempt[]>({
     queryKey: ['quiz', 'my-results'],
-    queryFn: async () => {
-      const res = await quizAPI.quizzes.myResults();
-      return res.data.results ?? res.data;
-    },
+    queryFn: () => fetchAllPages(() => quizAPI.quizzes.myResults()),
   });
 }
 

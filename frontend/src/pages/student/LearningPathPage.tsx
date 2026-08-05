@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { learningAPI, subjectAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
@@ -60,12 +61,12 @@ export default function LearningPathPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [pathsRes, subjectsRes] = await Promise.all([
-        learningAPI.paths.list(),
-        subjectAPI.list(),
+      const [pathList, subjectList] = await Promise.all([
+        fetchAllPages((p) => learningAPI.paths.list(p)),
+        fetchAllPages((p) => subjectAPI.list(p)),
       ]);
-      setPaths(pathsRes.data.results ?? pathsRes.data);
-      setSubjects(subjectsRes.data.results ?? subjectsRes.data);
+      setPaths(pathList);
+      setSubjects(subjectList);
     } catch {
       setError('Failed to load learning paths');
     } finally {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { guidanceAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
@@ -42,8 +43,8 @@ export default function CareerGuidancePage() {
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
-      const res = await guidanceAPI.career.list();
-      setRecommendations(res.data.results ?? res.data);
+      const list = await fetchAllPages((p) => guidanceAPI.career.list(p));
+      setRecommendations(list);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load recommendations');
     } finally {

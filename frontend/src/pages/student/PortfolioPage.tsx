@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { analyticsAPI } from '../../api';
-import { unwrapPaginated } from '../../api/client';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
 
@@ -47,8 +47,8 @@ export default function PortfolioPage() {
 
   const loadItems = () => {
     setLoading(true);
-    analyticsAPI.portfolio.list()
-      .then((res) => setItems(unwrapPaginated(res.data)))
+    fetchAllPages((p) => analyticsAPI.portfolio.list(p))
+      .then(setItems)
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
   };

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { schoolAPI, userAPI } from '../../api';
+import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonCard, SkeletonChart } from '../../components/Skeleton';
 
@@ -77,8 +78,8 @@ export default function StudentReportPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    userAPI.list({ role: 'student' })
-      .then((res) => setStudents(res.data.results || res.data))
+    fetchAllPages((p) => userAPI.list({ role: 'student', ...p }))
+      .then(setStudents)
       .catch(() => setError(language === 'ar' ? 'فشل تحميل الطلاب' : 'Failed to load students'))
       .finally(() => setLoadingStudents(false));
   }, [language]);
