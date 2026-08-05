@@ -82,7 +82,7 @@ class SubjectListView(generics.ListCreateAPIView):
         return SubjectListSerializer
 
     def get_queryset(self):
-        return Subject.objects.filter(madrasah=self.request.user.madrasah).annotate(topic_count=Count('topics'))
+        return Subject.objects.filter(madrasah=self.request.user.madrasah).annotate(topic_count=Count('topics')).order_by('id')
 
     def perform_create(self, serializer):
         serializer.save(madrasah=self.request.user.madrasah)

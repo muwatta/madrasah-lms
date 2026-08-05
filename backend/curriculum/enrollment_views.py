@@ -15,7 +15,7 @@ class EnrollmentListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Enrollment.objects.filter(madrasah=user.madrasah).select_related('student', 'subject', 'school_class')
+        qs = Enrollment.objects.filter(madrasah=user.madrasah).select_related('student', 'subject', 'school_class').order_by('id')
 
         # Teachers see the classes they lead plus the students they teach.
         if user.role not in ('mudeer', 'idaarah'):
