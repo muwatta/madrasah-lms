@@ -260,9 +260,10 @@ class WhatsAppAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_webhook_verification(self):
+        from django.conf import settings
         self.client2 = Client()
         resp = self.client2.get(
-            '/api/v1/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token=madrasah-webhook-token&hub.challenge=abc123'
+            f'/api/v1/whatsapp/webhook/?hub.mode=subscribe&hub.verify_token={settings.WHATSAPP_WEBHOOK_VERIFY_TOKEN}&hub.challenge=abc123'
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b'abc123')

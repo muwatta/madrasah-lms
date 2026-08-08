@@ -619,7 +619,7 @@ class ApprovalService:
 
     VALID_TRANSITIONS: dict[str, list[str]] = {
         'draft': ['submitted'],
-        'submitted': ['under_review', 'rejected'],
+        'submitted': ['under_review', 'approved', 'rejected'],
         'under_review': ['approved', 'rejected'],
         'approved': ['published'],
         'published': ['locked'],
@@ -1028,6 +1028,7 @@ class TermAggregationService:
         student_ids = (
             SubjectResult.objects
             .filter(term=term, school_class=school_class)
+            .order_by()
             .values_list('student_id', flat=True)
             .distinct()
         )

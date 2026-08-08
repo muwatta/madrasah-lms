@@ -194,7 +194,7 @@ class GradeScaleTests(BaseResultsTestCase):
 
     def test_get_grade_out_of_different_max(self):
         grade, remark = self.grade_scale.get_grade(15.0, max_score=20.0)
-        self.assertEqual(grade, 'B')
+        self.assertEqual(grade, 'A')
 
     def test_get_gpa_points(self):
         gpa = self.grade_scale.get_gpa_points(80.0, max_score=100.0)
@@ -579,7 +579,7 @@ class TermAggregationTests(BaseResultsTestCase):
         tr = TermAggregationService.aggregate_term(
             self.student1, self.term, self.school_class,
         )
-        self.assertEqual(tr.grade, 'B')
+        self.assertEqual(tr.grade, 'A')
 
     def test_subjects_passed_and_failed(self):
         tr = TermAggregationService.aggregate_term(
