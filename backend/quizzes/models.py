@@ -71,7 +71,7 @@ class Question(models.Model):
     options = models.JSONField(
         default=list, blank=True,
         help_text='MCQ: [{"key":"A","text":"...","text_ar":"..."},...]  T/F: auto-generated')
-    correct_answer = models.CharField(max_length=10, help_text='Option key: A, B, C, D or true/false')
+    correct_answer = models.CharField(max_length=255, help_text='Option key: A, B, C, D or true/false, or the answer text for short answer/essay')
     explanation = models.TextField(blank=True, default='', help_text='Explanation shown after submission')
     explanation_ar = models.TextField(blank=True, default='')
     is_active = models.BooleanField(default=True)
