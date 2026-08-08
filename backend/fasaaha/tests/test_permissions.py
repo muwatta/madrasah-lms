@@ -92,3 +92,79 @@ class TestCanReviewAttempts:
         perm = CanReviewAttempts()
         req = _make_request(_make_user('student'))
         assert perm.has_permission(req, None) is False
+
+
+@pytest.mark.django_db
+class TestAssignmentEndpoints:
+    """Assignments: teachers/admins write, students read only their own."""
+
+    @staticmethod
+    def _student_client(student):
+        from rest_framework.test import APIClient
+        client = APIClient()
+        client.force_authenticate(user=student)
+        return client
+
+    def test_teacher_can_create_and_list(self, teacher_client, fasaaha_mission, student, madrasah):
+        from fasaaha.models import MissionAssignment
+        resp = teacher_client.post('/api/v1/fasaaha/assignments/', {
+            'mission': fasaaha_mission.id,
+            'target_student': student.id,
+            'is_required': True,
+        }, format='json')
+        assert resp.status_code == 201
+        assert MissionAssignment.objects.count() == 1
+
+        resp = teacher_client.get('/api/v1/fasaaha/assignments/')
+        assert resp.status_code == 200
+        assert resp.data['count'] == 1
+        assert resp.data['results'][0]['mission_title'] == fasaaha_mission.title
+        assert resp.data['results'][0]['target_student_name'] == student.get_full_name()
+
+    def test_student_can_view_own_assignments(
+            self, teacher_client, fasaaha_mission, student, madrasah):
+        teacher_client.post('/api/v1/fasaaha/assignments/', {
+            'mission': fasaaha_mission.id,
+            'target_student': student.id,
+        }, format='json')
+
+        resp = self._student_client(student).get('/api/v1/fasaaha/assignments/')
+        assert resp.status_code == 200
+        assert resp.data['count'] == 1
+        assert resp.data['results'][0]['mission'] == fasaaha_mission.id
+
+    def test_student_cannot_see_other_students_assignments(
+            self, teacher_client, fasaaha_mission, student, madrasah):
+        from users.models import User
+        other = User.objects.create_user(
+            email='other@test.com', password='student123',
+            first_name='Other', last_name='Student',
+            role='student', madrasah=madrasah,
+        )
+        teacher_client.post('/api/v1/fasaaha/assignments/', {
+            'mission': fasaaha_mission.id,
+            'target_student': other.id,
+        }, format='json')
+
+        resp = self._student_client(student).get('/api/v1/fasaaha/assignments/')
+        assert resp.status_code == 200
+        assert resp.data['count'] == 0
+
+    def test_student_cannot_create_assignment(self, student_client, fasaaha_mission, student):
+        resp = student_client.post('/api/v1/fasaaha/assignments/', {
+            'mission': fasaaha_mission.id,
+            'target_student': student.id,
+        }, format='json')
+        assert resp.status_code == 403
+
+    def test_student_cannot_delete_assignment(
+            self, teacher_client, fasaaha_mission, student, madrasah):
+        from fasaaha.models import MissionAssignment
+        resp = teacher_client.post('/api/v1/fasaaha/assignments/', {
+            'mission': fasaaha_mission.id,
+            'target_student': student.id,
+        }, format='json')
+        assignment_id = MissionAssignment.objects.get().id
+
+        resp = self._student_client(student).delete(f'/api/v1/fasaaha/assignments/{assignment_id}/')
+        assert resp.status_code == 403

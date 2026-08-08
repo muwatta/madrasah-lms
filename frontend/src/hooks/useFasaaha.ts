@@ -18,6 +18,7 @@ import type {
   DailyGoal,
   LeaderboardEntry,
   ScoreTrend,
+  MissionAssignment,
 } from '../types';
 
 // ── Levels ────────────────────────────────────────────────────────────────
@@ -259,6 +260,45 @@ export function useMyBadges() {
   });
 }
 
+// ── Assignments ────────────────────────────────────────────────────────────
+
+export function useAssignments() {
+  return useQuery<MissionAssignment[]>({
+    queryKey: ['fasaaha', 'assignments'],
+    queryFn: async () => {
+      const res = await fasaahaAPI.assignments.list();
+      return unwrapPaginated<MissionAssignment>(res.data);
+    },
+  });
+}
+
+export function useCreateAssignment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      mission: number;
+      target_student?: number | null;
+      target_class?: number | null;
+      due_date?: string | null;
+      is_required?: boolean;
+      notes?: string;
+    }) => fasaahaAPI.assignments.create(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'assignments'] });
+    },
+  });
+}
+
+export function useDeleteAssignment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => fasaahaAPI.assignments.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['fasaaha', 'assignments'] });
+    },
+  });
+}
+
 // ── Analytics ─────────────────────────────────────────────────────────────
 
 export function useClassAnalytics(schoolClassId: number | null) {
@@ -425,6 +465,9 @@ export { useAllBadges as useFasaahaAllBadges };
 export { useMyBadges as useFasaahaMyBadges };
 export { useClassAnalytics as useFasaahaClassAnalytics };
 export { useStudentAnalytics as useFasaahaStudentAnalytics };
+export { useAssignments as useFasaahaAssignments };
+export { useCreateAssignment as useFasaahaCreateAssignment };
+export { useDeleteAssignment as useFasaahaDeleteAssignment };
 export { useDialogueSessions as useFasaahaDialogueSessions };
 export { useDialogueSession as useFasaahaDialogueSession };
 export { useStartDialogue as useFasaahaStartDialogue };

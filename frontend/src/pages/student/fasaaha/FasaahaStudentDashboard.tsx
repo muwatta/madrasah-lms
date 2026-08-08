@@ -8,6 +8,7 @@ import SpeakingOverview from '../../../components/fasaaha/dashboard/SpeakingOver
 import PrimaryLearningActions from '../../../components/fasaaha/dashboard/PrimaryLearningActions';
 import RecommendedActivity from '../../../components/fasaaha/dashboard/RecommendedActivity';
 import DailyGoalsSection from '../../../components/fasaaha/dashboard/DailyGoalsSection';
+import AssignedMissionsSection from '../../../components/fasaaha/dashboard/AssignedMissionsSection';
 import ProgressInsights from '../../../components/fasaaha/dashboard/ProgressInsights';
 import BadgesSection from '../../../components/fasaaha/dashboard/BadgesSection';
 import LeaderboardSection from '../../../components/fasaaha/dashboard/LeaderboardSection';
@@ -73,6 +74,10 @@ export default function FasaahaStudentDashboard() {
           <DailyGoalsSection />
         </Reveal>
       </div>
+
+      <Reveal>
+        <AssignedMissionsSection />
+      </Reveal>
 
       <Reveal>
         <ProgressInsights progress={progress} />

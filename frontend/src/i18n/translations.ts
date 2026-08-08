@@ -1551,6 +1551,27 @@ export const translations = {
     typeListening: { ar: 'استماع', en: 'Listening' },
     typeAllTypes: { ar: 'جميع الأنواع', en: 'All Types' },
 
+    // Assignments
+    assignments: { ar: 'المهمات المسندة', en: 'Assignments' },
+    createAssignment: { ar: 'إسناد مهمة', en: 'Assign Mission' },
+    assignTo: { ar: 'إسناد إلى', en: 'Assign to' },
+    assignToClass: { ar: 'إسناد إلى فصل', en: 'Assign to class' },
+    assignToStudent: { ar: 'إسناد إلى طالب', en: 'Assign to student' },
+    selectMission: { ar: 'اختر المهمة', en: 'Select mission' },
+    noMissionsAvailable: { ar: 'لا توجد مهمات متاحة', en: 'No missions available' },
+    dueDate: { ar: 'تاريخ الاستحقاق', en: 'Due date' },
+    required: { ar: 'إلزامية', en: 'Required' },
+    optional: { ar: 'اختيارية', en: 'Optional' },
+    assignedClass: { ar: 'الفصل', en: 'Class' },
+    assignedStudent: { ar: 'الطالب', en: 'Student' },
+    assignedBy: { ar: 'أُسندت بواسطة', en: 'Assigned by' },
+    noAssignments: { ar: 'لم تُسند أي مهمات بعد. أسند أول مهمة لطلابك!', en: 'No assignments yet. Assign your first mission!' },
+    unassignMission: { ar: 'إلغاء الإسناد', en: 'Remove assignment' },
+    selectTargetHint: { ar: 'اختر فصلاً أو طالباً واحداً على الأقل', en: 'Choose at least one class or student' },
+    assignmentCreated: { ar: 'تم إسناد المهمة بنجاح', en: 'Mission assigned successfully' },
+    missionAssigned: { ar: 'المهمة المسندة', en: 'Assigned Mission' },
+    assignSuccess: { ar: 'تم إسناد المهمة', en: 'Mission assigned' },
+
     // Phase 3: Dialogue
     conversation: { ar: 'محادثة', en: 'Conversation' },
     conversationDesc: { ar: 'تحدث بالعربية مع مساعد الذكاء الاصطناعي', en: 'Speak Arabic with the AI assistant' },

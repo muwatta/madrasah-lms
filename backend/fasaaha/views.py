@@ -402,6 +402,11 @@ class ReviewDetailView(generics.RetrieveUpdateAPIView):
 class AssignmentListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, CanManageAssignments]
 
+    def get_permissions(self):
+        if self.request.method in ('POST', 'PUT', 'PATCH'):
+            return [permission() for permission in self.permission_classes]
+        return [IsAuthenticated()]
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return MissionAssignmentWriteSerializer
@@ -450,8 +455,16 @@ class AssignmentDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = MissionAssignmentSerializer
     permission_classes = [IsAuthenticated, CanManageAssignments]
 
+    def get_permissions(self):
+        if self.request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
+            return [permission() for permission in self.permission_classes]
+        return [IsAuthenticated()]
+
     def get_queryset(self):
-        return get_assignments(madrasah=self.request.user.madrasah)  
+        user = self.request.user
+        if user.role == 'student':
+            return get_assignments(madrasah=user.madrasah, student=user)
+        return get_assignments(madrasah=user.madrasah)
 
     def perform_destroy(self, instance):
         AssignmentService.remove_assignment(assignment=instance)

@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:15
     container_name: madrasah_lms_db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: madrasah_lms
       POSTGRES_USER: postgres
@@ -19,6 +20,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: madrasah_lms_redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     healthcheck:
@@ -30,6 +32,7 @@ services:
   backend:
     build: ./backend
     container_name: madrasah_lms_backend
+    restart: unless-stopped
     env_file:
       - ./backend/.env
     environment:
@@ -54,6 +57,7 @@ services:
   worker:
     build: ./backend
     container_name: madrasah_lms_worker
+    restart: unless-stopped
     command: ["celery", "-A", "config", "worker", "--loglevel=info"]
     env_file:
       - ./backend/.env
@@ -77,6 +81,7 @@ services:
   beat:
     build: ./backend
     container_name: madrasah_lms_beat
+    restart: unless-stopped
     command: ["celery", "-A", "config", "beat", "--loglevel=info"]
     env_file:
       - ./backend/.env
@@ -100,6 +105,7 @@ services:
       args:
         VITE_API_URL: /api/v1
     container_name: madrasah_lms_frontend
+    restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:

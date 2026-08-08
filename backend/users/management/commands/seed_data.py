@@ -462,6 +462,160 @@ class Command(BaseCommand):
             }
         )
 
+        # --- Fasaaha (Arabic speaking practice) seed data ---
+        from fasaaha.models import SpeakingLevel, MissionCategory, Mission as FasaahaMission
+
+        levels = {}
+        for number, name, name_ar, desc, vocab, diff in [
+            (1, 'Greetings & Basics', 'التحيات والأساسيات', 'Introduce yourself, greet others, and use everyday basics.', 50, 1),
+            (2, 'Everyday Conversations', 'المحادثات اليومية', 'Handle daily situations: school, food, shopping, routines.', 100, 2),
+            (3, 'Confident Speaking', 'التحدث بثقة', 'Speak at length about topics, tell stories, and role-play.', 150, 3),
+        ]:
+            level, _ = SpeakingLevel.objects.get_or_create(
+                madrasah=madrasah,
+                number=number,
+                defaults={
+                    'name': name,
+                    'name_ar': name_ar,
+                    'description': desc,
+                    'target_vocabulary_count': vocab,
+                    'difficulty': diff,
+                    'sort_order': number,
+                },
+            )
+            levels[number] = level
+
+        categories = {}
+        for name, name_ar, icon in [
+            ('Greetings', 'التحيات', '👋'),
+            ('Self-Introduction', 'التعريف بالنفس', '🙋'),
+            ('Family', 'العائلة', '👨‍👩‍👧‍👦'),
+            ('School', 'المدرسة', '🏫'),
+            ('Food & Dining', 'الطعام', '🍽️'),
+            ('Daily Life', 'الحياة اليومية', '☀️'),
+        ]:
+            cat, _ = MissionCategory.objects.get_or_create(
+                madrasah=madrasah,
+                name=name,
+                defaults={'name_ar': name_ar, 'icon': icon},
+            )
+            categories[name] = cat
+
+        # (level_number, category, title, title_ar, prompt_ar, transliteration, translation,
+        #  expected_phrases, hints, difficulty, mission_type, max_time_seconds)
+        mission_data = [
+            (1, 'Greetings', 'Morning Greetings', 'تحيات الصباح',
+             'صباح الخير! كيف حالك اليوم؟',
+             'Sabah al-khair! Kayfa haluka al-yawm?',
+             'Good morning! How are you today?',
+             ['صباح الخير', 'كيف حالك', 'أنا بخير', 'الحمد لله', 'شكراً'],
+             ['Start with صباح الخير', 'Answer with أنا بخير', 'Add الحمد لله'], 1, 'repeat_after_me', 45),
+            (1, 'Greetings', 'Saying Goodbye', 'الوداع',
+             'مع السلامة، أراك غداً إن شاء الله!',
+             'Ma\'a as-salamah, araka ghadan in sha Allah!',
+             'Goodbye, see you tomorrow God willing!',
+             ['مع السلامة', 'إلى اللقاء', 'أراك غداً', 'تصبح على خير'],
+             ['Say مع السلامة when leaving', 'Add أراك غداً for tomorrow'], 1, 'pronunciation', 45),
+            (1, 'Self-Introduction', 'Introduce Yourself', 'التعريف بالنفس',
+             'اسمي عبد الله، وأنا طالب في الصف الأول. أنا من نيجيريا.',
+             'Ismi Abdullah, wa ana talib fi as-saff al-awwal. Ana min Nijiria.',
+             'My name is Abdullah, and I am a student in primary one. I am from Nigeria.',
+             ['اسمي', 'أنا طالب', 'أنا من', 'عمري', 'أنا سعيد'],
+             ['Say your name with اسمي', 'Add your role أنا طالب', 'Mention your country أنا من'], 1, 'pronunciation', 60),
+            (1, 'Family', 'My Family', 'عائلتي',
+             'عندي أب وأم وأخ. أخي اسمه عمر.',
+             '\'Indi ab wa umm wa akh. Akhi ismuhu Umar.',
+             'I have a father, a mother, and a brother. My brother\'s name is Umar.',
+             ['عندي أب', 'عندي أم', 'عندي أخ', 'اسمه', 'هي أمي'],
+             ['Start with عندي', 'Introduce each member', 'Use اسمه for names'], 1, 'pronunciation', 60),
+            (1, 'School', 'My School', 'مدرستي',
+             'أدرس في المدرسة. المعلم لطيف. أحب القراءة.',
+             'Adrusu fi al-madrasah. Al-mu\'allim latif. Uhibbu al-qira\'ah.',
+             'I study at school. The teacher is kind. I love reading.',
+             ['أدرس في', 'المدرسة', 'المعلم', 'أحب', 'القراءة'],
+             ['Say أدرس في المدرسة', 'Describe the teacher', 'Say what you love with أحب'], 1, 'pronunciation', 60),
+
+            (2, 'School', 'A Day at School', 'يوم في المدرسة',
+             'كل يوم أذهب إلى المدرسة مبكراً. أدرس القرآن واللغة العربية. بعد الدرس ألعب مع أصدقائي.',
+             'Kulla yawm adhhab ila al-madrasah mubakkiran. Adrusu al-Quran wa al-lughah al-\'arabiyyah. Ba\'da ad-dars al\'ab ma\'a asdiqa\'i.',
+             'Every day I go to school early. I study Quran and Arabic. After class I play with my friends.',
+             ['أذهب إلى المدرسة', 'مبكراً', 'أدرس', 'بعد الدرس', 'ألعب مع أصدقائي'],
+             ['Start with كُل يوم أذهب', 'Mention what you study', 'End with what you do after class'], 2, 'free_speaking', 90),
+            (2, 'Food & Dining', 'Ordering Food', 'طلب الطعام',
+             'أريد أن أطلب الطعام. عندكم حساء العدس؟ أريد خبزاً وماء من فضلك.',
+             'Uridu an atluba at-ta\'am. \'Indakum hasa\' al-\'adas? Uridu khubzan wa ma\'an min fadlik.',
+             'I want to order food. Do you have lentil soup? I would like bread and water please.',
+             ['أريد أن أطلب', 'عندكم', 'من فضلك', 'خبز', 'ماء'],
+             ['Ask politely with من فضلك', 'Use عندكم to ask if available', 'Request items with أريد'], 2, 'role_play', 90),
+            (2, 'Daily Life', 'My Daily Routine', 'روتيني اليومي',
+             'أستيقظ في الساعة السادسة صباحاً. أصلي الفجر ثم أتناول الفطور. بعدها أذهب إلى المدرسة.',
+             'Astayqiz fi as-sa\'ah as-sadisah sabahan. Usalli al-fajr thumma atanawal al-futur. Ba\'daha adhhab ila al-madrasah.',
+             'I wake up at six in the morning. I pray Fajr, then eat breakfast. After that I go to school.',
+             ['أستيقظ في الساعة', 'صباحاً', 'أصلي الفجر', 'أتناول الفطور', 'أذهب إلى المدرسة'],
+             ['Give the time you wake up', 'Mention prayer أولاً', 'Use بعدها to sequence'], 2, 'storytelling', 90),
+            (2, 'Daily Life', 'Shopping Trip', 'رحلة التسوق',
+             'أذهب إلى السوق مع أمي. نشتري التفاح واللبن. السوق مزدحم اليوم.',
+             'Adhhab ila as-suq ma\'a ummi. Nashtari at-tuffah wa al-laban. As-suq muzdahim al-yawm.',
+             'I go to the market with my mother. We buy apples and milk. The market is crowded today.',
+             ['أذهب إلى السوق', 'نشتري', 'التفاح', 'اللبن', 'مزدحم'],
+             ['Start with أذهب إلى السوق', 'Use نشتري for what you buy', 'Describe the market'], 2, 'conversation', 90),
+            (2, 'Family', 'Talking About My Family', 'الحديث عن عائلتي',
+             'عندي عائلة كبيرة. أبي طبيب وأمي معلمة. أختي الكبرى تدرس في الجامعة.',
+             '\'Indi \'a\'ilah kabirah. Abi tabib wa ummi mu\'allimah. Ukhti al-kubra tadrusu fi al-jami\'ah.',
+             'I have a big family. My father is a doctor and my mother is a teacher. My older sister studies at university.',
+             ['عائلة كبيرة', 'أبي طبيب', 'أمي معلمة', 'أختي', 'الجامعة'],
+             ['Say عندي عائلة كبيرة', 'Give each member\'s job', 'Add a detail about one member'], 2, 'free_speaking', 90),
+
+            (3, 'Daily Life', 'Describe Your Day', 'صف يومك',
+             'صف يومك كاملاً من الاستيقاظ حتى النوم. تكلّم عن دروسك وطعامك وأصدقائك.',
+             'Sif yawmaka kamilan min al-istiqadh hatta an-nawm. Takallam \'an durusika wa ta\'amika wa asdiqa\'ika.',
+             'Describe your full day from waking until sleep. Talk about your lessons, food, and friends.',
+             ['من الاستيقاظ حتى النوم', 'درسي المفضل', 'مع أصدقائي', 'بعد المدرسة', 'قبل النوم'],
+             ['Tell the time order', 'Include one lesson detail', 'Mention food and friends'], 3, 'storytelling', 120),
+            (3, 'Food & Dining', 'Restaurant Conversation', 'محادثة في المطعم',
+             'أهلاً، أريد طاولة لشخصين. ماذا تنصحون من أكلات اليوم؟ أريد طبق السمك بالخضار.',
+             'Ahlan, uridu tawilatan lishakhsayn. Matha tansuhun min akalat al-yawm? Uridu tabaq as-samak bil-khudar.',
+             'Hello, I want a table for two. What do you recommend from today\'s dishes? I would like the fish and vegetables plate.',
+             ['طاولة لشخصين', 'ماذا تنصحون', 'طبق', 'السمك', 'الحساب من فضلك'],
+             ['Greet and ask for a table', 'Ask for a recommendation', 'Order a dish and ask for the bill'], 3, 'conversation', 120),
+            (3, 'School', 'My Favorite Subject', 'مادتي المفضلة',
+             'مادتي المفضلة هي اللغة العربية لأنها لغة القرآن. أتعلم فيها النحو والقراءة. أريد أن أصبح معلماً للغة العربية.',
+             'Maddati al-mufaddalah hiya al-lughah al-\'arabiyyah li\'annaha lughat al-Quran. Ata\'allamu fiha an-nahw wa al-qira\'ah. Uridu an usbiha mu\'alliman lil-lughah al-\'arabiyyah.',
+             'My favorite subject is Arabic because it is the language of the Quran. In it I learn grammar and reading. I want to become an Arabic teacher.',
+             ['مادتي المفضلة', 'لغة القرآن', 'النحو', 'أريد أن أصبح', 'لأنها'],
+             ['Say the subject first', 'Give a reason with لأنها', 'State your future goal'], 3, 'free_speaking', 120),
+            (3, 'Daily Life', 'Role Play: Visiting a Friend', 'زيارة صديق',
+             'أنت تزور صديقك في بيته. سلّم عليه واسأله عن أسرته وأخبره عن مدرستك. اشكره قبل أن تغادر.',
+             'Anta tazuru sadiqaka fi baytihi. Sallim \'alayhi wa as\'alhu \'an usratihi wa akhbirhu \'an madrasatika. Ushkurhu qabla an tughadir.',
+             'You are visiting your friend at his home. Greet him, ask about his family, tell him about your school, and thank him before leaving.',
+             ['السلام عليكم', 'كيف أسرتك', 'مدرستي جميلة', 'أهلاً بك', 'شكراً لك'],
+             ['Open with السلام عليكم', 'Ask كيف أسرتك', 'Describe your school', 'Close with شكراً لك'], 3, 'role_play', 120),
+        ]
+
+        fasaaha_count = 0
+        for number, cat_name, title, title_ar, prompt_ar, translit, translation, phrases, hints, diff, mtype, max_time in mission_data:
+            mission, created = FasaahaMission.objects.get_or_create(
+                madrasah=madrasah,
+                title=title,
+                defaults={
+                    'level': levels[number],
+                    'category': categories.get(cat_name),
+                    'title_ar': title_ar,
+                    'prompt_ar': prompt_ar,
+                    'prompt_transliteration': translit,
+                    'prompt_translation': translation,
+                    'expected_phrases': phrases,
+                    'hints': hints,
+                    'difficulty': diff,
+                    'mission_type': mtype,
+                    'max_time_seconds': max_time,
+                    'is_active': True,
+                    'created_by': admin,
+                },
+            )
+            if created:
+                fasaaha_count += 1
+
         self.stdout.write(self.style.SUCCESS('Database seeded successfully!'))
         self.stdout.write(f'  Madrasah: {madrasah.name}')
         self.stdout.write(f'  Admin: admin@madrasah.com / admin123')

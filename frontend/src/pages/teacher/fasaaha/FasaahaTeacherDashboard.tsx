@@ -36,6 +36,7 @@ export default function FasaahaTeacherDashboard() {
         <Link to="/teacher/fasaaha/missions" className="btn-press px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium">{t('fasaaha.manageMissions')}</Link>
         <Link to="/teacher/fasaaha/review" className="btn-press px-4 py-2 rounded-lg border text-sm font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{t('fasaaha.reviews')} ({data.pending_reviews_count})</Link>
         <Link to="/teacher/fasaaha/analytics" className="btn-press px-4 py-2 rounded-lg border text-sm font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{t('fasaaha.analyticsTitle')}</Link>
+        <Link to="/teacher/fasaaha/assignments" className="btn-press px-4 py-2 rounded-lg border text-sm font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{t('fasaaha.assignments')}</Link>
       </div>
 
       {data.pending_reviews.length > 0 && (

@@ -85,6 +85,7 @@ const FasaahaTeacherDashboard = lazy(() => import('./pages/teacher/fasaaha/Fasaa
 const FasaahaMissionManager = lazy(() => import('./pages/teacher/fasaaha/FasaahaMissionManager'));
 const FasaahaReviewPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaReviewPage'));
 const FasaahaAnalyticsPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaAnalyticsPage'));
+const FasaahaAssignmentsPage = lazy(() => import('./pages/teacher/fasaaha/FasaahaAssignmentsPage'));
 const CertificatesPage = lazy(() => import('./pages/student/CertificatesPage'));
 const CalendarPage = lazy(() => import('./pages/student/CalendarPage'));
 const TeacherTimetablePage = lazy(() => import('./pages/teacher/TimetablePage'));
@@ -208,6 +209,7 @@ function App() {
               <Route path="fasaaha/missions" element={<FasaahaMissionManager />} />
               <Route path="fasaaha/review" element={<FasaahaReviewPage />} />
               <Route path="fasaaha/analytics" element={<FasaahaAnalyticsPage />} />
+              <Route path="fasaaha/assignments" element={<FasaahaAssignmentsPage />} />
               <Route path="qr-scanner" element={<QRScannerPage />} />
               <Route path="class-subjects" element={<TeacherClassSubjectsPage />} />
               <Route path="profile" element={<ProfilePage />} />
