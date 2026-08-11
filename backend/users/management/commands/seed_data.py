@@ -136,7 +136,7 @@ class Command(BaseCommand):
         admin.set_password('admin123')
         admin.save()
 
-        # Create teachers
+        # Create teachers 
         teachers_data = [
             ('teacher@madrasah.com', 'أحمد', 'محمد', 'Quran & Tajweed teacher'),
             ('teacher2@madrasah.com', 'يوسف', 'صالح', 'Tafsir & Hadith teacher'),
