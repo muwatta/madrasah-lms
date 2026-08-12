@@ -3,11 +3,14 @@ from django.http import HttpResponse
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from config.permissions import IsAdminOrTeacher
 
 from .models import Attendance, Fee, FeePayment
 
 
 class ExportAttendanceView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')
         qs = Attendance.objects.filter(
@@ -54,6 +57,8 @@ class ExportAttendanceView(APIView):
 
 
 class ExportFeesView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')
         qs = Fee.objects.filter(
@@ -95,6 +100,8 @@ class ExportFeesView(APIView):
 
 
 class ExportFeePaymentsView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')
         qs = FeePayment.objects.filter(

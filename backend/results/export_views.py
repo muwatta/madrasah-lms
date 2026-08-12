@@ -4,12 +4,15 @@ from django.db.models import Avg
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from config.permissions import IsAdminOrTeacher
 from users.models import User
 from assessments.models import QuizAttempt
 from results.models import ExamResult, SubjectResult, TermResult
 
 
 class ExportStudentPerformanceView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')
         students = User.objects.filter(madrasah=request.user.madrasah, role='student')
@@ -41,6 +44,8 @@ class ExportStudentPerformanceView(APIView):
 
 
 class ExportQuizResultsView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request, quiz_id):
         from assessments.models import Quiz
         try:
@@ -74,6 +79,8 @@ class ExportQuizResultsView(APIView):
 
 
 class ExportExamResultsView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request, exam_id):
         from results.models import Exam
         try:
@@ -107,6 +114,8 @@ class ExportExamResultsView(APIView):
 
 
 class ExportSubjectResultsView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')
         term_id = request.query_params.get('term_id')
@@ -150,6 +159,8 @@ class ExportSubjectResultsView(APIView):
 
 
 class ExportTermResultsView(APIView):
+    permission_classes = [IsAdminOrTeacher]
+
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')
         term_id = request.query_params.get('term_id')

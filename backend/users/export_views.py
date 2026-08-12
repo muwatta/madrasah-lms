@@ -2,13 +2,13 @@ import csv
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from config.permissions import IsMudeer
+from config.permissions import IsAdminOrTeacher
 
 from .models import User
 
 
 class ExportUsersView(APIView):
-    permission_classes = [IsMudeer]
+    permission_classes = [IsAdminOrTeacher]
 
     def get(self, request):
         fmt = request.query_params.get('format', 'csv')

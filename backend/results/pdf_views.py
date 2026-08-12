@@ -15,7 +15,19 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import ReportCard, TermResult, SubjectResult
 from school_ops.models import Attendance
-from users.models import User
+from users.models import User, StudentParent
+
+
+def _can_access_report_card(user, student) -> bool:
+    if user.role in ('mudeer', 'idaarah', 'ustaadh'):
+        return True
+    if user.id == student.id:
+        return True
+    if user.role == 'parent':
+        return StudentParent.objects.filter(
+            parent=user, student=student
+        ).exists()
+    return False
 
 
 def _ordinal(n: int) -> str:
@@ -232,6 +244,9 @@ class GenerateReportCardPDFView(APIView):
         except ReportCard.DoesNotExist:
             return HttpResponse('Report card not found', status=404)
 
+        if not _can_access_report_card(request.user, rc.student):
+            return HttpResponse('Report card not found', status=404)
+
         pdf_bytes = generate_report_card_pdf(rc)
 
         response = HttpResponse(pdf_bytes, content_type='application/pdf')
@@ -252,6 +267,9 @@ class GenerateReportCardByStudentTermView(APIView):
                 student__madrasah=request.user.madrasah,
             )
         except ReportCard.DoesNotExist:
+            return HttpResponse('Report card not found', status=404)
+
+        if not _can_access_report_card(request.user, rc.student):
             return HttpResponse('Report card not found', status=404)
 
         pdf_bytes = generate_report_card_pdf(rc)
