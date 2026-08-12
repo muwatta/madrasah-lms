@@ -195,6 +195,16 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Lagos'
+
+# Cache (Redis) — used by DRF throttling, must be shared so rate limits are
+# enforced consistently across gunicorn workers.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': config('CACHE_URL', default='redis://localhost:6379/1'),
+    },
+}
+
 CELERY_BEAT_SCHEDULE = {
     'send-fee-reminders': {
         'task': 'whatsapp.tasks.send_overdue_fee_reminders',

@@ -6,6 +6,16 @@ from assessments.models import Question, Quiz, QuizAttempt
 from results.models import Exam, ExamResult
 
 
+@pytest.fixture(autouse=True)
+def _isolated_cache(settings):
+    """Keep DRF throttle/cache counters out of the shared Redis in tests."""
+    settings.CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+    }
+
+
 @pytest.fixture
 def madrasah():
     return Madrasah.objects.create(name='Test Madrasah', city='Lagos')

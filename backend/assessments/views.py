@@ -71,7 +71,7 @@ class QuizListView(generics.ListCreateAPIView):
             qs = qs.filter(is_published=True)
         elif user.role == 'ustaadh':
             qs = qs.filter(created_by=user)
-        return qs
+        return qs.order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(madrasah=self.request.user.madrasah, created_by=self.request.user)
