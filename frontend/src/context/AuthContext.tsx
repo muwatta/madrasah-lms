@@ -25,7 +25,7 @@ const ACTIVE_EMAIL_KEY = 'lms_active_email';
 
 function getStoredSessions(): Record<string, StoredSession> {
   try {
-    const raw = localStorage.getItem(SESSIONS_KEY);
+    const raw = sessionStorage.getItem(SESSIONS_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
@@ -33,7 +33,7 @@ function getStoredSessions(): Record<string, StoredSession> {
 }
 
 function saveStoredSessions(sessions: Record<string, StoredSession>) {
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+  sessionStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

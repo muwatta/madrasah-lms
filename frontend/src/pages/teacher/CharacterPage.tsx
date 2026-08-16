@@ -11,12 +11,13 @@ const TAB_KEYS = ['evaluate', 'traits', 'summary'] as const;
 const CATEGORIES = ['moral', 'social', 'spiritual', 'academic', 'personal'];
 
 export default function CharacterPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [tab, setTab] = useState<'evaluate'|'traits'|'summary'>('evaluate');
   const [traits, setTraits] = useState<Trait[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [evaluations, setEvaluations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [studentId, setStudentId] = useState<number | ''>('');
   const [evalDate, setEvalDate] = useState(new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState('');
@@ -37,7 +38,9 @@ export default function CharacterPage() {
   const loadEvaluations = async () => {
     try {
       setEvaluations(await fetchAllPages((p) => characterAPI.evaluations.list(p)));
-    } catch {}
+    } catch {
+      setError(language === 'ar' ? 'تعذر تحميل التقييمات' : 'Failed to load evaluations');
+    }
   };
 
   const handleCreateEvaluation = async () => {
@@ -51,7 +54,9 @@ export default function CharacterPage() {
       });
       setStudentId(''); setNotes(''); setScores({});
       loadEvaluations();
-    } catch {}
+    } catch {
+      setError(language === 'ar' ? 'تعذر حفظ التقييم' : 'Failed to save evaluation');
+    }
   };
 
   const handleCreateTrait = async () => {
@@ -60,7 +65,9 @@ export default function CharacterPage() {
       setShowTraitForm(false);
       setTraitForm({ name: '', name_ar: '', category: 'moral' });
       setTraits(await fetchAllPages((p) => characterAPI.traits.list(p)));
-    } catch {}
+    } catch {
+      setError(language === 'ar' ? 'تعذر إنشاء الصفة' : 'Failed to create trait');
+    }
   };
 
   const handleLoadSummary = async () => {
@@ -68,7 +75,9 @@ export default function CharacterPage() {
     try {
       const r = await characterAPI.evaluations.summary({ student: selectedStudent });
       setSummary(r.data);
-    } catch {}
+    } catch {
+      setError(language === 'ar' ? 'تعذر تحميل الملخص' : 'Failed to load summary');
+    }
   };
 
   const getScoreLabel = (score: number) => {
@@ -116,6 +125,12 @@ export default function CharacterPage() {
             }`}>{tabLabels[tabKey]}</button>
         ))}
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-sm text-red-700 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
       {tab === 'evaluate' && (
         <div className="grid gap-6 lg:grid-cols-2">

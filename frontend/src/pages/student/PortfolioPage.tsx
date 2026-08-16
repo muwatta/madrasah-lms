@@ -3,6 +3,7 @@ import { analyticsAPI } from '../../api';
 import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonCard } from '../../components/Skeleton';
+import { safeUrl } from '../../utils/sanitize';
 
 interface PortfolioItem {
   id: number;
@@ -59,6 +60,10 @@ export default function PortfolioPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return;
+    if (form.url.trim() && !safeUrl(form.url)) {
+      setError(language === 'ar' ? 'رابط غير صالح' : 'Invalid URL');
+      return;
+    }
     setSubmitting(true);
     try {
       await analyticsAPI.portfolio.create(form);
@@ -171,7 +176,7 @@ export default function PortfolioPage() {
                     <span className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{item.date ? formatDate(item.date) : formatDate(item.created_at)}</span>
                     {item.url && (
                       <a
-                        href={item.url}
+                        href={safeUrl(item.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"

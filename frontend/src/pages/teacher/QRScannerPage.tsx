@@ -123,7 +123,9 @@ export default function QRScannerPage() {
     try {
       const payload = { qr_data: decodedText, scanner_location: manualLocation.trim() || 'camera' };
       const res = await attendanceAPI.scan(payload);
-      setSuccessMsg(`${res.data.student} - ${res.data.attendance_status}`);
+      const name = res.data?.student ?? '';
+      const status = res.data?.attendance_status ?? 'present';
+      setSuccessMsg(`${name} - ${status}`);
       loadScans();
     } catch (err: any) {
       setError(err.response?.data?.error || t('qrScanner.scanFailed'));
@@ -172,7 +174,9 @@ export default function QRScannerPage() {
         qr_data: manualInput.trim(),
         scanner_location: manualLocation.trim() || undefined,
       });
-      setSuccessMsg(`${res.data.student} - ${res.data.attendance_status}`);
+      const name = res.data?.student ?? '';
+      const status = res.data?.attendance_status ?? 'present';
+      setSuccessMsg(`${name} - ${status}`);
       setManualInput('');
       loadScans();
     } catch (err: any) {

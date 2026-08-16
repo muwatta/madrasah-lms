@@ -701,6 +701,10 @@ export const auditAPI = {
     if (params?.url) {
       // When using a next/prev URL, extract the path + query
       const url = new URL(params.url, window.location.origin);
+      const basePath = new URL(api.defaults.baseURL ?? '', window.location.origin).pathname;
+      if (!url.pathname.startsWith(basePath) || url.pathname.includes('..')) {
+        return api.get('/audit/logs/');
+      }
       return api.get(url.pathname + url.search);
     }
     return api.get('/audit/logs/', { params });

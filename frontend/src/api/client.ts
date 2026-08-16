@@ -31,7 +31,10 @@ api.interceptors.response.use(
           const response = await axios.post(`${API_URL}/auth/refresh-token/`, {
             refresh: refreshToken,
           });
-          const { access, refresh } = response.data.tokens;
+          const { access, refresh } = response.data?.tokens ?? {};
+          if (!access) {
+            throw new Error('No access token in refresh response');
+          }
           sessionStorage.setItem('access_token', access);
           if (refresh) {
             sessionStorage.setItem('refresh_token', refresh);
@@ -63,17 +66,21 @@ export async function fetchAllPages<T = any>(
   params?: Record<string, any>,
 ): Promise<T[]> {
   const all: T[] = [];
+  const basePath = new URL(api.defaults.baseURL ?? '', window.location.origin).pathname;
   let res = await fetcher({ ...params, page: 1 });
   while (true) {
     const results = res.data?.results ?? res.data;
     if (Array.isArray(results)) all.push(...results);
     const next = res.data?.next;
     if (!next || !Array.isArray(results) || results.length === 0) break;
-    const nextUrl = new URL(next, window.location.origin);
-    const basePath = new URL(api.defaults.baseURL ?? '', window.location.origin).pathname;
-    const relPath = nextUrl.pathname.startsWith(basePath)
-      ? nextUrl.pathname.slice(basePath.length)
-      : nextUrl.pathname;
+    let nextUrl: URL;
+    try {
+      nextUrl = new URL(next, window.location.origin);
+    } catch {
+      break;
+    }
+    if (!nextUrl.pathname.startsWith(basePath) || nextUrl.pathname.includes('..')) break;
+    const relPath = nextUrl.pathname.slice(basePath.length);
     res = await api.get(relPath + nextUrl.search);
   }
   return all;

@@ -31,6 +31,25 @@ const MODEL_LABELS: Record<string, { ar: string; en: string }> = {
   topic: { ar: 'موضوع', en: 'Topic' },
 };
 
+const ALLOWED_ROUTE_PREFIXES = [
+  '/student/',
+  '/teacher/',
+  '/parent/',
+  '/admin/',
+  '/board/',
+  '/users/',
+  '/curriculum/',
+  '/school/',
+  '/lessons/',
+  '/quizzes/',
+];
+
+function isAllowedRoute(url?: string): boolean {
+  if (!url || !url.startsWith('/')) return false;
+  if (url.includes('//') || url.includes('..')) return false;
+  return ALLOWED_ROUTE_PREFIXES.some((prefix) => url.startsWith(prefix));
+}
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -75,7 +94,9 @@ export default function GlobalSearch({ open, onClose }: Props) {
 
   const handleSelect = useCallback((item: SearchResult) => {
     onClose();
-    navigate(item.url);
+    if (isAllowedRoute(item.url)) {
+      navigate(item.url);
+    }
   }, [navigate, onClose]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

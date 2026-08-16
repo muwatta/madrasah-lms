@@ -14,19 +14,25 @@ function triggerDownload(response: AxiosResponse<Blob>, filename: string) {
 
 export function useExport() {
   const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = useCallback(() => setError(null), []);
 
   const exportData = useCallback(async (
     apiCall: () => Promise<AxiosResponse<Blob>>,
     filename: string,
   ) => {
     setExporting(true);
+    setError(null);
     try {
       const response = await apiCall();
       triggerDownload(response, filename);
+    } catch {
+      setError('Export failed');
     } finally {
       setExporting(false);
     }
   }, []);
 
-  return { exporting, exportData };
+  return { exporting, error, clearError, exportData };
 }

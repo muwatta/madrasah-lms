@@ -82,8 +82,7 @@ export default function AdminCertificatesPage() {
   const handleDelete = async (id: string) => {
     if (!(language === 'ar' ? confirm('هل أنت متأكد من حذف هذه الشهادة؟') : confirm('Delete this certificate?'))) return;
     try {
-      await certificateAPI.get(id);
-      await fetch(`/api/v1/certificates/${id}/`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` } });
+      await certificateAPI.delete(id);
       setCertificates((prev) => prev.filter((c) => c.id !== id));
     } catch {
       setError(language === 'ar' ? 'فشل الحذف' : 'Failed to delete');

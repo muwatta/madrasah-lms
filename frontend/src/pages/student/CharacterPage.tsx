@@ -5,9 +5,13 @@ import { SkeletonCard } from '../../components/Skeleton';
 export default function StudentCharacterPage() {
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    characterAPI.evaluations.summary({}).then(r => setSummary(r.data)).catch(() => {}).finally(() => setLoading(false));
+    characterAPI.evaluations.summary({})
+      .then(r => setSummary(r.data))
+      .catch(() => setError('Failed to load character summary'))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -22,6 +26,12 @@ export default function StudentCharacterPage() {
   return (
     <div>
       <h1 className="mb-4 text-2xl font-bold text-[var(--color-text-primary)] dark:text-gray-100">Character Evaluation</h1>
+
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-sm text-red-700 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
       {summary ? (
         <div className="space-y-6">

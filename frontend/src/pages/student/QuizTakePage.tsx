@@ -5,6 +5,7 @@ import type { Question, Quiz, GradingResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import RichTextEditor from '../../components/RichTextEditor';
+import { sanitizeHtml } from '../../utils/sanitize';
 
 interface Answers {
   [questionId: string]: string;
@@ -109,13 +110,13 @@ export default function QuizTakePage() {
   }
 
   if (result) {
-    const passed = result.percentage >= (quiz?.passing_score || 50);
+    const passed = (result.percentage ?? 0) >= (quiz?.passing_score || 50);
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className={`rounded-2xl p-8 text-center mb-8 ${passed ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
           <h2 className="text-3xl font-bold mb-2 dark:text-gray-100">{passed ? t('quizTake.wellDone') : t('quizTake.tryAgain')}</h2>
-          <p className="text-5xl font-bold my-4 dark:text-gray-100">{result.percentage}%</p>
-          <p className="text-lg dark:text-gray-300">{result.score}/{result.total} {t('quizTake.correct')}</p>
+          <p className="text-5xl font-bold my-4 dark:text-gray-100">{result.percentage ?? 0}%</p>
+          <p className="text-lg dark:text-gray-300">{result.score ?? 0}/{result.total ?? 0} {t('quizTake.correct')}</p>
           <p className={`mt-2 font-medium ${passed ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
             {passed ? t('quizTake.youPassed') : t('quizTake.youDidNotPass')}
           </p>
@@ -132,15 +133,15 @@ export default function QuizTakePage() {
                   {i + 1}
                 </span>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-800 dark:text-gray-200 mb-2 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: q.question_text }} />
+                  <div className="font-medium text-gray-800 dark:text-gray-200 mb-2 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(q.question_text) }} />
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     {t('quizTake.yourAnswer')}
-                    <div className="font-medium prose prose-sm max-w-none dark:prose-invert mt-1" dangerouslySetInnerHTML={{ __html: r.user_answer || t('quizTake.empty') }} />
+                    <div className="font-medium prose prose-sm max-w-none dark:prose-invert mt-1" dangerouslySetInnerHTML={{ __html: sanitizeHtml(r.user_answer) || t('quizTake.empty') }} />
                   </div>
                   {!r.is_correct && r.correct_answer && (
                     <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       {t('quizTake.correctAnswer')}
-                      <div className="font-medium text-green-700 dark:text-green-400 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: r.correct_answer }} />
+                      <div className="font-medium text-green-700 dark:text-green-400 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(r.correct_answer) }} />
                     </div>
                   )}
                   {q.explanation && (
@@ -256,7 +257,7 @@ export default function QuizTakePage() {
           )}
         </div>
 
-        <div className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-6 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: question.question_text }} />
+        <div className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-6 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.question_text) }} />
 
         {question.question_type === 'mcq' && question.options && (
           <div className="space-y-3">

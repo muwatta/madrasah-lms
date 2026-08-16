@@ -6,6 +6,7 @@ import { SkeletonTable } from '../../components/Skeleton';
 import ConfirmModal from '../../components/ConfirmModal';
 import RichTextEditor from '../../components/RichTextEditor';
 import { useLanguage } from '../../context/LanguageContext';
+import { sanitizeHtml } from '../../utils/sanitize';
 import BulkUpload from './BulkUpload';
 
 type QuestionForm = {
@@ -444,7 +445,7 @@ export default function QuestionBankPage() {
             <div key={q.id} className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: q.question_text }} />
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeHtml(q.question_text) }} />
                   <div className="mt-1 flex flex-wrap gap-2">
                     <span className="rounded-full bg-blue-100 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:text-blue-400">
                       {typeLabel(q.question_type)}
@@ -467,7 +468,7 @@ export default function QuestionBankPage() {
                   )}
                   {q.question_type !== 'mcq' && q.correct_answer && (
                     <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700 dark:text-primary-400 prose prose-sm max-w-none dark:prose-invert inline-block" dangerouslySetInnerHTML={{ __html: q.correct_answer }} />
+                      {t('questionBank.answerLabel')} <span className="font-medium text-primary-700 dark:text-primary-400 prose prose-sm max-w-none dark:prose-invert inline-block" dangerouslySetInnerHTML={{ __html: sanitizeHtml(q.correct_answer) }} />
                     </div>
                   )}
                 </div>
