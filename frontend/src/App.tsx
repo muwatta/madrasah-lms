@@ -270,6 +270,7 @@ function App() {
               <Route path="certificates" element={<AdminCertificatesPage />} />
               <Route path="timetable" element={<AdminTimetablePage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
             </Route>
 
             <Route

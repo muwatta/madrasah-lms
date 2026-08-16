@@ -359,7 +359,6 @@ class Command(BaseCommand):
                     defaults={'score': score, 'grade': grade, 'remarks': 'أداء جيد'}
                 )
 
-        # --- School Ops seed data ---
         import random
         from datetime import date, timedelta
 

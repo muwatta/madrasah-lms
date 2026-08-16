@@ -39,7 +39,7 @@ export default function FasaahaTeacherDashboard() {
         <Link to="/teacher/fasaaha/assignments" className="btn-press px-4 py-2 rounded-lg border text-sm font-medium" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}>{t('fasaaha.assignments')}</Link>
       </div>
 
-      {data.pending_reviews.length > 0 && (
+      {(data.pending_reviews ?? []).length > 0 && (
         <div className="rounded-xl border p-5" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
           <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.pendingReviews')}</h2>
           <div className="space-y-2">

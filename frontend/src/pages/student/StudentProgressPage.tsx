@@ -109,21 +109,21 @@ export default function StudentProgressPage() {
         </div>
         <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
           <p className="text-xs font-medium text-gray-400 dark:text-gray-500">{t('studentProgress.overallAverage')}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.stats.overall_average}%</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.stats?.overall_average ?? 0}%</p>
         </div>
         <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
           <p className="text-xs font-medium text-gray-400 dark:text-gray-500">{t('studentProgress.totalAttempts')}</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.stats.total_attempts}</p>
+          <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">{data.stats?.total_attempts ?? 0}</p>
         </div>
         <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
           <p className="text-xs font-medium text-gray-400 dark:text-gray-500">{t('studentProgress.badges')}</p>
-          <p className="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{data.stats.total_badges_earned}/{data.stats.total_badges}</p>
+          <p className="mt-1 text-2xl font-bold text-primary-600 dark:text-primary-400">{data.stats?.total_badges_earned ?? 0}/{data.stats?.total_badges ?? 0}</p>
         </div>
       </div>
 
       <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('studentProgress.subjectMastery')}</h2>
-        {data.subject_mastery.length === 0 ? (
+        {(data.subject_mastery ?? []).length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-gray-500">{language === 'ar' ? 'لم تُسجل في أي مادة بعد' : 'No subjects enrolled yet'}</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -141,9 +141,9 @@ export default function StudentProgressPage() {
       </div>
 
       <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
-        <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('studentProgress.badges')} ({data.stats.total_badges_earned} {t('studentProgress.badgesEarned')})</h2>
+        <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{t('studentProgress.badges')} ({data.stats?.total_badges_earned ?? 0} {t('studentProgress.badgesEarned')})</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {data.badges.map((badge) => (
+          {(data.badges ?? []).map((badge) => (
             <div
               key={badge.id}
               className={`flex flex-col items-center rounded-xl border p-4 text-center transition-all ${

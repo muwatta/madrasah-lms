@@ -67,7 +67,7 @@ export default function AdminEngagementPage() {
   if (error) return <div className="max-w-5xl mx-auto px-4 py-8"><div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-red-700 dark:text-red-400">{error}</div></div>;
   if (!data) return null;
 
-  const maxDaily = Math.max(...data.daily_attempts.map(d => d.count), 1);
+  const maxDaily = Math.max(...(data.daily_attempts ?? []).map(d => d.count), 1);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
@@ -88,7 +88,7 @@ export default function AdminEngagementPage() {
       <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('engagement.dailyAttempts')}</h2>
         <div className="flex items-end gap-2" style={{ height: 120 }}>
-          {data.daily_attempts.map((d) => (
+          {(data.daily_attempts ?? []).map((d) => (
             <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
               <span className="text-[10px] font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{d.count}</span>
               <div className={`w-full rounded-t-md transition-all ${d.count > 0 ? 'bg-primary-400' : 'bg-gray-100'}`}
@@ -101,7 +101,7 @@ export default function AdminEngagementPage() {
 
       <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('engagement.teacherStats')}</h2>
-        {data.teacher_stats.length === 0 ? (
+        {(data.teacher_stats ?? []).length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'لا يوجد معلمون بعد' : 'No teachers yet'}</p>
         ) : (
           <div className="space-y-3">
@@ -128,7 +128,7 @@ export default function AdminEngagementPage() {
 
       <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('engagement.subjectTrends')}</h2>
-        {data.subject_trends.length === 0 ? (
+        {(data.subject_trends ?? []).length === 0 ? (
           <p className="text-sm text-gray-400 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'لا توجد مواد بعد' : 'No subjects yet'}</p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

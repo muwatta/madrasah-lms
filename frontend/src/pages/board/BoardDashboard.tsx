@@ -37,7 +37,7 @@ export default function BoardDashboard() {
   if (error) return <div className="max-w-7xl mx-auto px-4 py-8"><div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-red-700 dark:text-red-400 flex items-center gap-3"><svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>{error}</div></div>;
   if (!data) return null;
 
-  const perfColor = data.average_performance >= 70 ? 'text-green-600 dark:text-green-400' : data.average_performance >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400';
+  const perfColor = (data.average_performance ?? 0) >= 70 ? 'text-green-600 dark:text-green-400' : (data.average_performance ?? 0) >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400';
 
   return (
     <div className="space-y-6">
@@ -57,14 +57,14 @@ export default function BoardDashboard() {
         <StatCard title={t('adminDashboard.totalSubjects')} value={data.total_subjects} color="bg-teal-600" delay={120} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>} />
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '180ms' }}>
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('adminDashboard.avgPerformance')}</p>
-          <p className={`mt-1 text-2xl font-bold ${perfColor}`}>{data.average_performance.toFixed(1)}%</p>
+          <p className={`mt-1 text-2xl font-bold ${perfColor}`}>{(data.average_performance ?? 0).toFixed(1)}%</p>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-            <div className="h-full rounded-full bg-primary-600 transition-all" style={{ width: `${Math.min(data.average_performance, 100)}%` }} />
+            <div className="h-full rounded-full bg-primary-600 transition-all" style={{ width: `${Math.min(data.average_performance ?? 0, 100)}%` }} />
           </div>
         </div>
       </div>
 
-      {data.teacher_effectiveness.length > 0 && (
+      {(data.teacher_effectiveness ?? []).length > 0 && (
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '240ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{t('boardDashboard.effectivenessRanking')}</h2>
           <div className="overflow-x-auto">
@@ -104,7 +104,7 @@ export default function BoardDashboard() {
         </div>
       )}
 
-      {data.top_subjects.length > 0 && (
+      {(data.top_subjects ?? []).length > 0 && (
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{t('boardDashboard.topSubjects')}</h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -119,7 +119,7 @@ export default function BoardDashboard() {
         </div>
       )}
 
-      {data.teacher_effectiveness.length > 0 && (
+      {(data.teacher_effectiveness ?? []).length > 0 && (
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '360ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{t('boardDashboard.performanceByTeacher')}</h2>
           <ResponsiveContainer width="100%" height={300}>

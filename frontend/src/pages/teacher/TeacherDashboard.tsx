@@ -93,7 +93,7 @@ export default function TeacherDashboard() {
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '180ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{t('teacher.subjectPerformance')}</h2>
-          {data.subject_performance.length === 0 ? (
+          {(data.subject_performance ?? []).length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('teacher.noSubjectData')}</p>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
@@ -110,7 +110,7 @@ export default function TeacherDashboard() {
 
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '240ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{t('teacher.recentActivity')}</h2>
-          {data.recent_activity.length === 0 ? (
+          {(data.recent_activity ?? []).length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">{t('teacher.noRecentActivity')}</p>
           ) : (
             <ul className="divide-y divide-gray-100 dark:divide-gray-700">

@@ -44,7 +44,7 @@ export default function AdminDashboard() {
   if (error) return <div className="max-w-5xl mx-auto px-4 py-8"><div className="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 text-red-700 dark:text-red-400 flex items-center gap-3"><svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>{error}</div></div>;
   if (!data) return null;
 
-  const perfColor = data.average_performance >= 70 ? 'text-green-600 dark:text-green-400' : data.average_performance >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400';
+  const perfColor = (data.average_performance ?? 0) >= 70 ? 'text-green-600 dark:text-green-400' : (data.average_performance ?? 0) >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400';
 
   return (
     <div className="space-y-6">
@@ -80,14 +80,14 @@ export default function AdminDashboard() {
         <StatCard title={t('adminDashboard.totalExams')} value={data.total_exams} color="bg-rose-600" delay={300} icon={<svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>} />
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '350ms' }}>
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('adminDashboard.avgPerformance')}</p>
-          <p className={`mt-1 text-2xl font-bold ${perfColor}`}>{data.average_performance.toFixed(1)}%</p>
+          <p className={`mt-1 text-2xl font-bold ${perfColor}`}>{(data.average_performance ?? 0).toFixed(1)}%</p>
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-            <div className="h-full rounded-full bg-primary-600 transition-all" style={{ width: `${Math.min(data.average_performance, 100)}%` }} />
+            <div className="h-full rounded-full bg-primary-600 transition-all" style={{ width: `${Math.min(data.average_performance ?? 0, 100)}%` }} />
           </div>
         </div>
       </div>
 
-      {data.subject_stats.length > 0 && (
+      {(data.subject_stats ?? []).length > 0 && (
         <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '400ms' }}>
           <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">{t('adminDashboard.subjectStats')}</h2>
           <div className="overflow-x-auto">

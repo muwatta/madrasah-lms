@@ -24,6 +24,42 @@ Object.defineProperty(window, 'IntersectionObserver', {
   value: MockIntersectionObserver,
 })
 
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  value: MockResizeObserver,
+})
+
+Object.defineProperty(window, 'scrollTo', {
+  writable: true,
+  value: () => {},
+})
+
+Object.defineProperty(Element.prototype, 'scrollIntoView', {
+  writable: true,
+  value: () => {},
+})
+
+if (!window.matchMedia) {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  })
+}
+
 beforeEach(() => {
   localStorage.setItem('language', 'en')
 })

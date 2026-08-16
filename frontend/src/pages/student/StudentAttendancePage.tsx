@@ -101,7 +101,7 @@ export default function StudentAttendancePage() {
         <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
           <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('attendance.recentRecords')}</h2>
         </div>
-        {analytics.recent_records.length === 0 ? (
+        {(analytics.recent_records ?? []).length === 0 ? (
           <p className="p-6 text-sm text-gray-500 dark:text-gray-400 text-center">{t('attendance.noRecords')}</p>
         ) : (
           <div className="overflow-x-auto">
@@ -109,7 +109,7 @@ export default function StudentAttendancePage() {
               <thead>
                 <tr>
                   <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('attendance.date')}</th>
-                  {analytics.recent_records[0]?.subject_name !== undefined && (
+                  {(analytics.recent_records ?? [])[0]?.subject_name !== undefined && (
                     <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('fields.subject')}</th>
                   )}
                   <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{t('fields.status')}</th>
