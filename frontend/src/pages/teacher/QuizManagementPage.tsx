@@ -72,7 +72,7 @@ export default function QuizManagementPage() {
     if (questionFilter.type) params.type = questionFilter.type;
     if (questionFilter.difficulty) params.difficulty = questionFilter.difficulty;
     if (questionFilter.search) params.search = questionFilter.search;
-    fetchAllPages((p) => questionAPI.list({ ...params, ...p }))
+    fetchAllPages((p) => questionAPI.list({ ...params, ...p }).then((res) => ({ data: res.data.results ?? [] })))
       .then(setQuestions)
       .catch(() => {});
   }, [questionFilter]);

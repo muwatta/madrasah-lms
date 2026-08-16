@@ -52,7 +52,7 @@ export default function QuestionBankPage() {
     if (filters.type) params.type = filters.type;
     if (filters.difficulty) params.difficulty = filters.difficulty;
     if (filters.search) params.search = filters.search;
-    fetchAllPages((p) => questionAPI.list({ ...params, ...p }))
+    fetchAllPages((p) => questionAPI.list({ ...params, ...p }).then((res) => ({ data: res.data.results ?? [] })))
       .then(setQuestions)
       .catch(() => setError(t('questionBank.loadFailed')))
       .finally(() => setLoading(false));

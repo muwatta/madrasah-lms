@@ -30,7 +30,8 @@ export default function CharacterPage() {
   useEffect(() => {
     Promise.all([
       fetchAllPages((p) => characterAPI.traits.list(p)).then(setTraits),
-      fetchAllPages((p) => enrollmentAPI.teacherStudents(p)).then(setStudents),
+      fetchAllPages((p) => enrollmentAPI.teacherStudents(p)).then((list) =>
+        setStudents(list.map((s) => ({ id: s.student, full_name: s.student_name })))),
       loadEvaluations(),
     ]).finally(() => setLoading(false));
   }, []);

@@ -5,7 +5,7 @@ import { SkeletonCard } from '../../../components/Skeleton';
 import type { QuizQuestion } from '../../../types';
 
 interface QForm {
-  question_text: string; question_type: 'mcq' | 'true_false' | 'short_answer';
+  question_text: string; question_type: 'mcq' | 'true_false' | 'short_answer' | 'essay';
   options: string[]; correct_answer: string; explanation: string;
   subject: number | ''; difficulty: number; marks: number;
 }

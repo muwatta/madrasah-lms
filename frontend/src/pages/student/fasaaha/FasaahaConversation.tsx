@@ -12,8 +12,8 @@ interface Message {
   role: 'student' | 'ai';
   text: string;
   translation?: string;
-  score?: number;
-  feedback?: string;
+  score?: number | null;
+  feedback?: string | null;
 }
 
 export default function FasaahaConversation() {

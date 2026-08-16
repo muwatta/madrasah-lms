@@ -55,24 +55,33 @@ api.interceptors.response.use(
 
 export default api;
 
-export function unwrapPaginated<T>(data: any): T[] {
-  if (Array.isArray(data)) return data;
-  if (data && Array.isArray(data.results)) return data.results;
+export interface PaginatedData<T> {
+  count?: number;
+  next?: string | null;
+  previous?: string | null;
+  results?: T[];
+}
+
+export function unwrapPaginated<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === 'object' && Array.isArray((data as { results?: unknown }).results)) {
+    return (data as { results: T[] }).results;
+  }
   return [];
 }
 
-export async function fetchAllPages<T = any>(
-  fetcher: (params?: Record<string, any>) => Promise<{ data: any }>,
-  params?: Record<string, any>,
+export async function fetchAllPages<T = unknown>(
+  fetcher: (params?: Record<string, unknown>) => Promise<{ data: T[] }>,
+  params?: Record<string, unknown>,
 ): Promise<T[]> {
   const all: T[] = [];
   const basePath = new URL(api.defaults.baseURL ?? '', window.location.origin).pathname;
-  let res = await fetcher({ ...params, page: 1 });
+  let body = (await fetcher({ ...params, page: 1 })).data as PaginatedData<T> | T[];
   while (true) {
-    const results = res.data?.results ?? res.data;
-    if (Array.isArray(results)) all.push(...results);
-    const next = res.data?.next;
-    if (!next || !Array.isArray(results) || results.length === 0) break;
+    const results = Array.isArray(body) ? body : body.results ?? [];
+    all.push(...results);
+    const next = Array.isArray(body) ? null : body.next;
+    if (!next || results.length === 0) break;
     let nextUrl: URL;
     try {
       nextUrl = new URL(next, window.location.origin);
@@ -81,7 +90,8 @@ export async function fetchAllPages<T = any>(
     }
     if (!nextUrl.pathname.startsWith(basePath) || nextUrl.pathname.includes('..')) break;
     const relPath = nextUrl.pathname.slice(basePath.length);
-    res = await api.get(relPath + nextUrl.search);
+    const res = await api.get(relPath + nextUrl.search);
+    body = res.data as PaginatedData<T> | T[];
   }
   return all;
 }

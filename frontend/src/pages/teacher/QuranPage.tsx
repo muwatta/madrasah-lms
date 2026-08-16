@@ -91,7 +91,7 @@ export default function QuranPage() {
 
   useEffect(() => {
     fetchAllPages((p) => userAPI.list({ role: 'talib', ...p }))
-      .then(setStudents)
+      .then((list) => setStudents(list.map((u) => ({ id: u.id, name: `${u.first_name} ${u.last_name}`, email: u.email }))))
       .catch(() => setError(t('common.loadFailed')))
       .finally(() => setLoading(false));
   }, [t]);

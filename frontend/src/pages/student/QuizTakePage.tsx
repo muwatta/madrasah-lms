@@ -61,11 +61,11 @@ export default function QuizTakePage() {
         setQuiz(q);
 
         const qRes = await questionAPI.list({ ids: q.question_ids?.join(',') });
-        const fetchedQuestions = qRes.data.results || qRes.data || [];
+        const fetchedQuestions = qRes.data.results ?? [];
         setQuestions(fetchedQuestions);
 
         const attemptRes = await quizAPI.attempts.start(Number(quizId));
-        setAttemptId(attemptRes.data.uuid || attemptRes.data.id);
+        setAttemptId(attemptRes.data.uuid || String(attemptRes.data.id));
 
         if (q.time_limit_minutes) {
           setTimeLeft(q.time_limit_minutes * 60);

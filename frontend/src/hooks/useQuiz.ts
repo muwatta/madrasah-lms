@@ -201,7 +201,8 @@ export { useQuizAnalysis as useQuestionAnalysis };
 export function useQuizResults() {
   return useQuery<QuizAttempt[]>({
     queryKey: ['quiz', 'my-results'],
-    queryFn: () => fetchAllPages(() => quizAPI.quizzes.myResults()),
+    queryFn: () => fetchAllPages<QuizAttempt>(() =>
+      quizAPI.quizzes.myResults().then((res) => ({ data: res.data.results ?? [] }))),
   });
 }
 

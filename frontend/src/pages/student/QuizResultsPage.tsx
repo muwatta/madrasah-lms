@@ -15,7 +15,8 @@ export default function QuizResultsPage() {
   useEffect(() => {
     const fetchAttempts = async () => {
       try {
-        setAttempts(await fetchAllPages(() => quizAPI.quizzes.myResults()));
+        setAttempts(await fetchAllPages<QuizAttempt>(() =>
+          quizAPI.quizzes.myResults().then((res) => ({ data: res.data.results ?? [] }))));
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadAttemptsFailed'));
       } finally {
