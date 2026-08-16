@@ -13,7 +13,7 @@ class WhatsAppRecipientSerializer(serializers.ModelSerializer):
             'phone_number', 'is_opted_in', 'opted_in_at', 'opted_out_at',
             'language', 'created_at', 'updated_at',
         ]
-        read_only_fields = ['madrasah', 'opted_in_at', 'opted_out_at']
+        read_only_fields = ['madrasah', 'is_opted_in', 'opted_in_at', 'opted_out_at']
 
 
 class WhatsAppTemplateSerializer(serializers.ModelSerializer):

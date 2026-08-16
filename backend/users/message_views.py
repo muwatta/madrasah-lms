@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db.models import Q
 from .models import Message, StudentParent, User
 from .message_serializers import MessageSerializer
 
@@ -24,7 +25,9 @@ class MessageDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Message.objects.filter(madrasah=user.madrasah)
+        return Message.objects.filter(madrasah=user.madrasah).filter(
+            Q(sender=user) | Q(recipient=user)
+        )
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()

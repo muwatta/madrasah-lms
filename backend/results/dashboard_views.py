@@ -4,6 +4,8 @@ from django.db.models import Avg, Count, Q, Sum
 from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from config.permissions import IsMudeer, IsParent, IsStudent, IsStaff
 from users.models import User, StudentParent
 from assessments.models import Quiz, QuizAttempt
 from results.models import Exam, ExamResult
@@ -12,6 +14,8 @@ from school_ops.models import Attendance, Fee
 
 
 class TeacherDashboardView(APIView):
+    permission_classes = [IsStaff]
+
     def get(self, request):
         user = request.user
         madrasah = user.madrasah
@@ -71,6 +75,8 @@ class TeacherDashboardView(APIView):
 
 
 class TeacherStudentPerformanceView(APIView):
+    permission_classes = [IsStaff]
+
     def get(self, request, student_id):
         if request.user.role != 'ustaadh':
             return Response({'error': 'Access denied'}, status=403)
@@ -125,6 +131,8 @@ class TeacherStudentPerformanceView(APIView):
 
 
 class ParentDashboardView(APIView):
+    permission_classes = [IsParent]
+
     def get(self, request):
         user = request.user
         children_links = StudentParent.objects.filter(parent=user).select_related('student')
@@ -213,6 +221,8 @@ class ParentDashboardView(APIView):
 
 
 class AdminDashboardView(APIView):
+    permission_classes = [IsMudeer]
+
     def get(self, request):
         user = request.user
         madrasah = user.madrasah
@@ -252,6 +262,8 @@ class AdminDashboardView(APIView):
 
 
 class StudentDashboardView(APIView):
+    permission_classes = [IsStudent]
+
     def get(self, request):
         user = request.user
         madrasah = user.madrasah
@@ -274,6 +286,8 @@ class StudentDashboardView(APIView):
 
 
 class BoardDashboardView(APIView):
+    permission_classes = [IsMudeer]
+
     def get(self, request):
         user = request.user
         madrasah = user.madrasah

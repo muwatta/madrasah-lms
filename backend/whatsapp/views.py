@@ -35,7 +35,31 @@ class WhatsAppRecipientViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(madrasah=self.request.user.madrasah)
+        user = self.request.user
+        if user.role == 'parent':
+            if serializer.validated_data.get('parent') and serializer.validated_data['parent'].id != user.id:
+                raise PermissionDenied('Parents can only create their own recipient')
+            serializer.save(madrasah=user.madrasah, parent=user)
+            return
+        if user.role not in ('mudeer', 'idaarah'):
+            raise PermissionDenied()
+        serializer.save(madrasah=user.madrasah)
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        if user.role == 'parent':
+            if serializer.instance.parent_id != user.id:
+                raise PermissionDenied()
+            serializer.save(parent=user)
+            return
+        if user.role not in ('mudeer', 'idaarah'):
+            raise PermissionDenied()
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if self.request.user.role not in ('mudeer', 'idaarah'):
+            raise PermissionDenied()
+        instance.delete()
 
     @action(detail=False, methods=['post'])
     def opt_in(self, request):

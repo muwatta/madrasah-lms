@@ -27,15 +27,24 @@ class CertificateListCreateView(generics.ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        student_id = self.request.data.get('student') or self.request.user.id
-        if not User.objects.filter(id=student_id, madrasah=self.request.user.madrasah, role='student').exists():
+        from users.models import StudentParent
+        user = self.request.user
+        student_id = self.request.data.get('student') or user.id
+        if user.role == 'student':
+            student_id = user.id
+        elif user.role == 'parent' and not StudentParent.objects.filter(
+            parent=user, student_id=student_id
+        ).exists():
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({'error': 'Student not linked to this parent'})
+        if not User.objects.filter(id=student_id, madrasah=user.madrasah, role='student').exists():
             from rest_framework.exceptions import ValidationError
             raise ValidationError({'error': 'Student not found in this madrasah'})
         serializer.save(
-            madrasah=self.request.user.madrasah,
+            madrasah=user.madrasah,
             student_id=student_id,
         )
-        logger.info("Certificate created for student %s by user %s", student_id, self.request.user.id)
+        logger.info("Certificate created for student %s by user %s", student_id, user.id)
 
 
 class CertificateDetailView(generics.RetrieveDestroyAPIView):
@@ -48,19 +57,33 @@ class CertificateDetailView(generics.RetrieveDestroyAPIView):
             qs = qs.filter(student=user)
         return qs
 
+    def perform_destroy(self, instance):
+        if self.request.user.role not in ('mudeer', 'idaarah', 'ustaadh'):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied()
+        instance.delete()
+
 
 class CertificateGenerateView(generics.CreateAPIView):
     serializer_class = CertificateGenerateSerializer
 
     def create(self, request, *args, **kwargs):
+        from users.models import StudentParent
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        student_id = request.data.get('student') or request.user.id
-        if not User.objects.filter(id=student_id, madrasah=request.user.madrasah, role='student').exists():
+        user = request.user
+        student_id = request.data.get('student') or user.id
+        if user.role == 'student':
+            student_id = user.id
+        elif user.role == 'parent' and not StudentParent.objects.filter(
+            parent=user, student_id=student_id
+        ).exists():
+            return Response({'error': 'Student not linked to this parent'}, status=status.HTTP_403_FORBIDDEN)
+        if not User.objects.filter(id=student_id, madrasah=user.madrasah, role='student').exists():
             return Response({'error': 'Student not found in this madrasah'}, status=status.HTTP_400_BAD_REQUEST)
         cert = Certificate.objects.create(
-            madrasah=request.user.madrasah,
+            madrasah=user.madrasah,
             student_id=student_id,
             certificate_type=serializer.validated_data['certificate_type'],
             title=serializer.validated_data['title'],

@@ -842,3 +842,53 @@ class ExamTests(BaseResultsTestCase):
             format='json',
         )
         self.assertEqual(response.status_code, 400)
+
+
+class DashboardPermissionTests(BaseResultsTestCase):
+    """Dashboards must reject users who are not in the required role."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = APIClient()
+
+    def test_student_dashboard_role_gated(self):
+        self.client.force_authenticate(user=self.student1)
+        self.assertEqual(self.client.get('/api/v1/dashboard/student/').status_code, 200)
+        self.client.force_authenticate(user=self.teacher)
+        self.assertEqual(self.client.get('/api/v1/dashboard/student/').status_code, 403)
+
+    def test_parent_dashboard_role_gated(self):
+        self.client.force_authenticate(user=self.parent)
+        self.assertEqual(self.client.get('/api/v1/dashboard/parent/').status_code, 200)
+        self.client.force_authenticate(user=self.student1)
+        self.assertEqual(self.client.get('/api/v1/dashboard/parent/').status_code, 403)
+
+    def test_admin_dashboard_role_gated(self):
+        self.client.force_authenticate(user=self.mudeer)
+        self.assertEqual(self.client.get('/api/v1/dashboard/admin/').status_code, 200)
+        self.client.force_authenticate(user=self.teacher)
+        self.assertEqual(self.client.get('/api/v1/dashboard/admin/').status_code, 403)
+
+    def test_board_dashboard_role_gated(self):
+        self.client.force_authenticate(user=self.mudeer)
+        self.assertEqual(self.client.get('/api/v1/dashboard/board/').status_code, 200)
+        self.client.force_authenticate(user=self.teacher)
+        self.assertEqual(self.client.get('/api/v1/dashboard/board/').status_code, 403)
+
+    def test_teacher_dashboard_role_gated(self):
+        self.client.force_authenticate(user=self.teacher)
+        self.assertEqual(self.client.get('/api/v1/dashboard/teacher/').status_code, 200)
+        self.client.force_authenticate(user=self.parent)
+        self.assertEqual(self.client.get('/api/v1/dashboard/teacher/').status_code, 403)
+
+    def test_student_performance_requires_staff(self):
+        self.client.force_authenticate(user=self.teacher)
+        self.assertEqual(
+            self.client.get(f'/api/v1/dashboard/teacher/student/{self.student1.pk}/performance/').status_code,
+            200,
+        )
+        self.client.force_authenticate(user=self.student1)
+        self.assertEqual(
+            self.client.get(f'/api/v1/dashboard/teacher/student/{self.student1.pk}/performance/').status_code,
+            403,
+        )

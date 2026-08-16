@@ -166,6 +166,11 @@ class SkillAssessmentDetailView(generics.RetrieveUpdateDestroyAPIView):
             raise PermissionDenied()
         instance.delete()
 
+    def perform_update(self, serializer):
+        if self.request.user.role not in ('mudeer', 'ustaadh', 'idaarah'):
+            raise PermissionDenied()
+        serializer.save()
+
 
 
 class DigitalPortfolioListCreateView(generics.ListCreateAPIView):

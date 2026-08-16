@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from .models import CareerRecommendation, AITutorSession
 from .serializers import CareerRecommendationSerializer, AITutorSessionSerializer
 from .services import AIService, StudentContextService
-from users.models import User
+from users.models import User, StudentParent
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +254,13 @@ class CareerGuidanceView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        if request.user.role == 'student' and student != request.user:
+            return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.role == 'parent' and not StudentParent.objects.filter(
+            parent=request.user, student=student
+        ).exists():
+            return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
         profile_key = get_profile_key(student)
         profile = CAREER_PROFILES[profile_key]
 
@@ -467,6 +474,18 @@ class AITutorSessionListView(APIView):
         qs = AITutorSession.objects.filter(madrasah=user.madrasah)
         if user.role == 'student':
             qs = qs.filter(student=user)
+        elif user.role == 'parent':
+            qs = qs.filter(
+                student__id__in=StudentParent.objects.filter(parent=user).values('student_id')
+            )
+        else:
+            student_id = request.query_params.get('student')
+            if not student_id:
+                return Response(
+                    {'error': 'student query parameter required to delete sessions'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            qs = qs.filter(student_id=student_id)
         count, _ = qs.delete()
         return Response({'deleted': count})
 

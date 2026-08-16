@@ -308,3 +308,72 @@ class WhatsAppAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         msg.refresh_from_db()
         self.assertEqual(msg.status, 'delivered')
+
+
+class WhatsAppRecipientGuardTests(TestCase):
+    """Recipients are full CRUD for admins, self-scoped for parents, denied for others."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.madrasah = Madrasah.objects.create(name='Test Madrasah')
+        self.mudeer = User.objects.create_user(
+            email='mudeer@test.com', password='pass123',
+            first_name='M', last_name='A', role='mudeer', madrasah=self.madrasah,
+        )
+        self.parent = User.objects.create_user(
+            email='parent@test.com', password='pass123',
+            first_name='P', last_name='A', role='parent', madrasah=self.madrasah,
+        )
+        self.student = User.objects.create_user(
+            email='student@test.com', password='pass123',
+            first_name='S', last_name='T', role='student', madrasah=self.madrasah,
+        )
+        self.recipient = WhatsAppRecipient.objects.create(
+            madrasah=self.madrasah, parent=self.parent, phone_number='+1234567890',
+        )
+
+    def test_parent_cannot_forge_is_opted_in(self):
+        self.client.force_authenticate(user=self.parent)
+        response = self.client.patch(
+            f'/api/v1/whatsapp/recipients/{self.recipient.pk}/',
+            {'is_opted_in': True, 'phone_number': '+1111111111'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.recipient.refresh_from_db()
+        self.assertFalse(self.recipient.is_opted_in)
+
+    def test_student_cannot_create_recipient(self):
+        self.client.force_authenticate(user=self.student)
+        response = self.client.post(
+            '/api/v1/whatsapp/recipients/',
+            {'parent': self.parent.pk, 'phone_number': '+1234567890'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_parent_cannot_create_recipient_for_other_parent(self):
+        self.client.force_authenticate(user=self.parent)
+        response = self.client.post(
+            '/api/v1/whatsapp/recipients/',
+            {'parent': self.mudeer.pk, 'phone_number': '+1234567890'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_student_cannot_delete_recipient(self):
+        self.client.force_authenticate(user=self.student)
+        response = self.client.delete(f'/api/v1/whatsapp/recipients/{self.recipient.pk}/')
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(WhatsAppRecipient.objects.filter(pk=self.recipient.pk).exists())
+
+    def test_mudeer_can_manage_recipients(self):
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.patch(
+            f'/api/v1/whatsapp/recipients/{self.recipient.pk}/',
+            {'phone_number': '+9999999999'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.recipient.refresh_from_db()
+        self.assertEqual(self.recipient.phone_number, '+9999999999')

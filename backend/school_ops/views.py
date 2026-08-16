@@ -89,6 +89,11 @@ class FeePaymentCreateView(APIView):
         except Fee.DoesNotExist:
             return Response({'error': 'Fee not found'}, status=status.HTTP_404_NOT_FOUND)
 
+        if request.user.role == 'parent' and not Fee.objects.filter(
+            pk=fee.pk, student_id__in=StudentParent.objects.filter(parent=request.user).values('student_id')
+        ).exists():
+            return Response({'error': 'Fee does not belong to your child'}, status=status.HTTP_403_FORBIDDEN)
+
         amount = request.data.get('amount_paid') or request.data.get('amount')
         if amount is None:
             return Response({'error': 'amount_paid required'}, status=status.HTTP_400_BAD_REQUEST)

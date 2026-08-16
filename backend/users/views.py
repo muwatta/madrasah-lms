@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timezone
 
 from rest_framework import status, generics, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -225,6 +226,11 @@ class StudentParentListCreateView(generics.ListCreateAPIView):
         elif user.role == 'student':
             return qs.filter(student=user)
         return qs.filter(student__madrasah=user.madrasah)
+
+    def perform_create(self, serializer):
+        if self.request.user.role not in ('mudeer', 'idaarah'):
+            raise PermissionDenied('Only admins can create student-parent links')
+        serializer.save()
 
 
 class StudentParentDeleteView(generics.DestroyAPIView):

@@ -15,6 +15,8 @@ from .serializers import (
     QuizAttemptSerializer, QuizAttemptDetailSerializer
 )
 from .grading import grade_quiz
+from users.models import StudentParent
+from config.permissions import IsStaff
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +90,8 @@ class QuizDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class QuizPublishView(APIView):
+    permission_classes = [IsStaff]
+
     def post(self, request, pk):
         try:
             quiz = Quiz.objects.get(pk=pk, madrasah=request.user.madrasah)
@@ -158,6 +162,11 @@ class QuizAttemptDetailView(APIView):
             return Response({'error': 'Attempt not found'}, status=status.HTTP_404_NOT_FOUND)
 
         if request.user.role == 'student' and attempt.student != request.user:
+            return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
+
+        if request.user.role == 'parent' and not StudentParent.objects.filter(
+            parent=request.user, student=attempt.student
+        ).exists():
             return Response({'error': 'Access denied'}, status=status.HTTP_403_FORBIDDEN)
 
         return Response(QuizAttemptDetailSerializer(attempt).data)

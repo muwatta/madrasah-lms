@@ -90,3 +90,79 @@ class MeViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
         self.assertEqual(self.user.role, 'student')
+
+
+class MessageAccessTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.madrasah = Madrasah.objects.create(name='Test Madrasah')
+        self.alice = User.objects.create_user(
+            email='alice@test.com', password='pass123',
+            first_name='Alice', last_name='A', role='student', madrasah=self.madrasah,
+        )
+        self.bob = User.objects.create_user(
+            email='bob@test.com', password='pass123',
+            first_name='Bob', last_name='B', role='student', madrasah=self.madrasah,
+        )
+        self.msg = self.madrasah.messages.create(
+            sender=self.alice, recipient=self.bob, subject='Hi', body='Hello',
+        )
+
+    def test_recipient_can_read_message(self):
+        self.client.force_authenticate(user=self.bob)
+        response = self.client.get(f'/api/v1/users/messages/{self.msg.pk}/')
+        self.assertEqual(response.status_code, 200)
+        self.msg.refresh_from_db()
+        self.assertTrue(self.msg.is_read)
+
+    def test_sender_can_read_message(self):
+        self.client.force_authenticate(user=self.alice)
+        response = self.client.get(f'/api/v1/users/messages/{self.msg.pk}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_unrelated_user_cannot_read_message(self):
+        other = User.objects.create_user(
+            email='other@test.com', password='pass123',
+            first_name='Other', last_name='X', role='student', madrasah=self.madrasah,
+        )
+        self.client.force_authenticate(user=other)
+        response = self.client.get(f'/api/v1/users/messages/{self.msg.pk}/')
+        self.assertEqual(response.status_code, 404)
+
+
+class StudentParentCreateGuardTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.madrasah = Madrasah.objects.create(name='Test Madrasah')
+        self.mudeer = User.objects.create_user(
+            email='mudeer@test.com', password='pass123',
+            first_name='M', last_name='A', role='mudeer', madrasah=self.madrasah,
+        )
+        self.student = User.objects.create_user(
+            email='s@test.com', password='pass123',
+            first_name='S', last_name='T', role='student', madrasah=self.madrasah,
+        )
+        self.parent = User.objects.create_user(
+            email='p@test.com', password='pass123',
+            first_name='P', last_name='A', role='parent', madrasah=self.madrasah,
+        )
+
+    def test_parent_cannot_create_student_parent_link(self):
+        self.client.force_authenticate(user=self.parent)
+        response = self.client.post(
+            '/api/v1/users/student-parents/',
+            {'student': self.student.pk, 'parent': self.parent.pk,
+             'relationship': 'father'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_mudeer_can_create_student_parent_link(self):
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.post(
+            '/api/v1/users/student-parents/',
+            {'student': self.student.pk, 'parent': self.parent.pk,
+             'relationship': 'father'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
