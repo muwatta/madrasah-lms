@@ -69,6 +69,23 @@ class ExamResultSerializer(serializers.ModelSerializer):
         read_only_fields = ["exam", "student"]
 
 
+class ExamResultWriteSerializer(serializers.ModelSerializer):
+    """Writable variant used when recording/bulk-uploading results.
+    The ``exam`` is bound by the URL, ``student`` is writable."""
+
+    class Meta:
+        model = ExamResult
+        fields = ["student", "score", "grade", "remarks"]
+
+    def validate_student(self, value):
+        madrasah = self.context.get("madrasah")
+        if madrasah is not None and value.madrasah_id != madrasah.id:
+            raise serializers.ValidationError(
+                "Student does not belong to this madrasah."
+            )
+        return value
+
+
 class TermSerializer(serializers.ModelSerializer):
     class Meta:
         model = Term

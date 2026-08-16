@@ -726,3 +726,119 @@ class PermissionTests(BaseResultsTestCase):
             format='json',
         )
         self.assertIn(response.status_code, [200, 201])
+
+
+# ──────────────────────────────────────────────────────────────────
+#  Exam Management Tests
+# ──────────────────────────────────────────────────────────────────
+
+
+class ExamTests(BaseResultsTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client = APIClient()
+
+    def _create_exam(self):
+        from .models import Exam
+        return Exam.objects.create(
+            madrasah=self.madrasah, subject=self.subject,
+            created_by=self.mudeer, title='Final Quran Exam',
+            exam_date='2026-01-15', total_marks=Decimal('100.00'),
+        )
+
+    def test_mudeer_can_create_exam(self):
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.post(
+            '/api/v1/results/exams/',
+            {'subject': self.subject.pk, 'title': 'Final Quran Exam',
+             'exam_date': '2026-01-15', 'total_marks': 100},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['subject'], self.subject.pk)
+        self.assertEqual(response.data['created_by'], self.mudeer.pk)
+
+    def test_exam_list_and_retrieve(self):
+        exam = self._create_exam()
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.get('/api/v1/results/exams/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['results'][0]['id'], exam.pk)
+        response = self.client.get(f'/api/v1/results/exams/{exam.pk}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['title'], 'Final Quran Exam')
+
+    def test_exam_update_and_delete(self):
+        exam = self._create_exam()
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.patch(
+            f'/api/v1/results/exams/{exam.pk}/',
+            {'title': 'Renamed Exam'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['title'], 'Renamed Exam')
+        response = self.client.delete(f'/api/v1/results/exams/{exam.pk}/')
+        self.assertEqual(response.status_code, 204)
+
+    def test_non_mudeer_cannot_manage_exams(self):
+        exam = self._create_exam()
+        self.client.force_authenticate(user=self.teacher)
+        response = self.client.post(
+            '/api/v1/results/exams/',
+            {'subject': self.subject.pk, 'title': 'Nope',
+             'exam_date': '2026-01-15', 'total_marks': 100},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 403)
+        self.client.force_authenticate(user=self.teacher)
+        response = self.client.get(f'/api/v1/results/exams/{exam.pk}/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_record_result_and_list(self):
+        exam = self._create_exam()
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.post(
+            f'/api/v1/results/exams/{exam.pk}/results/',
+            {'student': self.student1.pk, 'score': 85, 'grade': 'A',
+             'remarks': 'Excellent'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['student_name'], 'Ahmed Student')
+        response = self.client.get(f'/api/v1/results/exams/{exam.pk}/results/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['results']), 1)
+
+    def test_bulk_upload_results(self):
+        exam = self._create_exam()
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.post(
+            f'/api/v1/results/exams/{exam.pk}/results/bulk/',
+            {'results': [
+                {'student': self.student1.pk, 'score': 85, 'grade': 'A'},
+                {'student': self.student2.pk, 'score': 60, 'grade': 'B'},
+            ]},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['created'], 2)
+        response = self.client.get(f'/api/v1/results/exams/{exam.pk}/results/')
+        self.assertEqual(len(response.data['results']), 2)
+
+    def test_result_requires_student_in_same_madrasah(self):
+        from users.models import Madrasah
+        other = Madrasah.objects.create(name='Other Madrasah')
+        other_student = User.objects.create_user(
+            email='other@test.com', password='pass123',
+            first_name='Other', last_name='Student',
+            role='student', madrasah=other,
+        )
+        exam = self._create_exam()
+        self.client.force_authenticate(user=self.mudeer)
+        response = self.client.post(
+            f'/api/v1/results/exams/{exam.pk}/results/',
+            {'student': other_student.pk, 'score': 85, 'grade': 'A'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 400)

@@ -19,6 +19,7 @@ router.register(r'ranks', views.StudentRankViewSet, basename='student-rank')
 router.register(r'publications', views.ResultPublicationViewSet, basename='publication')
 router.register(r'report-cards', views.ReportCardViewSet, basename='report-card')
 router.register(r'audit-logs', views.ResultAuditLogViewSet, basename='audit-log')
+router.register(r'exams', views.ExamViewSet, basename='exam')
 
 urlpatterns = [
     # ── Explicit paths FIRST to avoid router conflicts ─────────────

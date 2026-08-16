@@ -10,7 +10,7 @@ from .models import (
     GradeScale, GradeScaleBand, AssessmentBlueprint, BlueprintComponent,
     Assessment, AssessmentScore, SubjectResult, TermResult, AnnualResult,
     StudentRank, ResultPublication, ResultApproval, ReportCard,
-    ResultAuditLog,
+    ResultAuditLog, Exam, ExamResult,
 )
 from .serializers import (
     GradeScaleSerializer, GradeScaleBandSerializer,
@@ -22,7 +22,7 @@ from .serializers import (
     ReportCardSerializer, ResultAuditLogSerializer,
     ResultApprovalSerializer,
     BulkScoreUploadSerializer,
-    ExamSerializer, ExamResultSerializer,
+    ExamSerializer, ExamResultSerializer, ExamResultWriteSerializer,
     ResultTemplateSerializer, ResultTemplateItemSerializer,
     ResultComponentSerializer, StudentResultSerializer,
     BulkScoreInputSerializer,
@@ -84,6 +84,101 @@ class GradeScaleViewSet(TenantAwareMixin, viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(GradeScaleSerializer(gs).data)
+
+
+# ── 1b. Exam management ──────────────────────────────
+
+
+class ExamViewSet(TenantAwareMixin, viewsets.ModelViewSet):
+    serializer_class = ExamSerializer
+
+    def get_permissions(self):
+        if self.action in ("list", "retrieve"):
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsMudeer()]
+
+    def get_queryset(self):
+        return (
+            Exam.objects
+            .filter(madrasah=self.request.user.madrasah)
+            .select_related("subject", "created_by")
+            .order_by("-exam_date")
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(madrasah=self.request.user.madrasah, created_by=self.request.user)
+
+    def get_exam(self, pk):
+        return get_object_or_404(self.get_queryset(), pk=pk)
+
+    @action(detail=True, methods=["get", "post"], url_path="results")
+    def results(self, request, pk=None):
+        exam = self.get_exam(pk)
+        if request.method == "POST":
+            serializer = ExamResultWriteSerializer(
+                data=request.data,
+                context={"madrasah": request.user.madrasah},
+            )
+            serializer.is_valid(raise_exception=True)
+            result, _ = ExamResult.objects.update_or_create(
+                exam=exam,
+                student=serializer.validated_data["student"],
+                defaults={
+                    "score": serializer.validated_data["score"],
+                    "grade": serializer.validated_data.get("grade", ""),
+                    "remarks": serializer.validated_data.get("remarks", ""),
+                },
+            )
+            return Response(ExamResultSerializer(result).data, status=status.HTTP_201_CREATED)
+
+        queryset = (
+            ExamResult.objects
+            .filter(exam=exam)
+            .select_related("student")
+            .order_by("student__last_name", "student__first_name")
+        )
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ExamResultSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = ExamResultSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], url_path="results/bulk")
+    def bulk_results(self, request, pk=None):
+        exam = self.get_exam(pk)
+        items = request.data.get("results") or request.data
+        if not isinstance(items, list) or not items:
+            return Response(
+                {"detail": "Provide a non-empty list of results."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        created, updated = 0, 0
+        errors = []
+        for idx, item in enumerate(items):
+            serializer = ExamResultWriteSerializer(
+                data=item,
+                context={"madrasah": request.user.madrasah},
+            )
+            if not serializer.is_valid():
+                errors.append({"row": idx, "errors": serializer.errors})
+                continue
+            _, was_created = ExamResult.objects.update_or_create(
+                exam=exam,
+                student=serializer.validated_data["student"],
+                defaults={
+                    "score": serializer.validated_data["score"],
+                    "grade": serializer.validated_data.get("grade", ""),
+                    "remarks": serializer.validated_data.get("remarks", ""),
+                },
+            )
+            if was_created:
+                created += 1
+            else:
+                updated += 1
+        if errors:
+            return Response({"created": created, "updated": updated, "errors": errors}, status=400)
+        return Response({"created": created, "updated": updated})
 
 
 # ── 2. AssessmentBlueprint ────────────────────────────
