@@ -26,7 +26,7 @@ export default function QuizListPage() {
           quizAPI.quizzes.myResults(),
         ]);
         setQuizzes(quizList);
-        setAttempts(attemptRes.data.results ?? []);
+        setAttempts(attemptRes.data);
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadQuizzesFailed'));
       } finally {

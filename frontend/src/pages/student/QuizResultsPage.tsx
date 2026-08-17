@@ -16,7 +16,7 @@ export default function QuizResultsPage() {
     const fetchAttempts = async () => {
       try {
         setAttempts(await fetchAllPages<QuizAttempt>(() =>
-          quizAPI.quizzes.myResults().then((res) => ({ data: res.data.results ?? [] }))));
+          quizAPI.quizzes.myResults().then((res) => ({ data: res.data }))));
       } catch (err: any) {
         setError(err.response?.data?.detail || t('student.loadAttemptsFailed'));
       } finally {

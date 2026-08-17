@@ -232,7 +232,7 @@ export default function Layout() {
 
   useEffect(() => {
     notificationAPI.unreadCount()
-      .then(res => setUnreadCount(res.data.count))
+      .then(res => setUnreadCount(res.data.unread_count))
       .catch(() => {});
   }, []);
 

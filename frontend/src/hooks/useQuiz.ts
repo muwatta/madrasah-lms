@@ -202,7 +202,7 @@ export function useQuizResults() {
   return useQuery<QuizAttempt[]>({
     queryKey: ['quiz', 'my-results'],
     queryFn: () => fetchAllPages<QuizAttempt>(() =>
-      quizAPI.quizzes.myResults().then((res) => ({ data: res.data.results ?? [] }))),
+      quizAPI.quizzes.myResults().then((res) => ({ data: res.data }))),
   });
 }
 

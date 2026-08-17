@@ -19,7 +19,7 @@ export const authAPI = {
     api.post('/auth/password-reset/', { email }),
 
   resetPassword: (uidb64: string, token: string, password: string) =>
-    api.post('/auth/password-reset/confirm/', { uidb64, token, password }),
+    api.post('/auth/password-reset/confirm/', { uidb64, token, new_password: password }),
 
   changePassword: (oldPassword: string, newPassword: string) =>
     api.post('/auth/change-password/', { old_password: oldPassword, new_password: newPassword }),
@@ -237,7 +237,7 @@ export const announcementAPI = {
 
 export const notificationAPI = {
   list: (params?: Record<string, unknown>) => api.get<T.AppNotification[]>('/school/notifications/', { params }),
-  unreadCount: () => api.get<{ count: number }>('/school/notifications/unread-count/'),
+  unreadCount: () => api.get<{ unread_count: number }>('/school/notifications/unread-count/'),
   markRead: (id: number) => api.post(`/school/notifications/mark-read/${id}/`),
   markAllRead: () => api.post('/school/notifications/mark-all-read/'),
 };
@@ -641,7 +641,7 @@ export const quizAPI = {
     stats: (id: number) => api.get(`/quizzes/${id}/stats/`),
     analysis: (id: number) => api.get(`/quizzes/${id}/analysis/`),
     violations: (id: number) => api.get<T.ViolationLog[]>(`/quizzes/${id}/violations/`),
-    myResults: (params?: Record<string, unknown>) => api.get<PaginatedData<T.QuizAttempt>>('/quizzes/my-results/', { params }),
+    myResults: (params?: Record<string, unknown>) => api.get<T.QuizAttempt[]>('/quizzes/my-results/', { params }),
   },
   attempts: {
     start: (quizId: number) => api.post<T.QuizAttempt>('/quizzes/start/', { quiz_id: quizId }),
