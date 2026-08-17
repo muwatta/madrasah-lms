@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Lock, Medal } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaMyBadges, useFasaahaAllBadges } from '../../../hooks/useFasaaha';
 import { SkeletonCard } from '../../../components/Skeleton';
@@ -40,13 +41,13 @@ export default function FasaahaMyBadges() {
             const earnedRecord = earned.find(e => e.badge === badge.id);
             return (
               <div key={badge.id} className={`rounded-xl border p-4 text-center card-hover ${isEarned ? '' : 'opacity-50 grayscale'}`} style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-                <span className="text-3xl block mb-2">{badge.icon || '🏅'}</span>
+                <span className="block mb-2">{badge.icon ? <span className="text-3xl">{badge.icon}</span> : <Medal className="w-6 h-6 text-yellow-500 mx-auto" />}</span>
                 <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{language === 'ar' ? badge.name_ar : badge.name}</p>
                 {isEarned && earnedRecord && (
                   <p className="text-[10px] mt-1" style={{ color: 'var(--color-text-muted)' }}>{t('fasaaha.earnedOn')} {new Date(earnedRecord.awarded_at).toLocaleDateString()}</p>
                 )}
                 {!isEarned && (
-                  <span className="text-[10px] mt-1 inline-block px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800" style={{ color: 'var(--color-text-muted)' }}>🔒</span>
+                  <span className="text-[10px] mt-1 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800" style={{ color: 'var(--color-text-muted)' }}><Lock className="w-3 h-3" /></span>
                 )}
               </div>
             );

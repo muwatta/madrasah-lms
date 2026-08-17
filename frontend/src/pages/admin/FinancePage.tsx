@@ -30,10 +30,10 @@ interface FeeAnalytics {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  paid: 'bg-green-100 text-green-700 border border-green-200',
-  partial: 'bg-amber-100 text-amber-700 border border-amber-200',
-  pending: 'bg-blue-100 text-blue-700 border border-blue-200',
-  overdue: 'bg-red-100 text-red-700 border border-red-200',
+  paid: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800',
+  partial: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800',
+  pending: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
+  overdue: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
 };
 
 const STATUS_OPTIONS = ['pending', 'paid', 'partial', 'overdue'];
@@ -258,8 +258,8 @@ export default function FinancePage() {
     }
   };
 
-  const selectCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
-  const inputCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const selectCls = 'w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-white dark:focus:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const inputCls = 'w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-white dark:focus:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-100';
 
   return (
     <div className="page-enter space-y-6">
@@ -297,7 +297,7 @@ export default function FinancePage() {
                 setCreateFieldErrors({});
                 setShowCreateForm(true);
               }}
-              className="btn-press inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50"
+              className="btn-press inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-800 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 shadow-sm transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
               {t('finance.addFee')}
@@ -338,7 +338,7 @@ export default function FinancePage() {
       </div>
 
       {chartData.length > 0 && (
-        <div className="card-hover rounded-xl border border-gray-100 bg-white p-5 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <div className="card-hover rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '200ms' }}>
           <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('finance.financialOverview')}</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={chartData}>
@@ -355,7 +355,7 @@ export default function FinancePage() {
       )}
 
       {analytics?.recent_payments && analytics.recent_payments.length > 0 && (
-        <div className="card-hover rounded-xl border border-gray-100 bg-white p-5 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '250ms' }}>
+        <div className="card-hover rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '250ms' }}>
           <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-[var(--color-text-secondary)]">{t('finance.recentPayments')}</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -371,9 +371,9 @@ export default function FinancePage() {
                 {analytics.recent_payments.slice(0, 5).map((p) => (
                   <tr key={p.id} className="border-b border-gray-50 dark:border-[var(--color-border-light)] last:border-0">
                     <td className="py-2.5 ps-4 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{p.student_name}</td>
-                    <td className="py-2.5 ps-4 text-green-600 font-semibold">{p.amount}</td>
+                    <td className="py-2.5 ps-4 text-green-600 dark:text-green-400 font-semibold">{p.amount}</td>
                     <td className="py-2.5 ps-4 text-gray-500 dark:text-[var(--color-text-muted)] capitalize">{paymentMethodLabels[p.payment_method] || p.payment_method?.replace('_', ' ')}</td>
-                    <td className="py-2.5 text-gray-500 text-xs">{new Date(p.paid_at).toLocaleDateString()}</td>
+                    <td className="py-2.5 text-gray-500 dark:text-gray-400 text-xs">{new Date(p.paid_at).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -387,7 +387,7 @@ export default function FinancePage() {
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[160px]">
           <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.searchStudent') || (language === 'ar' ? 'بحث عن طالب' : 'Search student')}</label>
           <div className="relative">
-            <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             <input
               type="text"
               value={searchQuery}
@@ -409,7 +409,7 @@ export default function FinancePage() {
           {(statusFilter || searchQuery) && (
             <button
               onClick={() => { setStatusFilter(''); setSearchQuery(''); setPage(1); }}
-              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               {language === 'ar' ? 'مسح' : 'Clear'}
@@ -419,15 +419,15 @@ export default function FinancePage() {
       </div>
 
       {showCreateForm && (
-        <div className="animate-slide-down rounded-xl border border-primary-100 bg-white p-6 shadow-md shadow-primary-500/5">
+        <div className="animate-slide-down rounded-xl border border-primary-100 dark:border-primary-800 bg-white dark:bg-gray-800 p-6 shadow-md shadow-primary-500/5">
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
               <svg className="h-4 w-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             </div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.createNewFee')}</h2>
           </div>
           {createError && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
               <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
               {createError}
             </div>
@@ -444,7 +444,7 @@ export default function FinancePage() {
                 <option value="">{t('filters.chooseStudent')}</option>
                 {students.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
               </select>
-              {createFieldErrors.student && <p className="mt-1 text-xs text-red-500">{createFieldErrors.student}</p>}
+              {createFieldErrors.student && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{createFieldErrors.student}</p>}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.amount')}</label>
@@ -458,7 +458,7 @@ export default function FinancePage() {
                 className={`${inputCls} ${createFieldErrors.amount ? 'border-red-300' : ''}`}
                 placeholder="0.00"
               />
-              {createFieldErrors.amount && <p className="mt-1 text-xs text-red-500">{createFieldErrors.amount}</p>}
+              {createFieldErrors.amount && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{createFieldErrors.amount}</p>}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.dueDate')}</label>
@@ -469,7 +469,7 @@ export default function FinancePage() {
                 onChange={(e) => { setCreateForm({ ...createForm, due_date: e.target.value }); setCreateFieldErrors(fe => { const n = { ...fe }; delete n.due_date; return n; }); }}
                 className={`${inputCls} ${createFieldErrors.due_date ? 'border-red-300' : ''}`}
               />
-              {createFieldErrors.due_date && <p className="mt-1 text-xs text-red-500">{createFieldErrors.due_date}</p>}
+              {createFieldErrors.due_date && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{createFieldErrors.due_date}</p>}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{t('finance.description')}</label>
@@ -497,7 +497,7 @@ export default function FinancePage() {
                   <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t('finance.createFee')}</>
                 )}
               </button>
-              <button type="button" onClick={() => setShowCreateForm(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+              <button type="button" onClick={() => setShowCreateForm(false)} className="btn-press rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-600">{t('common.cancel')}</button>
             </div>
           </form>
         </div>
@@ -508,16 +508,16 @@ export default function FinancePage() {
           <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.recordPayment')}</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+              <button onClick={() => setShowPaymentModal(false)} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="mb-4 rounded-lg bg-gray-50 p-3">
+            <div className="mb-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 p-3">
               <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">{t('finance.student')}: <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{paymentFee.student_name}</span></p>
-              <p className="text-sm text-gray-600 dark:text-[var(--color-text-secondary)]">{t('finance.balance')}: <span className="font-medium text-amber-600">{paymentFee.balance}</span></p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t('finance.balance')}: <span className="font-medium text-amber-600 dark:text-amber-400">{paymentFee.balance}</span></p>
             </div>
             {paymentError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 {paymentError}
               </div>
@@ -553,7 +553,7 @@ export default function FinancePage() {
                     <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t('finance.recordPayment')}</>
                   )}
                 </button>
-                <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+                <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-press rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-600">{t('common.cancel')}</button>
               </div>
             </form>
           </div>
@@ -565,18 +565,18 @@ export default function FinancePage() {
           <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.bulkCreateFees')}</h3>
-              <button onClick={() => setShowBulkModal(false)} className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+              <button onClick={() => setShowBulkModal(false)} className="rounded-lg p-1 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             {bulkError && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                 {bulkError}
               </div>
             )}
             {bulkSuccess && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 p-3 text-sm text-green-700">
+              <div className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 dark:bg-green-900/20 p-3 text-sm text-green-700 dark:text-green-400">
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 {bulkSuccess}
               </div>
@@ -640,12 +640,12 @@ export default function FinancePage() {
                 />
               </div>
               <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-sm text-gray-700">
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <input
                     type="checkbox"
                     checked={bulkForm.assign_all}
                     onChange={(e) => setBulkForm({ ...bulkForm, assign_all: e.target.checked, selected_students: [] })}
-                    className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
                   {t('finance.assignToAllStudents')}
                 </label>
@@ -676,7 +676,7 @@ export default function FinancePage() {
                     <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>{t('finance.bulkCreate')}</>
                   )}
                 </button>
-                <button type="button" onClick={() => setShowBulkModal(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+                <button type="button" onClick={() => setShowBulkModal(false)} className="btn-press rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-600">{t('common.cancel')}</button>
               </div>
             </form>
           </div>
@@ -692,14 +692,14 @@ export default function FinancePage() {
         </div>
       ) : pagedFees.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+            <svg className="h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
           </div>
           <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{t('finance.noFees')}</p>
-          <p className="mt-1 text-xs text-gray-400">{language === 'ar' ? 'ابدأ بإضافة رسوم للطلاب' : 'Start by adding fees for students'}</p>
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{language === 'ar' ? 'ابدأ بإضافة رسوم للطلاب' : 'Start by adding fees for students'}</p>
         </div>
       ) : (
-        <div className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
+        <div className="card-hover rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden opacity-0 animate-slide-up" style={{ animationDelay: '300ms' }}>
           <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
@@ -713,7 +713,7 @@ export default function FinancePage() {
                   <th className="px-4 py-3 text-center">{t('common.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
                 {filteredFees.map((fee) => (
                   <tr key={fee.id} className="transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/30">
                     <td className="whitespace-nowrap px-4 py-3">
@@ -721,8 +721,8 @@ export default function FinancePage() {
                       {fee.description && <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)] mt-0.5">{fee.description}</p>}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{fee.amount}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-green-600 font-medium">{fee.paid}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-amber-600 font-medium">{fee.balance}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-green-600 dark:text-green-400 font-medium">{fee.paid}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-amber-600 dark:text-amber-400 font-medium">{fee.balance}</td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[fee.status] || ''}`}>
                         {statusLabels[fee.status] || fee.status.charAt(0).toUpperCase() + fee.status.slice(1)}
@@ -734,7 +734,7 @@ export default function FinancePage() {
                         {fee.status !== 'paid' && (
                           <button
                             onClick={() => { setPaymentFee(fee); setPaymentForm({ amount: fee.balance, payment_method: 'cash' }); setPaymentError(null); setShowPaymentModal(true); }}
-                            className="btn-press inline-flex items-center gap-1 rounded-lg bg-green-50 px-2.5 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100"
+                            className="btn-press inline-flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-900/20 px-2.5 py-2 text-xs font-medium text-green-700 dark:text-green-400 transition-colors hover:bg-green-100 dark:hover:bg-green-900/30"
                             title={t('finance.recordPayment')}
                           >
                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -746,14 +746,14 @@ export default function FinancePage() {
                             <button onClick={() => handleDelete(fee.id)} disabled={deleting} className="btn-press rounded-lg bg-red-600 px-2 py-2 text-xs font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50">
                               {language === 'ar' ? 'نعم' : 'Yes'}
                             </button>
-                            <button onClick={() => setDeleteConfirmId(null)} className="btn-press rounded-lg border border-gray-200 bg-white px-2 py-2 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50">
+                            <button onClick={() => setDeleteConfirmId(null)} className="btn-press rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-600">
                               {language === 'ar' ? 'لا' : 'No'}
                             </button>
                           </div>
                         ) : (
                           <button
                             onClick={() => setDeleteConfirmId(fee.id)}
-                            className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                            className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-2.5 py-2 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
                             title={t('common.delete')}
                           >
                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -768,7 +768,7 @@ export default function FinancePage() {
           </div>
           <div className="block md:hidden space-y-3 p-4">
             {pagedFees.map((fee) => (
-              <div key={fee.id} className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
+              <div key={fee.id} className="rounded-lg border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{fee.student_name}</span>
                   <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[fee.status] || ''}`}>
@@ -782,21 +782,21 @@ export default function FinancePage() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{t('finance.paid')}</p>
-                    <p className="font-medium text-green-600">{fee.paid}</p>
+                    <p className="font-medium text-green-600 dark:text-green-400">{fee.paid}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 dark:text-[var(--color-text-muted)]">{t('finance.balance')}</p>
-                    <p className="font-medium text-amber-600">{fee.balance}</p>
+                    <p className="font-medium text-amber-600 dark:text-amber-400">{fee.balance}</p>
                   </div>
                 </div>
-                <div className="mt-2 text-xs text-gray-400">
+                <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
                   {t('finance.dueDate')}: {new Date(fee.due_date).toLocaleDateString()}
                 </div>
-                <div className="mt-3 flex items-center gap-2 border-t border-gray-50 pt-3">
+                <div className="mt-3 flex items-center gap-2 border-t border-gray-50 dark:border-gray-700 pt-3">
                   {fee.status !== 'paid' && (
                     <button
                       onClick={() => { setPaymentFee(fee); setPaymentForm({ amount: fee.balance, payment_method: 'cash' }); setPaymentError(null); setShowPaymentModal(true); }}
-                      className="btn-press inline-flex items-center gap-1 rounded-lg bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100"
+                      className="btn-press inline-flex items-center gap-1 rounded-lg bg-green-50 dark:bg-green-900/20 px-3 py-2 text-xs font-medium text-green-700 dark:text-green-400 transition-colors hover:bg-green-100 dark:hover:bg-green-900/30"
                     >
                       {t('finance.recordPayment')}
                     </button>
@@ -806,14 +806,14 @@ export default function FinancePage() {
                       <button onClick={() => handleDelete(fee.id)} disabled={deleting} className="btn-press rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white disabled:opacity-50">
                         {language === 'ar' ? 'نعم' : 'Yes'}
                       </button>
-                      <button onClick={() => setDeleteConfirmId(null)} className="btn-press rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600">
+                      <button onClick={() => setDeleteConfirmId(null)} className="btn-press rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300">
                         {language === 'ar' ? 'لا' : 'No'}
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setDeleteConfirmId(fee.id)}
-                      className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-xs font-medium text-red-700 transition-colors hover:bg-red-100"
+                      className="btn-press inline-flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-900/20 px-3 py-2 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
                     >
                       {t('common.delete')}
                     </button>
@@ -831,7 +831,7 @@ export default function FinancePage() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
+                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40"
                 >
                   <svg className={`h-3.5 w-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                   {language === 'ar' ? 'السابق' : 'Prev'}
@@ -840,13 +840,13 @@ export default function FinancePage() {
                   .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .map((p, idx, arr) => (
                     <span key={p} className="inline-flex items-center">
-                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-xs text-gray-400">...</span>}
+                      {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-xs text-gray-400 dark:text-gray-500">...</span>}
                       <button
                         onClick={() => setPage(p)}
                         className={`btn-press inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                           page === p
                             ? 'bg-primary-600 text-white shadow-sm'
-                            : 'text-gray-600 hover:bg-gray-100'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                         }`}
                       >
                         {p}
@@ -856,7 +856,7 @@ export default function FinancePage() {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
+                  className="btn-press inline-flex items-center gap-1 rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40"
                 >
                   {language === 'ar' ? 'التالي' : 'Next'}
                   <svg className={`h-3.5 w-3.5 ${language === 'ar' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>

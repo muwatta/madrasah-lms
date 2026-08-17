@@ -1,4 +1,4 @@
-import { Clock, Mic, Target } from 'lucide-react';
+import { CheckCircle2, CircleDashed, Clock, Mic, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaDailyGoal, useFasaahaWeeklyGoals } from '../../../hooks/useFasaaha';
@@ -91,8 +91,8 @@ export default function DailyGoalsSection() {
                 <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
                   {t(`fasaaha.${DAY_KEYS[d.getDay()]}`)}
                 </span>
-                <span className="text-sm leading-none" aria-hidden>
-                  {goal.is_achieved ? '✅' : goal.missions_completed > 0 ? '🟡' : '⬜'}
+                <span className="flex justify-center" aria-hidden>
+                  {goal.is_achieved ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : goal.missions_completed > 0 ? <Clock className="w-4 h-4 text-yellow-500" /> : <CircleDashed className="w-4 h-4 text-gray-300" />}
                 </span>
               </div>
             );

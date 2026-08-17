@@ -2,19 +2,21 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchAPI, type SearchResult } from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import { User, BookOpen, School, Megaphone, PenLine, HelpCircle, Pencil, FileText, Map, Coins, BookMarked, File } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-const MODEL_ICONS: Record<string, string> = {
-  user: '👤',
-  subject: '📚',
-  school_class: '🏫',
-  announcement: '📢',
-  quiz: '📝',
-  question: '❓',
-  homework: '✏️',
-  lesson_plan: '📋',
-  scheme: '🗺️',
-  fee_structure: '💰',
-  topic: '📖',
+const MODEL_ICONS: Record<string, LucideIcon> = {
+  user: User,
+  subject: BookOpen,
+  school_class: School,
+  announcement: Megaphone,
+  quiz: PenLine,
+  question: HelpCircle,
+  homework: Pencil,
+  lesson_plan: FileText,
+  scheme: Map,
+  fee_structure: Coins,
+  topic: BookMarked,
 };
 
 const MODEL_LABELS: Record<string, { ar: string; en: string }> = {
@@ -168,7 +170,7 @@ export default function GlobalSearch({ open, onClose }: Props) {
                 i === selectedIndex ? 'bg-primary-50 dark:bg-primary-900/20' : ''
               }`}
             >
-              <span className="mt-0.5 text-lg leading-none">{MODEL_ICONS[item.model] ?? '📄'}</span>
+              <span className="mt-0.5 text-lg leading-none">{(() => { const Icon = MODEL_ICONS[item.model] ?? File; return <Icon className="w-5 h-5" />; })()}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>

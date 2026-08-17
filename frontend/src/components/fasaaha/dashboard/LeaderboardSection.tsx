@@ -1,4 +1,4 @@
-import { Medal, Trophy } from 'lucide-react';
+import { Flame, Medal, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaLeaderboard } from '../../../hooks/useFasaaha';
@@ -74,7 +74,7 @@ export default function LeaderboardSection() {
                   </p>
                   <div className="flex gap-3 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                     <span>{entry.missions_completed} {t('fasaaha.missionsDone')}</span>
-                    {entry.current_streak > 0 && <span>🔥 {entry.current_streak}d</span>}
+                    {entry.current_streak > 0 && <span><Flame className="w-4 h-4 text-orange-500 inline" /> {entry.current_streak}d</span>}
                   </div>
                 </div>
                 <p className="shrink-0 text-base font-bold" style={{ color: 'var(--color-primary)' }}>

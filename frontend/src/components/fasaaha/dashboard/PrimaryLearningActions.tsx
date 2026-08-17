@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { Bot, Clock, Gauge, Mic, Target, Trophy } from 'lucide-react';
+import { Bot, Clock, Gauge, MessageSquare, Mic, Target, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaMissions } from '../../../hooks/useFasaaha';
@@ -170,7 +170,7 @@ export default function PrimaryLearningActions({ dashboard }: PrimaryLearningAct
                     className="group flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
                     style={{ borderColor: 'var(--color-border-light)' }}
                   >
-                    <span className="shrink-0 text-xl" aria-hidden>{MISSION_TYPE_ICONS[mType] ?? '🗣️'}</span>
+                    <span className="shrink-0 text-xl" aria-hidden>{MISSION_TYPE_ICONS[mType] ?? <MessageSquare className="w-5 h-5" />}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                         {title}

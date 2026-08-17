@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Flame } from 'lucide-react';
 import { dashboardAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonCard, SkeletonStatsGrid } from '../../components/Skeleton';
@@ -101,7 +102,7 @@ export default function StudentProgressPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-2xl">🔥</span>
+            <Flame className="w-5 h-5 text-orange-500" />
             <p className="text-xs font-medium text-gray-400 dark:text-gray-500">{t('studentProgress.streak')}</p>
           </div>
           <p className="text-2xl font-bold text-orange-500">{data.streak}</p>

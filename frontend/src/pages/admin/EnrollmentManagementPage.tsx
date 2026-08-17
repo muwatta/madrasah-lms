@@ -156,7 +156,7 @@ export default function EnrollmentManagementPage() {
   const totalSubjects = subjects.length;
   const totalTeachers = teachers.length;
 
-  const selectCls = 'w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-100';
+  const selectCls = 'w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-3 py-2.5 text-sm text-gray-700 dark:text-gray-300 transition-colors focus:border-primary-400 focus:bg-white dark:focus:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-100';
 
   return (
     <div className="page-enter space-y-6">
@@ -168,7 +168,7 @@ export default function EnrollmentManagementPage() {
           </div>
           <button
             onClick={() => { setForm({ student: '', subject: '', ustaadh: '', school_class: '' }); setFormError(null); setFieldErrors({}); setShowForm(true); }}
-            className="btn-press inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-primary-700 shadow-sm transition-colors hover:bg-primary-50"
+            className="btn-press inline-flex items-center gap-2 rounded-xl bg-white dark:bg-gray-800 px-5 py-2.5 text-sm font-semibold text-primary-700 dark:text-primary-300 shadow-sm transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/30"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             {t('enrollmentManagement.addEnrollment')}
@@ -196,10 +196,10 @@ export default function EnrollmentManagementPage() {
       </div>
 
       {dataError && (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           <span className="flex-1">{dataError}</span>
-          <button onClick={loadData} className="shrink-0 rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-200">
+          <button onClick={loadData} className="shrink-0 rounded-lg bg-red-100 dark:bg-red-900/30 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-200 dark:hover:bg-red-900/50">
             {language === 'ar' ? 'إعادة المحاولة' : 'Retry'}
           </button>
         </div>
@@ -208,28 +208,28 @@ export default function EnrollmentManagementPage() {
       <div className="rounded-xl border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-[160px] flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('filters.filterByStudent')}</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('filters.filterByStudent')}</label>
             <select value={studentFilter} onChange={(e) => setStudentFilter(e.target.value)} className={selectCls}>
               <option value="">{t('filters.allStudents')}</option>
               {students.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
             </select>
           </div>
           <div className="min-w-[160px] flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('filters.filterBySubject')}</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('filters.filterBySubject')}</label>
             <select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className={selectCls}>
               <option value="">{t('filters.allSubjects')}</option>
               {subjects.map((s) => <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>)}
             </select>
           </div>
           <div className="min-w-[160px] flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('filters.filterByTeacher')}</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('filters.filterByTeacher')}</label>
             <select value={teacherFilter} onChange={(e) => setTeacherFilter(e.target.value)} className={selectCls}>
               <option value="">{t('filters.allTeachers')}</option>
               {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>)}
             </select>
           </div>
           <div className="min-w-[160px] flex-1">
-            <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'تصفية حسب الصف' : 'Filter by Class'}</label>
+            <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{language === 'ar' ? 'تصفية حسب الصف' : 'Filter by Class'}</label>
             <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)} className={selectCls}>
               <option value="">{language === 'ar' ? 'كل الصفوف' : 'All Classes'}</option>
               {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</option>)}
@@ -238,7 +238,7 @@ export default function EnrollmentManagementPage() {
           {(studentFilter || subjectFilter || teacherFilter || classFilter) && (
             <button
               onClick={() => { setStudentFilter(''); setSubjectFilter(''); setTeacherFilter(''); setClassFilter(''); }}
-              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="btn-press inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300"
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               {language === 'ar' ? 'مسح' : 'Clear'}
@@ -248,40 +248,40 @@ export default function EnrollmentManagementPage() {
       </div>
 
       {showForm && (
-        <div className="animate-slide-down rounded-xl border border-primary-100 bg-white p-6 shadow-md shadow-primary-500/5">
+        <div className="animate-slide-down rounded-xl border border-primary-100 dark:border-primary-900/30 bg-white dark:bg-gray-800 p-6 shadow-md shadow-primary-500/5">
           <div className="mb-4 flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
               <svg className="h-4 w-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
             </div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-[var(--color-text-primary)]">{t('enrollmentManagement.createEnrollment')}</h2>
           </div>
           {formError && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-700 dark:text-red-400">
               <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
               {formError}
             </div>
           )}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.student')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('fields.student')}</label>
               <select required value={form.student} onChange={(e) => { setForm({ ...form, student: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.student; return n; }); }} className={`${selectCls} ${fieldErrors.student ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
                 <option value="">{t('filters.chooseStudent')}</option>
                 {students.map((s) => <option key={s.id} value={s.id}>{s.full_name}</option>)}
               </select>
-              {fieldErrors.student && <p className="mt-1 text-xs text-red-500">{fieldErrors.student}</p>}
+              {fieldErrors.student && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{fieldErrors.student}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{language === 'ar' ? 'الصف' : 'Class'}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{language === 'ar' ? 'الصف' : 'Class'}</label>
               <select required value={form.school_class} onChange={(e) => { setForm({ ...form, school_class: e.target.value, subject: '' }); setFieldErrors(fe => { const n = { ...fe }; delete n.school_class; return n; }); }} className={`${selectCls} ${fieldErrors.school_class ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
                 <option value="">{language === 'ar' ? 'اختر الصف' : 'Choose Class'}</option>
                 {schoolClasses.map((c: any) => <option key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</option>)}
               </select>
-              {fieldErrors.school_class && <p className="mt-1 text-xs text-red-500">{fieldErrors.school_class}</p>}
+              {fieldErrors.school_class && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{fieldErrors.school_class}</p>}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.subject')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('fields.subject')}</label>
               {dataLoading ? (
-                <div className={`${selectCls} flex items-center gap-2 text-gray-400`}>
+                <div className={`${selectCls} flex items-center gap-2 text-gray-400 dark:text-gray-500`}>
                   <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                   {language === 'ar' ? 'جارٍ التحميل...' : 'Loading...'}
                 </div>
@@ -292,7 +292,7 @@ export default function EnrollmentManagementPage() {
                     value={form.subject}
                     disabled={!form.school_class}
                     onChange={(e) => { setForm({ ...form, subject: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.subject; return n; }); }}
-                    className={`${selectCls} ${fieldErrors.subject ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''} ${!form.school_class ? 'cursor-not-allowed bg-gray-100 text-gray-400' : ''}`}
+                    className={`${selectCls} ${fieldErrors.subject ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''} ${!form.school_class ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500' : ''}`}
                   >
                     <option value="">{!form.school_class
                       ? (language === 'ar' ? 'اختر الصف أولاً' : 'Select a class first')
@@ -301,14 +301,14 @@ export default function EnrollmentManagementPage() {
                     {formSubjects.map((s) => <option key={s.id} value={s.id}>{language === 'ar' ? s.name_ar : s.name_en}</option>)}
                   </select>
                   {form.school_class && formSubjects.length === 0 && !dataError && (
-                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600">
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
                       <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
                       {language === 'ar' ? 'لا توجد مواد مخصصة لهذا الصف بعد' : 'No subjects have been assigned to this class yet'}
                     </p>
                   )}
                 </>
               )}
-              {fieldErrors.subject && <p className="mt-1 text-xs text-red-500">{fieldErrors.subject}</p>}
+              {fieldErrors.subject && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{fieldErrors.subject}</p>}
               {form.school_class && formSubjects.length > 0 && (
                 <p className="mt-1 text-xs text-gray-400 dark:text-[var(--color-text-muted)]">
                   {language === 'ar' ? `${formSubjects.length} مواد متاحة` : `${formSubjects.length} subject(s) available`}
@@ -316,12 +316,12 @@ export default function EnrollmentManagementPage() {
               )}
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500">{t('fields.teacher')}</label>
+              <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">{t('fields.teacher')}</label>
               <select value={form.ustaadh} onChange={(e) => { setForm({ ...form, ustaadh: e.target.value }); setFieldErrors(fe => { const n = { ...fe }; delete n.ustaadh; return n; }); }} className={`${selectCls} ${fieldErrors.ustaadh ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}>
                 <option value="">{t('enrollmentManagement.chooseOptionalTeacher')}</option>
                 {teachers.map((teacher) => <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>)}
               </select>
-              {fieldErrors.ustaadh && <p className="mt-1 text-xs text-red-500">{fieldErrors.ustaadh}</p>}
+              {fieldErrors.ustaadh && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{fieldErrors.ustaadh}</p>}
             </div>
             <div className="flex items-end gap-3 sm:col-span-2 lg:col-span-4">
               <button type="submit" disabled={saving || !form.student || !form.school_class || !form.subject} className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/25 transition-colors hover:bg-primary-700 disabled:opacity-50">
@@ -331,7 +331,7 @@ export default function EnrollmentManagementPage() {
                   <><svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>{t('common.create')}</>
                 )}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn-press rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50">{t('common.cancel')}</button>
+              <button type="button" onClick={() => setShowForm(false)} className="btn-press rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">{t('common.cancel')}</button>
             </div>
           </form>
         </div>
@@ -340,13 +340,13 @@ export default function EnrollmentManagementPage() {
       {loading ? (
         <div className="space-y-6"><SkeletonStatsGrid /><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}</div></div>
       ) : error ? (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-700 dark:text-red-400">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
           {error}
         </div>
       ) : !groupOrder.length ? (
         <div className="rounded-2xl border border-dashed border-gray-200 dark:border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-secondary)] py-16 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
             <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           </div>
           <p className="text-sm font-medium text-gray-900 dark:text-[var(--color-text-primary)]">{t('enrollmentManagement.noEnrollments')}</p>
@@ -358,7 +358,7 @@ export default function EnrollmentManagementPage() {
             {groupOrder.map((studentName) => {
               const items = grouped[studentName];
               return (
-                <div key={studentName} className="card-hover rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+                <div key={studentName} className="card-hover rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
                   <div className={`flex items-center gap-3 px-5 py-4 ${getAvatarColor(studentName)} bg-opacity-10`}>
                     <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white ${getAvatarColor(studentName)}`}>
                       {getInitials(studentName)}
@@ -372,7 +372,7 @@ export default function EnrollmentManagementPage() {
                   </div>
                   <ul className="divide-y divide-gray-50 dark:divide-[var(--color-border-light)]">
                     {items.map((e, idx) => (
-                      <li key={e.id} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50/60">
+                      <li key={e.id} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-700/50">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-[10px] font-bold text-primary-600">
                           {idx + 1}
                         </div>
@@ -387,7 +387,7 @@ export default function EnrollmentManagementPage() {
                         </span>
                         <button
                           onClick={() => handleDelete(e)}
-                          className="shrink-0 rounded-lg p-1.5 text-gray-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                          className="shrink-0 rounded-lg p-1.5 text-gray-300 dark:text-gray-600 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                           title={t('classSubjects.removeEnrollment')}
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>

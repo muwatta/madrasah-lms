@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Image, FileText, Table2, File, Paperclip } from 'lucide-react';
 import { guidanceAPI, subjectAPI } from '../../api';
 import { fetchAllPages } from '../../api/client';
 
@@ -195,12 +196,12 @@ export default function AITutorPage() {
   };
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return '🖼';
-    if (type.includes('pdf')) return '📄';
-    if (type.includes('spreadsheet') || type.includes('excel') || type.includes('xls')) return '📊';
-    if (type.includes('word') || type.includes('document')) return '📝';
-    if (type.includes('text') || type.includes('csv')) return '📃';
-    return '📎';
+    if (type.startsWith('image/')) return <Image className="w-4 h-4" />;
+    if (type.includes('pdf')) return <FileText className="w-4 h-4" />;
+    if (type.includes('spreadsheet') || type.includes('excel') || type.includes('xls')) return <Table2 className="w-4 h-4" />;
+    if (type.includes('word') || type.includes('document')) return <FileText className="w-4 h-4" />;
+    if (type.includes('text') || type.includes('csv')) return <File className="w-4 h-4" />;
+    return <Paperclip className="w-4 h-4" />;
   };
 
   const handleSend = async (e?: React.FormEvent) => {

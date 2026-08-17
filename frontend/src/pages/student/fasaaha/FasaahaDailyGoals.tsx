@@ -1,3 +1,4 @@
+import { CheckCircle2, CircleDashed, Clock, Target, TrendingUp } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaDailyGoal, useFasaahaWeeklyGoals } from '../../../hooks/useFasaaha';
 import { SkeletonCard } from '../../../components/Skeleton';
@@ -69,7 +70,7 @@ export default function FasaahaDailyGoals() {
       {today && (
         <div className="rounded-xl border p-5 text-center" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-card)' }}>
           <p className="text-3xl font-bold" style={{ color: today.is_achieved ? '#22c55e' : 'var(--color-text-primary)' }}>
-            {today.is_achieved ? '🎯' : '💪'} {today.points_earned} {t('fasaaha.points')}
+            {today.is_achieved ? <Target className="w-5 h-5 text-green-500 inline" /> : <TrendingUp className="w-5 h-5 text-blue-500 inline" />} {today.points_earned} {t('fasaaha.points')}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
             {today.is_achieved ? t('fasaaha.goalAchieved') : t('fasaaha.keepGoing')}
@@ -98,7 +99,7 @@ export default function FasaahaDailyGoals() {
                   <p className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>
                     {dayName}
                   </p>
-                  <p className="text-lg mt-0.5">{goal.is_achieved ? '✅' : goal.missions_completed > 0 ? '🟡' : '⬜'}</p>
+                  <p className="mt-0.5 flex justify-center">{goal.is_achieved ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : goal.missions_completed > 0 ? <Clock className="w-4 h-4 text-yellow-500" /> : <CircleDashed className="w-4 h-4 text-gray-300" />}</p>
                   <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                     {goal.points_earned}p
                   </p>

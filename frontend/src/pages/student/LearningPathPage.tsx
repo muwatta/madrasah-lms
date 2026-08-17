@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BookOpen, PenLine, Pencil, Play, BookMarked, Target, FileText } from 'lucide-react';
 import { learningAPI, subjectAPI } from '../../api';
 import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
@@ -34,13 +35,13 @@ interface LearningPath {
   created_at: string;
 }
 
-const TYPE_ICONS: Record<string, string> = {
-  lesson: '📖',
-  quiz: '📝',
-  practice: '✏️',
-  video: '🎬',
-  reading: '📚',
-  project: '🎯',
+const TYPE_ICONS: Record<string, React.ReactNode> = {
+  lesson: <BookOpen className="w-5 h-5" />,
+  quiz: <PenLine className="w-5 h-5" />,
+  practice: <Pencil className="w-5 h-5" />,
+  video: <Play className="w-5 h-5" />,
+  reading: <BookMarked className="w-5 h-5" />,
+  project: <Target className="w-5 h-5" />,
 };
 
 export default function LearningPathPage() {
@@ -178,7 +179,7 @@ export default function LearningPathPage() {
               }`}>
                 {item.is_completed ? '✓' : idx + 1}
               </span>
-              <span className="text-xl">{TYPE_ICONS[item.item_type] || '📋'}</span>
+              <span className="text-xl">{TYPE_ICONS[item.item_type] || <FileText className="w-5 h-5" />}</span>
               <div className="min-w-0 flex-1">
                 <p className={`text-sm font-medium ${item.is_completed ? 'text-emerald-700 dark:text-emerald-400' : 'text-[var(--color-text-primary)] dark:text-gray-100'}`}>
                   {item.title}

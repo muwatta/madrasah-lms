@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Flame } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaLeaderboard } from '../../../hooks/useFasaaha';
 import { SkeletonCard } from '../../../components/Skeleton';
@@ -90,7 +91,7 @@ export default function FasaahaLeaderboard() {
                   <div className="flex gap-3 mt-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
                     <span>{entry.missions_completed} {t('fasaaha.missionsDone')}</span>
                     <span>{Math.round(entry.average_score)}% {t('fasaaha.avgScore')}</span>
-                    {entry.current_streak > 0 && <span>🔥 {entry.current_streak}d</span>}
+                    {entry.current_streak > 0 && <span><Flame className="w-4 h-4 text-orange-500 inline" /> {entry.current_streak}d</span>}
                   </div>
                 </div>
 

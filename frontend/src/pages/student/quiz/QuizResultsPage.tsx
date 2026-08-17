@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PartyPopper } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useQuizResults } from '../../../hooks/useQuiz';
 import { useGapAnalysis } from '../../../hooks/useQuestionBanks';
@@ -38,7 +39,7 @@ function GapAnalysisCard({ bankId, attemptUuid }: { bankId: number; attemptUuid:
         {data?.analysis}
       </div>
       {data?.wrong_count === 0 && (
-        <p className="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">🎉</p>
+        <p className="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><PartyPopper className="w-6 h-6 text-yellow-500" /></p>
       )}
     </div>
   );

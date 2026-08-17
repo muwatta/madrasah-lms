@@ -4,6 +4,7 @@ import { schoolAPI, userAPI } from '../../api';
 import { fetchAllPages } from '../../api/client';
 import { useLanguage } from '../../context/LanguageContext';
 import { Skeleton, SkeletonCard, SkeletonChart } from '../../components/Skeleton';
+import { AlertTriangle, ClipboardList, Sparkles } from 'lucide-react';
 
 interface Student {
   id: number;
@@ -56,9 +57,9 @@ function getBarFill(score: number) {
 }
 
 function getRecommendationIcon(type: string) {
-  if (type === 'weak_subject') return { icon: '⚠️', style: 'border-amber-200 bg-amber-50' };
-  if (type === 'attendance') return { icon: '📋', style: 'border-blue-200 bg-blue-50' };
-  return { icon: '🌟', style: 'border-emerald-200 bg-emerald-50' };
+  if (type === 'weak_subject') return { icon: <AlertTriangle className="w-5 h-5 text-red-500" />, style: 'border-amber-200 bg-amber-50' };
+  if (type === 'attendance') return { icon: <ClipboardList className="w-5 h-5 text-blue-500" />, style: 'border-blue-200 bg-blue-50' };
+  return { icon: <Sparkles className="w-5 h-5 text-green-500" />, style: 'border-emerald-200 bg-emerald-50' };
 }
 
 function getDisplayName(s: Student) {
@@ -360,7 +361,7 @@ export default function StudentReportPage() {
                   const { icon, style } = getRecommendationIcon(rec.type);
                   return (
                     <div key={i} className={`flex items-start gap-3 rounded-lg border p-4 ${style}`}>
-                      <span className="mt-0.5 text-lg">{icon}</span>
+                      <span className="mt-0.5">{icon}</span>
                       <div className="flex-1">
                         <p className="inline-block rounded-full bg-white/60 dark:bg-gray-800/60 px-2 py-0.5 text-[10px] font-semibold text-gray-600 dark:text-[var(--color-text-secondary)]">
                           {rec.type === 'weak_subject' ? (language === 'ar' ? 'مادة ضعيفة' : 'Weak Subject') : rec.type === 'attendance' ? (language === 'ar' ? 'حضور' : 'Attendance') : (language === 'ar' ? 'متقدم' : 'Advanced')}

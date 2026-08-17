@@ -1,4 +1,4 @@
-import { Award, Lock } from 'lucide-react';
+import { Award, Lock, Medal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaAllBadges, useFasaahaMyBadges } from '../../../hooks/useFasaaha';
@@ -71,8 +71,8 @@ export default function BadgesSection() {
                 }}
                 title={isEarned ? t('fasaaha.earned') : `${t('fasaaha.earnBy')}: ${badge.description}`}
               >
-                <span className={`text-2xl ${isEarned ? '' : 'grayscale'}`} aria-hidden>
-                  {badge.icon || '🏅'}
+                <span className={`${isEarned ? '' : 'grayscale'}`} aria-hidden>
+                  {badge.icon ? <span className="text-2xl">{badge.icon}</span> : <Medal className="w-6 h-6 text-yellow-500 mx-auto" />}
                 </span>
                 <p className="line-clamp-1 w-full text-[11px] font-semibold leading-tight" style={{ color: 'var(--color-text-primary)' }}>
                   {name}

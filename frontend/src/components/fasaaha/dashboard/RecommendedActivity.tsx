@@ -1,4 +1,4 @@
-import { Bot, Clock, PlayCircle, Sparkles } from 'lucide-react';
+import { Bot, Clock, MessageSquare, PlayCircle, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaMissions } from '../../../hooks/useFasaaha';
@@ -65,7 +65,7 @@ export default function RecommendedActivity({ dashboard }: RecommendedActivityPr
         <>
           <div className="mt-4 flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
             <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-2xl dark:bg-primary-900/30" aria-hidden>
-              {mType ? (MISSION_TYPE_ICONS[mType] ?? '🗣️') : '🗣️'}
+              {mType ? (MISSION_TYPE_ICONS[mType] ?? <MessageSquare className="w-5 h-5" />) : <MessageSquare className="w-5 h-5" />}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">

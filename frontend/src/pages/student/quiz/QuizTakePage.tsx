@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Flag } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useQuiz, useStartQuizAttempt, useQuizAttempt, useSaveAnswer, useFlagQuestion, useSubmitQuiz, useReportViolation } from '../../../hooks/useQuiz';
 import type { QuizAttempt, QuizAnswerItem } from '../../../types';
@@ -111,16 +112,16 @@ export default function QuizTakePage() {
       <div className="max-w-xl mx-auto space-y-6">
         <button onClick={() => navigate('/student/quiz')} className="text-sm text-primary-600 hover:underline">{t('quiz.backToList') || 'Back to Quizzes'}</button>
         {quiz && (
-          <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
-            <h1 className="text-xl font-bold text-gray-900">{quiz.title}</h1>
-            {quiz.instructions && <p className="text-sm text-gray-500 whitespace-pre-line">{quiz.instructions}</p>}
-            <div className="grid grid-cols-2 gap-3 text-sm text-gray-700">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 space-y-4">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{quiz.title}</h1>
+            {quiz.instructions && <p className="text-sm text-gray-500 dark:text-gray-400 whitespace-pre-line">{quiz.instructions}</p>}
+            <div className="grid grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
               <div>{t('quiz.timeLimit') || 'Time Limit'}: {quiz.time_limit_minutes}min</div>
               <div>{t('quiz.questions') || 'Questions'}: {quiz.question_count}</div>
               <div>{t('quiz.totalMarks') || 'Total Marks'}: {quiz.total_marks}</div>
               <div>{t('quiz.passingScore') || 'Passing Score'}: {quiz.passing_score}%</div>
               <div>{t('quiz.maxAttempts') || 'Max Attempts'}: {quiz.max_attempts}</div>
-              {quiz.require_fullscreen && <div className="col-span-2 text-orange-500 font-medium">{t('quiz.requiresFullscreen') || 'Requires fullscreen mode'}</div>}
+              {quiz.require_fullscreen && <div className="col-span-2 text-orange-500 dark:text-orange-400 font-medium">{t('quiz.requiresFullscreen') || 'Requires fullscreen mode'}</div>}
             </div>
             <button onClick={handleStart} disabled={startAttempt.isPending}
               className="w-full py-3 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 disabled:opacity-50 transition-colors">
@@ -136,34 +137,34 @@ export default function QuizTakePage() {
     const isReleased = attempt.status === 'released';
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-xl font-bold text-gray-900">{t('quiz.results') || 'Results'}</h1>
-        <div className="rounded-xl border border-gray-200 bg-white p-6 text-center space-y-3">
-          <p className={`text-4xl font-bold ${attempt.is_pass ? 'text-green-600' : 'text-red-500'}`}>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t('quiz.results') || 'Results'}</h1>
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 text-center space-y-3">
+          <p className={`text-4xl font-bold ${attempt.is_pass ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
             {attempt.percentage !== null ? `${attempt.percentage}%` : '—'}
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {attempt.score}/{attempt.total_marks} {t('quiz.marks') || 'marks'}
           </p>
-          <p className={`text-sm font-medium ${attempt.is_pass ? 'text-green-600' : 'text-red-500'}`}>
+          <p className={`text-sm font-medium ${attempt.is_pass ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
             {attempt.is_pass ? (t('quiz.passed') || 'PASSED') : (t('quiz.failed') || 'FAILED')}
           </p>
-          {!isReleased && <p className="text-xs text-orange-500">{t('quiz.pendingRelease') || 'Results pending teacher release'}</p>}
+          {!isReleased && <p className="text-xs text-orange-500 dark:text-orange-400">{t('quiz.pendingRelease') || 'Results pending teacher release'}</p>}
         </div>
         {isReleased && (
           <div className="space-y-3">
             {attempt.answers.map((ans: QuizAnswerItem) => (
-              <div key={ans.id} className={`rounded-xl border p-4 ${ans.is_correct ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                <p className="text-sm font-medium text-gray-900">{ans.question_text}</p>
-                <div className="mt-2 text-sm text-gray-700">
-                  <p>Your answer: <span className={ans.is_correct ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>{ans.selected_answer || '—'}</span></p>
-                  {!ans.is_correct && <p>Correct: <span className="text-green-600 font-medium">{ans.correct_answer}</span></p>}
-                  {ans.explanation && <p className="mt-1 text-xs text-gray-500">{ans.explanation}</p>}
+              <div key={ans.id} className={`rounded-xl border p-4 ${ans.is_correct ? 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20' : 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20'}`}>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{ans.question_text}</p>
+                <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                  <p>Your answer: <span className={ans.is_correct ? 'text-green-600 dark:text-green-400 font-medium' : 'text-red-500 dark:text-red-400 font-medium'}>{ans.selected_answer || '—'}</span></p>
+                  {!ans.is_correct && <p>Correct: <span className="text-green-600 dark:text-green-400 font-medium">{ans.correct_answer}</span></p>}
+                  {ans.explanation && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{ans.explanation}</p>}
                 </div>
               </div>
             ))}
           </div>
         )}
-        <button onClick={() => navigate('/student/quiz')} className="w-full py-3 rounded-xl border border-gray-200 bg-white text-gray-900 font-medium hover:bg-gray-50 transition-colors">
+        <button onClick={() => navigate('/student/quiz')} className="w-full py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
           {t('quiz.backToList') || 'Back to Quizzes'}
         </button>
       </div>
@@ -178,13 +179,13 @@ export default function QuizTakePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-3">
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
         <div className="flex items-center gap-4">
-          <span className={`text-sm font-semibold ${timeLeft < 300 ? 'text-red-500' : 'text-gray-900'}`}>
+          <span className={`text-sm font-semibold ${timeLeft < 300 ? 'text-red-500 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>
             {formatTime(timeLeft)}
           </span>
-          <span className="text-xs text-gray-500">{answeredCount}/{answers.length}</span>
-          {flaggedCount > 0 && <span className="text-xs text-orange-500">🚩 {flaggedCount}</span>}
+          <span className="text-xs text-gray-500 dark:text-gray-400">{answeredCount}/{answers.length}</span>
+          {flaggedCount > 0 && <span className="text-xs text-orange-500 dark:text-orange-400 flex items-center gap-1"><Flag className="w-4 h-4 text-red-500 dark:text-red-400" /> {flaggedCount}</span>}
         </div>
         <button onClick={() => setShowConfirm(true)} className="btn-press px-4 py-1.5 rounded-lg bg-primary-600 text-white text-xs font-semibold">
           {t('quiz.submit') || 'Submit'}
@@ -196,25 +197,25 @@ export default function QuizTakePage() {
           <button key={a.id} onClick={() => setCurrentIndex(i)}
             className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${
               i === currentIndex ? 'bg-primary-600 text-white' :
-              a.selected_answer ? 'bg-green-100 text-green-700' :
-              a.is_flagged ? 'bg-orange-100 text-orange-700' :
-              'bg-gray-100 text-gray-500'
+              a.selected_answer ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+              a.is_flagged ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' :
+              'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
             }`}>
             {i + 1}
           </button>
         ))}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 space-y-4">
         <div className="flex items-start justify-between">
-          <p className="text-xs font-medium text-gray-500">
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
             {t('quiz.question') || 'Question'} {currentIndex + 1} / {answers.length}
           </p>
           <button onClick={() => handleFlag(current.question)} className="text-lg">
-            {current.is_flagged ? '🚩' : '⚑'}
+            {current.is_flagged ? <Flag className="w-4 h-4 text-red-500 dark:text-red-400" /> : '⚑'}
           </button>
         </div>
-        <p className="text-base leading-relaxed text-gray-900">{current.question_text}</p>
+        <p className="text-base leading-relaxed text-gray-900 dark:text-gray-100">{current.question_text}</p>
 
         <div className="space-y-2">
           {current.question_type === 'true_false' ? (
@@ -223,8 +224,8 @@ export default function QuizTakePage() {
                 <button key={opt.key} onClick={() => handleAnswer(current.question, opt.key)}
                   className={`w-full text-left p-3 rounded-lg border text-sm font-medium transition-colors ${
                     localAnswers[current.question] === opt.key
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                   }`}>
                   ({opt.key}) {opt.text}
                 </button>
@@ -236,15 +237,15 @@ export default function QuizTakePage() {
               onChange={(e) => handleAnswer(current.question, e.target.value)}
               rows={3}
               placeholder={t('quiz.typeAnswer') || 'Type your answer here...'}
-              className="w-full p-3 rounded-lg border border-gray-200 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+              className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           ) : (
             (current.options || []).map(opt => (
               <button key={opt.key} onClick={() => handleAnswer(current.question, opt.key)}
                 className={`w-full text-left p-3 rounded-lg border text-sm font-medium transition-colors ${
                   localAnswers[current.question] === opt.key
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                    ? 'border-primary-500 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
+                    : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                 }`}>
                 ({opt.key}) {opt.text}
               </button>
@@ -256,7 +257,7 @@ export default function QuizTakePage() {
       <div className="flex justify-between">
         {quiz?.allow_back_navigation ? (
           <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0}
-            className="btn-press px-4 py-2 rounded-lg border border-gray-200 text-gray-900 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 transition-colors">
+            className="btn-press px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-medium disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
             {t('quiz.previous') || 'Previous'}
           </button>
         ) : <div />}
@@ -268,13 +269,13 @@ export default function QuizTakePage() {
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
-          <div className="rounded-xl border border-gray-200 bg-white p-6 max-w-sm w-full mx-4 space-y-4">
-            <h3 className="text-lg font-bold text-gray-900">{t('quiz.confirmSubmit') || 'Submit Quiz?'}</h3>
-            <p className="text-sm text-gray-500">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 max-w-sm w-full mx-4 space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t('quiz.confirmSubmit') || 'Submit Quiz?'}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {t('quiz.submitWarning') || `You have answered ${answeredCount} of ${answers.length} questions. This cannot be undone.`}
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 rounded-lg border border-gray-200 text-gray-900 text-sm font-medium hover:bg-gray-50 transition-colors">
+              <button onClick={() => setShowConfirm(false)} className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 {t('quiz.cancel') || 'Cancel'}
               </button>
               <button onClick={handleSubmit} disabled={submitQuiz.isPending}

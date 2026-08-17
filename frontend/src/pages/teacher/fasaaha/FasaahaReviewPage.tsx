@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaPendingReviews, useFasaahaSubmitReview } from '../../../hooks/useFasaaha';
 import ScoreDisplay from '../../../components/fasaaha/ScoreDisplay';
@@ -36,7 +37,7 @@ export default function FasaahaReviewPage() {
   if (pending.length === 0 && !selected) {
     return (
       <div className="text-center py-12">
-        <span className="text-4xl block mb-3">✅</span>
+        <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
         <p className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>{t('fasaaha.noPendingReviews')}</p>
         {reviewed > 0 && <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>{reviewed} {t('fasaaha.reviews')}</p>}
       </div>

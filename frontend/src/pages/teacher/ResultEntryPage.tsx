@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { resultsAPI, enrollmentAPI, academicAPI, schoolClassAPI } from '../../api'
 import { unwrapPaginated, fetchAllPages } from '../../api/client'
 import toast from 'react-hot-toast'
+import { Calendar, CalendarDays, BookOpen, School, Zap } from 'lucide-react'
 
 interface Subject {
   id: number
@@ -490,7 +491,7 @@ export default function ResultEntryPage() {
 
   const selectCls = 'w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2.5 text-sm text-[var(--color-text-primary)] transition-colors focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/30'
 
-  const DropdownLabel = ({ icon, label }: { icon: string; label: string }) => (
+  const DropdownLabel = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
     <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-[var(--color-text-secondary)] dark:text-gray-400">
       <span className="text-sm">{icon}</span>
       {label}
@@ -524,7 +525,7 @@ export default function ResultEntryPage() {
       <div className="mb-6 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-primary)] p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <DropdownLabel icon="📅" label={t('results.selectYear')} />
+            <DropdownLabel icon={<Calendar className="w-4 h-4 text-gray-500" />} label={t('results.selectYear')} />
             <select
               className={selectCls}
               value={selectedSession}
@@ -544,7 +545,7 @@ export default function ResultEntryPage() {
           </div>
 
           <div>
-            <DropdownLabel icon="🗓️" label={t('results.term')} />
+            <DropdownLabel icon={<CalendarDays className="w-4 h-4 text-gray-500" />} label={t('results.term')} />
             <select
               className={selectCls}
               value={selectedTerm}
@@ -559,7 +560,7 @@ export default function ResultEntryPage() {
           </div>
 
           <div>
-            <DropdownLabel icon="📖" label={t('results.subject')} />
+            <DropdownLabel icon={<BookOpen className="w-4 h-4 text-gray-500" />} label={t('results.subject')} />
             <select
               className={selectCls}
               value={selectedSubject}
@@ -573,7 +574,7 @@ export default function ResultEntryPage() {
           </div>
 
           <div>
-            <DropdownLabel icon="🏫" label={t('results.selectClass')} />
+            <DropdownLabel icon={<School className="w-4 h-4 text-gray-500" />} label={t('results.selectClass')} />
             <select
               className={selectCls}
               value={selectedClass}
@@ -611,7 +612,7 @@ export default function ResultEntryPage() {
             disabled={loading || students.length === 0}
             className="btn-press inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50"
           >
-            <span>⚡</span>
+            <span><Zap className="w-4 h-4" /></span>
             {t('results.generateComponents')}
           </button>
           {canManageComponents && (

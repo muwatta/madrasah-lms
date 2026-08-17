@@ -1,3 +1,4 @@
+import { Flame } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useFasaahaProgress, useFasaahaAttempts, useFasaahaStreak } from '../../../hooks/useFasaaha';
 import { SkeletonStatsGrid } from '../../../components/Skeleton';
@@ -24,7 +25,7 @@ export default function FasaahaMyProgress() {
         {[
           { label: t('fasaaha.totalAttempts'), value: attempts.length },
           { label: t('fasaaha.avgScore'), value: `${avgScore}%` },
-          { label: t('fasaaha.currentStreak'), value: `${streak?.current_streak ?? 0} 🔥` },
+          { label: t('fasaaha.currentStreak'), value: <>{streak?.current_streak ?? 0} <Flame className="w-5 h-5 text-orange-500 inline" /></> },
           { label: t('fasaaha.longestStreak'), value: streak?.longest_streak ?? 0 },
         ].map(s => (
           <div key={s.label} className="rounded-xl border p-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>

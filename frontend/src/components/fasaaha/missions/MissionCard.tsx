@@ -1,4 +1,4 @@
-import { Clock, Mic } from 'lucide-react';
+import { Clock, MessageSquare, Mic } from 'lucide-react';
 import { useLanguage } from '../../../context/LanguageContext';
 import type { Mission, MissionType } from '../../../types';
 import { MISSION_TYPE_ICONS, MISSION_TYPE_LABELS } from '../../../types';
@@ -58,7 +58,7 @@ export default function MissionCard({ mission, progress, onStart }: MissionCardP
         {mission.category_name ?? t('fasaaha.allCategories')}
         {' · '}
         <span className="inline-flex items-center gap-1">
-          {MISSION_TYPE_ICONS[mType] ?? '🗣️'}
+          {MISSION_TYPE_ICONS[mType] ?? <MessageSquare className="w-5 h-5" />}
           {MISSION_TYPE_LABELS[mType] ?? mType}
         </span>
       </p>
