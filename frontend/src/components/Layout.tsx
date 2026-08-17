@@ -7,6 +7,7 @@ import { notificationAPI } from '../api';
 import { fetchAllPages } from '../api/client';
 import PageNavigation from './PageNavigation';
 import GlobalSearch from './GlobalSearch';
+import Breadcrumbs from './Breadcrumbs';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import type { User } from '../types';
 
@@ -616,7 +617,7 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)' }}><div className="page-enter"><Outlet /><PageNavigation links={links} /></div></main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)' }}><div className="page-enter"><Breadcrumbs /><Outlet /><PageNavigation links={links} /></div></main>
       </div>
       <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
