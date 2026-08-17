@@ -1,13 +1,28 @@
 import { useState, useEffect, useMemo } from 'react';
 import { examAPI } from '../../api';
 import { fetchAllPages } from '../../api/client';
-import type { ExamResult } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { SkeletonStatsGrid, SkeletonCard } from '../../components/Skeleton';
 
+interface SubjectResult {
+  id: number;
+  student: number;
+  student_name: string;
+  subject: number;
+  subject_name: string;
+  term: number;
+  term_name: string;
+  school_class: number;
+  school_class_name: string;
+  total_score: string;
+  grade: string;
+  grade_remark: string;
+  submitted_at: string | null;
+}
+
 export default function ExamResultsPage() {
   const { t } = useLanguage();
-  const [results, setResults] = useState<ExamResult[]>([]);
+  const [results, setResults] = useState<SubjectResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -26,7 +41,7 @@ export default function ExamResultsPage() {
 
   const stats = useMemo(() => {
     if (results.length === 0) return null;
-    const scores = results.map((r) => r.score);
+    const scores = results.map((r) => parseFloat(r.total_score) || 0);
     const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length;
     const grades = results.map((r) => r.grade);
     const gradeCounts: Record<string, number> = {};
@@ -132,7 +147,7 @@ export default function ExamResultsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{result.exam_title}</h2>
+                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{result.subject_name}</h2>
                       {passed && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
                           {t('enrollmentStatus.passed')}
@@ -140,15 +155,15 @@ export default function ExamResultsPage() {
                       )}
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      {t('student.recordedOn')} {new Date(result.recorded_at).toLocaleDateString()}
+                      {result.school_class_name}{result.term_name ? ` · ${result.term_name}` : ''}
                     </p>
-                    {result.remarks && (
-                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 italic">{result.remarks}</p>
+                    {result.grade_remark && (
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 italic">{result.grade_remark}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{result.score}</div>
+                      <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">{result.total_score}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">{t('fields.score')}</div>
                     </div>
                     <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold ${gradeTextColor} bg-gray-50 dark:bg-gray-700`}>
