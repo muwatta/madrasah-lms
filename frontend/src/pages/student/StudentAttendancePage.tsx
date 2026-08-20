@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { attendanceAPI } from '../../api';
 import { useLanguage } from '../../context/LanguageContext';
 import StatCard from '../../components/StatCard';
@@ -39,6 +39,24 @@ export default function StudentAttendancePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const attendanceStatus = useMemo(() => {
+    if (!analytics) return { label: t('attendance.weeklyRate'), color: 'text-primary-600 dark:text-primary-400' };
+    if (analytics.weekly_rate >= 90) return { label: t('attendance.excellent'), color: 'text-emerald-600 dark:text-emerald-400' };
+    if (analytics.weekly_rate >= 75) return { label: t('attendance.good'), color: 'text-primary-600 dark:text-primary-400' };
+    if (analytics.weekly_rate >= 60) return { label: t('attendance.fair'), color: 'text-amber-600 dark:text-amber-400' };
+    return { label: t('attendance.needsAttention'), color: 'text-red-600 dark:text-red-400' };
+  }, [analytics, t]);
+
+  const attendanceBreakdown = useMemo(() => {
+    if (!analytics) return [];
+    return [
+      { key: 'present', label: t('attendance.present'), value: analytics.days_present, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+      { key: 'absent', label: t('attendance.absent'), value: analytics.days_absent, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+      { key: 'late', label: t('attendance.late'), value: analytics.days_late, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+      { key: 'excused', label: t('attendance.excused'), value: analytics.days_excused, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    ];
+  }, [analytics, t]);
+
   useEffect(() => {
     attendanceAPI.analytics()
       .then((res) => setAnalytics(res.data))
@@ -65,6 +83,21 @@ export default function StudentAttendancePage() {
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('attendance.myAttendance')}</h1>
       </div>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{t('guides.studentAttendance')}</p>
+
+      <div className="mb-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">{t('attendance.weeklyRate')}</p>
+            <h2 className={`mt-2 text-3xl font-bold ${attendanceStatus.color}`}>{analytics.weekly_rate}%</h2>
+          </div>
+          <div className="rounded-lg bg-gray-50 dark:bg-gray-700/50 px-3 py-2 text-sm text-gray-600 dark:text-gray-300">
+            <span className="font-semibold">{attendanceStatus.label}</span>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {analytics.total_days > 0 ? `${analytics.total_days} ${t('attendance.daysTracked')}` : t('attendance.noAttendanceYet')}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8">
         <StatCard
@@ -97,6 +130,18 @@ export default function StudentAttendancePage() {
         />
       </div>
 
+      <div className="mb-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">{t('attendance.statusBreakdown')}</h2>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {attendanceBreakdown.map((item) => (
+            <div key={item.key} className={`rounded-lg border border-transparent p-3 ${item.color}`}>
+              <p className="text-xs font-medium uppercase tracking-wider opacity-80">{item.label}</p>
+              <p className="mt-2 text-2xl font-bold">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
         <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
           <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t('attendance.recentRecords')}</h2>
@@ -116,22 +161,24 @@ export default function StudentAttendancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
-                {analytics.recent_records.map((record) => {
-                  const style = STATUS_STYLES[record.status] || STATUS_STYLES.absent;
-                  return (
-                    <tr key={record.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50">
-                      <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-gray-300">{formatDate(record.date)}</td>
-                      {record.subject_name !== undefined && (
-                        <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-gray-300">{record.subject_name}</td>
-                      )}
-                      <td className="px-6 py-3.5">
-                        <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${style.bg} ${style.text}`}>
-                          {t(style.labelKey)}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {[...(analytics.recent_records ?? [])]
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                  .map((record) => {
+                    const style = STATUS_STYLES[record.status] || STATUS_STYLES.absent;
+                    return (
+                      <tr key={record.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/50">
+                        <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-gray-300">{formatDate(record.date)}</td>
+                        {record.subject_name !== undefined && (
+                          <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-gray-300">{record.subject_name}</td>
+                        )}
+                        <td className="px-6 py-3.5">
+                          <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${style.bg} ${style.text}`}>
+                            {t(style.labelKey)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>

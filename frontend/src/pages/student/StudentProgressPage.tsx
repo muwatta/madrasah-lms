@@ -74,9 +74,9 @@ export default function StudentProgressPage() {
   useEffect(() => {
     dashboardAPI.studentProgress()
       .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.detail || 'Failed to load progress'))
+      .catch((err) => setError(err.response?.data?.detail || t('studentProgress.loadFailed')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (

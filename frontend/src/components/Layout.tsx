@@ -306,7 +306,7 @@ export default function Layout() {
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin">
         {visibleLinks.map((link, i) => {
-          const isActive = location.pathname === link.path;
+          const isActive = location.pathname === link.path || location.pathname.startsWith(`${link.path}/`);
           return (
             <Link
               key={link.path}
@@ -408,6 +408,7 @@ export default function Layout() {
               onClick={toggleTheme}
               className="btn-press rounded-lg border border-gray-200 p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {theme === 'dark' ? (
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,6 +426,7 @@ export default function Layout() {
               onClick={toggleLanguage}
               className="btn-press flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
               title={t('common.toggleLanguage')}
+              aria-label={t('common.toggleLanguage')}
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -438,6 +440,7 @@ export default function Layout() {
               className="btn-press flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
               style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
               title={t('common.searchHint')}
+              aria-label={t('common.search')}
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -452,6 +455,9 @@ export default function Layout() {
               onClick={toggleNotifMenu}
               className="btn-press relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
               title={t('common.notifications')}
+              aria-label={t('common.notifications')}
+              aria-expanded={notifMenuOpen}
+              aria-haspopup="menu"
             >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -522,6 +528,9 @@ export default function Layout() {
               <button
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
                 className="btn-press flex items-center gap-2 rounded-lg border py-1.5 ps-1.5 pe-2.5 text-sm font-medium transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                aria-label={t('common.currentAccount')}
+                aria-expanded={accountMenuOpen}
+                aria-haspopup="menu"
               >
                 {user && (
                   <span className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-white ${roleColors[user.role]}`}>

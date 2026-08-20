@@ -58,12 +58,12 @@ export default function AudioRecorder({
   };
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
+    if (mediaRecorderRef.current?.state === "recording") {
       mediaRecorderRef.current.stop();
     }
     clearTimer();
     setIsRecording(false);
-  }, [isRecording, clearTimer]);
+  }, [clearTimer]);
 
   const startRecording = useCallback(async () => {
     setError(null);

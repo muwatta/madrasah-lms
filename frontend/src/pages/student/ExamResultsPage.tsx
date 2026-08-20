@@ -57,6 +57,15 @@ export default function ExamResultsPage() {
     };
   }, [results]);
 
+  const sortedResults = useMemo(() => (
+    [...results].sort((a, b) => {
+      if (!a.submitted_at && !b.submitted_at) return 0;
+      if (!a.submitted_at) return 1;
+      if (!b.submitted_at) return -1;
+      return new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime();
+    })
+  ), [results]);
+
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
@@ -129,7 +138,7 @@ export default function ExamResultsPage() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {results.map((result) => {
+          {sortedResults.map((result) => {
             const gradeColor =
               result.grade === 'A' ? 'border-green-300 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10' :
               result.grade === 'B' ? 'border-blue-300 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10' :

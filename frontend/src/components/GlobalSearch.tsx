@@ -128,6 +128,9 @@ export default function GlobalSearch({ open, onClose }: Props) {
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('common.search')}
         className="relative z-10 w-full max-w-xl rounded-2xl border shadow-2xl animate-scale-in overflow-hidden"
         style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}
       >
@@ -142,6 +145,7 @@ export default function GlobalSearch({ open, onClose }: Props) {
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('common.searchPlaceholder')}
+            aria-label={t('common.searchPlaceholder')}
             className="h-14 flex-1 bg-transparent text-base outline-none"
             style={{ color: 'var(--color-text-primary)' }}
           />

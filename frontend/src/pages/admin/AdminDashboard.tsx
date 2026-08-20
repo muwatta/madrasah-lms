@@ -45,6 +45,7 @@ export default function AdminDashboard() {
   if (!data) return null;
 
   const perfColor = (data.average_performance ?? 0) >= 70 ? 'text-green-600 dark:text-green-400' : (data.average_performance ?? 0) >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400';
+  const totalActiveMembers = (data.total_users ?? 0) - (data.pending_guests ?? 0);
 
   return (
     <div className="space-y-6">
@@ -68,6 +69,29 @@ export default function AdminDashboard() {
           </a>
         </div>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{t('guides.adminDashboard')}</p>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">{t('adminDashboard.schoolOverview')}</p>
+          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{totalActiveMembers}</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{t('adminDashboard.activeMembers')}</p>
+        </div>
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{t('adminDashboard.avgPerformance')}</p>
+          <p className={`mt-2 text-3xl font-bold ${perfColor}`}>{(data.average_performance ?? 0).toFixed(1)}%</p>
+          <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">{t('adminDashboard.performanceHealth')}</p>
+        </div>
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">{t('adminDashboard.pendingApprovals')}</p>
+          <p className="mt-2 text-3xl font-bold text-amber-900 dark:text-amber-100">{data.pending_guests ?? 0}</p>
+          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{t('adminDashboard.reviewNow')}</p>
+        </div>
+        <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4 shadow-sm">
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">{t('adminDashboard.subjectStats')}</p>
+          <p className="mt-2 text-3xl font-bold text-blue-900 dark:text-blue-100">{data.total_subjects ?? 0}</p>
+          <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">{t('adminDashboard.subjectsCovered')}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
