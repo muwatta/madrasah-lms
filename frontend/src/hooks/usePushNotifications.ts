@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { pushAPI } from '../api';
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -80,13 +80,6 @@ export function usePushNotifications() {
       }
     } catch (err) {
       console.error('[Push] Unsubscribe failed:', err);
-    }
-  }, []);
-
-  // Auto-register service worker on mount
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
   }, []);
 

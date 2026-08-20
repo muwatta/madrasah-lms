@@ -99,6 +99,8 @@ export const translations = {
     toggleLanguage: { ar: 'التبديل إلى الإنجليزية', en: 'Switch to Arabic' },
     toggleTheme: { ar: 'التبديل إلى الوضع الداكن', en: 'Switch to dark mode' },
     toggleThemeLight: { ar: 'التبديل إلى الوضع الفاتح', en: 'Switch to light mode' },
+    installApp: { ar: 'تثبيت التطبيق', en: 'Install app' },
+    installAppLabel: { ar: 'تثبيت تطبيق المدرسة على جهازك', en: 'Install the school app on your device' },
     confirm: { ar: 'تأكيد', en: 'Confirm' },
     switchAccount: { ar: 'تبديل الحساب', en: 'Switch Account' },
     savedAccounts: { ar: 'الحسابات المحفوظة', en: 'Saved Accounts' },

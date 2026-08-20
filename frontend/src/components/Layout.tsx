@@ -9,6 +9,7 @@ import PageNavigation from './PageNavigation';
 import GlobalSearch from './GlobalSearch';
 import Breadcrumbs from './Breadcrumbs';
 import { usePushNotifications } from '../hooks/usePushNotifications';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import type { User } from '../types';
 
 interface NavLink {
@@ -185,6 +186,7 @@ export default function Layout() {
   const { user, logout, switchAccount, getStoredSessions, removeStoredSession } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const { canInstall, install } = useInstallPrompt();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -448,6 +450,20 @@ export default function Layout() {
               <span className="hidden sm:inline" style={{ color: 'var(--color-text-muted)' }}>{t('common.search')}</span>
               <kbd className="hidden rounded border px-1.5 py-0.5 text-[10px] font-semibold sm:inline-block" style={{ color: 'var(--color-text-muted)', borderColor: 'var(--color-border)' }}>⌘K</kbd>
             </button>
+
+            {canInstall && (
+              <button
+                onClick={() => { void install(); }}
+                className="btn-press hidden items-center gap-2 rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-700 sm:flex"
+                title={t('common.installAppLabel')}
+                aria-label={t('common.installAppLabel')}
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14a2 2 0 002-2v-2M3 17v2a2 2 0 002 2" />
+                </svg>
+                {t('common.installApp')}
+              </button>
+            )}
 
             {/* Notification bell */}
             <div className="relative" ref={notifRef}>
