@@ -1,7 +1,6 @@
 export type Language = 'ar' | 'en';
 
 export const translations = {
-  // Navigation
   nav: {
     dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
     availableQuizzes: { ar: 'الاختبارات المتاحة', en: 'Available Quizzes' },
@@ -57,7 +56,6 @@ export const translations = {
     scoreTrends: { ar: 'اتجاهات الدرجات', en: 'Score Trends' },
     myExamResults: { ar: 'نتائج الامتحانات', en: 'My Exam Results' },
   },
-  // Roles
   roles: {
     guest: { ar: 'ضيف (قيد المراجعة)', en: 'Guest (Pending)' },
     student: { ar: 'طالب', en: 'Student' },
@@ -66,7 +64,6 @@ export const translations = {
     mudeer: { ar: 'مدير', en: 'Admin' },
     idaarah: { ar: 'مجلس الإدارة', en: 'Board' },
   },
-  // Common
   common: {
     save: { ar: 'حفظ', en: 'Save' },
     cancel: { ar: 'إلغاء', en: 'Cancel' },
@@ -176,7 +173,6 @@ export const translations = {
     saveFailed: { ar: 'فشل الحفظ', en: 'Failed to save' },
     deleteFailed: { ar: 'فشل الحذف', en: 'Failed to delete' },
   },
-  // Fields
   fields: {
     email: { ar: 'البريد الإلكتروني', en: 'Email' },
     password: { ar: 'كلمة المرور', en: 'Password' },
@@ -223,7 +219,6 @@ export const translations = {
     attempt: { ar: 'المحاولة', en: 'Attempt' },
     surahNumber: { ar: 'رقم السورة', en: 'Surah Number' },
   },
-  // Auth
   auth: {
     signIn: { ar: 'تسجيل الدخول', en: 'Sign In' },
     signOut: { ar: 'تسجيل الخروج', en: 'Sign Out' },
@@ -252,7 +247,6 @@ export const translations = {
     guestApprovedHint: { ar: 'تمت الموافقة على حسابك! أعد تسجيل الدخول للوصول.', en: 'Your account was approved! Sign in again to get access.' },
     guestLogout: { ar: 'تسجيل الخروج', en: 'Sign Out' },
   },
-  // Common filters
   filters: {
     allSubjects: { ar: 'جميع المواد', en: 'All Subjects' },
     allTopics: { ar: 'جميع المواضيع', en: 'All Topics' },
@@ -275,39 +269,33 @@ export const translations = {
     chooseClass: { ar: 'اختر الفصل...', en: 'Choose class...' },
     allClasses: { ar: 'جميع الفصول', en: 'All Classes' },
   },
-  // Question types
   questionTypes: {
     mcq: { ar: 'اختيار من متعدد', en: 'Multiple Choice' },
     fillBlank: { ar: 'ملء الفراغ', en: 'Fill in the Blank' },
     shortAnswer: { ar: 'إجابة قصيرة', en: 'Short Answer' },
     essay: { ar: 'مقال', en: 'Essay' },
   },
-  // Quiz types
   quizTypes: {
     practice: { ar: 'تمرين', en: 'Practice' },
     assignment: { ar: 'واجب', en: 'Assignment' },
     test: { ar: 'اختبار', en: 'Test' },
   },
-  // Difficulty
   difficulty: {
     easy: { ar: 'سهل', en: 'Easy' },
     medium: { ar: 'متوسط', en: 'Medium' },
     hard: { ar: 'صعب', en: 'Hard' },
   },
-  // Enrollment status
   enrollmentStatus: {
     passed: { ar: 'ناجح', en: 'Passed' },
     failed: { ar: 'راسب', en: 'Failed' },
     inProgress: { ar: 'قيد التنفيذ', en: 'In Progress' },
     pending: { ar: 'قيد الانتظار', en: 'Pending' },
   },
-  // Relationship
   relationship: {
     father: { ar: 'الأب', en: 'Father' },
     mother: { ar: 'الأم', en: 'Mother' },
     guardian: { ar: 'ولي الأمر', en: 'Guardian' },
   },
-  // Student page
   student: {
     myDashboard: { ar: 'لوحة تحكمي', en: 'My Dashboard' },
     availableQuizzes: { ar: 'الاختبارات المتاحة', en: 'Available Quizzes' },
@@ -369,7 +357,6 @@ export const translations = {
     viewAnnouncements: { ar: 'عرض الإعلانات', en: 'View Announcements' },
     viewAttendance: { ar: 'عرض الحضور', en: 'View Attendance' },
   },
-  // Quiz taking
   quizTake: {
     questionCounter: { ar: 'سؤال', en: 'Question' },
     of: { ar: 'من', en: 'of' },
@@ -398,7 +385,6 @@ export const translations = {
     startFailed: { ar: 'فشل بدء الاختبار', en: 'Failed to start quiz' },
     loadingQuiz: { ar: 'جارٍ تحميل الاختبار...', en: 'Loading quiz...' },
   },
-  // Teacher page
   teacher: {
     dashboard: { ar: 'لوحة تحكم المعلم', en: 'Teacher Dashboard' },
     totalStudents: { ar: 'إجمالي الطلاب', en: 'Total Students' },
@@ -433,7 +419,6 @@ export const translations = {
     loadDashboardFailed: { ar: 'فشل تحميل لوحة التحكم', en: 'Failed to load dashboard' },
     markAttendance: { ar: 'تسجيل الحضور', en: 'Mark Attendance' },
   },
-  // Quiz management
   quizManagement: {
     title: { ar: 'إدارة الاختبارات', en: 'Quiz Management' },
     newQuiz: { ar: 'اختبار جديد', en: 'New Quiz' },
@@ -455,7 +440,6 @@ export const translations = {
     averageScore: { ar: 'متوسط الدرجات', en: 'Avg Score' },
     loadFailed: { ar: 'فشل تحميل الاختبارات', en: 'Failed to load quizzes' },
   },
-  // Question bank
   questionBank: {
     title: { ar: 'بنك الأسئلة', en: 'Question Bank' },
     newQuestion: { ar: 'سؤال جديد', en: 'New Question' },
@@ -475,7 +459,6 @@ export const translations = {
     chooseCorrectAnswer: { ar: 'اختر الإجابة الصحيحة', en: 'Choose the correct answer' },
     answerLabel: { ar: 'الإجابة:', en: 'Answer:' },
   },
-  // Subject management
   subjectManagement: {
     title: { ar: 'إدارة المواد', en: 'Subject Management' },
     addSubject: { ar: 'إضافة مادة', en: 'Add Subject' },
@@ -490,7 +473,6 @@ export const translations = {
     topicsLoadFailed: { ar: 'فشل تحميل المواضيع', en: 'Failed to load topics' },
     topicCreateFailed: { ar: 'فشل إنشاء الموضوع', en: 'Failed to create topic' },
   },
-  // Exam management
   examManagement: {
     title: { ar: 'إدارة الامتحانات', en: 'Exam Management' },
     createExam: { ar: 'إنشاء امتحان', en: 'Create Exam' },
@@ -510,7 +492,6 @@ export const translations = {
     bulkFailed: { ar: 'فشل الرفع المجمع', en: 'Failed to bulk upload' },
     recordResultFor: { ar: 'تسجيل نتيجة لـ', en: 'Record result for' },
   },
-  // User management
   userManagement: {
     title: { ar: 'إدارة المستخدمين', en: 'User Management' },
     addUser: { ar: 'إضافة مستخدم', en: 'Add User' },
@@ -530,7 +511,6 @@ export const translations = {
     assignRole: { ar: 'تعيين الدور', en: 'Assign Role' },
     approveFailed: { ar: 'فشلت الموافقة', en: 'Approval failed' },
   },
-  // Enrollment management
   enrollmentManagement: {
     title: { ar: 'إدارة التسجيلات', en: 'Enrollment Management' },
     addEnrollment: { ar: 'إضافة تسجيل', en: 'Add Enrollment' },
@@ -570,7 +550,6 @@ export const translations = {
     confirmDropSubject: { ar: 'إزالة هذه المادة ستلغي تسجيل جميع طلاب الصف منها. هل تريد المتابعة؟', en: 'Removing this subject will unenroll all students in this class from it. Continue?' },
     confirmDropEnrollment: { ar: 'هل تريد إزالة تسجيل هذا الطالب من هذه المادة؟', en: 'Remove this student from this subject?' },
   },
-  // Admin dashboard
   adminDashboard: {
     title: { ar: 'لوحة تحكم المدير', en: 'Admin Dashboard' },
     totalUsers: { ar: 'إجمالي المستخدمين', en: 'Total Users' },
@@ -595,7 +574,6 @@ export const translations = {
     manageExams: { ar: 'إدارة الامتحانات', en: 'Manage Exams' },
     loadFailed: { ar: 'فشل تحميل لوحة التحكم', en: 'Failed to load dashboard' },
   },
-  // Parent dashboard
   parentDashboard: {
     title: { ar: 'أبنائي', en: 'My Children' },
     noChildren: { ar: 'لا يوجد أبناء مرتبطون بحسابك.', en: 'No children linked to your account.' },
@@ -623,7 +601,6 @@ export const translations = {
     absent: { ar: 'غائب', en: 'Absent' },
     feeStatus: { ar: 'حالة الرسوم', en: 'Fee Status' },
   },
-  // Board dashboard
   boardDashboard: {
     title: { ar: 'لوحة تحكم مجلس الإدارة', en: 'Board Dashboard' },
     totalTeachers: { ar: 'إجمالي المعلمين', en: 'Total Teachers' },
@@ -650,7 +627,6 @@ export const translations = {
     deleteFailed: { ar: 'فشل حذف الرابط', en: 'Failed to delete link' },
     loadFailed: { ar: 'فشل تحميل البيانات', en: 'Failed to load data' },
   },
-  // Confirmations
   confirm: {
     submitQuiz: { ar: 'هل أنت متأكد من الإرسال؟', en: 'Are you sure you want to submit?' },
     deleteQuestion: { ar: 'هل أنت متأكد من حذف هذا السؤال؟', en: 'Delete this question?' },
@@ -659,7 +635,6 @@ export const translations = {
     deactivateUser: { ar: 'هل أنت متأكد من إلغاء تنشيط هذا المستخدم؟', en: 'Deactivate this user?' },
     removeLink: { ar: 'إزالة هذا الرابط؟', en: 'Remove this link?' },
   },
-  // Common labels
   labels: {
     studentCount: { ar: 'عدد الطلاب', en: 'Student Count' },
     quizCount: { ar: 'عدد الاختبارات', en: 'Quiz Count' },
@@ -698,7 +673,6 @@ export const translations = {
     resultEntry: { ar: 'أدخل نتائج الطلاب في كل مكون. سجل الدرجات والملاحظات.', en: 'Enter student scores for each component. Record grades and remarks.' },
     character: { ar: 'قيّم وطوّر الجوانب الشخصية والخلقية للطلاب.', en: 'Assess and develop students\' character and personal qualities.' },
   },
-  // Bulk upload
   bulkUpload: {
     title: { ar: 'رفع أسئلة بالجملة', en: 'Bulk Upload Questions' },
     downloadTemplate: { ar: 'تحميل القالب', en: 'Download Template' },
@@ -714,7 +688,6 @@ export const translations = {
     file: { ar: 'الملف', en: 'File' },
     rowError: { ar: 'خطأ في الصف', en: 'Row error' },
   },
-  // Quiz analytics
   quizAnalytics: {
     title: { ar: 'تحليلات الاختبار', en: 'Quiz Analytics' },
     viewAnalytics: { ar: 'عرض التحليلات', en: 'View Analytics' },
@@ -736,7 +709,6 @@ export const translations = {
     avgAccuracy: { ar: 'متوسط الدقة', en: 'avg accuracy' },
     loadFailed: { ar: 'فشل تحميل التحليلات', en: 'Failed to load analytics' },
   },
-  // Student progress
   studentProgress: {
     streak: { ar: 'أيام متتالية', en: 'Day Streak' },
     streakDays: { ar: 'يوم', en: 'days' },
@@ -750,7 +722,6 @@ export const translations = {
     learningJourney: { ar: 'رحلة التعلم', en: 'Learning Journey' },
     loadFailed: { ar: 'فشل تحميل التقدم', en: 'Failed to load progress' },
   },
-  // Messages
   messages: {
     title: { ar: 'الرسائل', en: 'Messages' },
     inbox: { ar: 'الصندوق', en: 'Inbox' },
@@ -766,7 +737,6 @@ export const translations = {
     from: { ar: 'من', en: 'From' },
     chooseRecipient: { ar: 'اختر المستلم', en: 'Choose recipient' },
   },
-  // Intervention alerts
   interventions: {
     title: { ar: 'تنبيهات التدخل', en: 'Intervention Alerts' },
     inactive: { ar: 'غير نشط', en: 'Inactive' },
@@ -775,7 +745,6 @@ export const translations = {
     noAlerts: { ar: 'لا توجد تنبيهات', en: 'No alerts' },
     studentsAtRisk: { ar: 'طلاب يحتاجون اهتمام', en: 'Students Need Attention' },
   },
-  // Admin engagement
   engagement: {
     title: { ar: 'قياس التفاعل', en: 'Engagement Metrics' },
     weeklyActive: { ar: 'الطلاب النشطون أسبوعياً', en: 'Weekly Active Students' },
@@ -783,7 +752,6 @@ export const translations = {
     teacherStats: { ar: 'إحصائيات المعلمين', en: 'Teacher Statistics' },
     subjectTrends: { ar: 'اتجاهات المواد', en: 'Subject Trends' },
   },
-  // Bulk import
   bulkImport: {
     title: { ar: 'استيراد مستخدمين بالجملة', en: 'Bulk Import Users' },
     downloadTemplate: { ar: 'تحميل القالب', en: 'Download Template' },
@@ -794,7 +762,6 @@ export const translations = {
     created: { ar: 'مستخدم تم إنشاؤه', en: 'users created' },
     templateHint: { ar: 'القالب: email, first_name, last_name, role (ustaadh|student|parent|mudeer), password (اختياري)', en: 'Template: email, first_name, last_name, role (ustaadh|student|parent|mudeer), password (optional, defaults to changeme123)' },
   },
-  // Finance
   finance: {
     title: { ar: 'إدارة المالية', en: 'Finance Management' },
     feeStatus: { ar: 'حالة الرسوم', en: 'Fee Status' },
@@ -847,7 +814,6 @@ export const translations = {
     selectStudents: { ar: 'اختر الطلاب', en: 'Select students' },
     searchStudent: { ar: 'بحث عن طالب...', en: 'Search student...' },
   },
-  // Attendance
   attendance: {
     title: { ar: 'الحضور والغياب', en: 'Attendance' },
     markAttendance: { ar: 'تسجيل الحضور', en: 'Mark Attendance' },
@@ -896,7 +862,6 @@ export const translations = {
     fair: { ar: 'مقبول', en: 'Fair' },
     needsAttention: { ar: 'يحتاج متابعة', en: 'Needs Attention' },
   },
-  // Announcements
   announcements: {
     title: { ar: 'الإعلانات', en: 'Announcements' },
     pinned: { ar: 'مثبت', en: 'Pinned' },
@@ -920,7 +885,6 @@ export const translations = {
     noAnnouncements: { ar: 'لا توجد إعلانات', en: 'No announcements' },
     createFailed: { ar: 'فشل إنشاء الإعلان', en: 'Failed to create announcement' },
   },
-  // Student Reports
   studentReport: {
     title: { ar: 'تقرير الطالب', en: 'Student Report' },
     selectStudent: { ar: 'اختر الطالب', en: 'Select Student' },
@@ -938,7 +902,6 @@ export const translations = {
     absentWarning: { ar: 'تحذير غياب', en: 'Absence Warning' },
     average: { ar: 'متوسط', en: 'Average' },
   },
-  // Homework
   homework: {
     title: { ar: 'الواجبات المنزلية', en: 'Homework' },
     myHomework: { ar: 'واجباتي', en: 'My Homework' },
@@ -985,7 +948,6 @@ export const translations = {
     viewFile: { ar: 'عرض الملف', en: 'View File' },
     feedbackPlaceholder: { ar: 'أضف ملاحظات...', en: 'Add feedback...' },
   },
-  // Certificates
   certificates: {
     title: { ar: 'شهادات الإنجاز', en: 'Certificates' },
     noCertificates: { ar: 'لا توجد شهادات بعد. أكمل متطلباتك للحصول على شهادتك الأولى!', en: 'No certificates yet. Complete your requirements to earn your first one!' },
@@ -997,7 +959,6 @@ export const translations = {
     typeCompletion: { ar: 'شهادة إتمام', en: 'Completion Certificate' },
     typeExcellence: { ar: 'شهادة تفوق', en: 'Excellence Certificate' },
   },
-  // Academic
   academic: {
     title: { ar: 'الدراسة', en: 'Academic' },
     subtitle: { ar: 'جدولك الدراسي والمواد المسجلة', en: 'Your schedule and enrolled subjects' },
@@ -1005,12 +966,10 @@ export const translations = {
     totalSessions: { ar: 'إجمالي الجلسات', en: 'Total Sessions' },
     totalTerms: { ar: 'إجمالي الفصول', en: 'Total Terms' },
   },
-  // Admissions
   admissions: {
     title: { ar: 'القبول والتسجيل', en: 'Admissions' },
     subtitle: { ar: 'إدارة طلبات القبول والتسجيل', en: 'Manage admission and enrollment requests' },
   },
-  // Lessons
   lessons: {
     title: { ar: 'الدروس', en: 'Lessons' },
     subtitle: { ar: 'إدارة الدروس والمواد الدراسية', en: 'Manage lessons and academic subjects' },
@@ -1183,7 +1142,6 @@ export const translations = {
     good: { ar: 'جيد', en: 'Good' },
     easy: { ar: 'سهل', en: 'Easy' },
   },
-  // QR Scanner
   qrScanner: {
     title: { ar: 'حضور QR', en: 'QR Attendance' },
     subtitle: { ar: 'إنشاء أو مسح رموز QR للحضور', en: 'Generate, scan, or manually enter QR codes for attendance' },
@@ -1272,7 +1230,6 @@ export const translations = {
     viewComponents: { ar: 'عرض المكونات', en: 'View Components' },
   },
 
-  // Timetable
   timetable: {
     subtitle: { ar: 'جدول الحصص الأسبوعي', en: 'Your weekly class schedule' },
     day: { ar: 'اليوم', en: 'Day' },
@@ -1285,7 +1242,6 @@ export const translations = {
     saturday: { ar: 'السبت', en: 'Saturday' },
     sunday: { ar: 'الأحد', en: 'Sunday' },
   },
-  // Landing page
   landing: {
     login: { ar: 'تسجيل الدخول', en: 'Log in' },
     getStarted: { ar: 'ابدأ الآن', en: 'Get Started' },
@@ -1790,7 +1746,6 @@ export const translations = {
     nextMission: { ar: 'المهمة التالية', en: 'Next Mission' },
   },
 
-  // Quiz module
   quiz: {
     title: { ar: 'الاختبارات', en: 'Quizzes' },
     all: { ar: 'الكل', en: 'All' },

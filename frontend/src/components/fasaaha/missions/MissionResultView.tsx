@@ -162,7 +162,6 @@ export default function MissionResultView({
 
   return (
     <div className="space-y-6">
-      {/* Pass / needs-practice banner */}
       <div
         className={`flex items-center gap-3 rounded-2xl border p-4 ${
           passed ? 'border-green-200 dark:border-green-800/50' : 'border-orange-200 dark:border-orange-800/50'
@@ -193,7 +192,6 @@ export default function MissionResultView({
         </div>
       )}
 
-      {/* Core scores */}
       <ScoreDisplay
         aiScore={analysis?.overall_score ?? null}
         pronunciationScore={analysis?.pronunciation_score ?? null}
@@ -207,7 +205,6 @@ export default function MissionResultView({
         fluencyWPM={analysis?.fluency_words_per_minute ?? null}
       />
 
-      {/* AI corrections & enhancements */}
       {hasStructuredCorrections && (
         <div className="rounded-2xl border p-5" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-card)' }}>
           <p className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -238,7 +235,6 @@ export default function MissionResultView({
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex flex-wrap items-center justify-center gap-3">
         <button
           onClick={onRetry}

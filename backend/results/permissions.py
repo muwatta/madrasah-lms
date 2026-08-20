@@ -8,10 +8,6 @@ def _role(user):
     return getattr(user, "role", None)
 
 
-# ──────────────────────────────────────────────────────
-#  Role checks
-# ──────────────────────────────────────────────────────
-
 
 class IsTeacher(BasePermission):
     """Allow only ustaadh role."""
@@ -73,10 +69,6 @@ class IsParent(BasePermission):
         return self.has_permission(request, view)
 
 
-# ──────────────────────────────────────────────────────
-#  Functional permission checks
-# ──────────────────────────────────────────────────────
-
 
 def _is_assigned_teacher(user, subject_id=None, school_class_id=None):
     """Return True if *user* (ustaadh) has an Enrollment where they are the
@@ -102,10 +94,6 @@ def _extract_subject_and_class(obj):
     school_class_id = getattr(obj, "school_class_id", None)
     return subject_id, school_class_id
 
-
-# ──────────────────────────────────────────────────────
-#  Composite permission classes
-# ──────────────────────────────────────────────────────
 
 
 class CanEnterScores(BasePermission):

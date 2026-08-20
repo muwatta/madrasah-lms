@@ -18,8 +18,6 @@ def _snapshot_fields(instance, fields=None):
     return {f: str(getattr(instance, f, None)) for f in fields}
 
 
-# ─── Results ────────────────────────────────────────────────────────────────
-
 @receiver(pre_save, sender='results.SubjectResult')
 def subjectresult_pre_save(sender, instance, **kwargs):
     if instance.pk:
@@ -74,8 +72,6 @@ def termresult_post_save(sender, instance, created, **kwargs):
         )
 
 
-# ─── Attendance ─────────────────────────────────────────────────────────────
-
 @receiver(pre_save, sender='school_ops.Attendance')
 def attendance_pre_save(sender, instance, **kwargs):
     if instance.pk:
@@ -102,8 +98,6 @@ def attendance_post_save(sender, instance, created, **kwargs):
             new_data=new if not created else {},
         )
 
-
-# ─── Fees ───────────────────────────────────────────────────────────────────
 
 @receiver(pre_save, sender='school_ops.Fee')
 def fee_pre_save(sender, instance, **kwargs):
@@ -148,8 +142,6 @@ def feepayment_post_save(sender, instance, created, **kwargs):
         )
 
 
-# ─── Users ──────────────────────────────────────────────────────────────────
-
 @receiver(pre_save, sender='users.User')
 def user_pre_save(sender, instance, **kwargs):
     if instance.pk:
@@ -179,8 +171,6 @@ def user_post_save(sender, instance, created, **kwargs):
             new_data=new if not created else {},
         )
 
-
-# ─── Login ──────────────────────────────────────────────────────────────────
 
 @receiver(user_logged_in)
 def user_login_audit(sender, request, user, **kwargs):

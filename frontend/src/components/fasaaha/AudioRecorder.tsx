@@ -132,7 +132,6 @@ export default function AudioRecorder({
         <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
       )}
 
-      {/* Timer */}
       {!recordedBlob && (
         <span
           className="font-mono text-2xl font-semibold"
@@ -142,7 +141,6 @@ export default function AudioRecorder({
         </span>
       )}
 
-      {/* Progress bar */}
       {!recordedBlob && (
         <div
           className="w-full max-w-xs h-2 rounded-full overflow-hidden"
@@ -155,7 +153,6 @@ export default function AudioRecorder({
         </div>
       )}
 
-      {/* Record / Stop button */}
       {!recordedBlob && (
         <button
           type="button"
@@ -193,7 +190,6 @@ export default function AudioRecorder({
         </button>
       )}
 
-      {/* Playback preview */}
       {recordedBlob && recordedUrl && (
         <div className="flex flex-col items-center gap-3 w-full max-w-xs">
           <p

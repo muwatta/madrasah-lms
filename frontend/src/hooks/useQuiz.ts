@@ -3,8 +3,6 @@ import { quizAPI } from '../api';
 import { fetchAllPages } from '../api/client';
 import type { Quiz, QuizQuestion, QuizAttempt } from '../types';
 
-// ── Questions ──────────────────────────────────────────────────────────────
-
 export function useQuizQuestions(params?: Record<string, unknown>) {
   return useQuery<QuizQuestion[]>({
     queryKey: ['quiz', 'questions', params],
@@ -19,8 +17,6 @@ export function useQuizQuestion(id: number | null) {
     enabled: !!id,
   });
 }
-
-// ── Quizzes ────────────────────────────────────────────────────────────────
 
 export function useQuizzes(params?: Record<string, unknown>) {
   return useQuery<Quiz[]>({
@@ -59,8 +55,6 @@ export function useQuizOverview() {
     queryFn: async () => { const res = await quizAPI.overview(); return res.data; },
   });
 }
-
-// ── Mutations ──────────────────────────────────────────────────────────────
 
 export function useCreateQuiz() {
   const qc = useQueryClient();
@@ -128,8 +122,6 @@ export function useRemoveQuizQuestion() {
   });
 }
 
-// ── Attempts ───────────────────────────────────────────────────────────────
-
 export function useStartQuizAttempt() {
   const qc = useQueryClient();
   return useMutation({
@@ -187,13 +179,9 @@ export function useReportViolation() {
   });
 }
 
-// ── Prefixed re-exports ────────────────────────────────────────────────────
-
 export { useQuizQuestions as useQuizQQuestions };
 export { useQuizzes as useQuizQuizzes };
 export { useQuiz as useQuizDetail };
-
-// ── Aliases used by pages ──────────────────────────────────────────────────
 
 export { useQuizQuestions as useQuestions };
 export { useQuizAnalysis as useQuestionAnalysis };

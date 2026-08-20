@@ -53,7 +53,6 @@ from curriculum.models import Subject, SchoolClass
 from users.models import User
 
 
-# ── 1. GradeScale ─────────────────────────────────────
 
 
 class GradeScaleViewSet(TenantAwareMixin, viewsets.ModelViewSet):
@@ -86,7 +85,6 @@ class GradeScaleViewSet(TenantAwareMixin, viewsets.ModelViewSet):
         return Response(GradeScaleSerializer(gs).data)
 
 
-# ── 1b. Exam management ──────────────────────────────
 
 
 class ExamViewSet(TenantAwareMixin, viewsets.ModelViewSet):
@@ -181,7 +179,6 @@ class ExamViewSet(TenantAwareMixin, viewsets.ModelViewSet):
         return Response({"created": created, "updated": updated})
 
 
-# ── 2. AssessmentBlueprint ────────────────────────────
 
 
 class AssessmentBlueprintViewSet(TenantAwareMixin, viewsets.ModelViewSet):
@@ -239,7 +236,6 @@ class BlueprintComponentViewSet(TenantAwareMixin, viewsets.ModelViewSet):
         serializer.save()
 
 
-# ── 3. Assessment ─────────────────────────────────────
 
 
 class AssessmentViewSet(TenantAwareMixin, viewsets.ModelViewSet):
@@ -323,7 +319,6 @@ class AssessmentViewSet(TenantAwareMixin, viewsets.ModelViewSet):
         )
 
 
-# ── 4. AssessmentScore ────────────────────────────────
 
 
 class AssessmentScoreViewSet(TenantAwareMixin, viewsets.ModelViewSet):
@@ -371,7 +366,6 @@ class AssessmentScoreViewSet(TenantAwareMixin, viewsets.ModelViewSet):
         )
 
 
-# ── 5. SubjectResult ──────────────────────────────────
 
 
 class SubjectResultViewSet(TenantAwareMixin, viewsets.ModelViewSet):
@@ -470,7 +464,6 @@ class SubjectResultViewSet(TenantAwareMixin, viewsets.ModelViewSet):
         return self._transition_action(request, pk, 'submitted', comment=comment)
 
 
-# ── 6. TermResult ─────────────────────────────────────
 
 
 class TermResultViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
@@ -541,7 +534,6 @@ class TermResultViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
         return Response(ReportCardSerializer(rc).data)
 
 
-# ── 7. AnnualResult ───────────────────────────────────
 
 
 class AnnualResultViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
@@ -608,7 +600,6 @@ class AnnualResultViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
         return Response({'detail': f'Recalculated {count} annual result(s).', 'count': count})
 
 
-# ── 8. StudentRank ────────────────────────────────────
 
 
 class StudentRankViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
@@ -665,7 +656,6 @@ class StudentRankViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
         })
 
 
-# ── 9. ResultPublication ──────────────────────────────
 
 
 class ResultPublicationViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
@@ -755,7 +745,6 @@ class ResultPublicationViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
         return Response({'detail': f'Unpublished {count} result(s).', 'count': count})
 
 
-# ── 10. ReportCard ────────────────────────────────────
 
 
 class ReportCardViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
@@ -842,7 +831,6 @@ class ReportCardViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
         return Response({'detail': f'Generated {count} report card(s).', 'count': count})
 
 
-# ── 11. ResultAuditLog ────────────────────────────────
 
 
 class ResultAuditLogViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
@@ -865,7 +853,6 @@ class ResultAuditLogViewSet(TenantAwareMixin, viewsets.ReadOnlyModelViewSet):
         return qs.order_by('-created_at')
 
 
-# ── 12. BulkScoreUpload ───────────────────────────────
 
 
 class BulkScoreUploadView(TenantAwareMixin, APIView):
@@ -908,8 +895,6 @@ class BulkScoreUploadView(TenantAwareMixin, APIView):
 # ──────────────────────────────────────────────────────
 #  Legacy backward-compatible views
 #  Kept for existing frontend imports from result_views.
-# ──────────────────────────────────────────────────────
-
 
 class TeacherSubjectsView(TenantAwareMixin, generics.ListAPIView):
     serializer_class = None

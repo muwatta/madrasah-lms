@@ -59,7 +59,6 @@ export default function AdmissionsPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  // Create modal
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     first_name: '', last_name: '', email: '', phone: '',
@@ -70,7 +69,6 @@ export default function AdmissionsPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [createFieldErrors, setCreateFieldErrors] = useState<Record<string, string>>({});
 
-  // Reject modal
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectAppId, setRejectAppId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -220,7 +218,6 @@ export default function AdmissionsPage() {
         </div>
       )}
 
-      {/* Header */}
       <div className="rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-purple-500 p-6 text-white shadow-lg shadow-indigo-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -242,7 +239,6 @@ export default function AdmissionsPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard title={language === 'ar' ? 'إجمالي' : 'Total'} value={stats.total} color="bg-blue-500" delay={0}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>}
@@ -258,7 +254,6 @@ export default function AdmissionsPage() {
         />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[180px]">
           <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-[var(--color-text-muted)]">{language === 'ar' ? 'بحث' : 'Search'}</label>
@@ -293,7 +288,6 @@ export default function AdmissionsPage() {
         )}
       </div>
 
-      {/* Main content */}
       {loading ? (
         <div className="space-y-6"><SkeletonStatsGrid /><SkeletonTable rows={5} /></div>
       ) : error ? (
@@ -433,7 +427,6 @@ export default function AdmissionsPage() {
             </table>
           </div>
 
-          {/* Mobile cards */}
           <div className="block md:hidden space-y-3 p-4">
             {pagedApps.map((app) => (
               <div key={app.id} className="rounded-lg border border-gray-100 dark:border-[var(--color-border-light)] bg-white dark:bg-[var(--color-bg-secondary)] p-4 shadow-sm">
@@ -489,7 +482,6 @@ export default function AdmissionsPage() {
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-gray-100 dark:border-[var(--color-border)] px-4 py-3">
               <p className="text-xs text-gray-500">{filteredApps.length} {language === 'ar' ? 'إجمالي' : 'total'}</p>
@@ -521,7 +513,6 @@ export default function AdmissionsPage() {
         </div>
       )}
 
-      {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowCreateModal(false)}>
           <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -605,7 +596,6 @@ export default function AdmissionsPage() {
         </div>
       )}
 
-      {/* Reject Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowRejectModal(false)}>
           <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[var(--color-bg-secondary)] p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>

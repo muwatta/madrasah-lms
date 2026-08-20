@@ -125,7 +125,6 @@ export default function AuditLogPage() {
   const [prevPage, setPrevPage] = useState<string | null>(null);
   const [count, setCount] = useState(0);
 
-  // Filters
   const [actionFilter, setActionFilter] = useState('');
   const [modelFilter, setModelFilter] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -185,7 +184,6 @@ export default function AuditLogPage() {
         </p>
       </div>
 
-      {/* Filters */}
       <div className="bg-white dark:bg-dark-secondary rounded-lg shadow p-4">
         <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <input
@@ -240,7 +238,6 @@ export default function AuditLogPage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white dark:bg-dark-secondary rounded-lg shadow overflow-hidden">
         {loading ? (
           <SkeletonTable rows={8} cols={6} />
@@ -329,7 +326,6 @@ export default function AuditLogPage() {
           </div>
         )}
 
-        {/* Pagination */}
         {(prevPage || nextPage) && (
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
             <span className="text-sm text-gray-500 dark:text-gray-400">

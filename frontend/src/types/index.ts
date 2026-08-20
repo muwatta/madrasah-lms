@@ -241,7 +241,6 @@ export interface BoardDashboard {
   }[];
 }
 
-// ─── Quizzes Module ──
 
 export interface QuizQuestion {
   id: number;
@@ -415,7 +414,6 @@ export interface ViolationLog {
 
 
 
-// ── Fasaaha (Arabic Speaking Intelligence) ──
 export interface SpeakingLevel {
   id: number;
   number: number;
@@ -676,7 +674,6 @@ export interface FasaahaTeacherDashboard {
   pending_reviews: SpeakingAttempt[];
 }
 
-// ── Fasaaha Phase 3 ──
 
 export interface DialogueSession {
   uuid: string;
@@ -762,7 +759,6 @@ export interface ScoreTrend {
   avg_fluency: number;
 }
 
-// ── Auth / Users ──
 
 export interface LoginPayload {
   email: string;
@@ -847,7 +843,6 @@ export interface MessagePayload {
   body: string;
 }
 
-// ── Curriculum ──
 
 export interface SubjectPayload {
   name_ar: string;
@@ -900,7 +895,6 @@ export interface ExamResultPayload {
   remarks?: string;
 }
 
-// ── Enrollments ──
 
 export interface EnrollmentPayload {
   student: number;
@@ -909,7 +903,6 @@ export interface EnrollmentPayload {
   school_class?: number | null;
 }
 
-// ── Results Module ──
 
 export interface TeacherSubject {
   id: number;
@@ -1206,7 +1199,6 @@ export interface AuditLogEntry {
   created_at: string;
 }
 
-// ── School Ops (fees / attendance / announcements / notifications) ──
 
 export interface FeeStructure {
   id: number;
@@ -1454,7 +1446,6 @@ export interface VapidKey {
   publicKey: string;
 }
 
-// ── Academic ──
 
 export interface AcademicSession {
   id: number;
@@ -1598,7 +1589,6 @@ export interface StudentCalendarEvents {
   homework: { id: number; title: string; description: string; due_date: string; subject_name: string }[];
 }
 
-// ── Admissions ──
 
 export interface AdmissionDocument {
   id: number;
@@ -1691,7 +1681,6 @@ export interface AdmissionEnrollResult {
   email: string;
 }
 
-// ── Lessons ──
 
 export interface LessonResource {
   id: number;
@@ -1882,7 +1871,6 @@ export interface HomeworkGradePayload {
   status?: string;
 }
 
-// ── Quran ──
 
 export interface QuranMemorization {
   id: number;
@@ -2008,7 +1996,6 @@ export interface QuranStudentProgress {
   upcoming_revisions: QuranRevision[];
 }
 
-// ── Analytics ──
 
 export interface AtRiskStudent {
   id: number;
@@ -2111,7 +2098,6 @@ export interface QuestionGeneratePayload {
   difficulty?: number;
 }
 
-// ── Learning ──
 
 export interface LearningPathItem {
   id: number;
@@ -2200,7 +2186,6 @@ export interface FlashCardReviewPayload {
   quality: number;
 }
 
-// ── Guidance ──
 
 export interface CareerRecommendation {
   id: number;
@@ -2248,7 +2233,6 @@ export interface TranscriptionResult {
   text: string;
 }
 
-// ── Character ──
 
 export interface CharacterTrait {
   id: number;
@@ -2304,7 +2288,6 @@ export interface CharacterEvaluationPayload {
   scores: { trait: number; score: number; notes?: string }[];
 }
 
-// ── WhatsApp ──
 
 export interface WhatsAppRecipient {
   id: number;
@@ -2374,7 +2357,6 @@ export interface WhatsAppSendPayload {
   language?: string;
 }
 
-// ── Certificates ──
 
 export interface Certificate {
   id: string;
@@ -2399,7 +2381,6 @@ export interface CertificateGeneratePayload {
   metadata?: Record<string, unknown>;
 }
 
-// ── Quizzes payloads ──
 
 export interface QuizQuestionPayload {
   subject: number;
@@ -2460,7 +2441,6 @@ export interface QuizViolationPayload {
   details?: Record<string, unknown>;
 }
 
-// ── Fasaaha payloads ──
 
 export interface SpeakingLevelPayload {
   number?: number;
@@ -2545,4 +2525,3 @@ export interface FasaahaDialogueTurnPayload {
   text_ar: string;
 }
 
-// ── Fasaaha (Arabic Speaking Intelligence) ──

@@ -131,7 +131,6 @@ export default function ProfilePage() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
-        {/* Account summary card */}
         <aside className="h-fit rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm dark:shadow-gray-900/50">
           <div className="flex flex-col items-center text-center">
             <span className={`flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white ${ROLE_COLORS[user.role] ?? 'bg-gray-400'}`}>
@@ -188,7 +187,6 @@ export default function ProfilePage() {
           </div>
         </aside>
 
-        {/* Edit form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <section className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm dark:shadow-gray-900/50">
             <h3 className="mb-4 border-b border-gray-100 dark:border-gray-700 pb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">

@@ -21,8 +21,6 @@ import type {
   MissionAssignment,
 } from '../types';
 
-// ── Levels ────────────────────────────────────────────────────────────────
-
 export function useLevels() {
   return useQuery<SpeakingLevel[]>({
     queryKey: ['fasaaha', 'levels'],
@@ -33,8 +31,6 @@ export function useLevels() {
   });
 }
 
-// ── Categories ────────────────────────────────────────────────────────────
-
 export function useCategories() {
   return useQuery<MissionCategory[]>({
     queryKey: ['fasaaha', 'categories'],
@@ -44,8 +40,6 @@ export function useCategories() {
     },
   });
 }
-
-// ── Missions ──────────────────────────────────────────────────────────────
 
 export function useMissions(params?: {
   level?: number;
@@ -83,8 +77,6 @@ export function useMissionsForLevel(levelId: number | null) {
     enabled: levelId !== null && levelId > 0,
   });
 }
-
-// ── Attempts ──────────────────────────────────────────────────────────────
 
 export function useAttempts(params?: { page_size?: number; mission?: number; status?: string }) {
   return useQuery<SpeakingAttempt[]>({
@@ -165,8 +157,6 @@ export function useAttemptResult(
   return { ...query, timedOut };
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────────────
-
 export function useStudentDashboard() {
   return useQuery<FasaahaStudentDashboard>({
     queryKey: ['fasaaha', 'dashboard', 'student'],
@@ -187,8 +177,6 @@ export function useTeacherDashboard() {
   });
 }
 
-// ── Progress ──────────────────────────────────────────────────────────────
-
 export function useProgress() {
   return useQuery<StudentLevelProgress[]>({
     queryKey: ['fasaaha', 'progress'],
@@ -198,8 +186,6 @@ export function useProgress() {
     },
   });
 }
-
-// ── Streak ────────────────────────────────────────────────────────────────
 
 export function useStreak() {
   return useQuery<StudentStreak[]>({
@@ -214,8 +200,6 @@ export function useStreak() {
     },
   });
 }
-
-// ── Reviews ───────────────────────────────────────────────────────────────
 
 export function usePendingReviews() {
   return useQuery<SpeakingAttempt[]>({
@@ -238,8 +222,6 @@ export function useSubmitReview() {
   });
 }
 
-// ── Badges ────────────────────────────────────────────────────────────────
-
 export function useAllBadges() {
   return useQuery<Badge[]>({
     queryKey: ['fasaaha', 'badges'],
@@ -259,8 +241,6 @@ export function useMyBadges() {
     },
   });
 }
-
-// ── Assignments ────────────────────────────────────────────────────────────
 
 export function useAssignments() {
   return useQuery<MissionAssignment[]>({
@@ -298,8 +278,6 @@ export function useDeleteAssignment() {
     },
   });
 }
-
-// ── Analytics ─────────────────────────────────────────────────────────────
 
 export function useClassAnalytics(schoolClassId: number | null) {
   return useQuery({

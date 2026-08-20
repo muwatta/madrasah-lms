@@ -32,7 +32,6 @@ def get_level_by_id(*, level_id, madrasah):
     return SpeakingLevel.objects.get(pk=level_id, madrasah=madrasah)
 
 
-#  Categories
 
 
 def get_categories(*, madrasah, active_only=True):
@@ -403,7 +402,6 @@ def get_dialogue_turns(*, session):
     return DialogueTurn.objects.filter(session=session).order_by('sort_order')
 
 
-#  Daily Goals
 
 
 def get_daily_goal(*, student, madrasah, goal_date=None):
@@ -415,7 +413,6 @@ def get_daily_goal(*, student, madrasah, goal_date=None):
         return None
 
 
-#  Leaderboard
 
 
 def get_leaderboard(*, madrasah, period='weekly', limit=20):
@@ -432,7 +429,6 @@ def get_leaderboard(*, madrasah, period='weekly', limit=20):
     ).select_related('student').order_by('-points', '-average_score')[:limit]
 
 
-#  Score Trends
 
 
 def get_score_trends(*, student, madrasah, days=30):

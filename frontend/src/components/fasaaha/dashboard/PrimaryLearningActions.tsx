@@ -63,7 +63,6 @@ export default function PrimaryLearningActions({ dashboard }: PrimaryLearningAct
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* ── Free Speaking ── */}
         <motion.section
           className="flex flex-col rounded-3xl bg-gradient-to-br from-primary-600 to-primary-800 p-6 text-white shadow-lg shadow-primary-900/10"
           initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 16 }}
@@ -125,7 +124,6 @@ export default function PrimaryLearningActions({ dashboard }: PrimaryLearningAct
           </Link>
         </motion.section>
 
-        {/* ── Missions ── */}
         <motion.section
           className="flex flex-col rounded-3xl border p-6 card-hover"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-card)' }}
@@ -199,7 +197,6 @@ export default function PrimaryLearningActions({ dashboard }: PrimaryLearningAct
           </Link>
         </motion.section>
 
-        {/* ── AI Conversation ── */}
         <motion.section
           className="flex flex-col rounded-3xl border p-6 card-hover"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-card)' }}

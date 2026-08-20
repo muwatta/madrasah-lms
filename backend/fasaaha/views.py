@@ -693,10 +693,6 @@ class TeacherDashboardView(APIView):
         })
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  Phase 3: Dialogue
-# ═══════════════════════════════════════════════════════════════════════════
-
 
 class DialogueStartView(APIView):
     permission_classes = [IsAuthenticated]
@@ -775,10 +771,6 @@ class DialogueListView(APIView):
         return Response(DialogueSessionSerializer(sessions, many=True).data)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  Phase 3: Daily Goals
-# ═══════════════════════════════════════════════════════════════════════════
-
 
 class DailyGoalView(APIView):
     permission_classes = [IsAuthenticated]
@@ -808,10 +800,6 @@ class DailyGoalWeeklyView(APIView):
         return Response(DailyGoalSerializer(goals, many=True).data)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-#  Phase 3: Leaderboard
-# ═══════════════════════════════════════════════════════════════════════════
-
 
 class LeaderboardView(APIView):
     permission_classes = [IsAuthenticated]
@@ -832,10 +820,6 @@ class LeaderboardRefreshView(APIView):
         LeaderboardService.update_leaderboard(madrasah=request.user.madrasah, period=period)
         return Response({'status': 'ok'})
 
-
-# ═══════════════════════════════════════════════════════════════════════════
-#  Phase 3: Score Trends
-# ═══════════════════════════════════════════════════════════════════════════
 
 
 class ScoreTrendsView(APIView):

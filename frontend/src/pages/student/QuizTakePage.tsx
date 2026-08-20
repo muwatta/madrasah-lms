@@ -173,7 +173,6 @@ export default function QuizTakePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      {/* Confirm Submit Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
@@ -206,7 +205,6 @@ export default function QuizTakePage() {
         </div>
       )}
 
-      {/* Timer warning banner */}
       {isTimeLow && (
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3 text-red-700 dark:text-red-400 text-sm font-medium animate-pulse">
           <svg className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

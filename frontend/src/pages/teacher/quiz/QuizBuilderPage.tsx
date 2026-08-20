@@ -126,7 +126,6 @@ export default function QuizBuilderPage() {
         {numId ? t('quiz.editQuiz') || 'Edit Quiz' : t('quiz.createQuiz') || 'Create Quiz'}
       </h1>
 
-      {/* Step tabs */}
       <div className="flex gap-2">
         {(['info', 'questions', 'settings'] as const).map(s => (
           <button key={s} onClick={() => setStep(s)}
@@ -136,7 +135,6 @@ export default function QuizBuilderPage() {
         ))}
       </div>
 
-      {/* Step: Info */}
       {step === 'info' && (
         <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,7 +170,6 @@ export default function QuizBuilderPage() {
         </div>
       )}
 
-      {/* Step: Questions */}
       {step === 'questions' && (
         <div className="space-y-4">
           <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
@@ -258,7 +255,6 @@ export default function QuizBuilderPage() {
         </div>
       )}
 
-      {/* Step: Settings */}
       {step === 'settings' && (
         <div className="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
           <h2 className="font-semibold text-gray-900">{t('quiz.quizSettings') || 'Quiz Settings'}</h2>

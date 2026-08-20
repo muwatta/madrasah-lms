@@ -218,7 +218,6 @@ export default function LessonPlannerPage() {
         </div>
       )}
 
-      {/* Header */}
       <div className="rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 p-6 text-white shadow-lg shadow-emerald-500/20 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -233,7 +232,6 @@ export default function LessonPlannerPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard title={t('lessons.total')} value={stats.total} color="bg-emerald-500" delay={0}
           icon={<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>}
@@ -249,7 +247,6 @@ export default function LessonPlannerPage() {
         />
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[160px]">
           <label className="mb-1.5 block text-xs font-medium text-[var(--color-text-muted)] dark:text-gray-400">{t('fields.subject')}</label>
@@ -282,7 +279,6 @@ export default function LessonPlannerPage() {
         )}
       </div>
 
-      {/* Content */}
       {loading ? (
         <div className="space-y-6">
           <SkeletonStatsGrid />
@@ -390,7 +386,6 @@ export default function LessonPlannerPage() {
             </table>
           </div>
 
-          {/* Mobile cards */}
           <div className="block md:hidden space-y-3 p-4">
             {pagedPlans.map((lp) => (
               <div key={lp.id} className="rounded-lg border border-[var(--color-border-light)] dark:border-gray-700 bg-[var(--color-bg-primary)] dark:bg-gray-800 p-4 shadow-sm">
@@ -434,7 +429,6 @@ export default function LessonPlannerPage() {
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between border-t border-[var(--color-border-light)] dark:border-gray-700/50 px-4 py-3">
               <p className="text-xs text-[var(--color-text-muted)] dark:text-gray-400">{filteredPlans.length} {t('lessons.total')}</p>
@@ -466,7 +460,6 @@ export default function LessonPlannerPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowModal(false)}>
           <div className="w-full max-w-lg rounded-2xl bg-[var(--color-bg-primary)] dark:bg-gray-800 p-6 shadow-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>

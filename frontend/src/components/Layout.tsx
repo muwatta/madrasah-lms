@@ -356,10 +356,8 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-      {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 lg:block">{sidebarContent}</aside>
 
-      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden animate-fade-in">
           <div
@@ -372,9 +370,7 @@ export default function Layout() {
         </div>
       )}
 
-      {/* Main area */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Header */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b px-4 shadow-sm sm:px-6" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
           <div className="flex items-center gap-3">
             {language !== 'ar' && (
@@ -405,7 +401,6 @@ export default function Layout() {
                 </svg>
               </button>
             )}
-            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               className="btn-press rounded-lg border border-gray-200 p-2 text-gray-500 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
@@ -423,7 +418,6 @@ export default function Layout() {
               )}
             </button>
 
-            {/* Language toggle */}
             <button
               onClick={toggleLanguage}
               className="btn-press flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -436,7 +430,6 @@ export default function Layout() {
               <span className="hidden sm:inline">{language === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
-            {/* Search trigger */}
             <button
               onClick={() => setSearchOpen(true)}
               className="btn-press flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
@@ -465,7 +458,6 @@ export default function Layout() {
               </button>
             )}
 
-            {/* Notification bell */}
             <div className="relative" ref={notifRef}>
             <button
               onClick={toggleNotifMenu}
@@ -539,7 +531,6 @@ export default function Layout() {
               )}
             </div>
 
-            {/* Account switcher */}
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
@@ -560,7 +551,6 @@ export default function Layout() {
 
               {accountMenuOpen && (
                 <div className="absolute end-0 top-full z-50 mt-2 w-72 rounded-xl border py-2 shadow-lg animate-scale-in" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-                  {/* Current account */}
                   {user && (
                     <div className="border-b px-4 py-3" style={{ borderColor: 'var(--color-border-light)' }}>
                       <div className="flex items-center justify-between mb-1">
@@ -598,7 +588,6 @@ export default function Layout() {
                     </div>
                   )}
 
-                  {/* Other accounts */}
                   {otherAccounts.length > 0 && (
                     <div className="px-2 py-1">
                       <p className="px-2 py-1 text-[11px] font-medium uppercase" style={{ color: 'var(--color-text-muted)' }}>{t('common.savedAccounts')}</p>
@@ -641,7 +630,6 @@ export default function Layout() {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6" style={{ backgroundColor: 'var(--color-bg-secondary)' }}><div className="page-enter"><Breadcrumbs /><Outlet /><PageNavigation links={links} /></div></main>
       </div>
       <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />

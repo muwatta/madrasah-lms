@@ -96,7 +96,6 @@ export default function ParentDashboard() {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{t('guides.parentDashboard')}</p>
       </div>
 
-      {/* Summary stats */}
       {summaryStats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="card-hover bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 text-center opacity-0 animate-slide-up" style={{ animationDelay: '0ms' }}>
@@ -120,10 +119,8 @@ export default function ParentDashboard() {
         </div>
       )}
 
-      {/* Attendance & Fee Summary */}
       {data.attendance_summary && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Attendance Summary */}
           <div className="card-hover bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 opacity-0 animate-slide-up" style={{ animationDelay: '180ms' }}>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">{t('parentDashboard.attendanceSummary')}</h3>
             <div className="flex items-center gap-3 mb-3">
@@ -151,7 +148,6 @@ export default function ParentDashboard() {
             </div>
           </div>
 
-          {/* Fee Summary */}
           <div className="card-hover bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 opacity-0 animate-slide-up" style={{ animationDelay: '220ms' }}>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">{t('parentDashboard.feeSummary')}</h3>
             <div className="space-y-2 text-sm">
@@ -182,10 +178,8 @@ export default function ParentDashboard() {
         </div>
       )}
 
-      {/* Children */}
       {data.children.map((child, childIdx) => (
         <div key={child.id} className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm space-y-5 opacity-0 animate-slide-up" style={{ animationDelay: `${200 + childIdx * 80}ms` }}>
-          {/* Child header */}
           <div className="flex items-center gap-4">
             <div className={`shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${getAvatarColor(child.name)}`}>
               {getInitials(child.name)}
@@ -202,7 +196,6 @@ export default function ParentDashboard() {
             </div>
           </div>
 
-          {/* Quick stats */}
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-lg bg-gray-50 dark:bg-gray-700/50 p-3 text-center">
               <div className="text-lg font-bold text-gray-900 dark:text-gray-100">{child.subjects.length}</div>
@@ -218,7 +211,6 @@ export default function ParentDashboard() {
             </div>
           </div>
 
-          {/* Subjects */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t('parentDashboard.subjects')}</h3>
             <div className="flex flex-wrap gap-2">
@@ -230,7 +222,6 @@ export default function ParentDashboard() {
             </div>
           </div>
 
-          {/* Recent quiz attempts */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t('parentDashboard.recentQuizAttempts')}</h3>
             {child.recent_attempts.length === 0 ? (
@@ -276,7 +267,6 @@ export default function ParentDashboard() {
             )}
           </div>
 
-          {/* Exam results */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t('student.examResults')}</h3>
             {child.exam_results.length === 0 ? (
@@ -314,7 +304,6 @@ export default function ParentDashboard() {
             )}
           </div>
 
-          {/* Performance trend */}
           {child.recent_attempts.length > 1 && (
             <div>
               <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">{t('parentDashboard.performanceTrend')}</h3>
@@ -337,7 +326,6 @@ export default function ParentDashboard() {
         </div>
       ))}
 
-      {/* Quick Links */}
       <div className="card-hover rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm opacity-0 animate-slide-up" style={{ animationDelay: '400ms' }}>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{t('quickLinks')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

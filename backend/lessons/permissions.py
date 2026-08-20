@@ -25,10 +25,6 @@ def _is_mudeer_or_idaarah(user):
     return _role(user) in ('mudeer', 'idaarah')
 
 
-# ──────────────────────────────────────────────────────
-#  Simple role permissions
-# ──────────────────────────────────────────────────────
-
 
 class IsUstaadh(BasePermission):
     def has_permission(self, request, view):
@@ -44,10 +40,6 @@ class IsStudent(BasePermission):
     def has_permission(self, request, view):
         return _role(request.user) == 'student'
 
-
-# ──────────────────────────────────────────────────────
-#  Composite / functional permissions
-# ──────────────────────────────────────────────────────
 
 
 class CanManageLessonPlans(BasePermission):

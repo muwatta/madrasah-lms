@@ -134,7 +134,6 @@ export default function GlobalSearch({ open, onClose }: Props) {
         className="relative z-10 w-full max-w-xl rounded-2xl border shadow-2xl animate-scale-in overflow-hidden"
         style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}
       >
-        {/* Search input */}
         <div className="flex items-center gap-3 border-b px-4" style={{ borderColor: 'var(--color-border)' }}>
           <svg className="h-5 w-5 shrink-0" style={{ color: 'var(--color-text-muted)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -157,7 +156,6 @@ export default function GlobalSearch({ open, onClose }: Props) {
           </kbd>
         </div>
 
-        {/* Results */}
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto">
           {query.length >= 2 && !loading && results.length === 0 && (
             <div className="px-4 py-8 text-center">
@@ -195,7 +193,6 @@ export default function GlobalSearch({ open, onClose }: Props) {
           ))}
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-between border-t px-4 py-2" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}>
           <span className="text-xs">↑↓ Navigate · ↵ Open</span>
           {results.length > 0 && (
