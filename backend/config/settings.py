@@ -6,8 +6,13 @@ from django.core.exceptions import ImproperlyConfigured
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key')
+ENVIRONMENT = config('ENVIRONMENT', default='development')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = ['*'] if DEBUG else config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver').split(',')
+if ENVIRONMENT.lower() == 'production' and DEBUG:
+    raise ImproperlyConfigured('DEBUG must be False in production.')
+ALLOWED_HOSTS = ['*'] if DEBUG else [
+    host.strip() for host in config('ALLOWED_HOSTS', default='').split(',') if host.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -79,6 +84,10 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD', default='postgres'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),
+        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=60, cast=int),
+        'OPTIONS': {
+            'sslmode': 'require' if config('DB_SSL_REQUIRE', default=False, cast=bool) else 'prefer',
+        },
     }
 }
 
@@ -114,50 +123,81 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
         'anon': '20/hour',
+        'user': '1200/hour',
         'landing': '600/hour',
     },
 }
-# Security hardening 
-if not DEBUG:
-    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000, cast=int)
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Security hardening. These are explicit so `manage.py check --deploy` reflects
+# the actual production profile instead of depending on middleware defaults.
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=not DEBUG, cast=bool)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000 if not DEBUG else 0, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
-# File upload limits FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+# File upload limits (10 MB).
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 FILE_UPLOAD_PERMISSIONS = 0o644
 
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173'
-).split(',')
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() for origin in config('CORS_ALLOWED_ORIGINS', default='').split(',') if origin.strip()
+]
 CORS_ALLOW_CREDENTIALS = True
 
 JWT_SECRET = config('JWT_SECRET', default='jwt-secret-key-change')
 JWT_EXPIRATION_HOURS = config('JWT_EXPIRATION_HOURS', default=24, cast=int)
 QR_SECRET_KEY = config('QR_SECRET_KEY', default='change-me-in-production')
+DJANGO_ADMIN_ENABLED = config('DJANGO_ADMIN_ENABLED', default=DEBUG, cast=bool)
+PUBLIC_STATS_ENABLED = config('PUBLIC_STATS_ENABLED', default=DEBUG, cast=bool)
+SENTRY_DSN = config('SENTRY_DSN', default='')
+SENTRY_TRACES_SAMPLE_RATE = config('SENTRY_TRACES_SAMPLE_RATE', default=0.0, cast=float)
+
+if SENTRY_DSN:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        environment=ENVIRONMENT,
+        traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+        send_default_pii=False,
+    )
 
 if not DEBUG:
-    if JWT_SECRET in ('', 'jwt-secret-key-change'):
+    placeholder_secrets = {
+        'SECRET_KEY': SECRET_KEY,
+        'JWT_SECRET': JWT_SECRET,
+        'QR_SECRET_KEY': QR_SECRET_KEY,
+    }
+    for name, value in placeholder_secrets.items():
+        if len(value) < 50 or value in {
+            'django-insecure-dev-key',
+            'django-insecure-change-me',
+            'jwt-secret-key-change',
+            'change-me-in-production',
+            'change-me-to-a-long-random-string',
+        }:
+            raise ImproperlyConfigured(
+                f'{name} must be a strong random value when DEBUG=False.'
+            )
+    if not ALLOWED_HOSTS:
+        raise ImproperlyConfigured('ALLOWED_HOSTS must be configured when DEBUG=False.')
+    if not CORS_ALLOWED_ORIGINS:
         raise ImproperlyConfigured(
-            'JWT_SECRET must be set to a strong random value when DEBUG=False.'
+            'CORS_ALLOWED_ORIGINS must contain explicit origins when DEBUG=False.'
         )
-    if QR_SECRET_KEY in ('', 'change-me-in-production'):
+    if len(config('DB_PASSWORD', default='')) < 20:
         raise ImproperlyConfigured(
-            'QR_SECRET_KEY must be set to a strong random value when DEBUG=False.'
-        )
-    if SECRET_KEY in ('', 'django-insecure-change-me'):
-        raise ImproperlyConfigured(
-            'SECRET_KEY must be set to a strong random value when DEBUG=False.'
+            'DB_PASSWORD must be configured with a strong value when DEBUG=False.'
         )
 
 LOGGING = {
@@ -231,7 +271,13 @@ WHATSAPP_WEBHOOK_VERIFY_TOKEN = config('WHATSAPP_VERIFY_TOKEN', default='madrasa
 WHATSAPP_VERIFY_TOKEN = WHATSAPP_WEBHOOK_VERIFY_TOKEN
 WHATSAPP_BUSINESS_ACCOUNT_ID = config('WHATSAPP_BUSINESS_ACCOUNT_ID', default='')
 WHATSAPP_APP_SECRET = config('WHATSAPP_APP_SECRET', default='')
+WHATSAPP_WEBHOOK_ENABLED = config('WHATSAPP_WEBHOOK_ENABLED', default=DEBUG, cast=bool)
 WHATSAPP_BASE_URL = 'https://graph.facebook.com'
+
+if not DEBUG and WHATSAPP_WEBHOOK_ENABLED and len(WHATSAPP_APP_SECRET) < 32:
+    raise ImproperlyConfigured(
+        'WHATSAPP_APP_SECRET must be configured when the webhook is enabled.'
+    )
 
 if not DEBUG and WHATSAPP_ACCESS_TOKEN and not WHATSAPP_APP_SECRET:
     raise ImproperlyConfigured(

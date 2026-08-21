@@ -7,7 +7,6 @@ from users import urls as users_urls
 from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('health/', views.health_check),
 
     path('api/v1/auth/', include(users_urls.auth_urlpatterns)),
@@ -37,6 +36,9 @@ urlpatterns = [
     path('api/v1/search/', include('search.urls')),
     path('api/v1/audit/', include('audit.urls')),
 ]
+
+if settings.DJANGO_ADMIN_ENABLED:
+    urlpatterns.insert(0, path('admin/', admin.site.urls))
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

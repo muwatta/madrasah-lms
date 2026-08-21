@@ -236,6 +236,20 @@ python -m pytest tests/ fasaaha/ -v
 
 184 tests covering: authentication, curriculum, class subjects, enrollments (validation + query efficiency), assessments, quiz auto-grading, question banks, results, dashboards, fasaaha, and more. One known pre-existing failure in question-bank conversion (`quiz_type` varchar(10) truncation) is unrelated to recent changes.
 
+## Production Deployment
+
+Use the production compose profile only behind a TLS-terminating load balancer or reverse proxy:
+
+```bash
+cp backend/.env.production.example backend/.env.production
+# Replace every placeholder with environment-specific values.
+docker compose --env-file backend/.env.production -f docker-compose.production.yml up -d --build
+```
+
+The production profile does not publish PostgreSQL or Redis ports. Store database and media volumes on durable encrypted storage, restrict access to the host firewall, and schedule tested PostgreSQL backups outside Docker. Keep `backend/.env.production` out of source control and rotate application, database, Redis, JWT, and integration credentials independently.
+
+Before accepting traffic, verify `GET /health/`, HTTPS redirect behavior, the configured host/origin allowlists, backup restoration, Celery worker execution, and error/metric alerting at the infrastructure layer.
+
 ## What's Built
 
 - [x] JWT authentication with 5 role-based portals

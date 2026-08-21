@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def whatsapp_webhook(request):
+    if not settings.WHATSAPP_WEBHOOK_ENABLED:
+        return HttpResponse("Webhook disabled", status=404)
+
     if request.method == "GET":
         mode = request.GET.get("hub.mode")
         token = request.GET.get("hub.verify_token")
@@ -26,13 +29,17 @@ def whatsapp_webhook(request):
     elif request.method == "POST":
         signature = request.META.get('HTTP_X_HUB_SIGNATURE_256', '')
         app_secret = settings.WHATSAPP_APP_SECRET
-        if app_secret and not _verify_webhook_signature(request.body, signature, app_secret):
+        if not app_secret or not _verify_webhook_signature(request.body, signature, app_secret):
             logger.warning("[WHATSAPP] Invalid webhook signature")
             return HttpResponse("Invalid signature", status=403)
 
         try:
             data = json.loads(request.body)
-            logger.info("[WHATSAPP] Webhook received: %s", json.dumps(data, indent=2))
+            logger.info(
+                "[WHATSAPP] Webhook received: object=%s entries=%s",
+                data.get('object'),
+                len(data.get('entry', [])) if isinstance(data.get('entry'), list) else 0,
+            )
         except json.JSONDecodeError:
             return HttpResponse("Bad JSON", status=400)
 
